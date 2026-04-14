@@ -300,8 +300,11 @@ body {
 
   <form class="cta-form" id="optinForm">
     <input type="email" name="email" placeholder="Your best email" required autocomplete="email">
-    <button type="submit" class="cta-btn">Save My Spot</button>
+    <!-- Honeypot: hidden from real users, bots will fill it -->
+    <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off">
+    <button type="submit" class="cta-btn" id="ctaBtn">Save My Spot</button>
     <p class="cta-note">Only 20 founding member spots. 100% free. No credit card required.</p>
+    <p id="formError" style="color:var(--error);font-size:0.8rem;margin-top:8px;min-height:1.2em;"></p>
   </form>
 
   <div class="countdown-wrap">
@@ -371,15 +374,32 @@ function toggleTheme() {
 // === FORM HANDLER ===
 document.getElementById('optinForm').addEventListener('submit', function(e) {
   e.preventDefault();
-  var email = this.querySelector('input[type="email"]').value;
 
-  // ====================================================
-  // INTEGRATION POINT - Replace with your email service
-  // ====================================================
-  console.log('Email submitted:', email);
+  var form = this;
+  var email = form.querySelector('input[name="email"]').value;
+  var website = form.querySelector('input[name="website"]').value;
+  var btn = document.getElementById('ctaBtn');
+  var errorEl = document.getElementById('formError');
 
-  // Redirect to confirmation page
-  window.location.href = '/confirmation';
+  errorEl.textContent = '';
+
+  btn.disabled = true;
+  btn.textContent = 'Saving your spot…';
+
+  fetch('/.netlify/functions/optin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, website: website })
+  })
+  .then(function(res) {
+    if (!res.ok) throw new Error('error');
+    window.location.href = '/confirmation';
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.textContent = 'Save My Spot';
+    errorEl.textContent = 'Something went wrong, please try again.';
+  });
 });
 
 // === A/B TEST SUPPORT ===
