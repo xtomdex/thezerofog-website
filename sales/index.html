@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The ZeroFog - 4-Week Brain Performance Protocol</title>
+<meta name="description" content="The 4-week protocol that resets your Clock, Battery, and Off-Switch - so your brain actually recovers at night and you wake up sharp.">
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/shared.css">
+<style>
+/* === SALES PAGE LAYOUT === */
+.sales { max-width: 680px; margin: 0 auto; padding: 80px 24px 40px; }
+
+.section { margin-bottom: 64px; }
+
+.label {
+  font-size: 0.65rem; letter-spacing: 0.5em; text-transform: uppercase;
+  color: var(--accent); font-weight: 800; opacity: 0.8; margin-bottom: 12px;
+}
+
+h1 {
+  font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 900;
+  line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 20px;
+}
+
+h2 {
+  font-size: clamp(1.3rem, 3vw, 1.8rem); font-weight: 800;
+  line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 16px;
+}
+
+.lead { font-size: 1.05rem; color: var(--text2); line-height: 1.7; margin-bottom: 20px; }
+.body-text { font-size: 0.95rem; color: var(--text2); line-height: 1.7; margin-bottom: 16px; }
+
+/* === WEEK CARDS === */
+.week-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 24px 28px; margin-bottom: 16px;
+}
+.week-card .week-num {
+  font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--accent); font-weight: 700; margin-bottom: 6px;
+}
+.week-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+.week-card p { font-size: 0.9rem; color: var(--text2); line-height: 1.6; }
+.week-card .result {
+  margin-top: 10px; font-size: 0.8rem; color: var(--cta);
+  font-weight: 600;
+}
+
+/* === INCLUDES LIST === */
+.includes { list-style: none; padding: 0; }
+.includes li {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+  font-size: 0.95rem; color: var(--text2); line-height: 1.5;
+}
+.includes li:last-child { border-bottom: none; }
+.includes .check { color: var(--accent); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+/* === BONUS CARDS === */
+.bonus-card {
+  background: var(--accent-dim); border: 1px solid var(--border-accent);
+  border-radius: 12px; padding: 20px 24px; margin-bottom: 12px;
+}
+.bonus-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+.bonus-card p { font-size: 0.85rem; color: var(--text2); line-height: 1.5; }
+
+/* === PRICE === */
+.price-box {
+  background: var(--bg2); border: 1px solid var(--border-accent);
+  border-radius: 16px; padding: 40px 32px; text-align: center;
+  margin-bottom: 24px;
+}
+.price-founding {
+  font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--secondary); font-weight: 700; margin-bottom: 12px;
+}
+.price-amount {
+  font-size: 3rem; font-weight: 900; letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+.price-original {
+  font-size: 1rem; color: var(--muted); text-decoration: line-through;
+  margin-bottom: 16px;
+}
+.price-note { font-size: 0.85rem; color: var(--text2); margin-bottom: 24px; }
+
+/* === GUARANTEE === */
+.guarantee {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 28px; text-align: center;
+}
+.guarantee h3 { font-size: 1rem; font-weight: 700; margin-bottom: 12px; }
+.guarantee p { font-size: 0.9rem; color: var(--text2); line-height: 1.6; }
+
+/* === ALTERNATIVES === */
+.alt-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+}
+.alt-row:last-child { border-bottom: none; }
+.alt-name { font-size: 0.9rem; color: var(--text2); }
+.alt-price { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+
+/* === DIVIDER === */
+.divider { width: 48px; height: 1px; background: var(--border-accent); margin: 48px auto; }
+
+/* === MOBILE === */
+@media (max-width: 640px) {
+  .sales { padding: 60px 20px 32px; }
+  .price-amount { font-size: 2.4rem; }
+}
+</style>
+</head>
+<body>
+
+<a href="/" class="brand">The Zero Fog</a>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
+
+<div class="sales">
+
+  <!-- HERO -->
+  <div class="section">
+    <p class="label">The Protocol</p>
+    <h1>Reset Your Brain's Three Core Systems In 4 Weeks</h1>
+    <p class="lead">A step-by-step protocol that resets your Clock, Battery, and Off-Switch - so your brain actually recovers at night and you wake up sharp instead of foggy.</p>
+    <p class="body-text">This is a founding launch - you're getting in before anyone else. This isn't a sleep course. It's a brain performance program.</p>
+  </div>
+
+  <!-- 4-WEEK ROADMAP -->
+  <div class="section">
+    <p class="label">The 4-Week Roadmap</p>
+
+    <div class="week-card">
+      <p class="week-num">Week 1</p>
+      <h3>Reset Your Clock</h3>
+      <p>Get your mornings back. Your body learns when to sleep and when to wake.</p>
+      <p class="result">Day 5-7: mornings get easier. Monday stops feeling like a hangover.</p>
+    </div>
+
+    <div class="week-card">
+      <p class="week-num">Week 2</p>
+      <h3>Charge Your Battery</h3>
+      <p>Build real sleep pressure. Your body actually needs sleep when you lie down.</p>
+      <p class="result">Day 10-14: falling asleep faster. That third cup of coffee becomes optional.</p>
+    </div>
+
+    <div class="week-card">
+      <p class="week-num">Week 3</p>
+      <h3>Train Your Off-Switch</h3>
+      <p>Shut down the racing brain at night. Your nervous system learns to transition out of work mode.</p>
+      <p class="result">Day 21: racing thoughts at bedtime start fading.</p>
+    </div>
+
+    <div class="week-card">
+      <p class="week-num">Week 4</p>
+      <h3>Sync All Three</h3>
+      <p>Build your personal protocol card - one page that's yours for life. The system runs on autopilot.</p>
+      <p class="result">Day 28: protocol locked in. Most of your work hours are sharp hours.</p>
+    </div>
+  </div>
+
+  <!-- WHAT'S INSIDE -->
+  <div class="section">
+    <p class="label">Everything You Get</p>
+    <h2>What's Inside</h2>
+
+    <ul class="includes">
+      <li><span class="check">&#10003;</span>Full 4-week protocol in video format (10-15 min per lesson)</li>
+      <li><span class="check">&#10003;</span>Sleep diary system (2 minutes a day)</li>
+      <li><span class="check">&#10003;</span>Sleep assessment - day 0 and day 28 (see exactly how far you've come)</li>
+      <li><span class="check">&#10003;</span>Your personal protocol card - one page, yours for life</li>
+      <li><span class="check">&#10003;</span>Action cards - one per lesson, always know what to do</li>
+      <li><span class="check">&#10003;</span>Week-by-week protocol guide</li>
+    </ul>
+  </div>
+
+  <!-- BONUSES -->
+  <div class="section">
+    <p class="label">Bonuses</p>
+    <h2>Included With Your Enrollment</h2>
+
+    <div class="bonus-card">
+      <h4>Your Caffeine Blueprint</h4>
+      <p>Your personalized caffeine schedule based on your biology. Know exactly when to stop so it doesn't block your sleep pressure.</p>
+    </div>
+
+    <div class="bonus-card">
+      <h4>9 Recovery Mistakes</h4>
+      <p>Things you do for energy that are actually making it worse. Sounds logical, works against your biology.</p>
+    </div>
+
+    <div class="bonus-card">
+      <h4>The Recovery Protocol</h4>
+      <p>Five changes where your body actually recovers. The kind where one fix quietly improves everything else.</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- PRICE -->
+  <div class="section" id="enroll">
+    <div class="price-box">
+      <p class="price-founding">Founding Member Price</p>
+      <p class="price-amount">$67</p>
+      <p class="price-original">Regular price: $147</p>
+      <p class="price-note">One-time payment. Lifetime access.</p>
+      <a href="#" class="cta-btn cta-btn--full" id="buyBtn">Enroll Now</a>
+    </div>
+    <p style="font-size:0.8rem;color:var(--text2);text-align:center;line-height:1.6;margin-bottom:24px;">Founding members get first access to every new tool and update. Including an AI assistant that knows your protocol - coming soon, free for founders.</p>
+  </div>
+
+  <!-- GUARANTEE -->
+  <div class="section">
+    <div class="guarantee">
+      <h3>30-Day Sleep-or-Refund Guarantee</h3>
+      <p>Follow the protocol for four weeks. If you're not sleeping better - email me, show me your diary, and I'll refund every cent. No drama. I only ask one thing: actually do the work.</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- FINAL CTA -->
+  <div class="section" style="text-align:center;">
+    <h2>The pattern doesn't break itself.</h2>
+    <p class="body-text" style="max-width:500px;margin:0 auto 24px;">Every week your sleep system stays broken - that's another week of brain fog. Another week of half-finished tasks. It compounds.</p>
+    <p class="body-text" style="max-width:500px;margin:0 auto 32px;">Fifteen minutes a day. Four weeks. Clock. Battery. Off-Switch. Reset all three.</p>
+    <a href="#enroll" class="cta-btn">Get Started</a>
+  </div>
+
+  <!-- FAQ -->
+  <div class="section">
+    <p class="label">Questions</p>
+    <h2>Got Questions?</h2>
+    <p class="body-text">If you have any questions about the protocol, the course, or whether this is right for you - just email me. I read every message personally.</p>
+    <p class="body-text" style="font-size:0.85rem;">Note: If you have diagnosed clinical insomnia or untreated sleep apnea, please see a specialist first. This protocol is powerful, but it's not a replacement for medical treatment.</p>
+  </div>
+
+  <p class="disclaimer">This is an educational wellness program, not medical treatment. Results vary.</p>
+
+</div>
+
+<footer class="footer">
+  <p>
+    &copy; 2026 The ZeroFog. All rights reserved.<br>
+    <a href="#">Privacy Policy</a> &middot; <a href="#">Terms</a>
+  </p>
+</footer>
+
+<script src="/shared.js"></script>
+<script>
+// Buy button - placeholder
+document.getElementById('buyBtn').addEventListener('click', function(e) {
+  e.preventDefault();
+  // ====================================================
+  // INTEGRATION POINT - Replace with Stripe/Gumroad link
+  // ====================================================
+  console.log('Buy clicked');
+  alert('Payment integration placeholder - connect Stripe or Gumroad here');
+});
+</script>
+</body>
+</html>

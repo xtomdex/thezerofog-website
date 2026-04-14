@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>You're In — The ZeroFog</title>
+<meta name="description" content="You're signed up for the free ZeroFog training. Here's what happens next.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://thezerofog.com/thank-you">
+
+<!-- Open Graph -->
+<meta property="og:title" content="You're In — The ZeroFog">
+<meta property="og:description" content="You're signed up for the free ZeroFog training. Here's what happens next.">
+<meta property="og:url" content="https://thezerofog.com/thank-you">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The ZeroFog">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+/* === RESET === */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* === DARK THEME (default - Dracula) === */
+:root {
+  --bg: #1a1a1a;
+  --bg2: #222222;
+  --bg3: #2a2a2a;
+  --text: #f8f8f2;
+  --text2: #b0b0b0;
+  --muted: #6272a4;
+  --accent: #bd93f9;
+  --accent-hover: #cdb4fc;
+  --accent-dim: rgba(189,147,249,0.15);
+  --cta: #50fa7b;
+  --cta-hover: #3de06a;
+  --cta-text: #1a1a1a;
+  --error: #ff5555;
+  --secondary: #ff79c6;
+  --tertiary: #8be9fd;
+  --border: rgba(255,255,255,0.08);
+  --border-accent: rgba(189,147,249,0.25);
+  --input-bg: #222222;
+  --input-border: rgba(255,255,255,0.12);
+  --input-focus: #bd93f9;
+  --glass: rgba(255,255,255,0.03);
+}
+
+/* === LIGHT THEME === */
+html:not(.dark) {
+  --bg: #fafafa;
+  --bg2: #f0f0f0;
+  --bg3: #e8e8e8;
+  --text: #1a1a1a;
+  --text2: #444444;
+  --muted: #888888;
+  --accent: #7c5cbf;
+  --accent-hover: #6a3fa0;
+  --accent-dim: rgba(124,92,191,0.1);
+  --cta: #2ecc71;
+  --cta-hover: #27ae60;
+  --cta-text: #ffffff;
+  --error: #e74c3c;
+  --secondary: #d63384;
+  --tertiary: #0891b2;
+  --border: #e0e0e0;
+  --border-accent: rgba(124,92,191,0.3);
+  --input-bg: #ffffff;
+  --input-border: #cccccc;
+  --input-focus: #7c5cbf;
+  --glass: rgba(0,0,0,0.02);
+}
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* === THEME TOGGLE === */
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  transition: all 0.3s;
+}
+.theme-toggle:hover { color: var(--text); border-color: var(--border-accent); }
+
+/* === BRAND === */
+.brand {
+  position: fixed;
+  top: 18px;
+  left: 20px;
+  z-index: 100;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  opacity: 0.4;
+}
+
+/* === MAIN CONTENT === */
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 24px 40px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* === HEADLINE === */
+.ty-headline {
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--cta);
+  margin-bottom: 16px;
+  letter-spacing: -0.03em;
+  text-align: center;
+}
+
+.ty-sub {
+  font-size: 1rem;
+  color: var(--text2);
+  line-height: 1.6;
+  text-align: center;
+  max-width: 560px;
+  margin-bottom: 48px;
+}
+
+/* === DIVIDER === */
+.divider { width: 48px; height: 1px; background: var(--border-accent); margin: 0 auto 48px; }
+
+/* === STEPS === */
+.steps-section { width: 100%; max-width: 560px; margin-bottom: 48px; }
+
+.step-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.step-num {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--accent);
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--accent-dim);
+  margin-top: 2px;
+}
+
+.step-body {}
+
+.step-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.step-text {
+  font-size: 0.85rem;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+/* === BULLETS === */
+.bullets-section { text-align: left; width: 100%; max-width: 560px; margin-bottom: 48px; }
+.bullets-heading {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text2);
+  margin-bottom: 20px;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+.bullet { display: flex; align-items: flex-start; margin-bottom: 18px; gap: 14px; }
+.bullet-check {
+  color: var(--accent);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  margin-top: 3px;
+  font-weight: 700;
+}
+.bullet-text { font-size: 0.9rem; color: var(--text2); line-height: 1.6; }
+
+/* === CREDIBILITY === */
+.credibility {
+  width: 100%;
+  max-width: 560px;
+  border-left: 3px solid var(--accent);
+  padding: 24px 28px;
+  margin-bottom: 48px;
+  background: var(--glass);
+  border-radius: 0 8px 8px 0;
+}
+
+.credibility-text {
+  font-size: 0.88rem;
+  color: var(--text2);
+  line-height: 1.7;
+  font-style: italic;
+}
+
+.credibility-author {
+  font-size: 0.8rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 16px;
+  font-style: normal;
+}
+
+/* === FINAL CTA === */
+.final-cta {
+  text-align: center;
+  max-width: 480px;
+  margin-bottom: 48px;
+}
+
+.final-cta p {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.final-cta p + p {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text2);
+  margin-top: 8px;
+}
+
+/* === DISCLAIMER === */
+.disclaimer {
+  font-size: 0.65rem; color: var(--muted); text-align: center;
+  max-width: 560px; margin: 0 auto; line-height: 1.6; opacity: 0.7;
+}
+
+/* === FOOTER === */
+.footer { text-align: center; padding: 40px 24px; border-top: 1px solid var(--border); }
+.footer p { font-size: 0.7rem; color: var(--muted); line-height: 2; }
+.footer a { color: var(--muted); text-decoration: underline; }
+
+/* === MOBILE === */
+@media (max-width: 640px) {
+  .content { padding: 60px 20px 32px; }
+  .step-card { padding: 20px 20px; gap: 16px; }
+  .step-title { font-size: 0.9rem; }
+  .step-text { font-size: 0.82rem; }
+  .bullet-text { font-size: 0.85rem; }
+  .credibility { padding: 20px 22px; }
+  .brand { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Brand -->
+<span class="brand">The Zero Fog</span>
+
+<!-- Theme toggle -->
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
+
+<!-- ===== THANK YOU PAGE ===== -->
+<main class="content">
+
+  <h1 class="ty-headline">You're In. Here's What Happens Next.</h1>
+
+  <p class="ty-sub">The free training on eliminating brain fog &mdash; without apps, supplements, or rigid schedules &mdash; is coming soon. You'll be one of the first to get access.</p>
+
+  <div class="divider"></div>
+
+  <!-- Steps -->
+  <div class="steps-section">
+
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <p class="step-title">Check your email right now.</p>
+        <p class="step-text">Look for a confirmation from ZeroFog. If you don't see it in 2 minutes, check your Promotions or Spam folder and move it to your inbox. This is important &mdash; all updates come through email.</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <p class="step-title">Watch for the invite.</p>
+        <p class="step-text">When the training goes live, you'll get a direct link. If you're not opening our emails, you'll miss it. Spots will be limited.</p>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <p class="step-title">Show up and get the bonus.</p>
+        <p class="step-text">Everyone who attends the live training gets a free resource that breaks down exactly what I changed &mdash; step by step. You won't find this anywhere else. Details in the invite email.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Bullets -->
+  <div class="bullets-section">
+    <p class="bullets-heading">Here's what you're going to see in the training:</p>
+
+    <div class="bullet">
+      <span class="bullet-check">&#10003;</span>
+      <p class="bullet-text">How I went from crashed-by-2-PM every day to sharp, focused hours &mdash; with zero willpower involved</p>
+    </div>
+
+    <div class="bullet">
+      <span class="bullet-check">&#10003;</span>
+      <p class="bullet-text">Why the things you've already tried (apps, coffee, "just push through") were never going to work &mdash; and what actually does</p>
+    </div>
+
+    <div class="bullet">
+      <span class="bullet-check">&#10003;</span>
+      <p class="bullet-text">A simple approach that took me from brain fog and bad decisions to clear thinking in weeks &mdash; without giving up coffee, changing my schedule, or buying a single supplement</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Credibility -->
+  <div class="credibility">
+    <p class="credibility-text">I work from home. For 3 years I ran on coffee and willpower. Brain fog, bad decisions, crashed by 2 PM every day. I tried everything &mdash; morning routines, productivity systems, supplements. None of it lasted. Then I found what was actually broken &mdash; and fixed it in weeks. This training is the thing I wish someone had showed me 3 years ago.</p>
+    <p class="credibility-author">&mdash; Kirill, ZeroFog</p>
+  </div>
+
+  <!-- Final CTA -->
+  <div class="final-cta">
+    <p>Go check your email now. Make sure you see our confirmation.</p>
+    <p>When the training drops, you'll know first.</p>
+  </div>
+
+  <p class="disclaimer">This is an educational wellness program, not medical treatment. Results vary.</p>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <p>
+    &copy; 2026 The ZeroFog. All rights reserved.<br>
+    <a href="/privacy">Privacy Policy</a> &middot; <a href="/terms">Terms</a> &middot; <a href="mailto:hello@thezerofog.com">Contact</a><br>
+    This site is not a part of the Facebook website or Meta Platforms, Inc.
+    Additionally, this site is not endorsed by Facebook/Meta in any way.
+  </p>
+</footer>
+
+<script>
+// === THEME TOGGLE ===
+function toggleTheme() {
+  document.documentElement.classList.toggle('dark');
+  var isDark = document.documentElement.classList.contains('dark');
+  document.getElementById('themeToggle').textContent = isDark ? 'Light' : 'Dark';
+  localStorage.setItem('zf_theme', isDark ? 'dark' : 'light');
+}
+
+// Restore saved theme (dark is default)
+(function() {
+  var saved = localStorage.getItem('zf_theme');
+  if (saved === 'light') {
+    document.documentElement.classList.remove('dark');
+    document.getElementById('themeToggle').textContent = 'Dark';
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coming Soon — The ZeroFog</title>
+<meta name="description" content="Coming soon: I found what was actually killing my focus — and fixed it in weeks. Get early access.">
+<link rel="canonical" href="https://thezerofog.com/coming-soon">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Coming Soon — The ZeroFog">
+<meta property="og:description" content="I found what was actually killing my focus — and fixed it in weeks. Get early access.">
+<meta property="og:url" content="https://thezerofog.com/coming-soon">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The ZeroFog">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Coming Soon — The ZeroFog">
+<meta name="twitter:description" content="I found what was actually killing my focus — and fixed it in weeks. Get early access.">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+/* === RESET === */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* === DARK THEME (default - Dracula) === */
+:root {
+  --bg: #1a1a1a;
+  --bg2: #222222;
+  --bg3: #2a2a2a;
+  --text: #f8f8f2;
+  --text2: #b0b0b0;
+  --muted: #6272a4;
+  --accent: #bd93f9;
+  --accent-hover: #cdb4fc;
+  --accent-dim: rgba(189,147,249,0.15);
+  --cta: #50fa7b;
+  --cta-hover: #3de06a;
+  --cta-text: #1a1a1a;
+  --error: #ff5555;
+  --secondary: #ff79c6;
+  --tertiary: #8be9fd;
+  --border: rgba(255,255,255,0.08);
+  --border-accent: rgba(189,147,249,0.25);
+  --input-bg: #222222;
+  --input-border: rgba(255,255,255,0.12);
+  --input-focus: #bd93f9;
+  --glass: rgba(255,255,255,0.03);
+}
+
+/* === LIGHT THEME === */
+html:not(.dark) {
+  --bg: #fafafa;
+  --bg2: #f0f0f0;
+  --bg3: #e8e8e8;
+  --text: #1a1a1a;
+  --text2: #444444;
+  --muted: #888888;
+  --accent: #7c5cbf;
+  --accent-hover: #6a3fa0;
+  --accent-dim: rgba(124,92,191,0.1);
+  --cta: #2ecc71;
+  --cta-hover: #27ae60;
+  --cta-text: #ffffff;
+  --error: #e74c3c;
+  --secondary: #d63384;
+  --tertiary: #0891b2;
+  --border: #e0e0e0;
+  --border-accent: rgba(124,92,191,0.3);
+  --input-bg: #ffffff;
+  --input-border: #cccccc;
+  --input-focus: #7c5cbf;
+  --glass: rgba(0,0,0,0.02);
+}
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* === THEME TOGGLE === */
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  transition: all 0.3s;
+}
+.theme-toggle:hover { color: var(--text); border-color: var(--border-accent); }
+
+/* === BRAND === */
+.brand {
+  position: fixed;
+  top: 18px;
+  left: 20px;
+  z-index: 100;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  opacity: 0.4;
+}
+
+/* === HERO SECTION === */
+/*
+  HEADLINE SIZING MATH:
+  Headline text: "I Found What Was Actually Killing My Focus — and Fixed It in Weeks"
+  Character count: 67 chars (including em dash and spaces)
+  Font: Inter, weight 900 (display/black)
+  Mixed-case average character width at Inter 900: ~0.48em
+    (Uppercase avg ~0.62em, lowercase avg ~0.42em, spaces ~0.27em;
+     headline has ~8 uppercase + ~46 lowercase + ~12 spaces + 1 em dash)
+
+  Required width = 67 × 0.48em × font-size-in-px
+  At max font-size 2.3rem = 36.8px: 67 × 0.48 × 36.8 = 1183px
+  Hero max-width: 1200px with 24px padding each side = 1152px usable
+  1183px > 1152px — tight. Bumping to max-width: 1260px → 1212px usable. Fits.
+
+  On 1280px viewport: 1260px container, 24px pad = 1212px. 1183px fits.
+  On 1024px viewport: clamp kicks in at 2.8vw × 1024 = 28.67px.
+    67 × 0.48 × 28.67 = 922px. Container at 1024 - 48 = 976px. Fits.
+  Below ~800px: white-space: normal allows wrapping for mobile.
+*/
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 24px 40px;
+  max-width: 1260px;
+  margin: 0 auto;
+}
+
+.pre-headline {
+  font-size: 0.7rem;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 28px;
+  font-weight: 800;
+  opacity: 0.8;
+}
+
+.headline {
+  font-size: clamp(1.5rem, 2.8vw, 2.3rem);
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--text);
+  margin-bottom: 18px;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.subheadline {
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  font-weight: 400;
+  color: var(--text2);
+  margin-bottom: 28px;
+  line-height: 1.4;
+}
+
+.without-block {
+  font-size: 0.95rem;
+  color: var(--secondary);
+  margin-bottom: 56px;
+  letter-spacing: 0.02em;
+  font-weight: 500;
+}
+
+.coming-soon-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+/* === CTA FORM === */
+.cta-form {
+  width: 100%;
+  max-width: 420px;
+  margin-bottom: 24px;
+}
+
+.cta-form input[type="email"] {
+  width: 100%;
+  padding: 16px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  background: var(--input-bg);
+  color: var(--text);
+  margin-bottom: 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.cta-form input[type="email"]::placeholder { color: var(--muted); }
+.cta-form input[type="email"]:focus { border-color: var(--input-focus); }
+
+.cta-btn {
+  width: 100%;
+  padding: 18px 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--cta-text);
+  background: var(--cta);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cta-btn:hover { background: var(--cta-hover); transform: translateY(-1px); }
+.cta-btn:active { transform: translateY(0); }
+
+.cta-note {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 10px;
+  letter-spacing: 0.02em;
+}
+
+/* === THANK YOU STATE === */
+.thank-you {
+  display: none;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+}
+
+.thank-you.visible {
+  display: block;
+}
+
+.thank-you-heading {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--cta);
+  margin-bottom: 14px;
+  letter-spacing: -0.02em;
+}
+
+.thank-you-text {
+  font-size: 0.95rem;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+/* === FOOTER === */
+.footer { text-align: center; padding: 40px 24px; border-top: 1px solid var(--border); }
+.footer p { font-size: 0.7rem; color: var(--muted); line-height: 2; }
+.footer a { color: var(--muted); text-decoration: underline; }
+
+/* === DISCLAIMER === */
+.disclaimer {
+  font-size: 0.65rem; color: var(--muted); text-align: center;
+  max-width: 560px; margin: 48px auto 0; line-height: 1.6; opacity: 0.7;
+}
+
+/* === MOBILE === */
+@media (max-width: 800px) {
+  .headline { white-space: normal; }
+}
+
+@media (max-width: 640px) {
+  .hero { padding: 50px 20px 32px; justify-content: center; }
+  .without-block { font-size: 0.85rem; margin-bottom: 40px; }
+  .cta-btn { font-size: 0.9rem; padding: 16px 20px; }
+  .brand { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Brand -->
+<span class="brand">The Zero Fog</span>
+
+<!-- Theme toggle -->
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
+
+<!-- ===== PRE-LAUNCH PAGE ===== -->
+<section class="hero" id="hero">
+
+  <p class="pre-headline">For People Who Work From Home</p>
+
+  <h1 class="headline">I Found What Was Actually Killing My Focus — and Fixed It in Weeks</h1>
+
+  <p class="subheadline">Brain Fog, Bad Decisions, Crashed by 2 PM — All Gone</p>
+
+  <p class="without-block">(Without Apps, Supplements, or Rigid Schedules)</p>
+
+  <p class="coming-soon-label">Coming Soon</p>
+  <form class="cta-form" id="optinForm">
+    <input type="email" name="email" placeholder="Your best email" required autocomplete="email">
+    <button type="submit" class="cta-btn">Get Early Access</button>
+    <p class="cta-note">No spam. You'll be the first to know when it's ready.</p>
+  </form>
+
+  <div class="thank-you" id="thankYou">
+    <p class="thank-you-heading">You're in.</p>
+    <p class="thank-you-text">You'll be the first to hear when it's ready. Keep an eye on your inbox.</p>
+  </div>
+
+  <p class="disclaimer">This site is not a part of the Facebook website or Facebook Inc. Additionally, this site is not endorsed by Facebook in any way. Facebook is a trademark of Facebook, Inc. Results vary. This is an educational wellness program, not medical treatment.</p>
+
+</section>
+
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <p>
+    &copy; 2026 The ZeroFog. All rights reserved.<br>
+    <a href="#">Privacy Policy</a> &middot; <a href="#">Terms of Service</a> &middot; <a href="#">Contact</a><br>
+    This site is not a part of the Facebook website or Facebook Inc.
+  </p>
+</footer>
+
+<script>
+// === THEME TOGGLE ===
+function toggleTheme() {
+  document.documentElement.classList.toggle('dark');
+  var isDark = document.documentElement.classList.contains('dark');
+  document.getElementById('themeToggle').textContent = isDark ? 'Light' : 'Dark';
+  localStorage.setItem('zf_theme', isDark ? 'dark' : 'light');
+}
+
+// Restore saved theme (dark is default)
+(function() {
+  var saved = localStorage.getItem('zf_theme');
+  if (saved === 'light') {
+    document.documentElement.classList.remove('dark');
+    document.getElementById('themeToggle').textContent = 'Dark';
+  }
+})();
+
+// === FORM HANDLER ===
+document.getElementById('optinForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var email = this.querySelector('input[type="email"]').value;
+
+  // ====================================================
+  // INTEGRATION POINT - Replace with your email service
+  // ====================================================
+  console.log('Email submitted:', email);
+
+  // Show thank you state, hide form
+  this.style.display = 'none';
+  document.getElementById('thankYou').classList.add('visible');
+});
+</script>
+
+</body>
+</html>

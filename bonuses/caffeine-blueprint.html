@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Caffeine Blueprint - The ZeroFog</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #1a1a1a; color: #f8f8f2;
+    padding: 56px 64px;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    line-height: 1.7;
+  }
+
+  .header { text-align: center; margin-bottom: 56px; padding-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .badge {
+    display: inline-block; background: rgba(189,147,249,0.12); color: #bd93f9;
+    font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    padding: 6px 16px; border-radius: 20px; border: 1px solid rgba(189,147,249,0.2); margin-bottom: 24px;
+  }
+  h1 { font-size: 34px; font-weight: 900; margin-bottom: 16px; letter-spacing: -0.5px; }
+  h1 .accent { color: #bd93f9; }
+  .subtitle { font-size: 16px; color: #b0b0b0; max-width: 540px; margin: 0 auto; line-height: 1.7; }
+
+  .section { margin-bottom: 44px; break-inside: avoid; }
+  .section-title {
+    font-size: 13px; font-weight: 700; color: #8be9fd;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    margin-bottom: 16px; padding-bottom: 10px;
+    border-bottom: 1px solid rgba(139,233,253,0.15);
+  }
+  .section p { font-size: 15px; color: #b0b0b0; line-height: 1.75; margin-bottom: 12px; }
+  .section p .hl { color: #ff79c6; font-weight: 600; }
+
+  .formula-box {
+    background: #222222; border: 1px solid rgba(189,147,249,0.15);
+    border-radius: 12px; padding: 28px 32px;
+  }
+  .formula-box p { font-size: 15px; color: #f8f8f2; margin-bottom: 20px; line-height: 1.7; }
+  .fill-line { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; font-size: 15px; color: #b0b0b0; }
+  .fill-line .blank { flex: 0 0 140px; border-bottom: 1px dashed rgba(255,255,255,0.2); height: 24px; }
+  .fill-line .label { color: #bd93f9; font-weight: 500; font-size: 14px; }
+
+  table { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 10px; overflow: hidden; }
+  thead th {
+    background: #222222; color: #bd93f9;
+    font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+    padding: 14px 18px; text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  tbody td {
+    padding: 12px 18px; font-size: 14px; color: #f8f8f2;
+    border-bottom: 1px solid rgba(255,255,255,0.05); background: #1a1a1a; line-height: 1.5;
+  }
+  tbody tr:nth-child(even) td { background: #1e1e1e; }
+
+  .tips-list { list-style: none; padding: 0; }
+  .tips-list li {
+    font-size: 15px; color: #b0b0b0; line-height: 1.75;
+    margin-bottom: 16px; padding-left: 24px; position: relative;
+  }
+  .tips-list li::before {
+    content: ''; position: absolute; left: 0; top: 10px;
+    width: 6px; height: 6px; border-radius: 50%; background: #bd93f9;
+  }
+  .tips-list li strong { color: #ff79c6; font-weight: 600; }
+
+  .divider { width: 48px; height: 1px; background: rgba(189,147,249,0.25); margin: 48px auto; }
+  .footer { text-align: center; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.08); }
+  .footer p { font-size: 11px; color: #555; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">The ZeroFog - Bonus Guide</div>
+  <h1>Your <span class="accent">Caffeine</span> Blueprint</h1>
+  <p class="subtitle">Stop guessing when to stop - know your exact cutoff so caffeine works for your focus, not against it</p>
+</div>
+
+<div class="section">
+  <div class="section-title">The Science (30 Seconds)</div>
+  <p>Caffeine has a half-life of 5-6 hours. Half the caffeine from your 2 PM coffee is still in your system at 8 PM. A quarter is still there at 2 AM.</p>
+  <p>You might fall asleep - but caffeine <span class="hl">reduces deep sleep by up to 20%</span>, even when you don't feel it.</p>
+  <p>After 2 weeks of daily use, caffeine stops giving energy - it only prevents withdrawal.</p>
+</div>
+
+<div class="section">
+  <div class="section-title">Your Formula</div>
+  <div class="formula-box">
+    <p>Take your target bedtime. Subtract 8-10 hours. That's your cutoff.</p>
+    <div class="fill-line">
+      <span>My target bedtime:</span>
+      <span class="blank"></span>
+      <span class="label">PM</span>
+    </div>
+    <div class="fill-line">
+      <span>Minus 8 hours =</span>
+      <span class="blank"></span>
+      <span class="label">(safe cutoff)</span>
+    </div>
+    <div class="fill-line">
+      <span>Minus 10 hours =</span>
+      <span class="blank"></span>
+      <span class="label">(ideal cutoff)</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Quick Reference</div>
+  <table>
+    <thead><tr><th>Bedtime</th><th>Safe Cutoff (-8h)</th><th>Ideal Cutoff (-10h)</th></tr></thead>
+    <tbody>
+      <tr><td>10:00 PM</td><td>2:00 PM</td><td>12:00 PM (noon)</td></tr>
+      <tr><td>11:00 PM</td><td>3:00 PM</td><td>1:00 PM</td></tr>
+      <tr><td>12:00 AM</td><td>4:00 PM</td><td>2:00 PM</td></tr>
+      <tr><td>1:00 AM</td><td>5:00 PM</td><td>3:00 PM</td></tr>
+      <tr><td>2:00 AM</td><td>6:00 PM</td><td>4:00 PM</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+  <div class="section-title">What Counts as Caffeine</div>
+  <table>
+    <thead><tr><th>Source</th><th>Caffeine</th><th>Equivalent</th></tr></thead>
+    <tbody>
+      <tr><td>Espresso (1 shot)</td><td>63 mg</td><td>1 unit</td></tr>
+      <tr><td>Drip coffee (250 ml)</td><td>95 mg</td><td>1.5 units</td></tr>
+      <tr><td>Black tea (250 ml)</td><td>47 mg</td><td>0.75 units</td></tr>
+      <tr><td>Green tea (250 ml)</td><td>28 mg</td><td>0.5 units</td></tr>
+      <tr><td>Cola (330 ml)</td><td>32 mg</td><td>0.5 units</td></tr>
+      <tr><td>Energy drink (250 ml)</td><td>80 mg</td><td>1.25 units</td></tr>
+      <tr><td>Dark chocolate (50 g)</td><td>25 mg</td><td>0.4 units</td></tr>
+      <tr><td>Pre-workout supplement</td><td>150-300 mg</td><td>2-5 units</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <div class="section-title">Practical Tips</div>
+  <ul class="tips-list">
+    <li><strong>Time it, don't quit it.</strong> Drink coffee in the morning - it works WITH your cortisol peak. After cutoff - decaf or herbal tea.</li>
+    <li><strong>Hidden sources add up.</strong> Dark chocolate, green tea, pre-workout. Check the table above.</li>
+    <li><strong>Know your type.</strong> ~15% are slow metabolizers (coffee at 3 PM = can't sleep). ~10% fast (coffee before bed, no problem). Rest are average. This is genetic. If 8 hours isn't enough - try a 10-12h cutoff.</li>
+    <li><strong>Full reset.</strong> Reduce by 1 cup every 3 days for 2 weeks. After that, one cup hits like it used to.</li>
+  </ul>
+</div>
+
+<div class="footer">
+  <p>This guide is part of The ZeroFog. Based on caffeine pharmacokinetics research and clinical sleep medicine.</p>
+</div>
+
+</body>
+</html>

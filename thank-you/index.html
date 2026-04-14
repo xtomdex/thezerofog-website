@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome - The ZeroFog</title>
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/shared.css">
+<style>
+.checkmark {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: var(--cta);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px; color: var(--cta-text); margin-bottom: 32px;
+}
+h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 16px; letter-spacing: -0.03em; }
+.subtitle { font-size: 1.05rem; color: var(--text2); margin-bottom: 40px; line-height: 1.7; max-width: 480px; }
+
+.next-steps { text-align: left; width: 100%; max-width: 500px; margin-bottom: 40px; }
+.next-steps h3 {
+  font-size: 0.8rem; color: var(--accent);
+  margin-bottom: 20px; text-transform: uppercase;
+  letter-spacing: 0.15em; font-weight: 700;
+}
+.step {
+  display: flex; align-items: flex-start; gap: 14px;
+  margin-bottom: 20px;
+}
+.step-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent-dim); border: 1px solid var(--border-accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; color: var(--accent);
+  flex-shrink: 0;
+}
+.step-text { font-size: 0.9rem; color: var(--text2); line-height: 1.6; }
+.step-text strong { color: var(--text); }
+
+.support-box {
+  background: var(--accent-dim); border: 1px solid var(--border-accent);
+  border-radius: 12px; padding: 24px 28px;
+  width: 100%; max-width: 500px; text-align: center;
+}
+.support-box p { font-size: 0.85rem; color: var(--text2); line-height: 1.6; }
+.support-box a { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<a href="/" class="brand">The Zero Fog</a>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
+
+<section class="page-center">
+
+  <div class="checkmark">&#10003;</div>
+
+  <h1>You're in. Welcome.</h1>
+
+  <p class="subtitle">Your enrollment is confirmed. You're now a founding member of The ZeroFog. Here's what happens next.</p>
+
+  <div class="next-steps">
+    <h3>Next Steps</h3>
+
+    <div class="step">
+      <span class="step-num">1</span>
+      <p class="step-text"><strong>Check your email.</strong> You'll receive login details and access to Week 1 within a few minutes.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-num">2</span>
+      <p class="step-text"><strong>Start with Lesson 1.</strong> It takes 10-15 minutes. You'll get your first action today.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-num">3</span>
+      <p class="step-text"><strong>Download your bonuses.</strong> Your Caffeine Blueprint, 9 Recovery Mistakes, and The Recovery Protocol are in your dashboard.</p>
+    </div>
+  </div>
+
+  <div class="support-box">
+    <p>Questions? Just reply to the welcome email or reach out directly. As a founding member, you have a direct line to me. We'll find the right pace together.</p>
+  </div>
+
+</section>
+
+<footer class="footer">
+  <p>
+    &copy; 2026 The ZeroFog. All rights reserved.<br>
+    <a href="#">Privacy Policy</a> &middot; <a href="#">Terms</a>
+  </p>
+</footer>
+
+<script src="/shared.js"></script>
+</body>
+</html>

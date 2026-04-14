@@ -1,0 +1,9 @@
+# Social media bio link → social landing page (no timer, no scarcity)
+/social  /social.html  200
+
+# Thank you page
+/thank-you  /thank-you.html  200
+
+# Legal pages
+/privacy  /privacy.html  200
+/terms  /terms.html  200

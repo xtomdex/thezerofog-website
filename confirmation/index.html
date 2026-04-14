@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>You're In - The ZeroFog</title>
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="/shared.css">
+<style>
+.checkmark {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: var(--cta);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; color: var(--cta-text); margin-bottom: 28px;
+}
+h1 { font-size: 2rem; font-weight: 900; margin-bottom: 16px; letter-spacing: -0.03em; }
+.subtitle { font-size: 1rem; color: var(--text2); margin-bottom: 36px; line-height: 1.6; }
+
+.detail-row {
+  display: flex; justify-content: space-between;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-label {
+  color: var(--muted); font-size: 0.75rem;
+  text-transform: uppercase; letter-spacing: 0.15em; font-weight: 500;
+}
+.detail-value { color: var(--text); font-size: 0.95rem; font-weight: 600; }
+
+.expect-section { text-align: left; width: 100%; max-width: 480px; margin: 36px 0; }
+.expect-section h3 {
+  font-size: 0.8rem; color: var(--accent);
+  margin-bottom: 18px; text-transform: uppercase;
+  letter-spacing: 0.15em; font-weight: 700;
+}
+.expect-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
+.expect-num { color: var(--accent); font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+.expect-text { color: var(--text2); font-size: 0.9rem; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<a href="/" class="brand">The Zero Fog</a>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
+
+<section class="page-center">
+
+  <div class="checkmark">&#10003;</div>
+
+  <h1>You're in.</h1>
+
+  <p class="subtitle">Check your inbox - we just sent you the details.<br>Here's what to expect.</p>
+
+  <div class="card" style="margin-bottom:0;">
+    <div class="detail-row">
+      <span class="detail-label">What</span>
+      <span class="detail-value">The ZeroFog Method</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">When</span>
+      <span class="detail-value">[DATE &amp; TIME TBD]</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Where</span>
+      <span class="detail-value">Online (link in your email)</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Length</span>
+      <span class="detail-value">~50 minutes</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-label">Cost</span>
+      <span class="detail-value">Free</span>
+    </div>
+  </div>
+
+  <div class="expect-section">
+    <h3>What you'll walk away with:</h3>
+    <div class="expect-item">
+      <span class="expect-num">1.</span>
+      <p class="expect-text">Why you lose half your productive hours by 2 PM - and what's actually causing it (it's not burnout)</p>
+    </div>
+    <div class="expect-item">
+      <span class="expect-num">2.</span>
+      <p class="expect-text">The 3-system model that explains why nothing you've tried has worked - and why it's not your fault</p>
+    </div>
+    <div class="expect-item">
+      <span class="expect-num">3.</span>
+      <p class="expect-text">One free technique to try tonight - takes 5 minutes, works on the first night</p>
+    </div>
+  </div>
+
+  <div class="card-accent">
+    <p style="font-size:0.65rem;color:var(--accent);text-transform:uppercase;letter-spacing:0.3em;margin-bottom:10px;font-weight:700;">Stay until the end</p>
+    <p style="color:var(--text2);font-size:0.85rem;line-height:1.6;">Everyone who watches the full training gets a free Caffeine Timing Calculator - the exact tool we use to know when to stop drinking coffee based on your body.</p>
+  </div>
+
+</section>
+
+<footer class="footer">
+  <p>
+    &copy; 2026 The ZeroFog. All rights reserved.<br>
+    <a href="#">Privacy Policy</a> &middot; <a href="#">Terms</a>
+  </p>
+</footer>
+
+<script src="/shared.js"></script>
+</body>
+</html>
