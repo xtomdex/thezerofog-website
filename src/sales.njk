@@ -1,119 +1,19 @@
-<!DOCTYPE html>
-<html lang="en" class="dark">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The ZeroFog - 4-Week Brain Performance Protocol</title>
+---
+title: "The ZeroFog - 4-Week Brain Performance Protocol"
+permalink: /sales/
+---
+{% extends "layouts/base.njk" %}
+
+{% block head_extras %}
 <meta name="description" content="The 4-week protocol that resets your Clock, Battery, and Off-Switch - so your brain actually recovers at night and you wake up sharp.">
 <meta name="robots" content="noindex">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="/shared.css">
-<style>
-/* === SALES PAGE LAYOUT === */
-.sales { max-width: 680px; margin: 0 auto; padding: 80px 24px 40px; }
+{% endblock %}
 
-.section { margin-bottom: 64px; }
+{% block page_css %}
+<link rel="stylesheet" href="/assets/css/pages/sales.css">
+{% endblock %}
 
-.label {
-  font-size: 0.65rem; letter-spacing: 0.5em; text-transform: uppercase;
-  color: var(--accent); font-weight: 800; opacity: 0.8; margin-bottom: 12px;
-}
-
-h1 {
-  font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 900;
-  line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 20px;
-}
-
-h2 {
-  font-size: clamp(1.3rem, 3vw, 1.8rem); font-weight: 800;
-  line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 16px;
-}
-
-.lead { font-size: 1.05rem; color: var(--text2); line-height: 1.7; margin-bottom: 20px; }
-.body-text { font-size: 0.95rem; color: var(--text2); line-height: 1.7; margin-bottom: 16px; }
-
-/* === WEEK CARDS === */
-.week-card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: 12px; padding: 24px 28px; margin-bottom: 16px;
-}
-.week-card .week-num {
-  font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase;
-  color: var(--accent); font-weight: 700; margin-bottom: 6px;
-}
-.week-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
-.week-card p { font-size: 0.9rem; color: var(--text2); line-height: 1.6; }
-.week-card .result {
-  margin-top: 10px; font-size: 0.8rem; color: var(--cta);
-  font-weight: 600;
-}
-
-/* === INCLUDES LIST === */
-.includes { list-style: none; padding: 0; }
-.includes li {
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 12px 0; border-bottom: 1px solid var(--border);
-  font-size: 0.95rem; color: var(--text2); line-height: 1.5;
-}
-.includes li:last-child { border-bottom: none; }
-.includes .check { color: var(--accent); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
-
-/* === BONUS CARDS === */
-.bonus-card {
-  background: var(--accent-dim); border: 1px solid var(--border-accent);
-  border-radius: 12px; padding: 20px 24px; margin-bottom: 12px;
-}
-.bonus-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
-.bonus-card p { font-size: 0.85rem; color: var(--text2); line-height: 1.5; }
-
-/* === PRICE === */
-.price-box {
-  background: var(--bg2); border: 1px solid var(--border-accent);
-  border-radius: 16px; padding: 40px 32px; text-align: center;
-  margin-bottom: 24px;
-}
-.price-founding {
-  font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase;
-  color: var(--secondary); font-weight: 700; margin-bottom: 12px;
-}
-.price-amount {
-  font-size: 3rem; font-weight: 900; letter-spacing: -0.03em;
-  margin-bottom: 4px;
-}
-.price-original {
-  font-size: 1rem; color: var(--muted); text-decoration: line-through;
-  margin-bottom: 16px;
-}
-.price-note { font-size: 0.85rem; color: var(--text2); margin-bottom: 24px; }
-
-/* === GUARANTEE === */
-.guarantee {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: 12px; padding: 28px; text-align: center;
-}
-.guarantee h3 { font-size: 1rem; font-weight: 700; margin-bottom: 12px; }
-.guarantee p { font-size: 0.9rem; color: var(--text2); line-height: 1.6; }
-
-/* === ALTERNATIVES === */
-.alt-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 0; border-bottom: 1px solid var(--border);
-}
-.alt-row:last-child { border-bottom: none; }
-.alt-name { font-size: 0.9rem; color: var(--text2); }
-.alt-price { font-size: 0.9rem; font-weight: 600; color: var(--text); }
-
-/* === DIVIDER === */
-.divider { width: 48px; height: 1px; background: var(--border-accent); margin: 48px auto; }
-
-/* === MOBILE === */
-@media (max-width: 640px) {
-  .sales { padding: 60px 20px 32px; }
-  .price-amount { font-size: 2.4rem; }
-}
-</style>
-</head>
-<body>
+{% block content %}
 
 <a href="/" class="brand">The Zero Fog</a>
 <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
@@ -241,24 +141,8 @@ h2 {
 
 </div>
 
-<footer class="footer">
-  <p>
-    &copy; 2026 The ZeroFog. All rights reserved.<br>
-    <a href="#">Privacy Policy</a> &middot; <a href="#">Terms</a>
-  </p>
-</footer>
+{% endblock %}
 
-<script src="/shared.js"></script>
-<script>
-// Buy button - placeholder
-document.getElementById('buyBtn').addEventListener('click', function(e) {
-  e.preventDefault();
-  // ====================================================
-  // INTEGRATION POINT - Replace with Stripe/Gumroad link
-  // ====================================================
-  console.log('Buy clicked');
-  alert('Payment integration placeholder - connect Stripe or Gumroad here');
-});
-</script>
-</body>
-</html>
+{% block page_scripts %}
+<script src="/assets/js/pages/sales.js" defer></script>
+{% endblock %}
