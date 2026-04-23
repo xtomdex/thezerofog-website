@@ -1,0 +1,80 @@
+---
+title: "Free Training: The 4-Week Protocol That Removed My Brain Fog And Let Me Do Real Work Again"
+permalink: /social/
+canonical: "https://thezerofog.com/"
+---
+{% extends "layouts/base.njk" %}
+
+{% block head_extras %}
+<meta name="description" content="Free training for remote workers: the 4-week protocol that removed my brain fog - without caffeine hacks, productivity apps, or willpower.">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Free Training: The 4-Week Protocol That Removed My Brain Fog And Let Me Do Real Work Again">
+<meta property="og:description" content="The 4-week protocol that removed my brain fog - without caffeine hacks, productivity apps, or willpower. Free training for remote workers.">
+<meta property="og:url" content="https://thezerofog.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The ZeroFog">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Free Training: The 4-Week Protocol That Removed My Brain Fog And Let Me Do Real Work Again">
+<meta name="twitter:description" content="The 4-week protocol that removed my brain fog - without caffeine hacks, productivity apps, or willpower.">
+{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="/assets/css/pages/social.css">
+{% endblock %}
+
+{% block content %}
+
+<!-- Brand -->
+<span class="brand">The Zero Fog</span>
+
+<!-- Theme toggle -->
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
+
+<!-- ===== OPT-IN PAGE ===== -->
+<section class="hero" id="hero">
+
+  <p class="pre-headline">Free Training For People Who Work From Home</p>
+
+  <h1 class="headline">The 4-Week Protocol That Removed My Brain Fog And Let Me Do Real Work Again</h1>
+
+  <p class="without-block">(Without Caffeine Hacks, Productivity Apps, or Willpower)</p>
+
+  <form class="cta-form" id="optinForm">
+    <input type="email" name="email" placeholder="Your best email" required autocomplete="email">
+    <button type="submit" class="cta-btn">Save My Spot</button>
+    <p class="cta-note">100% free. By signing up you agree to receive emails from ZeroFog. Unsubscribe anytime. <a href="/privacy" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a></p>
+  </form>
+
+  <div class="divider"></div>
+
+  <div class="bullets-section">
+    <p class="bullets-heading">In This Free Training, You'll Discover:</p>
+
+    <div class="bullet">
+      <span class="bullet-check">&#10003;</span>
+      <p class="bullet-text">Why you hit a wall by 2 PM every day - and why it has nothing to do with discipline, motivation, or how hard you push yourself</p>
+    </div>
+
+    <div class="bullet">
+      <span class="bullet-check">&#10003;</span>
+      <p class="bullet-text">How I got my focus and energy back without changing my schedule, giving up coffee, or adding anything complicated to my day</p>
+    </div>
+
+    <div class="bullet">
+      <span class="bullet-check">&#10003;</span>
+      <p class="bullet-text">How this works even if you've already tried morning routines, productivity apps, and every "hack" the internet recommended - and why none of that ever stuck</p>
+    </div>
+  </div>
+
+  <p class="disclaimer">This is an educational wellness program, not medical treatment. Results vary.</p>
+
+</section>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="/assets/js/pages/social.js" defer></script>
+{% endblock %}
