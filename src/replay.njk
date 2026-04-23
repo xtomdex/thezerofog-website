@@ -1,0 +1,59 @@
+---
+title: "Replay - The ZeroFog Training"
+permalink: /replay/
+---
+{% extends "layouts/base.njk" %}
+
+{% block head_extras %}
+<meta name="robots" content="noindex">
+{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="/assets/css/pages/replay.css">
+{% endblock %}
+
+{% block content %}
+
+<a href="/" class="brand">The Zero Fog</a>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
+
+<div class="replay">
+
+  <p style="font-size:0.65rem;letter-spacing:0.5em;text-transform:uppercase;color:var(--accent);font-weight:800;opacity:0.8;text-align:center;margin-bottom:16px;">Replay</p>
+
+  <h1>The 4-Week Protocol That Removed My Brain Fog</h1>
+  <p class="subtitle">Watch the full training. This replay is available for a limited time.</p>
+
+  <!-- Countdown timer -->
+  <div class="timer-bar">
+    <span class="timer-label">Replay expires in</span>
+    <span class="timer-nums" id="replayTimer">47:59:59</span>
+  </div>
+
+  <!-- Video -->
+  <div class="video-wrapper" id="videoContainer">
+    <div class="video-placeholder">
+      <div class="play-icon">&#9654;</div>
+      <p>Video will be embedded here</p>
+      <p style="font-size:0.75rem;margin-top:8px;opacity:0.6;">Replace with Vimeo/Wistia/YouTube embed</p>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="replay-cta">
+    <h2>Ready to reset all three systems?</h2>
+    <p>The founding member price won't last. Lock in $67 before it goes back to $147.</p>
+    <p class="price">$67</p>
+    <p class="price-sub">One-time payment. Lifetime access. 30-day guarantee.</p>
+    <a href="/sales#enroll" class="cta-btn">Get The Protocol</a>
+  </div>
+
+  <p class="disclaimer">This is an educational wellness program, not medical treatment. Results vary.</p>
+
+</div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="/assets/js/pages/replay.js" defer></script>
+{% endblock %}
