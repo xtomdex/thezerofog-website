@@ -1,0 +1,53 @@
+---
+title: "Welcome - The ZeroFog"
+permalink: /thank-you/
+---
+{% extends "layouts/base.njk" %}
+
+{% block head_extras %}
+<meta name="robots" content="noindex">
+{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="/assets/css/pages/thank-you.css">
+{% endblock %}
+
+{% block content %}
+
+<a href="/" class="brand">The Zero Fog</a>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
+
+<section class="page-center">
+
+  <div class="checkmark">&#10003;</div>
+
+  <h1>You're in. Welcome.</h1>
+
+  <p class="subtitle">Your enrollment is confirmed. You're now a founding member of The ZeroFog. Here's what happens next.</p>
+
+  <div class="next-steps">
+    <h3>Next Steps</h3>
+
+    <div class="step">
+      <span class="step-num">1</span>
+      <p class="step-text"><strong>Check your email.</strong> You'll receive login details and access to Week 1 within a few minutes.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-num">2</span>
+      <p class="step-text"><strong>Start with Lesson 1.</strong> It takes 10-15 minutes. You'll get your first action today.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-num">3</span>
+      <p class="step-text"><strong>Download your bonuses.</strong> Your Caffeine Blueprint, 9 Recovery Mistakes, and The Recovery Protocol are in your dashboard.</p>
+    </div>
+  </div>
+
+  <div class="support-box">
+    <p>Questions? Just reply to the welcome email or reach out directly. As a founding member, you have a direct line to me. We'll find the right pace together.</p>
+  </div>
+
+</section>
+
+{% endblock %}
