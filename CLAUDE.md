@@ -116,3 +116,4 @@ Rule: all public env vars MUST have `PUBLIC_` prefix. Local `.env` is gitignored
 - **Paddle.js** — checkout on sales page (client token via `env.paddle_client_token`)
 - **MailerLite** — email sequences via Make.com
 - **Systeme.io** — LMS (course delivery)
+ 
