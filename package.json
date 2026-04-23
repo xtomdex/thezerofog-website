@@ -1,0 +1,15 @@
+{
+  "name": "thezerofog-website",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "eleventy",
+    "dev": "eleventy --serve",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3",
+    "html-minifier-terser": "^7",
+    "lightningcss": "^1"
+  }
+}
