@@ -1,26 +1,3 @@
-<!DOCTYPE html>
-<html lang="en" class="dark">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Free Training: The 4-Week Protocol That Removed My Brain Fog And Let Me Do Real Work Again</title>
-<meta name="description" content="Free training for remote workers: the 4-week protocol that removed my brain fog - without caffeine hacks, productivity apps, or willpower.">
-<link rel="canonical" href="https://thezerofog.com/">
-
-<!-- Open Graph -->
-<meta property="og:title" content="Free Training: The 4-Week Protocol That Removed My Brain Fog And Let Me Do Real Work Again">
-<meta property="og:description" content="The 4-week protocol that removed my brain fog - without caffeine hacks, productivity apps, or willpower. Free training for remote workers.">
-<meta property="og:url" content="https://thezerofog.com/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="The ZeroFog">
-
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Free Training: The 4-Week Protocol That Removed My Brain Fog And Let Me Do Real Work Again">
-<meta name="twitter:description" content="The 4-week protocol that removed my brain fog - without caffeine hacks, productivity apps, or willpower.">
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-<style>
 /* === RESET === */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -208,6 +185,34 @@ body {
   letter-spacing: 0.02em;
 }
 
+/* === COUNTDOWN === */
+.countdown-wrap { margin: 0 0 36px; text-align: center; }
+.countdown-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.countdown { display: flex; justify-content: center; gap: 8px; align-items: baseline; }
+.countdown-unit { display: flex; flex-direction: column; align-items: center; }
+.countdown-unit .num {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text2);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.countdown-unit .lbl {
+  font-size: 0.45rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.countdown-sep { font-size: 1.2rem; font-weight: 600; color: var(--muted); line-height: 1; }
+
 /* === DIVIDER === */
 .divider { width: 48px; height: 1px; background: var(--border-accent); margin: 0 auto 36px; }
 
@@ -251,100 +256,3 @@ body {
   .bullet-text { font-size: 0.85rem; }
   .brand { display: none; }
 }
-</style>
-</head>
-<body>
-
-<!-- Brand -->
-<span class="brand">The Zero Fog</span>
-
-<!-- Theme toggle -->
-<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
-
-<!-- ===== OPT-IN PAGE ===== -->
-<section class="hero" id="hero">
-
-  <p class="pre-headline">Free Training For People Who Work From Home</p>
-
-  <h1 class="headline">The 4-Week Protocol That Removed My Brain Fog And Let Me Do Real Work Again</h1>
-
-  <p class="without-block">(Without Caffeine Hacks, Productivity Apps, or Willpower)</p>
-
-  <form class="cta-form" id="optinForm">
-    <input type="email" name="email" placeholder="Your best email" required autocomplete="email">
-    <button type="submit" class="cta-btn">Save My Spot</button>
-    <p class="cta-note">100% free. By signing up you agree to receive emails from ZeroFog. Unsubscribe anytime. <a href="/privacy" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a></p>
-  </form>
-
-  <div class="divider"></div>
-
-  <div class="bullets-section">
-    <p class="bullets-heading">In This Free Training, You'll Discover:</p>
-
-    <div class="bullet">
-      <span class="bullet-check">&#10003;</span>
-      <p class="bullet-text">Why you hit a wall by 2 PM every day - and why it has nothing to do with discipline, motivation, or how hard you push yourself</p>
-    </div>
-
-    <div class="bullet">
-      <span class="bullet-check">&#10003;</span>
-      <p class="bullet-text">How I got my focus and energy back without changing my schedule, giving up coffee, or adding anything complicated to my day</p>
-    </div>
-
-    <div class="bullet">
-      <span class="bullet-check">&#10003;</span>
-      <p class="bullet-text">How this works even if you've already tried morning routines, productivity apps, and every "hack" the internet recommended - and why none of that ever stuck</p>
-    </div>
-  </div>
-
-  <p class="disclaimer">This is an educational wellness program, not medical treatment. Results vary.</p>
-
-</section>
-
-
-<!-- ===== FOOTER ===== -->
-<footer class="footer">
-  <p>
-    &copy; 2026 The ZeroFog. All rights reserved.<br>
-    <a href="/privacy">Privacy Policy</a> &middot; <a href="/terms">Terms</a><br>
-    <a href="mailto:hello@thezerofog.com">Contact</a><br>
-    This site is not a part of the Facebook website or Meta Platforms, Inc.
-    Additionally, this site is not endorsed by Facebook/Meta in any way.
-  </p>
-</footer>
-
-<script>
-// === THEME TOGGLE ===
-function toggleTheme() {
-  document.documentElement.classList.toggle('dark');
-  var isDark = document.documentElement.classList.contains('dark');
-  document.getElementById('themeToggle').textContent = isDark ? 'Light' : 'Dark';
-  localStorage.setItem('zf_theme', isDark ? 'dark' : 'light');
-}
-
-// Restore saved theme (dark is default)
-(function() {
-  var saved = localStorage.getItem('zf_theme');
-  if (saved === 'light') {
-    document.documentElement.classList.remove('dark');
-    document.getElementById('themeToggle').textContent = 'Dark';
-  }
-})();
-
-// === FORM HANDLER ===
-document.getElementById('optinForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  var email = this.querySelector('input[type="email"]').value;
-
-  // ====================================================
-  // INTEGRATION POINT - Replace with your email service
-  // ====================================================
-  console.log('Email submitted:', email);
-
-  // Redirect to thank you page
-  window.location.href = 'thank-you.html';
-});
-</script>
-
-</body>
-</html>

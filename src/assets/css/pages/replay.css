@@ -1,0 +1,52 @@
+.replay { max-width: 800px; margin: 0 auto; padding: 80px 24px 40px; }
+
+h1 { font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: 900; letter-spacing: -0.03em; margin-bottom: 12px; text-align: center; }
+.subtitle { font-size: 0.95rem; color: var(--text2); text-align: center; margin-bottom: 32px; line-height: 1.6; }
+
+/* Timer */
+.timer-bar {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px 24px;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  margin-bottom: 40px;
+}
+.timer-bar .timer-label {
+  font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--secondary); font-weight: 600;
+}
+.timer-bar .timer-nums {
+  font-size: 1.1rem; font-weight: 700;
+  font-variant-numeric: tabular-nums; color: var(--text);
+}
+
+/* Video embed placeholder */
+.video-wrapper {
+  width: 100%; aspect-ratio: 16/9;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 40px; overflow: hidden;
+}
+.video-placeholder {
+  text-align: center; color: var(--muted);
+}
+.video-placeholder .play-icon {
+  font-size: 3rem; margin-bottom: 12px; opacity: 0.3;
+}
+.video-placeholder p { font-size: 0.85rem; }
+
+/* CTA below video */
+.replay-cta {
+  background: var(--bg2); border: 1px solid var(--border-accent);
+  border-radius: 12px; padding: 32px;
+  text-align: center; margin-bottom: 40px;
+}
+.replay-cta h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.02em; }
+.replay-cta p { font-size: 0.9rem; color: var(--text2); margin-bottom: 20px; line-height: 1.6; }
+.replay-cta .price { font-size: 1.8rem; font-weight: 900; color: var(--text); margin-bottom: 4px; }
+.replay-cta .price-sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 20px; }
+
+@media (max-width: 640px) {
+  .replay { padding: 60px 20px 32px; }
+  .timer-bar { flex-direction: column; gap: 6px; }
+}

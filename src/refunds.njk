@@ -1,0 +1,112 @@
+---
+title: "Refund Policy — The Zero Fog"
+permalink: /refunds/
+canonical: "https://thezerofog.com/refunds/"
+---
+{% extends "layouts/base.njk" %}
+
+{% block head_extras %}
+<meta name="description" content="Refund Policy for The Zero Fog — 30-day conditional money-back guarantee, eligibility, and how to request a refund.">
+{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="/assets/css/pages/legal.css">
+{% endblock %}
+
+{% block content %}
+
+<a href="/" class="brand">The Zero Fog</a>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
+
+<article class="legal-page">
+
+  <h1>Refund Policy</h1>
+
+  <div class="legal-meta">
+    <p><strong>Sleeping Protocol</strong></p>
+    <p>Website: {{ site.domain }}</p>
+    <p>Effective Date: 2026-04-28</p>
+    <p>Last Updated: 2026-04-28</p>
+  </div>
+
+  <h2>1. Overview</h2>
+  <p>We stand behind the quality of our Course. We believe that if you apply the strategies and techniques taught in the Course with genuine effort, you will see meaningful improvements in your daily habits. For this reason, we offer a <strong>30-day conditional money-back guarantee</strong> to ensure you have a fair opportunity to implement the Course material.</p>
+
+  <h2>2. Eligibility for a Refund</h2>
+  <p>To be eligible for a refund of the actual amount you paid for the Course, <strong>all</strong> of the following conditions must be met:</p>
+
+  <h3>2.1 Timeframe</h3>
+  <p>Your refund request must be submitted within <strong>30 calendar days</strong> of the original purchase date.</p>
+
+  <h3>2.2 Proof of Implementation</h3>
+  <p>Because the Course is designed to produce results through active participation and consistent application, we require evidence that you have made a genuine good-faith effort to implement the Course recommendations before requesting a refund. This means:</p>
+  <ul>
+    <li>You must have completed the core lessons through at least the first two weeks of the Course</li>
+    <li>You must have actively used the Sleep Diary for a minimum of <strong>14 consecutive days</strong></li>
+    <li>You must provide documentation of your implementation effort (see Section 2.3)</li>
+  </ul>
+
+  <h3>2.3 What Qualifies as Proof of Implementation</h3>
+  <p>Acceptable documentation includes:</p>
+  <ul>
+    <li><strong>Screenshots or photographs of your completed Sleep Diary</strong> showing at least 14 consecutive days of entries (whether maintained using the provided template on paper, in a personal spreadsheet, or in any other format)</li>
+    <li><strong>A digital copy of your Sleep Diary</strong> (e.g., a completed spreadsheet based on our provided template)</li>
+  </ul>
+  <p>The purpose of this requirement is not to create obstacles to a legitimate refund, but to ensure that you have given the Course a fair opportunity to work. We believe in the effectiveness of the program when followed as directed.</p>
+
+  <h2>3. How to Request a Refund</h2>
+  <p>To initiate a refund request:</p>
+  <ol>
+    <li>Send an email to <a href="mailto:{{ site.email.refunds }}">{{ site.email.refunds }}</a> with the subject line "Refund Request — [Your Name]"</li>
+    <li>Include your full name and the email address used for purchase</li>
+    <li>Include your order number or Paddle transaction ID</li>
+    <li>Attach your proof of implementation as described in Section 2.3</li>
+    <li>Briefly describe what you found was not working or where you encountered difficulties</li>
+  </ol>
+
+  <h2>4. Refund Amount</h2>
+  <p>Refunds are issued for the <strong>actual amount you paid</strong> for the Course. If you purchased the Course using a promotional discount, coupon, or special offer, the refund will reflect the discounted price you paid, not the standard listed price.</p>
+
+  <h2>5. Refund Processing</h2>
+
+  <h3>5.1 Review</h3>
+  <p>Upon receiving your refund request with all required documentation, our team will review your submission within <strong>5 business days</strong>. We may contact you for clarification or to offer additional support before processing the refund.</p>
+
+  <h3>5.2 Approval and Processing</h3>
+  <p>If your refund request meets all eligibility criteria, we will initiate a full refund of the amount you paid. Because Paddle acts as the Merchant of Record, refunds are processed by Paddle in accordance with their procedures. The refund will be issued to the original payment method used for purchase. Processing times may vary depending on Paddle's processes and your payment provider (typically 5–10 business days).</p>
+
+  <h2>6. What Happens After a Refund</h2>
+  <p>Upon approval and processing of a refund:</p>
+  <ul>
+    <li>Your access to the Course on Systeme.io and all related materials will be revoked</li>
+    <li>Your license to use any downloaded materials is terminated</li>
+    <li>You must delete any Course materials you may have saved locally</li>
+  </ul>
+
+  <h2>7. Non-Refundable Situations</h2>
+  <p>Refunds will <strong>not</strong> be granted in the following cases:</p>
+  <ul>
+    <li>The refund request is submitted more than 30 calendar days after the original purchase date</li>
+    <li>No proof of implementation is provided or the proof does not meet the requirements of Section 2.3</li>
+    <li>The purchaser has previously received a refund for the same or a substantially similar product from us</li>
+    <li>There is evidence of account sharing, content piracy, or violation of our Terms of Service</li>
+  </ul>
+
+  <h2>8. Disputes and Chargebacks</h2>
+  <p>We strongly encourage you to contact us directly before initiating a chargeback or dispute with your bank or payment provider. We are committed to resolving issues fairly and promptly. Initiating a chargeback without first contacting us may result in permanent suspension from all of our Services.</p>
+  <p>Please note that because Paddle is the Merchant of Record, chargeback disputes are handled between your bank and Paddle. We cooperate fully with Paddle in resolving any such disputes.</p>
+
+  <h2>9. Our Commitment</h2>
+  <p>If your refund request is denied because the proof of implementation requirements were not met, but you are willing to continue the program, we may at our discretion extend your refund eligibility window by an additional 15 days to allow you more time to complete the required steps. This is offered as a good-faith effort to support your success.</p>
+
+  <h2>10. Contact Us</h2>
+  <p>For refund-related questions or to submit a refund request, contact us at:</p>
+  <p>
+    <strong>Email:</strong> <a href="mailto:{{ site.email.refunds }}">{{ site.email.refunds }}</a><br>
+    <strong>Response time:</strong> We aim to respond to all refund-related inquiries within 2 business days.
+  </p>
+  <p>For billing or payment method questions, you may also contact Paddle directly at <a href="https://www.paddle.com/support">https://www.paddle.com/support</a>.</p>
+
+</article>
+
+{% endblock %}
