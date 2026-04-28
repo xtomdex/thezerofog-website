@@ -7,16 +7,16 @@ last_updated: "2026-04-28"
 
 # PRIVACY POLICY
 
-**Sleeping Protocol**
+**The ZeroFog**
 
-Website: [YOUR-DOMAIN.com]
+Website: thezerofog.com
 
 Effective Date: [EFFECTIVE_DATE]
 Last Updated: [LAST_UPDATED_DATE]
 
 ## 1. Introduction
 
-This Privacy Policy describes how [YOUR LEGAL ENTITY NAME] ("we," "us," or "our") collects, uses, discloses, and protects personal data when you visit our website at [YOUR-DOMAIN.com] (the "Site"), register for webinars, subscribe to our newsletter, purchase or use our digital products, or otherwise interact with our services (collectively, the "Services").
+This Privacy Policy describes how [YOUR LEGAL ENTITY NAME] ("we," "us," or "our") collects, uses, discloses, and protects personal data when you visit our website at thezerofog.com (the "Site"), register for webinars, subscribe to our newsletter, purchase or use our digital products, or otherwise interact with our services (collectively, the "Services").
 
 We are committed to protecting your privacy and processing your personal data in compliance with the General Data Protection Regulation (EU) 2016/679 ("GDPR"), the California Consumer Privacy Act ("CCPA") as amended by the California Privacy Rights Act ("CPRA"), the CAN-SPAM Act, and other applicable data protection laws.
 
@@ -27,7 +27,7 @@ For the purposes of GDPR, the data controller is:
 **Entity:** [YOUR LEGAL ENTITY NAME]
 **Registration:** Registered as autónomo in Spain
 **Location:** Barcelona, Spain
-**Email:** [PRIVACY@YOUR-DOMAIN.com]
+**Email:** privacy@thezerofog.com
 
 ## 3. Data We Collect
 
@@ -147,7 +147,7 @@ If you are a resident of the European Economic Area, you have the right to:
 - **Object** — object to processing based on legitimate interests, including direct marketing
 - **Withdraw consent** — withdraw previously given consent at any time
 
-To exercise any of these rights, contact us at [PRIVACY@YOUR-DOMAIN.com]. We will respond within 30 days. You also have the right to lodge a complaint with your local data protection authority.
+To exercise any of these rights, contact us at privacy@thezerofog.com. We will respond within 30 days. You also have the right to lodge a complaint with your local data protection authority.
 
 ### 10.2 Rights Under CCPA/CPRA (California Residents)
 
@@ -171,7 +171,7 @@ You have the right to opt out of this sharing. To exercise this right, you may:
 
 - Disable advertising/marketing cookies through your browser settings
 - Use the opt-out tools provided by each advertising platform (Facebook Ad Preferences, Google Ad Settings)
-- Send an opt-out request to [PRIVACY@YOUR-DOMAIN.com] with the subject line "Do Not Sell or Share My Data"
+- Send an opt-out request to privacy@thezerofog.com with the subject line "Do Not Sell or Share My Data"
 
 Upon receiving a verified opt-out request, we will cease sharing your personal information with advertising platforms within 15 business days.
 
@@ -195,7 +195,7 @@ We may update this Privacy Policy from time to time. When we make material chang
 
 For questions, requests, or complaints regarding this Privacy Policy or the processing of your personal data, please contact:
 
-**Email:** [PRIVACY@YOUR-DOMAIN.com]
+**Email:** privacy@thezerofog.com
 **Entity:** [YOUR LEGAL ENTITY NAME]
 **Location:** Barcelona, Spain
 

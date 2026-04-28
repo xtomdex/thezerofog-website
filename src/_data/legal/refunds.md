@@ -7,9 +7,9 @@ last_updated: "2026-04-28"
 
 # REFUND POLICY
 
-**Sleeping Protocol**
+**The ZeroFog**
 
-Website: [YOUR-DOMAIN.com]
+Website: thezerofog.com
 
 Effective Date: [EFFECTIVE_DATE]
 Last Updated: [LAST_UPDATED_DATE]
@@ -47,7 +47,7 @@ The purpose of this requirement is not to create obstacles to a legitimate refun
 
 To initiate a refund request:
 
-1. Send an email to [REFUNDS@YOUR-DOMAIN.com] with the subject line "Refund Request — [Your Name]"
+1. Send an email to refunds@thezerofog.com with the subject line "Refund Request — [Your Name]"
 2. Include your full name and the email address used for purchase
 3. Include your order number or Paddle transaction ID
 4. Attach your proof of implementation as described in Section 2.3
@@ -98,7 +98,7 @@ If your refund request is denied because the proof of implementation requirement
 
 For refund-related questions or to submit a refund request, contact us at:
 
-**Email:** [REFUNDS@YOUR-DOMAIN.com]
+**Email:** refunds@thezerofog.com
 **Response time:** We aim to respond to all refund-related inquiries within 2 business days.
 
 For billing or payment method questions, you may also contact Paddle directly at https://www.paddle.com/support.
