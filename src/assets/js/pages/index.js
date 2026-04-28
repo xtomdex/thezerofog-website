@@ -34,7 +34,7 @@ document.getElementById('optinForm').addEventListener('submit', function(e) {
   var params = new URLSearchParams(window.location.search);
   var w = params.get('w');
   var withouts = {
-    '1': '(Without Caffeine Hacks, Productivity Apps, or Willpower)',
+    '1': '(Without Strict Routines, Productivity Apps, or Willpower)',
     '2': '(Without Supplements, Strict Routines, or Working Harder)',
     '3': '(Without Supplements, Productivity Apps, or Hustle)'
   };
