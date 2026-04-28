@@ -8,6 +8,7 @@
 {% block head_extras %}{% endblock %}
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/shared.css">
+<link rel="stylesheet" href="/assets/css/cookie-consent.css">
 {% include "partials/head-meta.njk" %}
 {% block page_css %}{% endblock %}
 </head>
@@ -16,8 +17,10 @@
 {% block content %}{% endblock %}
 
 {% include "partials/footer.njk" %}
+{% include "partials/cookie-banner.njk" %}
 
 <script src="/assets/js/shared.js" defer></script>
+<script src="/assets/js/cookie-consent.js" defer></script>
 {% block page_scripts %}{% endblock %}
 
 </body>
