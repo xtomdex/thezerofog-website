@@ -1,36 +1,81 @@
+/* === THANK-YOU (post-purchase) === */
+
 .checkmark {
   width: 80px; height: 80px; border-radius: 50%;
   background: var(--cta);
   display: flex; align-items: center; justify-content: center;
   font-size: 40px; color: var(--cta-text); margin-bottom: 32px;
+  font-weight: 800;
 }
-h1 { font-size: 2.2rem; font-weight: 900; margin-bottom: 16px; letter-spacing: -0.03em; }
-.subtitle { font-size: 1.05rem; color: var(--text2); margin-bottom: 40px; line-height: 1.7; max-width: 480px; }
+h1 {
+  font-size: clamp(1.7rem, 3.5vw, 2.4rem); font-weight: 900;
+  letter-spacing: -0.03em; line-height: 1.15;
+  margin-bottom: 16px; text-align: center;
+}
+.subtitle {
+  font-size: 1.05rem; color: var(--text2); margin-bottom: 48px;
+  line-height: 1.7; max-width: 520px; text-align: center;
+}
 
-.next-steps { text-align: left; width: 100%; max-width: 500px; margin-bottom: 40px; }
-.next-steps h3 {
-  font-size: 0.8rem; color: var(--accent);
-  margin-bottom: 20px; text-transform: uppercase;
-  letter-spacing: 0.15em; font-weight: 700;
+/* === STEPS === */
+.next-steps { text-align: left; width: 100%; max-width: 540px; margin-bottom: 40px; }
+.next-steps-heading {
+  font-size: 0.7rem; color: var(--accent);
+  margin-bottom: 24px; text-transform: uppercase;
+  letter-spacing: 0.25em; font-weight: 700; text-align: center;
 }
 .step {
-  display: flex; align-items: flex-start; gap: 14px;
-  margin-bottom: 20px;
+  display: flex; align-items: flex-start; gap: 16px;
+  margin-bottom: 24px;
 }
 .step-num {
-  width: 28px; height: 28px; border-radius: 50%;
+  width: 30px; height: 30px; border-radius: 50%;
   background: var(--accent-dim); border: 1px solid var(--border-accent);
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.75rem; font-weight: 700; color: var(--accent);
+  font-size: 0.8rem; font-weight: 800; color: var(--accent);
   flex-shrink: 0;
 }
-.step-text { font-size: 0.9rem; color: var(--text2); line-height: 1.6; }
+.step-text { font-size: 0.92rem; color: var(--text2); line-height: 1.65; }
 .step-text strong { color: var(--text); }
+.accent-name { color: var(--accent); font-weight: 600; }
 
+/* === EXPECTATIONS BOX === */
+.expectations {
+  width: 100%; max-width: 540px;
+  border-left: 3px solid var(--accent);
+  background: var(--glass);
+  border-radius: 0 8px 8px 0;
+  padding: 22px 26px;
+  margin-bottom: 32px;
+}
+.expectations h3 {
+  font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--accent); font-weight: 700; margin-bottom: 14px;
+}
+.expectations p {
+  font-size: 0.88rem; color: var(--text2); line-height: 1.7;
+  margin-bottom: 10px;
+}
+.expectations p:last-child { margin-bottom: 0; }
+.expectations strong { color: var(--text); }
+
+/* === SUPPORT BOX === */
 .support-box {
   background: var(--accent-dim); border: 1px solid var(--border-accent);
   border-radius: 12px; padding: 24px 28px;
-  width: 100%; max-width: 500px; text-align: center;
+  width: 100%; max-width: 540px; text-align: center;
+  margin-bottom: 32px;
 }
-.support-box p { font-size: 0.85rem; color: var(--text2); line-height: 1.6; }
+.support-box p { font-size: 0.88rem; color: var(--text2); line-height: 1.65; }
 .support-box a { color: var(--accent); }
+
+/* === DISCLAIMER === */
+.disclaimer {
+  font-size: 0.7rem; color: var(--muted); text-align: center;
+  max-width: 520px; line-height: 1.6; opacity: 0.7;
+}
+
+/* === MOBILE === */
+@media (max-width: 640px) {
+  .checkmark { width: 64px; height: 64px; font-size: 32px; margin-bottom: 24px; }
+}

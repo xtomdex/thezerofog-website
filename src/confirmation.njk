@@ -6,6 +6,7 @@ permalink: /confirmation/
 
 {% block head_extras %}
 <meta name="robots" content="noindex">
+<meta name="description" content="You're signed up for the free ZeroFog training. Here's what happens next.">
 {% endblock %}
 
 {% block page_css %}
@@ -17,58 +18,94 @@ permalink: /confirmation/
 <a href="/" class="brand">The Zero Fog</a>
 <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
 
-<section class="page-center">
+<main class="content">
 
-  <div class="checkmark">&#10003;</div>
+  <h1 class="ty-headline">You're in - now check your email.</h1>
 
-  <h1>You're in.</h1>
+  <p class="ty-sub">The training link is on its way to your inbox. Should arrive in the next 2 minutes.</p>
 
-  <p class="subtitle">Check your inbox - we just sent you the details.<br>Here's what to expect.</p>
-
-  <div class="card" style="margin-bottom:0;">
-    <div class="detail-row">
-      <span class="detail-label">What</span>
-      <span class="detail-value">The ZeroFog Method</span>
+  <div class="countdown-wrap">
+    <p class="countdown-label">Training Opens In</p>
+    <div class="countdown">
+      <div class="countdown-unit"><span class="num" id="cd-hrs">00</span><span class="lbl">Hours</span></div>
+      <span class="countdown-sep">:</span>
+      <div class="countdown-unit"><span class="num" id="cd-min">00</span><span class="lbl">Minutes</span></div>
+      <span class="countdown-sep">:</span>
+      <div class="countdown-unit"><span class="num" id="cd-sec">00</span><span class="lbl">Seconds</span></div>
     </div>
-    <div class="detail-row">
-      <span class="detail-label">When</span>
-      <span class="detail-value">[DATE &amp; TIME TBD]</span>
-    </div>
-    <div class="detail-row">
-      <span class="detail-label">Where</span>
-      <span class="detail-value">Online (link in your email)</span>
-    </div>
-    <div class="detail-row">
-      <span class="detail-label">Length</span>
-      <span class="detail-value">~50 minutes</span>
-    </div>
-    <div class="detail-row">
-      <span class="detail-label">Cost</span>
-      <span class="detail-value">Free</span>
-    </div>
+    <p class="countdown-note">Add it to your calendar - the link goes live when the timer hits zero.</p>
   </div>
 
-  <div class="expect-section">
-    <h3>What you'll walk away with:</h3>
-    <div class="expect-item">
-      <span class="expect-num">1.</span>
-      <p class="expect-text">Why you lose half your productive hours by 2 PM - and what's actually causing it (it's not burnout)</p>
+  <div class="divider"></div>
+
+  <div class="steps-section">
+
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <p class="step-title">Check your inbox right now.</p>
+        <p class="step-text">Look for "ZeroFog" in your sender list. If it's not there within 2 minutes, check your Promotions or Spam folder and move it to your main inbox.</p>
+      </div>
     </div>
-    <div class="expect-item">
-      <span class="expect-num">2.</span>
-      <p class="expect-text">The 3-system model that explains why nothing you've tried has worked - and why it's not your fault</p>
+
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <p class="step-title">Mark it "not spam" and move to inbox.</p>
+        <p class="step-text">This is critical. If you don't, the next email - the one with your training link - won't reach you. Gmail, Outlook, Yahoo - they all filter aggressively.</p>
+      </div>
     </div>
-    <div class="expect-item">
-      <span class="expect-num">3.</span>
-      <p class="expect-text">One free technique to try tonight - takes 5 minutes, works on the first night</p>
+
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <p class="step-title">Show up to the training.</p>
+        <p class="step-text">Live attendees get 3 free guides delivered right after. Skip the training and you skip those too.</p>
+      </div>
     </div>
+
   </div>
 
-  <div class="card-accent">
-    <p style="font-size:0.65rem;color:var(--accent);text-transform:uppercase;letter-spacing:0.3em;margin-bottom:10px;font-weight:700;">Stay until the end</p>
-    <p style="color:var(--text2);font-size:0.85rem;line-height:1.6;">Everyone who watches the full training gets a free Caffeine Timing Calculator - the exact tool we use to know when to stop drinking coffee based on your body.</p>
+  <div class="divider"></div>
+
+  <div class="bullets-section">
+    <p class="bullets-heading">For attendees, you'll also get:</p>
+
+    <div class="bullet">
+      <span class="bullet-check">&#10003;</span>
+      <p class="bullet-text"><strong class="accent-name">Your Caffeine Blueprint</strong></p>
+    </div>
+
+    <div class="bullet">
+      <span class="bullet-check">&#10003;</span>
+      <p class="bullet-text"><strong class="accent-name">9 Recovery Mistakes</strong></p>
+    </div>
+
+    <div class="bullet">
+      <span class="bullet-check">&#10003;</span>
+      <p class="bullet-text"><strong class="accent-name">The Recovery Protocol</strong></p>
+    </div>
+
+    <p class="bonus-note">Delivered to your inbox right after you watch.</p>
   </div>
 
-</section>
+  <div class="divider"></div>
 
+  <div class="credibility">
+    <p class="credibility-text">I work from home. For 3 years I ran on coffee and willpower. Brain fog, bad decisions, crashed by 2 PM every day. I tried everything - morning routines, productivity systems, supplements. None of it lasted. Then I found what was actually broken - and fixed it in weeks. This training is the thing I wish someone had showed me 3 years ago.</p>
+    <p class="credibility-author">- Kirill, ZeroFog</p>
+  </div>
+
+  <div class="final-cta">
+    <p>Check your email - we'll see you inside.</p>
+  </div>
+
+  <p class="disclaimer">This is an educational wellness program, not medical treatment. Results vary.</p>
+
+</main>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="/assets/js/pages/confirmation.js" defer></script>
 {% endblock %}
