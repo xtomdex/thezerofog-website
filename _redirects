@@ -7,3 +7,6 @@
 # Legal pages
 /privacy  /privacy.html  200
 /terms  /terms.html  200
+
+# Backward compat: old /refund (singular) links from previous deploy
+/refund  /refunds/  301
