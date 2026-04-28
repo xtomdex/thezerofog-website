@@ -1,0 +1,106 @@
+---
+title: "Medical & Wellness Disclaimer — The Zero Fog"
+permalink: /disclaimer/
+canonical: "https://thezerofog.com/disclaimer/"
+---
+{% extends "layouts/base.njk" %}
+
+{% block head_extras %}
+<meta name="description" content="Medical & Wellness Disclaimer for The Zero Fog — the Course is for general wellness only and is not a substitute for professional medical advice.">
+{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="/assets/css/pages/legal.css">
+{% endblock %}
+
+{% block content %}
+
+<a href="/" class="brand">The Zero Fog</a>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
+
+<article class="legal-page">
+
+  <h1>Medical &amp; Wellness Disclaimer</h1>
+
+  <div class="legal-meta">
+    <p><strong>Sleeping Protocol</strong></p>
+    <p>Website: {{ site.domain }}</p>
+    <p>Effective Date: 2026-04-28</p>
+    <p>Last Updated: 2026-04-28</p>
+  </div>
+
+  <h2>1. General Wellness Disclaimer</h2>
+  <p>The information, content, and materials provided through {{ site.domain }} (the "Site"), the Sleeping Protocol course (the "Course"), webinars, emails, and all related services (collectively, the "Services") are intended for <strong>general wellness and educational purposes only</strong>.</p>
+  <div class="legal-callout">
+    <strong>THIS PRODUCT IS FOR GENERAL WELLNESS ONLY AND IS NOT A SUBSTITUTE FOR PROFESSIONAL MEDICAL ADVICE, DIAGNOSIS, OR TREATMENT.</strong>
+  </div>
+
+  <h2>2. Not Medical Advice</h2>
+  <p>The Services are provided by a wellness education company, not by licensed medical professionals. The Course content is based on publicly available research and general behavioral and lifestyle principles related to sleep. None of the content provided through the Services constitutes:</p>
+  <ul>
+    <li>Medical advice or clinical recommendations</li>
+    <li>A diagnosis of any medical condition, including but not limited to insomnia, sleep apnea, restless leg syndrome, narcolepsy, or any other sleep disorder</li>
+    <li>A treatment plan for any disease, condition, or ailment</li>
+    <li>A prescription, therapeutic intervention, or clinical protocol</li>
+    <li>A substitute for the advice of a physician, psychologist, psychiatrist, or other qualified healthcare provider</li>
+  </ul>
+
+  <h2>3. No Claims of Cure or Treatment</h2>
+  <p>The Course does not claim to diagnose, treat, cure, mitigate, or prevent any disease or medical condition. The information provided is designed to support general wellness habits and behavioral adjustments that may improve sleep quality for individuals who do not have underlying clinical sleep disorders.</p>
+  <p>We make no guarantees, representations, or warranties that the Course will produce any specific results. Individual experiences and outcomes vary significantly depending on personal circumstances, health conditions, lifestyle factors, and the degree of implementation.</p>
+
+  <h2>4. Consult Your Healthcare Provider</h2>
+  <p><strong>You should always consult with a qualified healthcare professional before:</strong></p>
+  <ul>
+    <li>Starting any new wellness, lifestyle, or behavioral change program</li>
+    <li>Making changes to your sleep schedule, particularly if you operate heavy machinery, drive, or perform safety-sensitive work</li>
+    <li>Reducing, changing, or discontinuing any medication, including sleep aids, supplements, or other prescriptions</li>
+    <li>Implementing any dietary changes suggested in the Course (such as caffeine reduction protocols)</li>
+  </ul>
+
+  <h2>5. Who Should NOT Rely on This Course</h2>
+  <p>This Course is designed for generally healthy adults experiencing lifestyle-related sleep difficulties. <strong>The Course is NOT appropriate as a primary intervention for individuals who:</strong></p>
+  <ul>
+    <li>Have been diagnosed with or suspect they have a clinical sleep disorder (insomnia disorder, sleep apnea, narcolepsy, parasomnias, etc.)</li>
+    <li>Are currently undergoing treatment for a sleep disorder or mental health condition that significantly affects sleep</li>
+    <li>Experience severe, chronic insomnia that has persisted for more than 3 months and significantly impairs daily functioning</li>
+    <li>Are taking prescription sleep medications and considering changing their medication regimen</li>
+    <li>Are pregnant, nursing, or have significant medical conditions that affect sleep</li>
+    <li>Have been advised by a healthcare professional to follow a specific medical sleep protocol</li>
+  </ul>
+  <p>If any of the above applies to you, we strongly recommend that you consult a licensed healthcare provider or sleep specialist before using this Course.</p>
+
+  <h2>6. No Professional-Patient Relationship</h2>
+  <p>Your use of the Services does not create a professional-patient, doctor-patient, therapist-patient, or any other professional healthcare relationship between you and the Company, its owners, employees, or any content creators associated with the Course.</p>
+
+  <h2>7. Third-Party Research References</h2>
+  <p>The Course may reference scientific studies, research papers, books, or expert opinions for educational purposes. Such references are provided for informational context and do not constitute endorsements by the referenced researchers or institutions. The inclusion of research references does not make the Course a clinical or medical program.</p>
+
+  <h2>8. Assumption of Risk</h2>
+  <p>By using the Services, you acknowledge and agree that:</p>
+  <ul>
+    <li>You are voluntarily participating in a wellness education program</li>
+    <li>You are solely responsible for your own health decisions</li>
+    <li>You will not hold the Company liable for any adverse effects, health changes, or outcomes resulting from the application of information provided in the Course</li>
+    <li>You have been advised to consult a healthcare professional before implementing any changes to your health or wellness routine</li>
+  </ul>
+
+  <h2>9. Earnings and Results Disclaimer</h2>
+  <p>Where the Course references improved productivity, focus, energy, or work performance as potential benefits of better sleep habits, these are general statements based on commonly recognized sleep science and should not be interpreted as guarantees of specific results. Your individual results will depend on many factors beyond the scope of this Course.</p>
+
+  <h2>10. FTC Compliance</h2>
+  <p>In compliance with FTC guidelines, we disclose that any testimonials or case studies presented in connection with the Course represent individual experiences and may not be typical of every user. Past performance and experiences do not guarantee future results.</p>
+
+  <h2>11. Limitation of Liability</h2>
+  <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE COMPANY, ITS OWNERS, PARTNERS, EMPLOYEES, AND CONTRACTORS SHALL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM YOUR USE OF OR RELIANCE ON ANY INFORMATION PROVIDED THROUGH THE SERVICES, INCLUDING BUT NOT LIMITED TO ANY HEALTH-RELATED OUTCOMES.</p>
+
+  <h2>12. Contact Information</h2>
+  <p>If you have any questions or concerns about this Medical &amp; Wellness Disclaimer, please contact us at:</p>
+  <p>
+    <strong>Email:</strong> <a href="mailto:{{ site.email.support }}">{{ site.email.support }}</a><br>
+    <strong>Website:</strong> {{ site.domain }}
+  </p>
+
+</article>
+
+{% endblock %}

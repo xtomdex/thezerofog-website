@@ -1,5 +1,7 @@
 .idea
+.claude
 dist/
 node_modules/
 .env
 .netlify/
+deno.lock

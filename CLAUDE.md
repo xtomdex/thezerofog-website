@@ -63,9 +63,14 @@ The base layout loads `shared.css` and `shared.js` (deferred) on every page auto
 
 ## Data
 
-- `src/_data/site.js` — global site vars (`brand`, `domain`, `contact_email`)
-- `src/_data/env.js` — public env vars only (`PUBLIC_*` prefixed). Available in templates as `{{ env.paddle_client_token }}` etc.
-- Server-only env vars (used in Netlify Functions only) must never be exposed to templates
+Templates pull global data from `src/_data/*.js`. Each file has a single semantic role — do not duplicate the same value across files.
+
+- `src/_data/site.js` — site identity: `brand`, `domain`, `url`, `legal.entity`, `email.{support,privacy,refunds,copyright}`. Most fields read from `PUBLIC_*` env vars with safe defaults; templates always reference the semantic name (e.g. `{{ site.email.support }}`) regardless of source.
+- `src/_data/env.js` — public runtime env for client-side integrations: `paddle_client_token`, `paddle_environment`. Templates: `{{ env.paddle_client_token }}`.
+- `src/_data/legal/*.md` — canonical markdown sources for legal pages. Eleventy ignores these (see `## Legal documents`).
+- Server-only env vars (used in Netlify Functions) MUST NOT be exposed via `_data/`.
+
+Rule: every field declared in `_data/` must be used somewhere in templates. If a value is unused, remove it. If a value belongs in templates, route it through `_data/` rather than hardcoding.
 
 ## Netlify Functions
 
@@ -84,19 +89,28 @@ Current functions:
 
 ## Environment variables
 
-**Server-only** (set in Netlify UI → Site settings → Environment variables; available to Functions only):
+Local: copy `.env.example` → `.env` (gitignored) and fill in. `netlify dev` auto-loads `.env`. Prod: set the same vars in Netlify UI → Site settings → Environment variables.
+
+**Public** — exposed to templates via `src/_data/*.js`. All public vars MUST have the `PUBLIC_` prefix.
+
+Site identity (consumed by `_data/site.js`):
+- `PUBLIC_SITE_DOMAIN` (default: `thezerofog.com`)
+- `PUBLIC_SITE_URL` (default: `https://${PUBLIC_SITE_DOMAIN}`)
+- `PUBLIC_LEGAL_ENTITY` — legal entity name shown in legal documents (default: `TBD`)
+- `PUBLIC_EMAIL_SUPPORT` / `PUBLIC_EMAIL_PRIVACY` / `PUBLIC_EMAIL_REFUNDS` / `PUBLIC_EMAIL_COPYRIGHT` — defaults derive as `<local-part>@${PUBLIC_SITE_DOMAIN}`
+
+Paddle client (consumed by `_data/env.js`):
+- `PUBLIC_PADDLE_CLIENT_TOKEN`
+- `PUBLIC_PADDLE_ENVIRONMENT` (default: `sandbox`)
+
+**Server-only** — available to Functions only. NEVER use the `PUBLIC_` prefix; NEVER expose via `_data/`.
 - `MAKE_WEBHOOK_URL` — Make.com webhook endpoint for form submissions
 - `MAILERLITE_API_KEY`
 - `PADDLE_API_KEY`
 - `PADDLE_WEBHOOK_SECRET`
 - `PADDLE_NOTIFICATION_SECRET`
 
-**Public** (set in Netlify UI; available to templates via `src/_data/env.js`):
-- `PUBLIC_PADDLE_CLIENT_TOKEN`
-- `PUBLIC_PADDLE_ENVIRONMENT` (default: `sandbox`)
-- `PUBLIC_SITE_URL`
-
-Rule: all public env vars MUST have `PUBLIC_` prefix. Local `.env` is gitignored and NOT committed.
+Rule: when adding a new public var, declare it in `.env.example`, expose it via the appropriate `_data/*.js` file with a safe default, and use it in at least one template — never leave declared-but-unused config.
 
 ## Rules for adding new pages
 
@@ -108,6 +122,33 @@ Rule: all public env vars MUST have `PUBLIC_` prefix. Local `.env` is gitignored
 6. Page-specific JS: create `src/assets/js/pages/<name>.js`, include via `{% block page_scripts %}<script src="/assets/js/pages/<name>.js" defer></script>{% endblock %}`
 7. Base layout auto-includes shared footer — do NOT add footer manually
 8. Every new page automatically inherits head meta, shared CSS/JS, and footer
+
+## Legal documents
+
+Privacy, Terms, Disclaimer, Refunds follow a two-tier structure:
+
+- **Sources** — `src/_data/legal/{privacy,terms,disclaimer,refunds}.md`. Canonical markdown with YAML frontmatter (`title`, `version`, `effective_date`, `last_updated`). Eleventy ignores these — they are reference docs, not templates.
+- **Rendered pages** — `src/{privacy,terms,disclaimer,refunds}.njk`. Extend `base.njk`, share `src/assets/css/pages/legal.css`, served at `/<slug>/`. Intentionally indexable (no `noindex`).
+
+### Sync rules (`.md` → `.njk`)
+
+1. Edit the source `.md` first — that is canonical. Then re-port changes to the matching `.njk`.
+2. Markdown → semantic HTML: `#` → `<h1>`, `##` → `<h2>`, `###` → `<h3>`, bullets → `<ul>`, ordered lists → `<ol>`, `**bold**` → `<strong>`, links → `<a>`.
+3. **Identity values MUST stay templated** — never inline. Use `{{ site.domain }}`, `{{ site.legal.entity }}`, `{{ site.email.{support,privacy,refunds,copyright} }}`. Driven by `PUBLIC_*` env vars.
+4. **Dates** — `effective_date` and `last_updated` live in the `.md` frontmatter. Copy the literal ISO value (e.g. `2026-04-28`) into the `.legal-meta` block of the `.njk`. The `[EFFECTIVE_DATE]` / `[LAST_UPDATED_DATE]` markers in the `.md` body are positional indicators — they are replaced by the frontmatter value during sync, never carried over to the `.njk`.
+5. Email addresses always render as `mailto:` links: `<a href="mailto:{{ site.email.support }}">{{ site.email.support }}</a>`.
+6. Cross-references between legal pages use absolute paths: `/privacy/`, `/terms/`, `/disclaimer/`, `/refunds/`.
+
+### Prompting Claude for a sync
+
+State which `.md` file(s) changed and the scope. Examples:
+
+- `Updated privacy.md frontmatter dates — sync privacy.njk` — date-only update.
+- `Edited section 5 in terms.md, port to terms.njk` — partial content change; name the section.
+- `Added new section "X" to disclaimer.md — port to disclaimer.njk` — additive change.
+- `Resync all 4 legal njk pages with their .md sources` — full rebuild after a batch edit.
+
+Claude reads the `.md`, locates the matching block in the `.njk`, and applies the sync rules above. Do not request inlined identity values or hardcoded emails — the templated form is enforced.
 
 ## Integrations (in progress)
 
