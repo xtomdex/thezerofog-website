@@ -7,9 +7,9 @@ last_updated: "2026-04-28"
 
 # TERMS OF SERVICE
 
-**Sleeping Protocol**
+**The ZeroFog**
 
-Website: [YOUR-DOMAIN.com]
+Website: thezerofog.com
 
 Effective Date: [EFFECTIVE_DATE]
 Last Updated: [LAST_UPDATED_DATE]
@@ -20,7 +20,7 @@ Last Updated: [LAST_UPDATED_DATE]
 
 ## 1. Introduction and Acceptance
 
-These Terms of Service ("Terms") govern your access to and use of the website [YOUR-DOMAIN.com] (the "Site"), all related services, content, webinars, email communications, and digital products (collectively, the "Services") provided by or on behalf of [YOUR LEGAL ENTITY NAME] ("we," "us," "our," or the "Company").
+These Terms of Service ("Terms") govern your access to and use of the website thezerofog.com (the "Site"), all related services, content, webinars, email communications, and digital products (collectively, the "Services") provided by or on behalf of [YOUR LEGAL ENTITY NAME] ("we," "us," "our," or the "Company").
 
 The Company is registered as autónomo in Spain, with its principal place of business in Barcelona, Spain. Contact details are provided in Section 19 of these Terms.
 
@@ -29,7 +29,7 @@ By accessing or using any part of the Services, you represent that you are at le
 ## 2. Definitions
 
 - **"Content"** means all text, images, video, audio, graphics, software, and other materials available through the Services.
-- **"Course"** means the digital educational product titled "Sleeping Protocol" (or such other name as may be used), including all video lessons, worksheets, templates, tools, and supplemental materials.
+- **"Course"** means the digital educational product titled "The ZeroFog (4-Week Protocol)" (or such other name as may be used), including all video lessons, worksheets, templates, tools, and supplemental materials.
 - **"User," "you," or "your"** means any individual who accesses or uses the Services.
 - **"Webinar"** means any live, simulated-live, or recorded presentation hosted by or on behalf of the Company through the EverWebinar platform.
 - **"Newsletter"** means email communications you receive after voluntarily providing your email address through the Site, delivered via MailerLite.
@@ -105,7 +105,7 @@ Upon purchase, you are granted a limited, non-exclusive, non-transferable, revoc
 
 ### 7.3 DMCA / Copyright Complaints
 
-If you believe any Content infringes your copyright, please contact us at [COPYRIGHT@YOUR-DOMAIN.com] with a description of the allegedly infringing material, proof of ownership, and your contact information.
+If you believe any Content infringes your copyright, please contact us at copyright@thezerofog.com with a description of the allegedly infringing material, proof of ownership, and your contact information.
 
 ## 8. User Conduct
 
@@ -182,8 +182,8 @@ These Terms, together with the Privacy Policy, Refund Policy, and Medical & Well
 
 If you have any questions about these Terms, please contact us at:
 
-**Email:** [SUPPORT@YOUR-DOMAIN.com]
-**Website:** [YOUR-DOMAIN.com]
+**Email:** support@thezerofog.com
+**Website:** thezerofog.com
 **Entity:** [YOUR LEGAL ENTITY NAME]
 **Location:** Barcelona, Spain
 

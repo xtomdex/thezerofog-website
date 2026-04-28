@@ -7,16 +7,16 @@ last_updated: "2026-04-28"
 
 # MEDICAL & WELLNESS DISCLAIMER
 
-**Sleeping Protocol**
+**The ZeroFog**
 
-Website: [YOUR-DOMAIN.com]
+Website: thezerofog.com
 
 Effective Date: [EFFECTIVE_DATE]
 Last Updated: [LAST_UPDATED_DATE]
 
 ## 1. General Wellness Disclaimer
 
-The information, content, and materials provided through [YOUR-DOMAIN.com] (the "Site"), the Sleeping Protocol course (the "Course"), webinars, emails, and all related services (collectively, the "Services") are intended for **general wellness and educational purposes only**.
+The information, content, and materials provided through thezerofog.com (the "Site"), The ZeroFog course (the "Course"), webinars, emails, and all related services (collectively, the "Services") are intended for **general wellness and educational purposes only**.
 
 **THIS PRODUCT IS FOR GENERAL WELLNESS ONLY AND IS NOT A SUBSTITUTE FOR PROFESSIONAL MEDICAL ADVICE, DIAGNOSIS, OR TREATMENT.**
 
@@ -91,5 +91,5 @@ TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE COMPANY, ITS OWNERS, PARTNERS, EMPLO
 
 If you have any questions or concerns about this Medical & Wellness Disclaimer, please contact us at:
 
-**Email:** [SUPPORT@YOUR-DOMAIN.com]
-**Website:** [YOUR-DOMAIN.com]
+**Email:** support@thezerofog.com
+**Website:** thezerofog.com
