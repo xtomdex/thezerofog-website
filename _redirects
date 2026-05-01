@@ -1,5 +1,7 @@
-# Social media bio link → social landing page (no timer, no scarcity)
-/social  /social.html  200
+# Social media waitlist (no timer, no scarcity)
+# Old /social URL kept as 301 to /waitlist for backward compat
+/social   /waitlist/  301
+/social/  /waitlist/  301
 
 # Thank you page
 /thank-you  /thank-you.html  200
