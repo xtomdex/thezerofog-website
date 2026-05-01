@@ -1,28 +1,29 @@
 ---
-title: "Free Training: The 4-Week Protocol That Removed My Brain Fog And Let Me Do Real Work Again"
-permalink: /social/
-canonical: "https://thezerofog.com/"
+title: "Join The Waitlist - The ZeroFog"
+permalink: /waitlist/
+canonical: "https://thezerofog.com/waitlist/"
 ---
 {% extends "layouts/base.njk" %}
 
 {% block head_extras %}
-<meta name="description" content="Free training for remote workers: the 4-week protocol that removed my brain fog - without caffeine hacks, productivity apps, or willpower.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Be first in line when the brain fog training drops. Free. Limited list. Priority access for waitlist members.">
 
 <!-- Open Graph -->
-<meta property="og:title" content="Free Training: The 4-Week Protocol That Removed My Brain Fog And Let Me Do Real Work Again">
-<meta property="og:description" content="The 4-week protocol that removed my brain fog - without caffeine hacks, productivity apps, or willpower. Free training for remote workers.">
-<meta property="og:url" content="https://thezerofog.com/">
+<meta property="og:title" content="Join The Waitlist - The ZeroFog">
+<meta property="og:description" content="Be first in line when the brain fog training drops. Free. Limited list.">
+<meta property="og:url" content="https://thezerofog.com/waitlist/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="The ZeroFog">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Free Training: The 4-Week Protocol That Removed My Brain Fog And Let Me Do Real Work Again">
-<meta name="twitter:description" content="The 4-week protocol that removed my brain fog - without caffeine hacks, productivity apps, or willpower.">
+<meta name="twitter:title" content="Join The Waitlist - The ZeroFog">
+<meta name="twitter:description" content="Be first in line when the brain fog training drops. Free.">
 {% endblock %}
 
 {% block page_css %}
-<link rel="stylesheet" href="/assets/css/pages/social.css">
+<link rel="stylesheet" href="/assets/css/pages/waitlist.css">
 {% endblock %}
 
 {% block content %}
@@ -36,22 +37,28 @@ canonical: "https://thezerofog.com/"
 <!-- ===== OPT-IN PAGE ===== -->
 <section class="hero" id="hero">
 
-  <p class="pre-headline">Free Training For People Who Work From Home</p>
+  <p class="pre-headline">Waiting List - Free Training For People Who Work From Home</p>
 
   <h1 class="headline">The 4-Week Protocol That Removed My Brain Fog And Let Me Do Real Work Again</h1>
 
   <p class="without-block">(Without Caffeine Hacks, Productivity Apps, or Willpower)</p>
 
+  <p class="sub-headline">Drop your email to be on the list. First in line gets priority access when the training opens.</p>
+
   <form class="cta-form" id="optinForm">
     <input type="email" name="email" placeholder="Your best email" required autocomplete="email">
-    <button type="submit" class="cta-btn">Save My Spot</button>
-    <p class="cta-note">100% free. By signing up you agree to receive emails from ZeroFog. Unsubscribe anytime. <a href="/privacy" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a></p>
+    <!-- Honeypot: hidden from real users, bots will fill it -->
+    <input type="text" name="website" style="display:none" tabindex="-1" autocomplete="off">
+    <input type="hidden" name="source" value="waitlist">
+    <button type="submit" class="cta-btn" id="ctaBtn">Join The Waitlist</button>
+    <p class="cta-note">Free. We'll email when the training opens. Unsubscribe anytime. <a href="/privacy" style="color:var(--muted);text-decoration:underline;">Privacy Policy</a></p>
+    <p id="formError" style="color:var(--error);font-size:0.8rem;margin-top:8px;min-height:1.2em;"></p>
   </form>
 
   <div class="divider"></div>
 
   <div class="bullets-section">
-    <p class="bullets-heading">In This Free Training, You'll Discover:</p>
+    <p class="bullets-heading">Inside The Free Training, You'll Discover:</p>
 
     <div class="bullet">
       <span class="bullet-check">&#10003;</span>
@@ -76,5 +83,5 @@ canonical: "https://thezerofog.com/"
 {% endblock %}
 
 {% block page_scripts %}
-<script src="/assets/js/pages/social.js" defer></script>
+<script src="/assets/js/pages/waitlist.js" defer></script>
 {% endblock %}
