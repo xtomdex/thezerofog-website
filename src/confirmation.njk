@@ -1,12 +1,12 @@
 ---
-title: "You're In - The ZeroFog"
+title: "You're Registered - The ZeroFog"
 permalink: /confirmation/
 ---
 {% extends "layouts/base.njk" %}
 
 {% block head_extras %}
 <meta name="robots" content="noindex">
-<meta name="description" content="You're signed up for the free ZeroFog training. Here's what happens next.">
+<meta name="description" content="You're registered for the free ZeroFog webinar. Here's what happens next.">
 {% endblock %}
 
 {% block page_css %}
@@ -20,20 +20,22 @@ permalink: /confirmation/
 
 <main class="content">
 
-  <h1 class="ty-headline">You're in - now check your email.</h1>
+  <p class="reg-greeting hidden" id="regGreeting">Hey, <span id="regName"></span></p>
 
-  <p class="ty-sub">The training link is on its way to your inbox. Should arrive in the next 2 minutes.</p>
+  <h1 class="ty-headline">You're registered. Check your email for the details.</h1>
 
-  <div class="countdown-wrap">
-    <p class="countdown-label">Training Opens In</p>
-    <div class="countdown">
-      <div class="countdown-unit"><span class="num" id="cd-hrs">00</span><span class="lbl">Hours</span></div>
-      <span class="countdown-sep">:</span>
-      <div class="countdown-unit"><span class="num" id="cd-min">00</span><span class="lbl">Minutes</span></div>
-      <span class="countdown-sep">:</span>
-      <div class="countdown-unit"><span class="num" id="cd-sec">00</span><span class="lbl">Seconds</span></div>
-    </div>
-    <p class="countdown-note">Add it to your calendar - the link goes live when the timer hits zero.</p>
+  <p class="ty-sub">Your webinar access link is on its way - usually lands in your inbox within 2 minutes.</p>
+
+  <p class="reg-details hidden" id="regDetails">We sent it to <strong id="regEmail"></strong>.</p>
+
+  <div class="device-msg hidden" id="deviceDesktop">
+    <p class="device-title">You're on a desktop - perfect.</p>
+    <p class="device-text">Add the webinar to your calendar now and join from this same computer when it's time. The join link is in the email we just sent.</p>
+  </div>
+
+  <div class="device-msg hidden" id="deviceMobile">
+    <p class="device-title">You're on mobile - the webinar link is in your email.</p>
+    <p class="device-text">For the best experience, join from a desktop or laptop when it starts. You'll see the slides, demos, and Q&amp;A in full.</p>
   </div>
 
   <div class="divider"></div>
@@ -52,15 +54,15 @@ permalink: /confirmation/
       <div class="step-num">2</div>
       <div class="step-body">
         <p class="step-title">Mark it "not spam" and move to inbox.</p>
-        <p class="step-text">This is critical. If you don't, the next email - the one with your training link - won't reach you. Gmail, Outlook, Yahoo - they all filter aggressively.</p>
+        <p class="step-text">This is critical. If you don't, the next email - the one with your webinar link - won't reach you. Gmail, Outlook, Yahoo - they all filter aggressively.</p>
       </div>
     </div>
 
     <div class="step-card">
       <div class="step-num">3</div>
       <div class="step-body">
-        <p class="step-title">Show up to the training.</p>
-        <p class="step-text">Live attendees get 3 free guides delivered right after. Skip the training and you skip those too.</p>
+        <p class="step-title">Show up to the webinar.</p>
+        <p class="step-text">Live attendees get 3 free guides delivered right after. Skip the webinar and you skip those too.</p>
       </div>
     </div>
 

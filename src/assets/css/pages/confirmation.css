@@ -1,4 +1,4 @@
-/* === CONFIRMATION (post-opt-in) === */
+/* === CONFIRMATION (post-webinar-registration) === */
 
 .content {
   display: flex;
@@ -29,27 +29,64 @@
   margin-bottom: 48px;
 }
 
+/* === REGISTRANT DETAILS (populated from EverWebinar wj_lead_* URL params) === */
+.reg-greeting {
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.reg-details {
+  font-size: 0.9rem;
+  color: var(--text2);
+  line-height: 1.6;
+  text-align: center;
+  max-width: 560px;
+  margin: 0 auto 48px;
+}
+
+.reg-details strong {
+  color: var(--text);
+  font-weight: 700;
+  word-break: break-word;
+}
+
+/* Pull reg-details closer to .ty-sub when both are visible */
+.ty-sub + .reg-details:not(.hidden) {
+  margin-top: -32px;
+}
+
+/* === DEVICE STRATEGY (desktop vs mobile guidance; JS reveals one) === */
+.device-msg {
+  width: 100%;
+  max-width: 560px;
+  background: var(--accent-dim);
+  border: 1px solid var(--border-accent);
+  border-radius: 12px;
+  padding: 22px 26px;
+  margin: 0 auto 48px;
+  text-align: center;
+}
+
+.device-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.device-text {
+  font-size: 0.88rem;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
 /* === DIVIDER === */
 .divider { width: 48px; height: 1px; background: var(--border-accent); margin: 0 auto 48px; }
-
-/* === COUNTDOWN === */
-.countdown-wrap { margin: 0 auto 40px; text-align: center; max-width: 480px; }
-.countdown-label {
-  font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 12px; font-weight: 700;
-}
-.countdown { display: flex; justify-content: center; gap: 8px; align-items: baseline; }
-.countdown-unit { display: flex; flex-direction: column; align-items: center; }
-.countdown-unit .num {
-  font-size: 1.6rem; font-weight: 700; color: var(--text);
-  font-variant-numeric: tabular-nums; line-height: 1;
-}
-.countdown-unit .lbl {
-  font-size: 0.5rem; letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--muted); margin-top: 4px;
-}
-.countdown-sep { font-size: 1.6rem; font-weight: 700; color: var(--muted); line-height: 1; }
-.countdown-note { font-size: 0.78rem; color: var(--text2); margin-top: 12px; line-height: 1.5; }
 
 /* === STEPS === */
 .steps-section { width: 100%; max-width: 560px; margin-bottom: 48px; }
@@ -167,6 +204,9 @@
   max-width: 560px; margin: 0 auto; line-height: 1.6; opacity: 0.7;
 }
 
+/* === UTILITY === */
+.hidden { display: none; }
+
 /* === MOBILE === */
 @media (max-width: 640px) {
   .content { padding: 60px 20px 32px; }
@@ -175,4 +215,7 @@
   .step-text { font-size: 0.82rem; }
   .bullet-text { font-size: 0.85rem; }
   .credibility { padding: 20px 22px; }
+  .device-msg { padding: 18px 20px; }
+  .device-title { font-size: 0.9rem; }
+  .device-text { font-size: 0.82rem; }
 }
