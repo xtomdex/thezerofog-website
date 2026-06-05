@@ -66,7 +66,7 @@ The base layout loads `shared.css` and `shared.js` (deferred) on every page auto
 Templates pull global data from `src/_data/*.js`. Each file has a single semantic role — do not duplicate the same value across files.
 
 - `src/_data/site.js` — site identity: `brand`, `domain`, `url`, `legal.entity`, `email.{support,privacy,refunds,copyright}`. Most fields read from `PUBLIC_*` env vars with safe defaults; templates always reference the semantic name (e.g. `{{ site.email.support }}`) regardless of source.
-- `src/_data/env.js` — public runtime env for client-side integrations: `paddle_client_token`, `paddle_environment`. Templates: `{{ env.paddle_client_token }}`.
+- `src/_data/env.js` — placeholder for future public client-side env (PUBLIC_* vars). Currently exports an empty object; populate as new client-side integrations land.
 - `src/_data/legal/*.md` — canonical markdown sources for legal pages. Eleventy ignores these (see `## Legal documents`).
 - Server-only env vars (used in Netlify Functions) MUST NOT be exposed via `_data/`.
 
@@ -77,7 +77,7 @@ Rule: every field declared in `_data/` must be used somewhere in templates. If a
 Located in `netlify/functions/`. Accessible at `/.netlify/functions/<name>`.
 
 Current functions:
-- `optin.js` — validates form input and proxies to Make.com webhook. Do NOT modify this file.
+- `optin.js` — validates form input and proxies to Make.com webhook.
 
 ## Build & deploy
 
@@ -99,16 +99,9 @@ Site identity (consumed by `_data/site.js`):
 - `PUBLIC_LEGAL_ENTITY` — legal entity name shown in legal documents (default: `TBD`)
 - `PUBLIC_EMAIL_SUPPORT` / `PUBLIC_EMAIL_PRIVACY` / `PUBLIC_EMAIL_REFUNDS` / `PUBLIC_EMAIL_COPYRIGHT` — defaults derive as `<local-part>@${PUBLIC_SITE_DOMAIN}`
 
-Paddle client (consumed by `_data/env.js`):
-- `PUBLIC_PADDLE_CLIENT_TOKEN`
-- `PUBLIC_PADDLE_ENVIRONMENT` (default: `sandbox`)
-
 **Server-only** — available to Functions only. NEVER use the `PUBLIC_` prefix; NEVER expose via `_data/`.
 - `MAKE_WEBHOOK_URL` — Make.com webhook endpoint for form submissions
 - `MAILERLITE_API_KEY`
-- `PADDLE_API_KEY`
-- `PADDLE_WEBHOOK_SECRET`
-- `PADDLE_NOTIFICATION_SECRET`
 
 Rule: when adding a new public var, declare it in `.env.example`, expose it via the appropriate `_data/*.js` file with a safe default, and use it in at least one template — never leave declared-but-unused config.
 
@@ -154,7 +147,7 @@ Claude reads the `.md`, locates the matching block in the `.njk`, and applies th
 
 - **Make.com** — webhook for form submissions, proxied via `netlify/functions/optin.js`
 - **EverWebinar** — webinar room
-- **Paddle.js** — checkout on sales page (client token via `env.paddle_client_token`)
+- **Stripe** — checkout on sales page (integration planned, not yet implemented)
 - **MailerLite** — email sequences via Make.com
 - **Systeme.io** — LMS (course delivery)
  
