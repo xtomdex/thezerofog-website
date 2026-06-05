@@ -15,3 +15,36 @@
   for = "/*.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+
+# === Redirects ===
+# Single source of truth — there is no _redirects file (it took precedence over
+# this section in the Netlify processing order, so keeping both would shadow
+# these rules).
+
+# Legacy /social → new /waitlist URL
+[[redirects]]
+  from = "/social"
+  to = "/waitlist/"
+  status = 301
+
+[[redirects]]
+  from = "/social/"
+  to = "/waitlist/"
+  status = 301
+
+# Legacy singular /refund → /refunds (plural)
+[[redirects]]
+  from = "/refund"
+  to = "/refunds/"
+  status = 301
+
+# Old post-purchase page renamed: /thank-you → /welcome
+[[redirects]]
+  from = "/thank-you"
+  to = "/welcome/"
+  status = 301
+
+[[redirects]]
+  from = "/thank-you/"
+  to = "/welcome/"
+  status = 301
