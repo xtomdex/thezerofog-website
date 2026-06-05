@@ -1,8 +1,5 @@
-// Public runtime env for client-side integrations. Templates: {{ env.paddle_client_token }}.
-// All keys MUST come from PUBLIC_*-prefixed env vars. For site identity (brand, domain,
-// emails, legal entity), see _data/site.js — those expose semantic names instead.
+// Placeholder for future public client-side env (PUBLIC_* vars). Empty for now —
+// no client-side integrations are active yet. Kept so the _data contract is stable
+// and any future `{{ env.* }}` reference resolves cleanly.
 
-module.exports = {
-  paddle_client_token: process.env.PUBLIC_PADDLE_CLIENT_TOKEN || "",
-  paddle_environment: process.env.PUBLIC_PADDLE_ENVIRONMENT || "sandbox",
-};
+module.exports = {};
