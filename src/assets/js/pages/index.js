@@ -20,7 +20,15 @@ document.getElementById('optinForm').addEventListener('submit', function(e) {
   })
   .then(function(res) {
     if (!res.ok) throw new Error('error');
-    window.location.href = '/confirmation';
+    return res.json();
+  })
+  .then(function(data) {
+    // Redirect to the EverWebinar schedule page returned by the function.
+    // If no redirectUrl is present (e.g. honeypot path), treat it as a benign
+    // success and leave the button in its submitted state — no error shown.
+    if (data && data.redirectUrl) {
+      window.location.href = data.redirectUrl;
+    }
   })
   .catch(function() {
     btn.disabled = false;
@@ -41,32 +49,4 @@ document.getElementById('optinForm').addEventListener('submit', function(e) {
   if (w && withouts[w]) {
     document.querySelector('.without-block').textContent = withouts[w];
   }
-})();
-
-// === COUNTDOWN TIMER (evergreen) ===
-(function() {
-  var key = 'zf_cd_end';
-  var stored = localStorage.getItem(key);
-  var end;
-  var now = Date.now();
-
-  if (stored && Number(stored) > now) {
-    end = Number(stored);
-  } else {
-    var mins = 30 + Math.floor(Math.random() * 25);
-    end = now + mins * 60 * 1000;
-    localStorage.setItem(key, end);
-  }
-
-  function tick() {
-    var diff = Math.max(0, end - Date.now());
-    var h = Math.floor(diff / 3600000);
-    var m = Math.floor((diff % 3600000) / 60000);
-    var s = Math.floor((diff % 60000) / 1000);
-    document.getElementById('cd-hrs').textContent = String(h).padStart(2, '0');
-    document.getElementById('cd-min').textContent = String(m).padStart(2, '0');
-    document.getElementById('cd-sec').textContent = String(s).padStart(2, '0');
-    if (diff > 0) requestAnimationFrame(tick);
-  }
-  tick();
 })();
