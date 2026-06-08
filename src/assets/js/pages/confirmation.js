@@ -1,30 +1,49 @@
-// === COUNTDOWN (continues from opt-in via shared localStorage key) ===
-(function() {
-  var key = 'zf_cd_end';
-  var stored = localStorage.getItem(key);
-  var end;
-  var now = Date.now();
+// confirmation.js — runs on /confirmation/ after EverWebinar redirects post-registration.
+// Two jobs: populate registrant details from wj_lead_* URL params, and reveal the
+// correct device-strategy message (desktop vs mobile).
+//
+// SECURITY: wj_lead_* values come from the URL and are attacker-controllable. They
+// MUST be injected via textContent only — never innerHTML / insertAdjacentHTML.
 
-  if (stored && Number(stored) > now) {
-    end = Number(stored);
-  } else {
-    // Fallback if user landed here directly: ~25 min countdown
-    end = now + 25 * 60 * 1000;
-    localStorage.setItem(key, end);
+(function () {
+  // --- 1. Registrant details from EverWebinar URL params ---
+  var params = new URLSearchParams(window.location.search);
+  var firstName = (params.get('wj_lead_first_name') || '').trim();
+  var email = (params.get('wj_lead_email') || '').trim();
+
+  if (email) {
+    var emailEl = document.getElementById('regEmail');
+    var detailsEl = document.getElementById('regDetails');
+    if (emailEl && detailsEl) {
+      emailEl.textContent = email;
+      detailsEl.classList.remove('hidden');
+    }
   }
 
-  function tick() {
-    var diff = Math.max(0, end - Date.now());
-    var h = Math.floor(diff / 3600000);
-    var m = Math.floor((diff % 3600000) / 60000);
-    var s = Math.floor((diff % 60000) / 1000);
-    var hEl = document.getElementById('cd-hrs');
-    var mEl = document.getElementById('cd-min');
-    var sEl = document.getElementById('cd-sec');
-    if (hEl) hEl.textContent = String(h).padStart(2, '0');
-    if (mEl) mEl.textContent = String(m).padStart(2, '0');
-    if (sEl) sEl.textContent = String(s).padStart(2, '0');
-    if (diff > 0) requestAnimationFrame(tick);
+  if (firstName) {
+    var nameEl = document.getElementById('regName');
+    var greetEl = document.getElementById('regGreeting');
+    if (nameEl && greetEl) {
+      nameEl.textContent = firstName;
+      greetEl.classList.remove('hidden');
+    }
   }
-  tick();
+
+  // --- 2. Device-aware message ---
+  // Conservative detection: require BOTH a coarse pointer AND a mobile UA token
+  // before flipping to the mobile variant. When uncertain, fall through to desktop
+  // since desktop is the primary conversion device for the webinar.
+  var ua = navigator.userAgent || '';
+  var coarsePointer =
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(pointer: coarse)').matches;
+  var mobileToken =
+    /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+  var isMobile = coarsePointer && mobileToken;
+
+  var targetId = isMobile ? 'deviceMobile' : 'deviceDesktop';
+  var deviceEl = document.getElementById(targetId);
+  if (deviceEl) {
+    deviceEl.classList.remove('hidden');
+  }
 })();
