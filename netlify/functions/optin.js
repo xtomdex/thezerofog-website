@@ -60,6 +60,15 @@ export default async function handler(req) {
     });
   }
 
+  const scheduleUrl = process.env.EVERWEBINAR_SCHEDULE_URL;
+  if (!scheduleUrl) {
+    console.error('EVERWEBINAR_SCHEDULE_URL environment variable is not set');
+    return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   const payload = { email: email.trim() };
   if (name && typeof name === 'string' && name.trim()) {
     payload.name = name.trim();
@@ -77,7 +86,13 @@ export default async function handler(req) {
       throw new Error('Upstream error');
     }
 
-    return new Response(JSON.stringify({ ok: true }), {
+    // Lead accepted by Make. Build the EverWebinar redirect URL with the email
+    // appended as a query param. Using the URL object encodes the email safely
+    // and merges with any query params the schedule URL already carries.
+    const redirectUrl = new URL(scheduleUrl);
+    redirectUrl.searchParams.set('email', email.trim());
+
+    return new Response(JSON.stringify({ ok: true, redirectUrl: redirectUrl.toString() }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
