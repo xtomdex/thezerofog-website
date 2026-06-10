@@ -60,6 +60,15 @@ export default async function handler(req) {
     });
   }
 
+  const scheduleUrl = process.env.EVERWEBINAR_SCHEDULE_URL;
+  if (!scheduleUrl) {
+    console.error('EVERWEBINAR_SCHEDULE_URL environment variable is not set');
+    return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   const payload = { email: email.trim() };
   if (name && typeof name === 'string' && name.trim()) {
     payload.name = name.trim();
@@ -77,7 +86,10 @@ export default async function handler(req) {
       throw new Error('Upstream error');
     }
 
-    return new Response(JSON.stringify({ ok: true }), {
+    // Lead accepted by Make. Return the EverWebinar schedule URL as-is. EverWebinar
+    // URL prefill is unsupported, so we do NOT append the email here. The client
+    // appends UTM params (from the landing-page URL) before redirecting.
+    return new Response(JSON.stringify({ ok: true, redirectUrl: scheduleUrl }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

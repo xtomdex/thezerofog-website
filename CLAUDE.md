@@ -77,7 +77,11 @@ Rule: every field declared in `_data/` must be used somewhere in templates. If a
 Located in `netlify/functions/`. Accessible at `/.netlify/functions/<name>`.
 
 Current functions:
-- `optin.js` — validates form input and proxies to Make.com webhook.
+- `optin.js` — validates form input and proxies to Make.com webhook. On success it
+  returns `{ ok: true, redirectUrl }` where `redirectUrl` is the bare EverWebinar
+  schedule URL (`EVERWEBINAR_SCHEDULE_URL`, no email appended — URL prefill is
+  unsupported). The client appends UTM params before redirecting to the webinar
+  registration page.
 
 ## Build & deploy
 
@@ -102,6 +106,7 @@ Site identity (consumed by `_data/site.js`):
 **Server-only** — available to Functions only. NEVER use the `PUBLIC_` prefix; NEVER expose via `_data/`.
 - `MAKE_WEBHOOK_URL` — Make.com webhook endpoint for form submissions
 - `MAILERLITE_API_KEY`
+- `EVERWEBINAR_SCHEDULE_URL` — EverWebinar registration/schedule page URL; `optin.js` returns it as-is for client-side redirect after a successful opt-in (client appends UTM params)
 
 Rule: when adding a new public var, declare it in `.env.example`, expose it via the appropriate `_data/*.js` file with a safe default, and use it in at least one template — never leave declared-but-unused config.
 
@@ -145,7 +150,11 @@ Claude reads the `.md`, locates the matching block in the `.njk`, and applies th
 
 ## Integrations (in progress)
 
-- **Make.com** — webhook for form submissions, proxied via `netlify/functions/optin.js`
+- **Make.com** — webhook for form submissions, proxied via `netlify/functions/optin.js`.
+  Flow: opt-in → Make forward (lead captured) → redirect to EverWebinar schedule page. The
+  client appends the landing-page UTM params (`utm_source/medium/campaign/content/term`, when
+  present) to the redirect URL for attribution. `/confirmation` is reached AFTER EverWebinar
+  registration, not directly after opt-in.
 - **EverWebinar** — webinar room
 - **Stripe** — checkout on sales page (integration planned, not yet implemented)
 - **MailerLite** — email sequences via Make.com
