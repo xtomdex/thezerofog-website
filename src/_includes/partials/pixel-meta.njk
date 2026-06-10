@@ -1,0 +1,6 @@
+{# Meta Pixel ID handoff to client JS. Outputs nothing when no ID is configured,
+   keeping the site fully pixel-free. This only exposes the ID — the pixel itself
+   loads in cookie-consent.js and ONLY after marketing consent ('all'). #}
+{% if env.meta_pixel_id %}
+<script>window.ZF_META_PIXEL_ID = "{{ env.meta_pixel_id }}";</script>
+{% endif %}

@@ -103,6 +103,17 @@ Site identity (consumed by `_data/site.js`):
 - `PUBLIC_LEGAL_ENTITY` — legal entity name shown in legal documents (default: `TBD`)
 - `PUBLIC_EMAIL_SUPPORT` / `PUBLIC_EMAIL_PRIVACY` / `PUBLIC_EMAIL_REFUNDS` / `PUBLIC_EMAIL_COPYRIGHT` — defaults derive as `<local-part>@${PUBLIC_SITE_DOMAIN}`
 
+Client-side integrations (consumed by `_data/env.js`):
+- `META_PIXEL_ID` — public, build-time Meta (Facebook) Pixel ID (not a secret; reaches the
+  browser). Exposed to client JS via `_data/env.js` → `env.meta_pixel_id`, surfaced only when
+  set as `window.ZF_META_PIXEL_ID` (see `partials/pixel-meta.njk`). The pixel itself is
+  **consent-gated**: `cookie-consent.js` loads it (and fires `PageView`) ONLY when cookie
+  consent === `all` — never on `essential`, never on no-choice, never by default. When unset,
+  the site is fully pixel-free (no script, no global). The opt-in form fires a `Lead` event on
+  successful submit only if the pixel is already loaded (`window.zfPixelLoaded`). Note: this var
+  intentionally omits the `PUBLIC_` prefix despite being client-side — it is the established
+  Meta Pixel env name.
+
 **Server-only** — available to Functions only. NEVER use the `PUBLIC_` prefix; NEVER expose via `_data/`.
 - `MAKE_WEBHOOK_URL` — Make.com webhook endpoint for form submissions
 - `MAILERLITE_API_KEY`
