@@ -86,13 +86,10 @@ export default async function handler(req) {
       throw new Error('Upstream error');
     }
 
-    // Lead accepted by Make. Build the EverWebinar redirect URL with the email
-    // appended as a query param. Using the URL object encodes the email safely
-    // and merges with any query params the schedule URL already carries.
-    const redirectUrl = new URL(scheduleUrl);
-    redirectUrl.searchParams.set('email', email.trim());
-
-    return new Response(JSON.stringify({ ok: true, redirectUrl: redirectUrl.toString() }), {
+    // Lead accepted by Make. Return the EverWebinar schedule URL as-is. EverWebinar
+    // URL prefill is unsupported, so we do NOT append the email here. The client
+    // appends UTM params (from the landing-page URL) before redirecting.
+    return new Response(JSON.stringify({ ok: true, redirectUrl: scheduleUrl }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
