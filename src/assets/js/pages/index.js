@@ -26,7 +26,23 @@ document.getElementById('optinForm').addEventListener('submit', function(e) {
     // Redirect to the EverWebinar schedule page returned by the function.
     // If no redirectUrl is present (e.g. honeypot path), treat it as a benign
     // success and leave the button in its submitted state — no error shown.
-    if (data && data.redirectUrl) {
+    if (!data || !data.redirectUrl) return;
+
+    // Forward UTM params from the current landing-page URL to EverWebinar for
+    // attribution. Only the five standard utm_* keys are forwarded (never other
+    // landing params like the A/B ?w=). The URL object merges with any query
+    // params the schedule URL already carries instead of clobbering them.
+    try {
+      var landingParams = new URLSearchParams(window.location.search);
+      var utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+      var target = new URL(data.redirectUrl);
+      utmKeys.forEach(function(key) {
+        var value = landingParams.get(key);
+        if (value) target.searchParams.set(key, value);
+      });
+      window.location.href = target.toString();
+    } catch (err) {
+      // If the redirect URL can't be parsed, don't block the redirect over UTMs.
       window.location.href = data.redirectUrl;
     }
   })
