@@ -28,6 +28,14 @@ document.getElementById('optinForm').addEventListener('submit', function(e) {
     // success and leave the button in its submitted state — no error shown.
     if (!data || !data.redirectUrl) return;
 
+    // Fire the Meta Pixel "Lead" event — best-effort, consent-gated. Only fires
+    // when the pixel actually loaded (consent === 'all' + configured ID). If the
+    // pixel is absent (essential/no consent/no ID), skip silently — never throw,
+    // never block the redirect below. Fire-and-forget.
+    if (window.zfPixelLoaded && typeof fbq === 'function') {
+      fbq('track', 'Lead');
+    }
+
     // Forward UTM params from the current landing-page URL to EverWebinar for
     // attribution. Only the five standard utm_* keys are forwarded (never other
     // landing params like the A/B ?w=). The URL object merges with any query
