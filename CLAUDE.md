@@ -82,6 +82,16 @@ Current functions:
   schedule URL (`EVERWEBINAR_SCHEDULE_URL`, no email appended — URL prefill is
   unsupported). The client appends UTM params before redirecting to the webinar
   registration page.
+- `create-checkout.js` — creates a Stripe Checkout Session via the Stripe REST API using
+  native `fetch` (no Stripe SDK / no npm deps). POST only (OPTIONS → CORS preflight, other
+  methods → 405). One-time payment (`mode: payment`), price referenced by `STRIPE_PRICE_ID`.
+  Collects email only (Stripe does this automatically) — no name/billing address. Returns
+  `{ ok: true, url }` where `url` is Stripe's hosted checkout page; the sales page redirects
+  there. `success_url` → `${PUBLIC_SITE_URL}/welcome/?session_id={CHECKOUT_SESSION_ID}`,
+  `cancel_url` → `${PUBLIC_SITE_URL}/sales/`. Session carries an extensible `metadata`
+  object (`metadata[source]=sales_page` for now). Stripe errors are logged server-side and
+  returned to the client as a generic message (no internal detail leaked). Webhook handling /
+  LMS enrollment is a **separate later task** — not implemented here.
 
 ## Build & deploy
 
@@ -118,6 +128,10 @@ Client-side integrations (consumed by `_data/env.js`):
 - `MAKE_WEBHOOK_URL` — Make.com webhook endpoint for form submissions
 - `MAILERLITE_API_KEY`
 - `EVERWEBINAR_SCHEDULE_URL` — EverWebinar registration/schedule page URL; `optin.js` returns it as-is for client-side redirect after a successful opt-in (client appends UTM params)
+- `STRIPE_SECRET_KEY` — Stripe secret key. Used by `create-checkout.js` for Bearer auth to the Stripe REST API. Server-only — NEVER exposed to the client.
+- `STRIPE_PRICE_ID` — Stripe Price ID (`price_…`) for the $67 one-time Founding Member price; referenced when creating the Checkout Session.
+
+`PUBLIC_SITE_URL` (listed above) is also consumed server-side by `create-checkout.js` to build the Stripe `success_url`/`cancel_url`.
 
 Rule: when adding a new public var, declare it in `.env.example`, expose it via the appropriate `_data/*.js` file with a safe default, and use it in at least one template — never leave declared-but-unused config.
 
