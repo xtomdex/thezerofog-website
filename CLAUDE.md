@@ -92,6 +92,21 @@ Current functions:
   object (`metadata[source]=sales_page` for now). Stripe errors are logged server-side and
   returned to the client as a generic message (no internal detail leaked). Webhook handling /
   LMS enrollment is a **separate later task** — not implemented here.
+- `stripe-webhook.js` — receives Stripe `checkout.session.completed` webhooks (server-to-server,
+  POST only; non-POST → 405; NOT gated on browser Origin). Verifies the `Stripe-Signature`
+  header with native `node:crypto` HMAC-SHA256 (no Stripe SDK / no npm deps): reads the **raw**
+  body via `req.text()` (re-serialization would break the signature), computes
+  `HMAC(STRIPE_WEBHOOK_SECRET, "${t}.${rawBody}")`, compares timing-safe against any provided
+  `v1` signature, and enforces a 300s replay tolerance on the `t` timestamp. After verification
+  it parses the event and validates the order: `payment_status === 'paid'`,
+  `amount_total === EXPECTED_AMOUNT_TOTAL`, `currency === EXPECTED_CURRENCY` (case-insensitive).
+  On a valid paid order it forwards a **normalized** payload (`email`, `amount_total`, `currency`,
+  `country`, `session_id`, `source: 'stripe_checkout'`) to `MAKE_STRIPE_WEBHOOK_URL` — NOT the raw
+  Stripe object. Enrollment / LMS / MailerLite happen **downstream in Make**, not here. Response
+  codes drive Stripe's retry behavior: **200** = forwarded OK, or a non-target event type ignored,
+  or a signature-valid event that failed payment validation (acknowledge, no retry); **400** =
+  missing/invalid signature, empty body, or parse failure (forged/bad — no retry); **500** = env
+  misconfig, missing email on a paid session, or Make forward failed (Stripe SHOULD retry).
 
 ## Build & deploy
 
@@ -130,6 +145,10 @@ Client-side integrations (consumed by `_data/env.js`):
 - `EVERWEBINAR_SCHEDULE_URL` — EverWebinar registration/schedule page URL; `optin.js` returns it as-is for client-side redirect after a successful opt-in (client appends UTM params)
 - `STRIPE_SECRET_KEY` — Stripe secret key. Used by `create-checkout.js` for Bearer auth to the Stripe REST API. Server-only — NEVER exposed to the client.
 - `STRIPE_PRICE_ID` — Stripe Price ID (`price_…`) for the $67 one-time Founding Member price; referenced when creating the Checkout Session.
+- `STRIPE_WEBHOOK_SECRET` — Stripe webhook signing secret (`whsec_…`). Used by `stripe-webhook.js` to verify the `Stripe-Signature` header (HMAC-SHA256). Server-only — NEVER exposed to the client.
+- `MAKE_STRIPE_WEBHOOK_URL` — Make webhook endpoint that `stripe-webhook.js` forwards verified, validated Stripe checkout events to. SEPARATE from `MAKE_WEBHOOK_URL` (opt-in flow).
+- `EXPECTED_AMOUNT_TOTAL` — expected paid amount in cents (e.g. `6700`); `stripe-webhook.js` rejects (acknowledges without forwarding) any session whose `amount_total` differs.
+- `EXPECTED_CURRENCY` — expected currency (lowercase ISO code, e.g. `usd`); `stripe-webhook.js` compares case-insensitively before forwarding.
 
 `PUBLIC_SITE_URL` (listed above) is also consumed server-side by `create-checkout.js` to build the Stripe `success_url`/`cancel_url`.
 
