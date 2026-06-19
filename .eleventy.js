@@ -9,6 +9,10 @@ module.exports = function (eleventyConfig) {
 
   // Passthrough copy
   eleventyConfig.addPassthroughCopy("src/assets");
+  // Standalone interactive Sleep Assessment (self-contained HTML+JS, served verbatim)
+  // ignore as a template input so Liquid never touches the inline JS; copy it as-is
+  eleventyConfig.ignores.add("src/sleep-assessment/**");
+  eleventyConfig.addPassthroughCopy("src/sleep-assessment");
 
   // CSS processing via lightningcss
   eleventyConfig.addTemplateFormats("css");
