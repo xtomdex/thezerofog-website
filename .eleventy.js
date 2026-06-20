@@ -17,6 +17,10 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.ignores.add("src/diary/**");
   eleventyConfig.addPassthroughCopy("src/diary");
 
+  // Combined /app (Sleep Diary + Assessment, auth + PWA, self-contained, served verbatim)
+  eleventyConfig.ignores.add("src/app/**");
+  eleventyConfig.addPassthroughCopy("src/app");
+
   // CSS processing via lightningcss
   eleventyConfig.addTemplateFormats("css");
   eleventyConfig.addExtension("css", {

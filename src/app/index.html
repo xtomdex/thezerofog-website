@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d0d0d">
+<title>The ZeroFog - App</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#161616; --panel:#202020; --panel2:#1b1b1b; --line:rgba(255,255,255,0.08);
+    --text:#f8f8f2; --muted:#9a9a9a; --dim:#6a6a6a;
+    --purple:#bd93f9; --cyan:#8be9fd; --green:#50fa7b; --orange:#ffb86c; --pink:#ff79c6; --red:#ff5555; --yellow:#f1fa8c;
+  }
+  /* ===== LIGHT THEME (toggle) ===== */
+  body.light{
+    background:#e7e7ec;
+    --bg:#f3f3f6; --panel:#ffffff; --panel2:#eceef1; --line:rgba(0,0,0,0.10);
+    --text:#1a1a1a; --muted:#555555; --dim:#8a8a8a;
+    --purple:#6d28d9; --cyan:#0e7490; --green:#15803d; --orange:#b45309; --pink:#be185d; --red:#dc2626; --yellow:#a16207;
+  }
+  body.light .top,body.light .a-progress{ background:rgba(243,243,246,0.94); }
+  body.light .live{ background:var(--panel); }
+  body.light .se-bar,body.light .meter,body.light .sys-bar,body.light .a-progress .bar,body.light .nrow .nb,body.light .progress .bar{ background:rgba(0,0,0,0.08); }
+  body.light .opt .box,body.light .aopt .box{ border-color:rgba(0,0,0,0.12); }
+  body.light .save,body.light .mbtn,body.light .a-progress .btn,body.light #installBtn{ color:#ffffff; }
+  body.light input[type=time]::-webkit-calendar-picker-indicator,
+  body.light input[type=date]::-webkit-calendar-picker-indicator{ filter:none; }
+  body.light .total-card,body.light .modal{ background:var(--panel); }
+  .themebtn{ background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; line-height:1; padding:4px; }
+
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{scroll-behavior:smooth}
+  body{ font-family:'Inter',sans-serif; background:#0d0d0d; color:var(--text); line-height:1.5; }
+  .app{ max-width:480px; margin:0 auto; min-height:100vh; background:var(--bg); position:relative; }
+
+  /* ===== Top bar with tabs ===== */
+  .top{ position:sticky; top:0; z-index:20; background:rgba(22,22,22,0.94); backdrop-filter:blur(10px);
+        border-bottom:1px solid var(--line); padding:14px 20px 0; padding-top:max(14px,env(safe-area-inset-top)); }
+  .top .barrow{ display:flex; align-items:center; justify-content:space-between; }
+  .top .brand{ font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:700; }
+  .top .brand .accent{ color:var(--purple); }
+  .acct{ display:flex; align-items:center; gap:9px; font-size:11px; color:var(--dim); }
+  .acct .em{ max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .acct button{ background:none; border:none; color:var(--purple); font-size:11px; cursor:pointer; font-family:inherit; }
+  .tabs{ display:flex; gap:6px; margin-top:12px; }
+  .tab{ flex:1; text-align:center; background:none; border:none; color:var(--muted); font-family:inherit;
+        font-size:13.5px; font-weight:600; padding:11px 4px 13px; cursor:pointer; border-bottom:2px solid transparent; }
+  .tab.on{ color:var(--text); border-bottom-color:var(--purple); }
+
+  .view{ display:none; }
+  .view.on{ display:block; }
+
+  /* ===== install hint ===== */
+  .install{ display:none; margin:14px 20px 0; background:rgba(189,147,249,0.10); border:1px solid rgba(189,147,249,0.3);
+            border-radius:12px; padding:12px 14px; font-size:12.5px; color:var(--muted); align-items:center; gap:10px; }
+  .install.show{ display:flex; }
+  .install b{ color:var(--text); }
+  .install button{ margin-left:auto; background:var(--purple); color:#1a1a1a; border:none; border-radius:9px;
+        font-family:inherit; font-weight:700; font-size:12.5px; padding:9px 14px; cursor:pointer; white-space:nowrap; }
+  .install .x{ background:none; color:var(--dim); padding:6px; font-size:16px; margin-left:6px; }
+
+  /* ===== DIARY ===== */
+  .body{ padding:16px 20px 0; }
+  .dpick{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:4px; }
+  .dpick .nav{ display:flex; align-items:center; gap:8px; }
+  .dpick .nav button{ background:var(--panel); border:1px solid var(--line); color:var(--muted); width:34px; height:34px;
+        border-radius:9px; font-size:16px; cursor:pointer; }
+  .dpick .d{ font-size:13px; color:var(--muted); font-weight:600; min-width:104px; text-align:center; }
+  .sumbtn{ background:rgba(189,147,249,0.14); border:1px solid rgba(189,147,249,0.3); color:var(--purple);
+        font-family:inherit; font-size:12.5px; font-weight:700; padding:9px 14px; border-radius:10px; cursor:pointer; white-space:nowrap; }
+
+  .section{ margin-bottom:10px; }
+  .stitle{ font-size:11px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase; color:var(--cyan); margin:18px 4px 10px; }
+  .section.ctx .stitle{ color:var(--orange); }
+  .field{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:15px 16px; margin-bottom:10px; }
+  .field > label{ display:block; font-size:14px; font-weight:600; margin-bottom:11px; }
+  .field .hint{ font-weight:400; color:var(--dim); font-size:12px; }
+  input[type=time]{ width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--text);
+        font-family:inherit; font-size:17px; font-weight:600; padding:11px 14px; border-radius:10px; }
+  input[type=time]::-webkit-calendar-picker-indicator{ filter:invert(0.7); }
+  .two{ display:flex; gap:10px; }
+  .two .field{ flex:1; margin-bottom:10px; }
+  textarea{ width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--text);
+        font-family:inherit; font-size:14px; padding:12px 14px; border-radius:10px; resize:vertical; min-height:62px; }
+  textarea::placeholder{ color:var(--dim); }
+  .chips{ display:flex; gap:8px; flex-wrap:wrap; }
+  .chip{ flex:1; min-width:60px; text-align:center; background:var(--panel2); border:1px solid var(--line);
+        color:var(--muted); font-family:inherit; font-size:13px; font-weight:600; padding:11px 6px; border-radius:10px; cursor:pointer; transition:.12s; }
+  .chip.on{ background:rgba(189,147,249,0.16); border-color:var(--purple); color:var(--text); }
+  .stepper{ display:flex; align-items:center; gap:14px; }
+  .stepper button{ width:42px; height:42px; border-radius:11px; background:var(--panel2); border:1px solid var(--line);
+        color:var(--text); font-size:22px; font-weight:600; cursor:pointer; }
+  .stepper .val{ font-size:20px; font-weight:700; min-width:36px; text-align:center; }
+  .seg{ display:flex; gap:7px; }
+  .seg .s{ flex:1; text-align:center; background:var(--panel2); border:1px solid var(--line); color:var(--muted);
+        padding:12px 4px 9px; border-radius:10px; cursor:pointer; font-size:12px; font-weight:600; }
+  .seg .s b{ display:block; font-size:18px; margin-bottom:2px; color:var(--text); font-weight:700; }
+  .seg .s.on{ background:rgba(80,250,123,0.14); border-color:var(--green); }
+  .seg .s.on b{ color:var(--green); }
+
+  .live{ margin:18px 0 0; background:linear-gradient(180deg,var(--panel),#191919);
+        border:1px solid rgba(189,147,249,0.25); border-radius:16px; padding:16px 18px; }
+  .live .se-top{ display:flex; align-items:baseline; justify-content:space-between; }
+  .live .se-lab{ font-size:11px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--dim); }
+  .live .se-num{ font-size:34px; font-weight:800; }
+  .live .se-num span{ font-size:16px; color:var(--dim); font-weight:700; }
+  .live .se-sub{ font-size:12px; color:var(--muted); margin-top:4px; }
+  .live .se-bar{ height:7px; border-radius:5px; background:rgba(255,255,255,0.08); margin-top:10px; overflow:hidden; }
+  .live .se-fill{ height:100%; width:0; transition:width .4s, background .4s; }
+
+  .savewrap{ padding:16px 20px calc(20px + env(safe-area-inset-bottom)); }
+  .save{ width:100%; background:var(--purple); color:#1a1a1a; border:none; border-radius:13px; font-family:inherit;
+        font-size:16px; font-weight:700; padding:15px; cursor:pointer; }
+  .save.saved{ background:var(--green); }
+
+  /* ===== ASSESSMENT ===== */
+  .a-wrap{ padding:20px 20px 0; }
+  .a-intro{ font-size:13.5px; color:var(--muted); text-align:center; margin-bottom:8px; }
+  .a-intro .hl{ color:var(--pink); font-weight:600; }
+  .a-sechead{ margin:24px 0 12px; padding-bottom:8px; border-bottom:1px solid var(--line); }
+  .a-sechead .eb{ font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; }
+  .a-sechead h2{ font-size:18px; font-weight:800; margin-top:3px; }
+  .a-sechead p{ font-size:12.5px; color:var(--dim); margin-top:2px; }
+  .sec-a .eb,.sec-a h2{ color:var(--cyan);} .sec-b .eb,.sec-b h2{ color:var(--green);} .sec-c .eb,.sec-c h2{ color:var(--pink);}
+  .aq{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px 16px; margin-bottom:12px; }
+  .aq.answered{ border-color:rgba(189,147,249,0.35); }
+  .aq.flash{ animation:flash .6s; }
+  @keyframes flash{0%,100%{border-color:var(--line)}30%{border-color:var(--red)}}
+  .aq-head{ display:flex; gap:11px; margin-bottom:12px; }
+  .aq-num{ flex:0 0 28px; height:28px; border-radius:50%; background:rgba(189,147,249,0.15); color:var(--purple);
+        font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .aq-text{ flex:1; font-size:14.5px; font-weight:600; line-height:1.45; padding-top:3px; }
+  .aopts{ display:flex; flex-direction:column; gap:7px; }
+  .aopt{ position:relative; display:block; cursor:pointer; }
+  .aopt input{ position:absolute; opacity:0; width:0; height:0; }
+  .aopt .box{ display:flex; align-items:center; gap:11px; padding:11px 13px; border:1px solid rgba(255,255,255,0.1);
+        border-radius:10px; background:var(--panel2); font-size:13.5px; color:var(--muted); transition:all .15s; }
+  .aopt .dot{ flex:0 0 17px; height:17px; border-radius:50%; border:2px solid var(--dim); transition:all .15s; }
+  .aopt input:checked + .box{ border-color:var(--purple); background:rgba(189,147,249,0.1); color:var(--text); }
+  .aopt input:checked + .box .dot{ border-color:var(--purple); background:var(--purple); box-shadow:inset 0 0 0 3px var(--panel2); }
+
+  .a-progress{ position:sticky; bottom:0; margin-top:18px; background:rgba(22,22,22,0.94); backdrop-filter:blur(8px);
+        border:1px solid var(--line); border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:14px;
+        margin-bottom:calc(16px + env(safe-area-inset-bottom)); }
+  .a-progress .bar{ flex:1; height:8px; border-radius:6px; background:rgba(255,255,255,0.08); overflow:hidden; }
+  .a-progress .pf{ height:100%; width:0; background:linear-gradient(90deg,var(--purple),var(--cyan)); transition:width .3s; }
+  .a-progress .ct{ font-size:12px; color:var(--muted); font-weight:600; white-space:nowrap; }
+  .a-progress .btn{ background:var(--purple); color:#1a1a1a; border:none; border-radius:10px; font-family:inherit;
+        font-size:14px; font-weight:700; padding:11px 18px; cursor:pointer; white-space:nowrap; }
+  .a-progress .btn:disabled{ opacity:.4; cursor:not-allowed; }
+
+  .a-result{ display:none; padding:0 20px; }
+  .a-result.show{ display:block; padding-bottom:calc(30px + env(safe-area-inset-bottom)); animation:fade .4s; }
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .total-card{ background:var(--panel); border:1px solid rgba(189,147,249,0.25); border-radius:16px; padding:26px 22px; text-align:center; margin:16px 0; }
+  .total-card .label{ font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--dim); font-weight:700; }
+  .total-card .num{ font-size:52px; font-weight:900; line-height:1; margin:8px 0; }
+  .total-card .num span{ font-size:22px; color:var(--dim); font-weight:700; }
+  .total-card .band{ display:inline-block; font-size:13px; font-weight:700; padding:5px 14px; border-radius:20px; margin:6px 0 12px; }
+  .total-card .band-desc{ font-size:13.5px; color:var(--muted); line-height:1.6; }
+  .meter{ height:9px; border-radius:6px; background:rgba(255,255,255,0.08); overflow:hidden; margin-top:16px; }
+  .meter .mf{ height:100%; width:0; transition:width .6s ease; }
+  .sysrows h3{ font-size:12px; letter-spacing:1px; text-transform:uppercase; color:var(--purple); margin:8px 0 12px; font-weight:700; }
+  .sys{ background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:15px 16px; margin-bottom:10px; }
+  .sys.weak{ border-color:rgba(255,85,85,0.4); }
+  .sys-top{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:8px; }
+  .sys-name{ font-size:14.5px; font-weight:700; }
+  .sys-name .tag{ font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--red); margin-left:6px; }
+  .sys-score{ font-size:13px; color:var(--muted); font-weight:600; }
+  .sys-bar{ height:8px; border-radius:6px; background:rgba(255,255,255,0.08); overflow:hidden; margin-bottom:8px; }
+  .sys-bar .sf{ height:100%; width:0; transition:width .6s ease; }
+  .sys-status{ font-size:12.5px; color:var(--muted); line-height:1.5; }
+  .sa .sys-name{color:var(--cyan)} .sb .sys-name{color:var(--green)} .sc .sys-name{color:var(--pink)}
+  .a-note{ text-align:center; font-size:12.5px; color:var(--muted); margin-top:16px; padding:14px;
+        border:1px dashed rgba(189,147,249,0.25); border-radius:12px; }
+  .a-note .hl{ color:var(--purple); font-weight:600; } .a-note .up{ color:var(--green); font-weight:700; } .a-note .down{ color:var(--orange); font-weight:700; }
+  .a-actions{ display:flex; gap:10px; justify-content:center; margin-top:18px; }
+  .a-actions .btn{ background:transparent; border:1px solid var(--purple); color:var(--purple); border-radius:10px;
+        font-family:inherit; font-size:13.5px; font-weight:700; padding:11px 18px; cursor:pointer; }
+
+  /* ===== modal / popup (shared) ===== */
+  .overlay{ position:fixed; inset:0; z-index:60; background:rgba(0,0,0,0.66); backdrop-filter:blur(3px);
+        display:none; align-items:flex-end; justify-content:center; }
+  .overlay.show{ display:flex; }
+  @media (min-width:520px){ .overlay{ align-items:center; } }
+  .modal{ width:100%; max-width:480px; background:var(--bg); border:1px solid var(--line);
+        border-radius:18px 18px 0 0; padding:24px 22px calc(24px + env(safe-area-inset-bottom)); }
+  @media (min-width:520px){ .modal{ border-radius:18px; } }
+  .modal h3{ font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:700; margin-bottom:6px; }
+  .modal .sub{ font-size:13px; color:var(--muted); margin-bottom:18px; line-height:1.5; }
+  .modal input[type=email],.modal input[type=text]{ width:100%; background:var(--panel2); border:1px solid var(--line);
+        color:var(--text); font-family:inherit; font-size:16px; padding:13px 15px; border-radius:11px; margin-bottom:12px; }
+  .modal input[type=text]{ letter-spacing:6px; text-align:center; font-weight:700; }
+  .modal .mbtn{ width:100%; background:var(--purple); color:#1a1a1a; border:none; border-radius:12px; font-family:inherit;
+        font-size:15.5px; font-weight:700; padding:14px; cursor:pointer; }
+  .modal .mbtn:disabled{ opacity:.4; cursor:not-allowed; }
+  .modal .mlink{ display:block; text-align:center; background:none; border:none; color:var(--dim); font-size:12.5px;
+        margin-top:14px; cursor:pointer; font-family:inherit; text-decoration:underline; }
+  .modal .demo{ font-size:12px; color:var(--yellow); background:rgba(241,250,140,0.08); border:1px dashed rgba(241,250,140,0.3);
+        border-radius:9px; padding:9px 11px; margin-bottom:12px; line-height:1.45; }
+  .modal .err{ font-size:12.5px; color:var(--red); margin-bottom:10px; min-height:16px; }
+
+  /* summary popup */
+  .presets{ display:flex; gap:8px; margin-bottom:14px; }
+  .preset{ flex:1; background:var(--panel2); border:1px solid var(--line); color:var(--muted); font-family:inherit;
+        font-size:12.5px; font-weight:600; padding:11px 6px; border-radius:10px; cursor:pointer; }
+  .preset.on{ background:rgba(189,147,249,0.16); border-color:var(--purple); color:var(--text); }
+  .custom-range{ display:none; gap:10px; margin-bottom:14px; }
+  .custom-range.show{ display:flex; }
+  .custom-range .cr{ flex:1; }
+  .custom-range label{ font-size:11px; color:var(--dim); display:block; margin-bottom:4px; }
+  .custom-range input[type=date]{ width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--text);
+        font-family:inherit; font-size:14px; padding:10px 12px; border-radius:10px; }
+  .custom-range input[type=date]::-webkit-calendar-picker-indicator{ filter:invert(0.7); }
+  .sum-out .big{ text-align:center; padding:18px 0 10px; }
+  .sum-out .big .n{ font-size:46px; font-weight:900; line-height:1; }
+  .sum-out .big .n span{ font-size:18px; color:var(--dim); }
+  .sum-out .big .l{ font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--dim); font-weight:700; margin-top:6px; }
+  .sum-grid{ display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:12px 0; }
+  .sum-cell{ background:var(--panel); border:1px solid var(--line); border-radius:11px; padding:12px 13px; }
+  .sum-cell .k{ font-size:11px; color:var(--dim); }
+  .sum-cell .v{ font-size:18px; font-weight:700; margin-top:2px; }
+  .sum-empty{ text-align:center; color:var(--muted); font-size:13.5px; padding:20px 0; }
+  .sum-nights{ margin-top:6px; }
+  .nrow{ display:flex; align-items:center; gap:10px; margin-bottom:7px; }
+  .nrow .nd{ font-size:11px; color:var(--muted); width:64px; }
+  .nrow .nb{ flex:1; height:7px; border-radius:5px; background:rgba(255,255,255,0.07); overflow:hidden; }
+  .nrow .nf{ height:100%; }
+  .nrow .nv{ font-size:11px; font-weight:700; width:40px; text-align:right; }
+
+  /* ===== auth gate ===== */
+  #authGate{ align-items:center; }
+  #authGate .modal{ border-radius:18px; margin:0 16px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="top">
+    <div class="barrow">
+      <div class="brand">The <span class="accent">ZeroFog</span></div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <button class="themebtn" id="themeToggle" title="Switch light / dark" aria-label="Switch theme">☾</button>
+        <div class="acct" id="acct" style="visibility:hidden">
+          <span class="em" id="acctEmail"></span><button id="signOut">Sign out</button>
+        </div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab on" data-view="diary">Sleep Diary</button>
+      <button class="tab" data-view="assessment">Assessment</button>
+    </div>
+  </div>
+
+  <!-- PWA install hint -->
+  <div class="install" id="install">
+    <span id="installTxt"></span>
+    <button id="installBtn">Install</button>
+    <button class="x" id="installX">×</button>
+  </div>
+
+  <!-- ============ DIARY VIEW ============ -->
+  <div class="view on" id="view-diary">
+    <div class="body">
+      <div class="dpick">
+        <div class="nav">
+          <button id="prev">‹</button>
+          <div class="d" id="dlabel">Today</div>
+          <button id="next">›</button>
+        </div>
+        <button class="sumbtn" id="openSummary">📊 Summary</button>
+      </div>
+
+      <div class="section">
+        <div class="stitle">Last night</div>
+        <div class="two">
+          <div class="field"><label>Into bed</label><input type="time" id="intoBed"></div>
+          <div class="field"><label>Lights out <span class="hint">- optional</span></label><input type="time" id="tried"></div>
+        </div>
+        <div class="field">
+          <label>Time to fall asleep <span class="hint">- minutes after lights out</span></label>
+          <div class="chips" data-chip="sol">
+            <div class="chip" data-v="7">&lt; 15 min</div><div class="chip" data-v="22">15-30</div>
+            <div class="chip" data-v="45">30-60</div><div class="chip" data-v="75">60+ min</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Times you woke up <span class="hint">- in the night</span></label>
+          <div class="stepper"><button data-step="-1">-</button><div class="val" id="wakeVal">0</div><button data-step="1">+</button></div>
+        </div>
+        <div class="field">
+          <label>Total time awake <span class="hint">- during those wake-ups</span></label>
+          <div class="chips" data-chip="waso">
+            <div class="chip" data-v="0">0</div><div class="chip" data-v="7">&lt; 15</div>
+            <div class="chip" data-v="22">15-30</div><div class="chip" data-v="45">30-60</div><div class="chip" data-v="75">60+</div>
+          </div>
+        </div>
+        <div class="two">
+          <div class="field"><label>Final wake-up</label><input type="time" id="finalWake"></div>
+          <div class="field"><label>Out of bed <span class="hint">- optional</span></label><input type="time" id="outBed"></div>
+        </div>
+        <div class="field">
+          <label>Sleep quality</label>
+          <div class="seg" data-seg="quality">
+            <div class="s" data-v="1"><b>1</b>poor</div><div class="s" data-v="2"><b>2</b></div>
+            <div class="s" data-v="3"><b>3</b>ok</div><div class="s" data-v="4"><b>4</b></div><div class="s" data-v="5"><b>5</b>great</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section ctx">
+        <div class="stitle">Yesterday</div>
+        <div class="field">
+          <label>Last caffeine</label>
+          <div class="two" style="gap:10px;align-items:stretch">
+            <input type="time" id="caffeine" style="flex:1">
+            <div class="chip" id="caffNone" style="flex:0 0 96px;display:flex;align-items:center;justify-content:center">None</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Alcohol</label>
+          <div class="chips" data-chip="alcohol"><div class="chip" data-v="none">None</div><div class="chip" data-v="1-2">1-2</div><div class="chip" data-v="3+">3+</div></div>
+        </div>
+        <div class="field">
+          <label>Daytime nap</label>
+          <div class="chips" data-chip="nap"><div class="chip" data-v="none">None</div><div class="chip" data-v="<20">&lt; 20 min</div><div class="chip" data-v="20-40">20-40</div><div class="chip" data-v="40+">40+</div></div>
+        </div>
+        <div class="field">
+          <label>Exercise <span class="hint">- when</span></label>
+          <div class="chips" data-chip="exercise"><div class="chip" data-v="none">None</div><div class="chip" data-v="morning">Morning</div><div class="chip" data-v="afternoon">Afternoon</div><div class="chip" data-v="evening">Evening</div></div>
+        </div>
+        <div class="field">
+          <label>Sleep aid <span class="hint">- taken last night</span></label>
+          <div class="chips" data-chip="aid"><div class="chip" data-v="none">None</div><div class="chip" data-v="melatonin">Melatonin</div><div class="chip" data-v="magnesium">Magnesium</div><div class="chip" data-v="other">Other</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="stitle">Notes <span style="color:var(--dim);font-weight:400;letter-spacing:0">- optional</span></div>
+        <div class="field"><textarea id="notes" placeholder="Anything unusual - stress, travel, illness, late meal, sick kid..."></textarea></div>
+      </div>
+
+      <div class="live">
+        <div class="se-top">
+          <div><div class="se-lab">Sleep efficiency</div><div class="se-num" id="seNum">--<span>%</span></div></div>
+          <div style="text-align:right"><div class="se-sub" id="seTib">time in bed --</div><div class="se-sub" id="seTst">slept --</div></div>
+        </div>
+        <div class="se-bar"><div class="se-fill" id="seFill"></div></div>
+        <div class="se-sub" id="seMsg" style="margin-top:9px"></div>
+      </div>
+    </div>
+    <div class="savewrap"><button class="save" id="save">Save today's entry</button></div>
+  </div>
+
+  <!-- ============ ASSESSMENT VIEW ============ -->
+  <div class="view" id="view-assessment">
+    <div class="a-wrap">
+      <p class="a-intro">Answer based on <span class="hl">the past 2 to 4 weeks</span> - the pattern, not one rough night.</p>
+      <form id="aform"></form>
+      <div class="a-progress" id="aprogress">
+        <div class="ct" id="act">0 / 16</div>
+        <div class="bar"><div class="pf" id="apf"></div></div>
+        <button type="button" class="btn" id="asubmit" disabled>See result</button>
+      </div>
+    </div>
+    <div class="a-result" id="aresult">
+      <div class="total-card">
+        <div class="label" id="aTotLabel">Your baseline score</div>
+        <div class="num" id="aTotNum">0<span>/ 48</span></div>
+        <div class="band" id="aBand"></div>
+        <p class="band-desc" id="aBandDesc"></p>
+        <div class="meter"><div class="mf" id="aMeter"></div></div>
+      </div>
+      <div class="sysrows"><h3>Your three systems</h3><div id="aSys"></div></div>
+      <div class="a-note" id="aNote"></div>
+      <div class="a-actions"><button type="button" class="btn" id="aRetake">Retake</button></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== AUTH GATE ===== -->
+<div class="overlay show" id="authGate">
+  <div class="modal">
+    <h3>Your sleep tools</h3>
+    <p class="sub">Sign in with your email to save your diary and assessment - on any device. We send you a one-time code, no password.</p>
+    <div class="demo" id="authDemo" style="display:none"></div>
+    <div class="err" id="authErr"></div>
+    <div id="step-email">
+      <input type="email" id="authEmail" placeholder="you@email.com" autocomplete="email">
+      <button class="mbtn" id="sendCode">Send my code</button>
+    </div>
+    <div id="step-code" style="display:none">
+      <input type="text" id="authCode" placeholder="000000" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
+      <button class="mbtn" id="verifyCode">Verify &amp; open</button>
+      <button class="mlink" id="backToEmail">Use a different email</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SUMMARY POPUP ===== -->
+<div class="overlay" id="summaryOverlay">
+  <div class="modal">
+    <h3>Your summary</h3>
+    <p class="sub">Averages over the range you pick. Calculated from your saved entries.</p>
+    <div class="presets">
+      <button class="preset on" data-range="7">Last 7 days</button>
+      <button class="preset" data-range="30">Last 30 days</button>
+      <button class="preset" data-range="custom">Custom</button>
+    </div>
+    <div class="custom-range" id="customRange">
+      <div class="cr"><label>From</label><input type="date" id="rangeFrom"></div>
+      <div class="cr"><label>To</label><input type="date" id="rangeTo"></div>
+    </div>
+    <div class="sum-out" id="sumOut"></div>
+    <button class="mlink" id="closeSummary">Close</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DATA LAYER  (the ONLY place that touches storage)
+   ------------------------------------------------------------
+   INTERIM: localStorage. SWAP to Supabase by replacing the
+   bodies of the DB methods below with Supabase calls. The rest
+   of the app calls DB.* and never touches storage directly.
+
+   Supabase wiring (when Dima gives project URL + anon key):
+     const sb = supabase.createClient(URL, ANON_KEY)
+     sendCode(email)   -> sb.auth.signInWithOtp({ email })
+     verifyCode(e,c)   -> sb.auth.verifyOtp({ email:e, token:c, type:'email' })
+     currentUser()     -> (await sb.auth.getUser()).data.user
+     signOut()         -> sb.auth.signOut()
+     saveDiary(entry)  -> sb.from('diary_entries').upsert(entry, {onConflict:'user_id,entry_date'})
+     getDiary(date)    -> sb.from('diary_entries').select().eq('entry_date',date).maybeSingle()
+     getDiaryRange     -> sb.from('diary_entries').select().gte('entry_date',from).lte('entry_date',to)
+     saveAssessment    -> sb.from('assessment_results').insert(rec)
+     getAssessments    -> sb.from('assessment_results').select().order('taken_on')
+   ============================================================ */
+const DEMO = true; // <- false once Supabase is wired
+
+const DB = {
+  _diaryKey(){ return 'zf_diary::' + (this._email||'anon'); },
+  _assessKey(){ return 'zf_assess::' + (this._email||'anon'); },
+  _email: null,
+  _pendingCode: null,
+
+  async currentUser(){
+    const e = localStorage.getItem('zf_user');
+    if(e){ this._email = e; return { email:e }; }
+    return null;
+  },
+  async sendCode(email){
+    // DEMO: generate a code locally and show it. Supabase: signInWithOtp.
+    this._email = email;
+    this._pendingCode = String(Math.floor(100000 + Math.random()*900000));
+    return { demoCode: this._pendingCode };
+  },
+  async verifyCode(email, code){
+    if(DEMO){
+      if(code !== this._pendingCode) throw new Error('That code does not match. Check the code and try again.');
+    }
+    localStorage.setItem('zf_user', email);
+    this._email = email;
+    return { email };
+  },
+  async signOut(){
+    localStorage.removeItem('zf_user'); this._email = null;
+  },
+
+  _allDiary(){ try{ return JSON.parse(localStorage.getItem(this._diaryKey()))||{}; }catch(e){ return {}; } },
+  async saveDiary(entry){
+    const all = this._allDiary(); all[entry.entry_date] = entry;
+    localStorage.setItem(this._diaryKey(), JSON.stringify(all));
+  },
+  async getDiary(dateStr){ return this._allDiary()[dateStr] || null; },
+  async getDiaryRange(from, to){
+    const all = this._allDiary();
+    return Object.values(all).filter(e => e.entry_date >= from && e.entry_date <= to)
+                 .sort((a,b)=> a.entry_date < b.entry_date ? -1 : 1);
+  },
+
+  async saveAssessment(rec){
+    let arr = []; try{ arr = JSON.parse(localStorage.getItem(this._assessKey()))||[]; }catch(e){}
+    arr.push(rec); localStorage.setItem(this._assessKey(), JSON.stringify(arr));
+  },
+  async getAssessments(){
+    try{ return (JSON.parse(localStorage.getItem(this._assessKey()))||[]).sort((a,b)=> a.taken_on < b.taken_on ? -1 : 1); }catch(e){ return []; }
+  },
+};
+
+const $ = id => document.getElementById(id);
+function dkey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function todayKey(){ const d=new Date(); d.setHours(0,0,0,0); return dkey(d); }
+
+/* ============ AUTH GATE ============ */
+const gate = $('authGate');
+async function boot(){
+  const u = await DB.currentUser();
+  if(u){ unlock(u.email); }
+  else { gate.classList.add('show'); }
+}
+function unlock(email){
+  gate.classList.remove('show');
+  $('acct').style.visibility = 'visible';
+  $('acctEmail').textContent = email;
+  diaryInit();
+  assessInit();
+}
+$('sendCode').addEventListener('click', async () => {
+  const email = $('authEmail').value.trim();
+  $('authErr').textContent = '';
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ $('authErr').textContent='Enter a valid email.'; return; }
+  const res = await DB.sendCode(email);
+  $('step-email').style.display='none'; $('step-code').style.display='block';
+  if(res.demoCode){ $('authDemo').style.display='block'; $('authDemo').innerHTML = 'Demo mode (no email sent yet). Your code is <b>'+res.demoCode+'</b>. Once Supabase is connected this arrives by email.'; }
+  $('authCode').focus();
+});
+$('verifyCode').addEventListener('click', async () => {
+  const email = $('authEmail').value.trim(), code = $('authCode').value.trim();
+  $('authErr').textContent = '';
+  try{ const u = await DB.verifyCode(email, code); unlock(u.email); }
+  catch(e){ $('authErr').textContent = e.message; }
+});
+$('backToEmail').addEventListener('click', () => {
+  $('step-code').style.display='none'; $('step-email').style.display='block';
+  $('authDemo').style.display='none'; $('authErr').textContent='';
+});
+$('signOut').addEventListener('click', async () => {
+  await DB.signOut(); location.reload();
+});
+
+/* ============ TABS ============ */
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on');
+  $('view-'+t.dataset.view).classList.add('on');
+  window.scrollTo(0,0);
+}));
+
+/* ============ DIARY ============ */
+let cur = new Date(); cur.setHours(0,0,0,0);
+const state = {};
+function diaryInit(){ loadDay(); }
+
+document.querySelectorAll('[data-chip]').forEach(group=>{
+  group.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{
+    group.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on'); state[group.dataset.chip]=c.dataset.v; calc();
+  }));
+});
+document.querySelectorAll('[data-seg]').forEach(group=>{
+  group.querySelectorAll('.s').forEach(c=>c.addEventListener('click',()=>{
+    group.querySelectorAll('.s').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on'); state[group.dataset.seg]=c.dataset.v;
+  }));
+});
+document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>{
+  let v=(state.wakings||0)+parseInt(b.dataset.step,10); v=Math.max(0,Math.min(9,v));
+  state.wakings=v; $('wakeVal').textContent=v;
+}));
+['intoBed','tried','finalWake','outBed','caffeine'].forEach(id=>{
+  $(id).addEventListener('input',()=>{ state[id]=$(id).value; if(id==='caffeine'){ $('caffNone').classList.remove('on'); } calc(); });
+});
+$('notes').addEventListener('input',()=>{ state.notes=$('notes').value; });
+$('caffNone').addEventListener('click',()=>{
+  $('caffNone').classList.toggle('on');
+  if($('caffNone').classList.contains('on')){ $('caffeine').value=''; state.caffeine='none'; } else state.caffeine='';
+});
+
+function toMin(t){ if(!t) return null; const [h,m]=t.split(':').map(Number); return h*60+m; }
+function chain(...vals){ let out=[], add=0, prev=null;
+  for(const v of vals){ if(v==null){ out.push(null); continue; } let x=v+add; if(prev!=null && x<prev){ x+=1440; add+=1440; } out.push(x); prev=x; } return out; }
+function seFrom(s){
+  let ib=toMin(s.intoBed), tr=toMin(s.tried), fw=toMin(s.finalWake), ob=toMin(s.outBed);
+  const sol=s.sol!=null?+s.sol:null, waso=s.waso!=null?+s.waso:0;
+  if(ib==null||fw==null||sol==null) return null;
+  if(tr==null) tr=ib; if(ob==null) ob=fw;
+  const c=chain(ib,tr,fw,ob); ib=c[0]; tr=c[1]; fw=c[2]; ob=c[3];
+  const tib=ob-ib, tst=(fw-tr)-sol-waso; if(tib<=0||tst<=0) return null;
+  return { se:Math.round(tst/tib*100), tib, tst };
+}
+function fmt(m){ return Math.floor(m/60)+'h '+(m%60)+'m'; }
+function calc(){
+  const r = seFrom(state);
+  if(!r){ $('seNum').innerHTML='--<span>%</span>'; $('seFill').style.width='0'; $('seTib').textContent='time in bed --'; $('seTst').textContent='slept --'; $('seMsg').textContent='Need: Into bed, Final wake-up, and Time to fall asleep.'; return; }
+  $('seNum').innerHTML=r.se+'<span>%</span>';
+  $('seTib').textContent='time in bed '+fmt(r.tib); $('seTst').textContent='slept '+fmt(r.tst);
+  const f=$('seFill'); f.style.width=Math.min(100,r.se)+'%';
+  f.style.background = r.se>=85?'var(--green)':r.se>=75?'var(--orange)':'var(--red)';
+  $('seMsg').innerHTML = r.se>=85 ? 'Healthy. <span style="color:var(--green)">85%+</span> is the target.' :
+    r.se>=75 ? 'Getting there. Aim for <span style="color:var(--orange)">85%+</span>.' :
+    'Below 75% means too much time in bed awake. The protocol fixes this.';
+}
+
+$('save').addEventListener('click', async () => {
+  const r = seFrom(state);
+  const entry = { ...state, entry_date: dkey(cur), sleep_eff: r? r.se : null };
+  await DB.saveDiary(entry);
+  const b=$('save'); b.classList.add('saved');
+  b.textContent = r ? ('Saved ✓   SE '+r.se+'%') : 'Saved ✓';
+  setTimeout(()=>{ b.classList.remove('saved'); b.textContent="Save today's entry"; },1800);
+});
+
+function applyState(){
+  document.querySelectorAll('.chip.on,.s.on').forEach(x=>x.classList.remove('on'));
+  ['intoBed','tried','finalWake','outBed','caffeine'].forEach(id=>$(id).value=state[id]&&state[id]!=='none'?state[id]:'');
+  $('notes').value=state.notes||''; $('wakeVal').textContent=state.wakings||0;
+  if(state.caffeine==='none') $('caffNone').classList.add('on');
+  ['sol','waso','alcohol','nap','exercise','aid'].forEach(k=>{
+    const g=document.querySelector('[data-chip="'+k+'"]'); if(g&&state[k]!=null){ const c=g.querySelector('[data-v="'+state[k]+'"]'); if(c)c.classList.add('on'); }
+  });
+  if(state.quality){ const c=document.querySelector('[data-seg="quality"] [data-v="'+state.quality+'"]'); if(c)c.classList.add('on'); }
+  calc();
+}
+async function loadDay(){
+  const k=dkey(cur);
+  for(const p in state) delete state[p];
+  const rec = await DB.getDiary(k); if(rec) Object.assign(state, rec);
+  $('dlabel').textContent = k===todayKey() ? 'Today' : cur.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  applyState();
+}
+$('prev').addEventListener('click',()=>{ cur.setDate(cur.getDate()-1); loadDay(); });
+$('next').addEventListener('click',()=>{ const t=new Date(); t.setHours(0,0,0,0); if(cur<t){ cur.setDate(cur.getDate()+1); loadDay(); } });
+
+/* ============ SUMMARY POPUP ============ */
+const sumOverlay = $('summaryOverlay');
+let sumRange = '7';
+$('openSummary').addEventListener('click', ()=>{ sumOverlay.classList.add('show'); renderSummary(); });
+$('closeSummary').addEventListener('click', ()=>{ sumOverlay.classList.remove('show'); });
+sumOverlay.addEventListener('click', e=>{ if(e.target===sumOverlay) sumOverlay.classList.remove('show'); });
+document.querySelectorAll('.preset').forEach(p=>p.addEventListener('click', ()=>{
+  document.querySelectorAll('.preset').forEach(x=>x.classList.remove('on'));
+  p.classList.add('on'); sumRange = p.dataset.range;
+  $('customRange').classList.toggle('show', sumRange==='custom');
+  if(sumRange!=='custom') renderSummary();
+}));
+['rangeFrom','rangeTo'].forEach(id=>$(id).addEventListener('change', renderSummary));
+
+async function renderSummary(){
+  let from, to;
+  const today = new Date(); today.setHours(0,0,0,0);
+  if(sumRange==='custom'){
+    if(!$('rangeFrom').value || !$('rangeTo').value){ $('sumOut').innerHTML='<div class="sum-empty">Pick a start and end date.</div>'; return; }
+    from = $('rangeFrom').value; to = $('rangeTo').value;
+  } else {
+    const days = parseInt(sumRange,10);
+    const f = new Date(today); f.setDate(f.getDate()-(days-1));
+    from = dkey(f); to = dkey(today);
+  }
+  const rows = await DB.getDiaryRange(from, to);
+  const withSE = rows.map(r=>({ r, m:seFrom(r) })).filter(x=>x.m);
+  if(!withSE.length){ $('sumOut').innerHTML='<div class="sum-empty">No saved nights in this range yet.</div>'; return; }
+
+  const avg = a => Math.round(a.reduce((s,x)=>s+x,0)/a.length);
+  const avgSE = avg(withSE.map(x=>x.m.se));
+  const avgTib = avg(withSE.map(x=>x.m.tib));
+  const avgTst = avg(withSE.map(x=>x.m.tst));
+  const quals = rows.map(r=>+r.quality).filter(q=>q); const avgQ = quals.length? (quals.reduce((s,x)=>s+x,0)/quals.length).toFixed(1):'-';
+  const col = se => se>=85?'var(--green)':se>=75?'var(--orange)':'var(--red)';
+
+  const nights = withSE.slice(-14).map(x=>{
+    const d = new Date(x.r.entry_date+'T00:00:00');
+    return '<div class="nrow"><div class="nd">'+d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</div>'+
+      '<div class="nb"><div class="nf" style="width:'+Math.min(100,x.m.se)+'%;background:'+col(x.m.se)+'"></div></div>'+
+      '<div class="nv" style="color:'+col(x.m.se)+'">'+x.m.se+'%</div></div>';
+  }).join('');
+
+  $('sumOut').innerHTML =
+    '<div class="big"><div class="n" style="color:'+col(avgSE)+'">'+avgSE+'<span>%</span></div><div class="l">Average sleep efficiency</div></div>'+
+    '<div class="sum-grid">'+
+      '<div class="sum-cell"><div class="k">Nights logged</div><div class="v">'+withSE.length+'</div></div>'+
+      '<div class="sum-cell"><div class="k">Avg sleep quality</div><div class="v">'+avgQ+(avgQ!=='-'?' / 5':'')+'</div></div>'+
+      '<div class="sum-cell"><div class="k">Avg time in bed</div><div class="v">'+fmt(avgTib)+'</div></div>'+
+      '<div class="sum-cell"><div class="k">Avg slept</div><div class="v">'+fmt(avgTst)+'</div></div>'+
+    '</div>'+
+    '<div class="sum-nights">'+nights+'</div>';
+}
+
+/* ============ ASSESSMENT ============ */
+const QUESTIONS = [
+  { s:'A', t:'How much does your wake-up time vary across the week?', o:['Within 30 minutes - roughly the same time every day','30 to 60 minutes variation','1 to 2 hours variation','More than 2 hours (e.g. 8 AM weekdays, noon weekends)'] },
+  { s:'A', t:'Do you get at least 10 minutes of bright light (outdoors or by a window) within 30 minutes of waking?', o:['Yes, most days','Sometimes','Rarely - I go straight to my desk or screen','Almost never - I work in a dim room all morning'] },
+  { s:'A', t:'How consistent is your energy in the first 2 hours after waking?', o:['Consistently good - I can focus and work','Varies - some mornings fine, others foggy for no clear reason','Usually foggy - takes me 1 to 2 hours to boot up','Most mornings are a write-off - real work starts late morning or afternoon'] },
+  { s:'A', t:'On a free day with no obligations, what time do you naturally wake up?', o:['Within 1 hour of my weekday wake time','1 to 2 hours later','2 to 3 hours later','3+ hours later'] },
+  { s:'A', t:'Do you feel alert and tired at roughly the same times each day, or does it shift unpredictably?', o:['Pretty consistent - I know when my energy peaks and dips','Somewhat consistent, with occasional off days','Unpredictable - good days and bad days seem random','Completely chaotic - I never know what kind of day I will get'] },
+  { s:'B', t:'How long does it usually take you to fall asleep after lights out?', o:['Less than 15 minutes','15 to 30 minutes','30 to 60 minutes','More than 60 minutes'] },
+  { s:'B', t:'How much caffeine do you have, and when is your last cup?', o:['None, or 1 to 2 cups before noon','2 to 3 cups, last one before 2 PM','3 to 4 cups, or last one between 2 and 5 PM','4+ cups, or caffeine after 5 PM (including energy drinks, pre-workout)'] },
+  { s:'B', t:'Do you get a strong energy crash in the afternoon (the 2 PM wall)?', o:['Rarely or never','Occasionally - once or twice a week','Most days - a clear dip around 2 to 4 PM','Every day - by mid-afternoon I am basically useless'] },
+  { s:'B', t:'How many hours are you actually in bed per night (getting in to getting out)?', o:['7 to 8 hours','8 to 9 hours','9 to 10 hours','More than 10 hours (including lying awake, scrolling)'] },
+  { s:'B', t:'When you wake up in the morning, how rested do you feel?', o:['Refreshed - ready to start the day','Okay - not great, not terrible','Tired - like I barely slept, even after enough time in bed','Exhausted - some mornings I want to go back to sleep within an hour'] },
+  { s:'C', t:'When you get into bed, does your mind start racing about work, tasks, or problems?', o:['Rarely - I can relax and drift off','Sometimes - depends on the day','Often - I lie there planning, reviewing, worrying','Almost every night - a full board meeting the moment I lie down'] },
+  { s:'C', t:'Do you wake up during the night?', o:['Rarely or never','Once, and I fall back asleep quickly','2 to 3 times, sometimes slow to fall back asleep','Frequently - awake 30+ minutes in the middle of the night'] },
+  { s:'C', t:'Do you use screens (phone, laptop, tablet) in bed or within 30 minutes of trying to sleep?', o:['No - I stop screens at least 30 minutes before bed','Occasionally - maybe a quick check','Most nights - I scroll or watch something in bed','Every night - I fall asleep with my phone or laptop'] },
+  { s:'C', t:'Do you work from your bedroom, or use your bed for non-sleep activities (work, calls, eating)?', o:['No - my bed is for sleep only','Occasionally','Regularly - I sometimes work from bed, or my desk is in the bedroom','Always - my bed is my office'] },
+  { s:'C', t:'When you think about bedtime, what is your dominant feeling?', o:['Neutral or slightly positive - bed means rest','Indifferent','Mildly anxious - I hope I can sleep tonight','Dread or frustration - here we go again'] },
+  { s:'C', t:'Rate your overall daytime energy over the past 2 to 4 weeks.', o:['8 to 10 - good, consistent energy most days','6 to 7 - decent but drops noticeably in the afternoon','4 to 5 - low, surviving on caffeine and willpower','1 to 3 - running on empty, brain fog most of the day'] },
+];
+const SECTIONS = {
+  A:{ cls:'sa sec-a', eyebrow:'Section A', name:'The Clock', sub:'How stable is your timing system?', max:15 },
+  B:{ cls:'sb sec-b', eyebrow:'Section B', name:'The Battery', sub:'How well is your recovery system charging?', max:15 },
+  C:{ cls:'sc sec-c', eyebrow:'Section C', name:'The Off-Switch', sub:'Can your brain actually shut down?', max:18 },
+};
+const TOTAL_BANDS = [
+  { max:8,  color:'var(--green)',  label:'Mostly working',        desc:'Your system is mostly working. Fine-tuning will sharpen what is already there.' },
+  { max:18, color:'var(--yellow)', label:'Moderate disruption',   desc:'Moderate disruption. One or two systems need attention. This course will make a noticeable difference.' },
+  { max:30, color:'var(--orange)', label:'Significant disruption', desc:'Significant disruption. Multiple systems are out of sync. This is exactly what the protocol is built to fix.' },
+  { max:48, color:'var(--red)',    label:'Major disruption',      desc:'Major disruption. Your systems have been off for a while. The protocol works here too - it just means your starting point is lower, so the improvements will feel more dramatic.' },
+];
+function sectionStatus(score){
+  if(score<=3)  return { color:'var(--green)',  text:'This system is functioning. We will keep it that way.' };
+  if(score<=7)  return { color:'var(--yellow)', text:'This system needs calibration. Expect improvement during its week.' };
+  if(score<=11) return { color:'var(--orange)', text:'This system is significantly off. This will be one of your biggest areas of change.' };
+  return          { color:'var(--red)',    text:'This system is deeply disrupted. It gets priority attention during its week.' };
+}
+const aform = $('aform'); let builtA = false;
+function assessInit(){
+  if(builtA) return; builtA = true;
+  let last=null;
+  QUESTIONS.forEach((q,i)=>{
+    if(q.s!==last){ const sec=SECTIONS[q.s]; const h=document.createElement('div'); h.className='a-sechead '+sec.cls;
+      h.innerHTML=`<div class="eb">${sec.eyebrow} - ${sec.name}</div><h2>${sec.name}</h2><p>${sec.sub}</p>`; aform.appendChild(h); last=q.s; }
+    const w=document.createElement('div'); w.className='aq'; w.id='aq'+i;
+    let opts=''; q.o.forEach((opt,j)=>{ opts+=`<label class="aopt"><input type="radio" name="aq${i}" value="${j}" data-section="${q.s}"><span class="box"><span class="dot"></span><span>${opt}</span></span></label>`; });
+    w.innerHTML=`<div class="aq-head"><div class="aq-num">${i+1}</div><div class="aq-text">${q.t}</div></div><div class="aopts">${opts}</div>`;
+    aform.appendChild(w);
+  });
+}
+const aTotal = QUESTIONS.length;
+function aAnswered(){ return new Set([...aform.querySelectorAll('input:checked')].map(i=>i.name)).size; }
+function aRefresh(){ const n=aAnswered(); $('apf').style.width=(n/aTotal*100)+'%'; $('act').textContent=n+' / '+aTotal; $('asubmit').disabled=n<aTotal; }
+aform.addEventListener('change', e=>{ const q=e.target.closest('.aq'); if(q)q.classList.add('answered'); aRefresh(); });
+
+$('asubmit').addEventListener('click', async ()=>{
+  for(let i=0;i<aTotal;i++){ if(!aform.querySelector(`input[name="aq${i}"]:checked`)){ const el=$('aq'+i); el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'),600); el.scrollIntoView({behavior:'smooth',block:'center'}); return; } }
+  const sec={A:0,B:0,C:0};
+  aform.querySelectorAll('input:checked').forEach(i=>{ sec[i.dataset.section]+=parseInt(i.value,10); });
+  const totalScore=sec.A+sec.B+sec.C;
+  const answers={}; aform.querySelectorAll('input:checked').forEach(i=>{ answers[i.name]=parseInt(i.value,10); });
+
+  const prior = await DB.getAssessments();
+  const rec = { taken_on: todayKey(), score_clock:sec.A, score_battery:sec.B, score_offswitch:sec.C, score_total:totalScore, answers };
+  await DB.saveAssessment(rec);
+
+  const band=TOTAL_BANDS.find(b=>totalScore<=b.max);
+  $('aTotLabel').textContent = prior.length ? 'Your latest score' : 'Your baseline score';
+  $('aTotNum').innerHTML=totalScore+'<span>/ 48</span>';
+  const be=$('aBand'); be.textContent=band.label; be.style.color=band.color; be.style.background='rgba(255,255,255,0.06)'; be.style.border='1px solid '+band.color;
+  $('aBandDesc').textContent=band.desc;
+  const mf=$('aMeter'); mf.style.background=band.color; setTimeout(()=>mf.style.width=(totalScore/48*100)+'%',60);
+
+  const order=['A','B','C']; let weakKey=order[0], weakPct=-1;
+  order.forEach(k=>{ const p=sec[k]/SECTIONS[k].max; if(p>weakPct){weakPct=p;weakKey=k;} });
+  const rows=$('aSys'); rows.innerHTML='';
+  order.forEach(k=>{ const S=SECTIONS[k], score=sec[k], st=sectionStatus(score), isWeak=(k===weakKey&&weakPct>0);
+    const row=document.createElement('div'); row.className='sys '+S.cls.split(' ')[0]+(isWeak?' weak':'');
+    row.innerHTML=`<div class="sys-top"><div class="sys-name">${S.name}${isWeak?'<span class="tag">most disrupted</span>':''}</div><div class="sys-score">${score} / ${S.max}</div></div><div class="sys-bar"><div class="sf" style="background:${st.color}"></div></div><div class="sys-status">${st.text}</div>`;
+    rows.appendChild(row); setTimeout(()=>row.querySelector('.sf').style.width=(score/S.max*100)+'%',80);
+  });
+
+  // baseline vs latest (computed on the fly from stored results)
+  const note=$('aNote');
+  if(!prior.length){
+    note.innerHTML=`Saved as your <span class="hl">Day 0 baseline</span> (${rec.taken_on}). Come back after about 4 weeks and retake - this page will show you the change.`;
+  } else {
+    const base=prior[0]; const diff=base.score_total-totalScore;
+    let line = diff>0 ? `down <span class="up">${diff} points</span> - lower is better, your systems are settling`
+            : diff<0 ? `up <span class="down">${Math.abs(diff)} points</span> - worth checking which system slipped`
+            : `unchanged so far`;
+    note.innerHTML=`Baseline: <span class="hl">${base.score_total}/48</span> (${base.taken_on}) &nbsp;|&nbsp; Today: <span class="hl">${totalScore}/48</span> (${rec.taken_on})<br>That is ${line}.`;
+  }
+  $('aprogress').style.display='none';
+  $('aresult').classList.add('show');
+  $('aresult').scrollIntoView({behavior:'smooth',block:'start'});
+});
+$('aRetake').addEventListener('click', ()=>{
+  aform.querySelectorAll('input:checked').forEach(i=>i.checked=false);
+  aform.querySelectorAll('.aq').forEach(q=>q.classList.remove('answered'));
+  $('aresult').classList.remove('show'); $('aprogress').style.display='flex'; aRefresh();
+  $('view-assessment').scrollIntoView({behavior:'smooth'});
+});
+
+/* ============ PWA ============ */
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault(); deferredPrompt = e;
+  $('installTxt').innerHTML = '<b>Add this to your home screen</b> - use it like an app, even offline.';
+  $('installBtn').style.display=''; $('install').classList.add('show');
+});
+$('installBtn').addEventListener('click', async ()=>{
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; $('install').classList.remove('show');
+});
+$('installX').addEventListener('click', ()=>{ $('install').classList.remove('show'); try{ localStorage.setItem('zf_install_dismissed','1'); }catch(e){} });
+// iOS has no install prompt - show manual hint
+(function(){
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const standalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+  const dismissed = (()=>{ try{ return localStorage.getItem('zf_install_dismissed'); }catch(e){ return null; } })();
+  if(isIOS && !standalone && !dismissed){
+    $('installBtn').style.display='none';
+    $('installTxt').innerHTML = '<b>Add to your home screen:</b> tap the Share button, then "Add to Home Screen".';
+    $('install').classList.add('show');
+  }
+})();
+
+/* ============ THEME TOGGLE ============ */
+function applyTheme(t){
+  document.body.classList.toggle('light', t==='light');
+  $('themeToggle').textContent = t==='light' ? '☀' : '☾';
+  const m = document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute('content', t==='light' ? '#f3f3f6' : '#0d0d0d');
+}
+let theme = (()=>{ try{ return localStorage.getItem('zf_theme')||'dark'; }catch(e){ return 'dark'; } })();
+applyTheme(theme);
+$('themeToggle').addEventListener('click', ()=>{
+  theme = theme==='light' ? 'dark' : 'light';
+  try{ localStorage.setItem('zf_theme', theme); }catch(e){}
+  applyTheme(theme);
+});
+
+boot();
+</script>
+</body>
+</html>
