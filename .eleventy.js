@@ -21,6 +21,9 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.ignores.add("src/app/**");
   eleventyConfig.addPassthroughCopy("src/app");
 
+  // Downloadable course materials (PDFs) served verbatim
+  eleventyConfig.addPassthroughCopy("src/downloads");
+
   // CSS processing via lightningcss
   eleventyConfig.addTemplateFormats("css");
   eleventyConfig.addExtension("css", {
