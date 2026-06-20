@@ -13,6 +13,9 @@ module.exports = function (eleventyConfig) {
   // ignore as a template input so Liquid never touches the inline JS; copy it as-is
   eleventyConfig.ignores.add("src/sleep-assessment/**");
   eleventyConfig.addPassthroughCopy("src/sleep-assessment");
+  // Standalone app-style Sleep Diary (self-contained HTML+JS, served verbatim)
+  eleventyConfig.ignores.add("src/diary/**");
+  eleventyConfig.addPassthroughCopy("src/diary");
 
   // CSS processing via lightningcss
   eleventyConfig.addTemplateFormats("css");
