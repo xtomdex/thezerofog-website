@@ -16,6 +16,9 @@ module.exports = function (eleventyConfig) {
   // Standalone app-style Sleep Diary (self-contained HTML+JS, served verbatim)
   eleventyConfig.ignores.add("src/diary/**");
   eleventyConfig.addPassthroughCopy("src/diary");
+  // Standalone webinar text-version long-read (self-contained HTML, served verbatim, noindex)
+  eleventyConfig.ignores.add("src/webinar-text/**");
+  eleventyConfig.addPassthroughCopy("src/webinar-text");
 
   // CSS processing via lightningcss
   eleventyConfig.addTemplateFormats("css");
