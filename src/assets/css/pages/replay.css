@@ -1,6 +1,6 @@
 .replay { max-width: 800px; margin: 0 auto; padding: 80px 24px 40px; }
 
-h1 { font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: 900; letter-spacing: -0.03em; margin-bottom: 12px; text-align: center; }
+h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.9rem, 3.8vw, 2.6rem); font-weight: 700; letter-spacing: -0.01em; margin-bottom: 12px; text-align: center; }
 .subtitle { font-size: 0.95rem; color: var(--text2); text-align: center; margin-bottom: 32px; line-height: 1.6; }
 
 /* Timer */
@@ -41,7 +41,7 @@ h1 { font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: 900; letter-spacing: 
   border-radius: 12px; padding: 32px;
   text-align: center; margin-bottom: 40px;
 }
-.replay-cta h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.02em; }
+.replay-cta h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.005em; }
 .replay-cta p { font-size: 0.9rem; color: var(--text2); margin-bottom: 20px; line-height: 1.6; }
 .replay-cta .price { font-size: 1.8rem; font-weight: 900; color: var(--text); margin-bottom: 4px; }
 .replay-cta .price-sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 20px; }

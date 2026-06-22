@@ -89,12 +89,12 @@ body {
   top: 18px;
   left: 20px;
   z-index: 100;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.7rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 0;
   color: var(--text);
-  opacity: 0.4;
+  opacity: 0.6;
 }
 
 /* === HERO SECTION === */
@@ -121,12 +121,13 @@ body {
 }
 
 .headline {
-  font-size: clamp(1.8rem, 4vw, 2.8rem);
-  font-weight: 900;
-  line-height: 1.1;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 4.8vw, 3.3rem);
+  font-weight: 700;
+  line-height: 1.08;
   color: var(--text);
   margin-bottom: 20px;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.01em;
 }
 
 .without-block {
