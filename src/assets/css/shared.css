@@ -78,8 +78,8 @@ body {
 /* === BRAND === */
 .brand {
   position: fixed; top: 18px; left: 20px; z-index: 100;
-  font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 600;
-  letter-spacing: 0.05em; color: var(--text); opacity: 0.4;
+  font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 600;
+  letter-spacing: 0; color: var(--text); opacity: 0.6;
   text-decoration: none;
 }
 .brand:hover { opacity: 0.7; }
