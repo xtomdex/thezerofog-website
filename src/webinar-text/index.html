@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Why You Lose 2-3 Sharp Hours Every Day - The ZeroFog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1a1a1a; --surface:#222222; --surface2:#1e1e1e; --line:rgba(255,255,255,0.08);
+    --text:#f8f8f2; --muted:#b0b0b0; --dim:#777;
+    --purple:#bd93f9; --pink:#ff79c6; --cyan:#8be9fd; --green:#50fa7b; --red:#ff5555; --orange:#ffb86c;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',sans-serif; background:var(--bg); color:var(--text);
+    line-height:1.7; -webkit-font-smoothing:antialiased; font-size:18px;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:0 22px}
+
+  /* hero */
+  .hero{text-align:center;padding:64px 0 40px;border-bottom:1px solid var(--line);margin-bottom:10px}
+  .eyebrow{font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--purple);margin-bottom:22px}
+  h1{
+    font-family:'Cormorant Garamond',serif;font-weight:700;
+    font-size:clamp(34px,7vw,54px);line-height:1.12;letter-spacing:-0.5px;margin-bottom:20px;
+  }
+  .hero .sub{font-size:17px;color:var(--muted);max-width:520px;margin:0 auto;font-style:italic;font-family:'Cormorant Garamond',serif;font-size:21px}
+
+  /* section headings */
+  h2{
+    font-family:'Cormorant Garamond',serif;font-weight:700;
+    font-size:clamp(26px,4.5vw,36px);line-height:1.2;margin:54px 0 18px;letter-spacing:-0.3px;
+  }
+  h2 .acc{color:var(--purple)}
+  h3{font-size:19px;font-weight:700;margin:34px 0 12px;color:var(--text)}
+  .kicker{font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);display:block;margin:56px 0 -6px}
+
+  p{margin:0 0 18px}
+  p.lead{font-size:21px;color:var(--text)}
+  strong{color:var(--text);font-weight:700}
+  em{color:var(--muted)}
+
+  /* pull quote */
+  .pull{
+    font-family:'Cormorant Garamond',serif;font-style:italic;
+    font-size:clamp(24px,4vw,32px);line-height:1.3;color:var(--purple);
+    text-align:center;margin:42px 0;padding:24px 10px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  }
+  .pull.pink{color:var(--pink)}
+  .pull.cyan{color:var(--cyan)}
+
+  blockquote{
+    border-left:3px solid var(--purple);padding:6px 0 6px 20px;margin:24px 0;
+    color:var(--muted);font-style:italic;
+  }
+  blockquote .who{display:block;font-style:normal;font-size:14px;color:var(--dim);margin-top:8px;font-weight:600}
+
+  /* figures */
+  figure{margin:34px 0}
+  figure img{width:100%;border-radius:12px;border:1px solid var(--line);display:block}
+  figcaption{font-size:13px;color:var(--dim);text-align:center;margin-top:10px;font-style:italic}
+
+  /* callout / list cards */
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin:28px 0}
+  .card.green{border-color:rgba(80,250,123,0.25)}
+  .card.purple{border-color:rgba(189,147,249,0.3)}
+  ul.clean{list-style:none;margin:14px 0}
+  ul.clean li{position:relative;padding:7px 0 7px 28px}
+  ul.clean li::before{content:"";position:absolute;left:4px;top:15px;width:7px;height:7px;border-radius:50%;background:var(--purple)}
+  ul.check li::before{content:"\2713";color:var(--green);background:none;left:0;top:6px;width:auto;height:auto;font-weight:700}
+
+  /* offer */
+  .offer{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid rgba(189,147,249,0.3);border-radius:18px;padding:34px 28px;margin:40px 0;text-align:center}
+  .offer .price{font-family:'Cormorant Garamond',serif;font-size:62px;font-weight:700;line-height:1;margin:6px 0}
+  .offer .price small{font-size:20px;color:var(--dim)}
+  .offer .terms{font-size:15px;color:var(--muted);margin-bottom:8px}
+  .cta{
+    display:inline-block;background:var(--purple);color:#1a1a1a;font-weight:700;font-size:17px;
+    padding:16px 40px;border-radius:12px;text-decoration:none;margin:18px 0 8px;transition:opacity .2s,transform .1s;
+  }
+  .cta:hover{opacity:.92}
+  .cta:active{transform:translateY(1px)}
+  .guar{font-size:14px;color:var(--dim);margin-top:6px}
+
+  .compare{display:flex;flex-direction:column;gap:10px;margin:22px 0;text-align:left}
+  .compare .row{display:flex;justify-content:space-between;gap:14px;padding:12px 16px;background:var(--surface2);border:1px solid var(--line);border-radius:10px}
+  .compare .row .n{color:var(--muted)} .compare .row .v{color:var(--text);font-weight:600;white-space:nowrap}
+  .compare .row.us{border-color:rgba(189,147,249,0.4)} .compare .row.us .v{color:var(--purple)}
+
+  hr.soft{border:none;border-top:1px solid var(--line);margin:46px 0}
+
+  .footer{text-align:center;margin:60px 0 40px;padding-top:24px;border-top:1px solid var(--line)}
+  .footer p{font-size:12px;color:var(--dim);line-height:1.6}
+
+  @media(max-width:540px){
+    body{font-size:17px}
+    .hero{padding:44px 0 32px}
+    p.lead{font-size:19px}
+    .cta{width:100%}
+  }
+</style>
+</head>
+<body>
+<!-- VISUALS: slide-number -> PNG filename mapping is best-effort (deck has 34b/86b, slide 45 missing, 100 silent). Spot-check each image matches its section before publishing. -->
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">The ZeroFog</div>
+    <h1>Why You Lose 2-3 Sharp Hours Every Day - And How to Get Them Back</h1>
+    <p class="sub">The written version of the workshop. Same content, same order - in long-form, at your pace.</p>
+  </header>
+
+  <p class="lead">By the end of this, you'll understand why you lose two or three hours of sharp focus every single day.</p>
+
+  <p>Do the math. Two to three hours a day, twenty working days a month - that's forty to sixty hours. A full work week, gone. Every single month. Multiply that by twelve, and it's four months of sharp thinking a year. Just... gone. I call it the <strong>productivity tax</strong>. You pay it every month, and you never even see the bill.</p>
+
+  <p>In the next few minutes you'll see the hidden pattern that's been getting worse every week. You'll understand why no productivity tool, no habit, no "just push through" ever fixed it - and why none of it was your fault. And I'll give you one free unlock you can try tonight, something that can sharpen your tomorrow.</p>
+
+  <p>And by the end you'll also have three free resources that tie into all of it - your Caffeine Blueprint, the 9 Recovery Mistakes, and the Recovery Protocol. Each one connects to what you're about to see.</p>
+
+  <p>A quick word first. I'm not here to build a brand. I'm not here to sell you a personality. I'm here to share what actually works. The story you're about to read is real. The losses are real. And the system I found is real - built on peer-reviewed clinical science, the same protocols performance specialists use to restore a brain to full capacity.</p>
+
+  <h2>Your morning. See if this sounds like you.</h2>
+
+  <figure>
+    <img src="img/slide-009.png" alt="3 AM, wide awake, staring at the ceiling">
+    <figcaption>3 AM. Wide awake. Your brain just won't stop.</figcaption>
+  </figure>
+
+  <p>You don't set an alarm. Or maybe you do, and ignore it. You wake up at a different time every day - Monday at nine, Wednesday at eleven, Friday you don't even check. You slept seven hours. Maybe eight. And you feel like you slept two. Your body got the hours. But somehow, it didn't get the rest.</p>
+
+  <p>You figured you'd shake it off by noon. You didn't. Two PM, brain fog hits. You re-read the same Slack message three times and still don't know what it says. You switch to easy tasks - anything to avoid real thinking. Your third cup of coffee isn't working anymore. You've hit a wall, and you know the rest of the day is going to be a struggle.</p>
+
+  <p>Eleven PM. You're exhausted. Your body is done. But your brain won't shut off. You lie there, staring at the ceiling. And then - three AM. Wide awake. Not because of a noise. Not because of a nightmare. Your brain just... won't stop.</p>
+
+  <p>If this is you, you're not alone. I went through the exact same thing. And the data backs it up: over forty percent of people who work from home wake up repeatedly during the night, and about half of them can't fall back asleep for hours. It's a sign the pattern has gone deep. By morning, you feel worse than when you went to bed.</p>
+
+  <p class="pull">You forgot what a hundred percent feels like.</p>
+
+  <p>And the worst part? You stopped noticing. Being tired became your normal. You don't say "I'm exhausted" anymore. You say "I'm fine." But you're not fine. You're running at sixty percent. Every single day. And you don't even realize it.</p>
+
+  <h2>It's not discipline. It's your brain.</h2>
+
+  <p>Think about your workday. You work eight, ten hours - and let's be honest, when you work from home it's rarely just eight. But how many of those hours are actually sharp? Maybe three. Four if you're lucky. The rest, you're just... there. At your desk. Going through the motions.</p>
+
+  <p>Here's what most people miss: it's not because you lack discipline. Your prefrontal cortex - the part of your brain that handles focus, judgment, planning, impulse control - is the first thing that shuts down when your brain hasn't fully recovered. That's not a character flaw.</p>
+
+  <p>It's like driving a car with the engine light on and the oil almost empty. The car still moves, but it's slow, it overheats, and every mile does more damage. That's your brain right now. It still works, but everything costs twice the effort and gives you half the result. And every decision you make in that state costs you. In time. In quality. In money.</p>
+
+  <p>What nobody talks about: you can't fix this by working more hours. Working ten hours instead of eight doesn't make you more productive - it makes you more exhausted tomorrow. You're not underperforming because you're not working enough. You're underperforming because your brain can't use the hours you already have. The problem isn't the quantity of hours. It's the quality of what your brain does with them.</p>
+
+  <h2>The number that surprised me</h2>
+
+  <p>Seventeen hours awake - that's not an all-nighter. That's just a long day. You wake up at seven AM and stay up until midnight. That's it. And at that point, your brain performs like you've had two glasses of wine. You wouldn't make business decisions after a glass of wine at two PM. But that's exactly what you're doing - every single day.</p>
+
+  <p>And it gets worse. Stay up twenty-four hours and you're at zero point one zero. That's legally drunk, in every state. Your reaction time drops by fifty percent. Your judgment is gone.</p>
+
+  <h2>You think it's burnout. It isn't.</h2>
+
+  <p>You've probably told yourself this is burnout. Too much work. Too much stress. You need a break. So you take one. A long weekend. A week off. Maybe longer. I took a year off. A full year. And nothing changed. I rested - and still felt destroyed.</p>
+
+  <p>Here's what I didn't understand at the time. I thought if I just removed the load - the pressure, the deadlines, the work - I'd recover. That's what everyone thinks. But removing the load and actually recovering are two completely different things.</p>
+
+  <p>It's like tearing a muscle. You don't fix a torn muscle by lying on the couch longer. A torn muscle needs targeted rehab - specific exercises, in the right order, at the right time. Without that, it just heals wrong. A vacation is the wrong tool for the job. Because "burnout" is the label we put on it. It's not the cause.</p>
+
+  <p>If time off actually fixed this, you'd already be fine. Think about your last vacation. Did you come back sharp? Or did the fog come back within days?</p>
+
+  <span class="kicker">The exhaustion cycle</span>
+  <h2>It's not a bad week. It's a cycle - and it's getting stronger.</h2>
+
+  <figure>
+    <img src="img/slide-016.png" alt="The exhaustion cycle">
+    <figcaption>Low energy, more caffeine, afternoon crash, wired at night - and repeat.</figcaption>
+  </figure>
+
+  <p>Low energy leads to more caffeine. More caffeine leads to an afternoon crash. Now, everyone dips between two and four PM - that's basic physiology, everyone has it. But when you're already running on empty, the dip becomes a crash you can't work through. Even naps don't help. You're still wired at night, can't switch off, and wake up drained. And the cycle repeats. Every day, a little worse. Every week, a little harder to break.</p>
+
+  <p>And caffeine itself turns on you. After a few weeks of daily coffee, it almost stops giving you energy - it just prevents withdrawal. Your morning cup doesn't boost you. It brings you back to zero. You're not getting a lift, you're digging out of a hole that caffeine created. And the tolerance builds. You need more to feel the same, until even three cups barely moves the needle.</p>
+
+  <p>If any of this sounds familiar - stay with me. The next part is where it starts to make sense. Because I went through all of it myself. And it took me three years to find the way out.</p>
+
+  <hr class="soft">
+
+  <span class="kicker">My story</span>
+  <h2>It's probably a lot like yours</h2>
+
+  <p>During the pandemic I had to find a remote job. At first I was happy - I could work from home, from my room, sometimes even from my bed. Life was good. But the schedule was brutal. Work ended at eleven PM, sometimes midnight, sometimes one AM. There was no fixed end time. I had no time to recover, and my schedule fell apart. One night I'd crash at one AM, the next at three. Every morning I woke up feeling destroyed. Everything turned into one loop: work, late-night TV and phone, midnight snacks that were really full meals.</p>
+
+  <p>Over time I got angry and snappy from being tired. By evening I was too drained to do anything good with my day. I was drinking coffee nonstop - my cup was a bottomless pit. No energy for exercise. No energy for real food. Every day I burned out a little more. The company was great - good people, good culture, support at every step. But that wasn't enough. Because only I could fix what I had broken. At some point I burned out completely. And that's how my career ended. After almost three years.</p>
+
+  <p>I thought I'd restart. I jumped into crypto investing - loved the freedom, no nine-to-five. And I fell right into the same hole. I'd wake up at night to check positions. One bad call after another. I lost seventy thousand dollars - my entire portfolio plus part of our family savings.</p>
+
+  <p>Then I finally decided to build the business I'd been thinking about for years. Studied hard, did everything right. But I had no energy. Brain fog every day. I cut corners everywhere, and it all fell apart. Third time in a row. Like stepping on the same rake again and again. I kept ignoring the one thing that mattered - my body.</p>
+
+  <p class="pull pink">All I did was sleep, eat, drift around the house, watch TV, then sleep again.</p>
+
+  <p>So I decided to just stop. Stop everything and rest. But rest didn't help. One month turned into six. Six turned into a year. A full year of doing nothing. No energy for friends - even texting back felt like a big deal. No energy for my wife - conversation felt like an obligation. I couldn't even play video games, and I loved games. I'd nap twice a day, and the only time I felt somewhat alive was after midnight. I'd stay up until two, three, four AM. And the cycle repeated.</p>
+
+  <h2>Then everything changed - and I didn't know why</h2>
+
+  <p>Then my mom came to visit. We walked, went to the beach, spent time in the sun. I was exhausted by evening - but a different kind of exhausted. No room for afternoon naps. I started falling asleep at ten, eleven PM. And within days, everything shifted. I lost weight. The snoring stopped. I started going outside on my own. I started talking to my wife because I wanted to, not because I had to. I started actually replying to my friend's messages. I felt like a different person. But I had no idea why.</p>
+
+  <p>Then she left. For a week or two I held on to that rhythm. But slowly the late nights crept back. The naps came back. The fog came back. Six weeks later I was sliding right back into the hole. And that's when it hit me: whatever had happened while she was here, it wasn't willpower. It wasn't motivation. Something about those weeks had reset something in my body. And without knowing what it was, I couldn't keep it.</p>
+
+  <h2>I decided to figure it out myself</h2>
+
+  <p>I started going on evening walks, trying to hold on to at least that one habit. And I made a decision: I'm going to figure this out myself. Nobody was going to hand me the right answer.</p>
+
+  <p>I started researching. Health podcasts, performance optimization, anything I could find. Hundreds of results. Most of it was garbage - the same recycled advice over and over. Wake up at 5 AM. Try melatonin. Cold plunges. Meditate. Nothing that explained what had actually happened to me during those weeks with my mom. So I kept digging.</p>
+
+  <p>I filtered by medical professionals only - no bloggers, no influencers, no AI slop. And that's when I found it. A podcast with an actual specialist. Not a wellness coach - a clinician. And next to his name was a word I'd never seen before: somnologist. A doctor who specializes in why the brain stops performing, and what actually fixes it. I pressed play. And by the end of that walk, everything started making sense.</p>
+
+  <p>Let me tell you who this man is. This isn't a wellness influencer who read a book and started giving advice. This is a clinical somnologist - a doctor with over thirty years of practice. The kind of specialist that CEOs and executives fly in to see. Not because he's famous, but because his patients make high-stakes decisions every day and can't afford to think at half speed. His first consultation costs seven hundred dollars. His authority isn't built on followers. It's built on published research and thousands of patients.</p>
+
+  <p>I went deeper. His books, his lectures, his clinical papers - most of it had never been translated into English. Putting it all together into one system took months of work. And what I found was completely different from everything else out there. Not generic tips. Not ten things to try. Actual clinical protocols, tested on thousands of patients over decades. Clear systems for what to do, what not to do, and in what order. That's what was missing from everything I'd tried before.</p>
+
+  <p>I couldn't stop. Every podcast, every interview, every lecture, every paper this doctor had ever published - some of them two or three times. I learned why I always lacked energy. Why I got tired so fast and constantly wanted to sleep. Why I gained weight. Why rest alone never fixed anything. And I started applying it. Small things. And I felt the difference - not in weeks. In days. Fewer bad thoughts. More energy. I started wanting to do things again.</p>
+
+  <p>I called a friend and couldn't stop talking about it. He started making a few of the same changes - and within weeks, he noticed it too. That's when it really hit me: this wasn't just my problem.</p>
+
+  <p class="pull cyan">Everyone is walking around broken - and nobody told them it can be fixed.</p>
+
+  <p>It felt like I took NZT from the movie Limitless. I could see what to do with my life and how to do it. Wake up, morning routine, then I just go - task after task. When stress hits, I act instead of spiraling. Solutions that used to be hidden behind a wall of fog are just there now. Things I'd put off for months started getting done in hours. Not because I suddenly had superhuman discipline. Because my brain was finally running at full capacity.</p>
+
+  <h2>The real reason nothing worked</h2>
+
+  <p>Looking back, I'd tried everything before that turning point. Coffee and energy drinks got me through the morning - but by 2 PM I was done. Productivity systems lasted a week before I quit. Every book gave me three hundred pages of tips and zero pages of explanation for why I had no energy in the first place. Every app tracked something but never told me what to actually change. Every supplement was "the answer" until I needed the next one.</p>
+
+  <p>I was the perfect customer. I bought everything, followed every step. And nothing worked. Not because I lacked discipline - but because none of it was designed to fix the real problem.</p>
+
+  <p class="pull">They sold me band-aids when I needed surgery.</p>
+
+  <p>Three years. A lost career. Seventy thousand dollars gone - on decisions made by a brain running on fumes. That's what it cost me to find what the right specialist could have told me in one session. I took everything I learned and built it into one protocol. Dead simple. I could've done it in a month if someone had shown me. I started sharing it with friends. Then their friends reached out. Everyone had the same reaction: "Why didn't anyone tell me this before?"</p>
+
+  <hr class="soft">
+
+  <span class="kicker">The shift</span>
+  <h2>You've been fixing the symptoms</h2>
+
+  <p>Here's what I want you to see. You've been fixing the symptoms - productivity apps, focus hacks, morning routines. But none of that touches the cause. They're aimed at the wrong layer. I know, because I tried all of them.</p>
+
+  <p>I tried building the perfect morning routine. I watched Mark Wahlberg talk about his "4 AM Workout Club" - the guy went to bed at eight PM and woke up at four AM. Then YouTube exploded with people trying to copy that, like waking up at four AM is the secret to success. I tried Pomodoro. I tried Notion setups, task managers, to-do apps - and spent more time organizing my productivity system than actually being productive. Cold plunges at six AM. Magnesium, lion's mane, whatever the next guru was selling. Journaling every morning because that's what "high performers" do.</p>
+
+  <p>I'm not saying all of that is garbage - some of it makes sense. But none of it moved the needle. Not for me, not for anyone I know. Right now I'm building this entire project - research, scripts, slides, everything - without any of it. No Pomodoro. No fancy task manager. No morning routine. Just a brain that actually works when I sit down.</p>
+
+  <p>Because the problem was never the tools. The problem was what was running underneath - the operating system. And that operating system runs on sleep.</p>
+
+  <p>Step back for a second. Your focus runs on your energy. And studies show nothing kills your energy faster than bad sleep. Not junk food. Not skipping the gym. Not even stress. When your brain doesn't recover at night, everything falls apart the next day. You're not lazy. You're not burning out. You've just been trying to fix the top of the chain while the bottom was broken. And it comes down to three systems. When they work together, everything works. When they don't, nothing does.</p>
+
+  <h2>The highest performers already know this</h2>
+
+  <p>And it's not just people on forums sharing the exact same pattern - the same realization, the same fix. Look at who else figured this out.</p>
+
+  <blockquote>A clear mind leads to better judgment, leads to a better outcome. A tired, foggy mind makes emotional ones.<span class="who">- Naval Ravikant, one of the most respected investors in Silicon Valley</span></blockquote>
+
+  <p><strong>LeBron James</strong> - four NBA championships - sleeps eight to ten hours plus a nap before every game, and calls sleep the most important thing for recovery.</p>
+
+  <blockquote>It's not worth trading sleep for a few extra hours at the office. Not only will it make you exhausted, it'll literally make you stupid.<span class="who">- Jason Fried, founder of Basecamp</span></blockquote>
+
+  <p>And <strong>Alex Becker</strong> - the marketer behind HYROS, one of the biggest ad-tracking platforms - ran a five-thousand-dollar business course. And you know what Week One was about? Not ads. Not funnels. Not copywriting. Sleep and body.</p>
+
+  <hr class="soft">
+
+  <span class="kicker">The three systems</span>
+  <h2>Everything maps to one of three</h2>
+
+  <p>Think about it this way. Every single thing that goes wrong with your sleep comes down to one of these three.</p>
+
+  <p>You work until two AM, wake up at seven for a call, then wonder why you can't fall asleep at midnight the next day. <strong>That's the Clock.</strong> Your body lost track of when night is.</p>
+
+  <p>You're on your third coffee by noon and it still doesn't work, and by four PM your brain just shuts down. <strong>That's the Battery.</strong> You keep blocking the signal that tells your body it needs rest, and now the signal doesn't come through.</p>
+
+  <p>You finally get to bed at a decent hour, exhausted - and the second your head hits the pillow, you start solving every problem from the day. Emails, calls, decisions. You lie there for hours. <strong>That's the Off-Switch.</strong> Your brain learned that bed is where you work, not where you rest.</p>
+
+  <figure>
+    <img src="img/slide-037.png" alt="The Clock, the Battery, and the Off-Switch">
+    <figcaption>Three systems. Not five, not ten. Everything maps into one of these three.</figcaption>
+  </figure>
+
+  <p><strong>The Clock</strong> controls when your body wants to sleep. It runs on a twenty-four hour cycle, driven by light. When it drifts - irregular schedules, no morning sunlight - you feel tired at the wrong times.</p>
+
+  <p><strong>The Battery</strong> is your sleep pressure. It builds while you're awake. Caffeine blocks the signal and hides the need. Too much time in bed without sleeping dilutes it.</p>
+
+  <p><strong>The Off-Switch</strong> is your nervous system's ability to shift from go mode to sleep mode. When it's stuck - racing brain, three AM waking, stress - you can't switch off.</p>
+
+  <h2>What Clock drift looks like in your week</h2>
+
+  <figure>
+    <img src="img/slide-038.png" alt="Clock drift across the week">
+    <figcaption>Wake at ten, then noon, then nine - your body never knows what timezone it's in.</figcaption>
+    <!-- GIF-TODO: an animated version showing the wake-time bouncing across the week would land harder than the static slide. -->
+  </figure>
+
+  <p>Ever tried to get real work done after a long flight? That feeling where you're staring at your screen but nothing's happening. You reread the same email three times. Someone asks a simple question and your brain just lags. You're technically awake, but you're running on autopilot, and everything takes twice as long. That's jetlag.</p>
+
+  <p>There's a word for the version most people don't realize they have: social jetlag. Same thing - but you didn't fly anywhere. You go to bed at different times and wake up at different times, and your body reacts as if you crossed timezones. For most people it's weekdays versus weekends. But if you work from home, it's every single day. Monday you wake at ten. Wednesday at noon. Thursday at nine. Your body never knows what timezone it's in. And you're trying to do focused work in that state.</p>
+
+  <figure>
+    <img src="img/slide-039.png" alt="In sync versus out of sync">
+    <figcaption>In sync: fall asleep fast, sleep deep, wake with energy. Out of sync: enough hours, zero rest.</figcaption>
+    <!-- GIF-TODO: a two-state in-sync vs out-of-sync animation would make the contrast visceral. -->
+  </figure>
+
+  <p>When all three are in sync, you fall asleep fast, sleep deep, and wake up with energy. When they're out of sync, you get enough hours but zero rest. Exhausted but wired. Brain fog all day. This is why you can sleep seven or eight hours and still feel terrible - still foggy by noon, still dragging, still wondering why everyone else seems to have more energy. The hours aren't the problem. The systems are.</p>
+
+  <h2>Why nothing you tried worked</h2>
+
+  <p>Think of it like baking a cake. You have all the right ingredients - but you forgot the main one and mixed the rest in the wrong order. No cake.</p>
+
+  <ul class="clean">
+    <li><strong>Exercise without proper sleep</strong> doesn't build you up. Recent research suggests intense exercise on poor sleep can actually accelerate aging - your body never gets the repair cycle. Right ingredient, no cake.</li>
+    <li><strong>Eating healthy</strong> - but when you sleep poorly, your hunger hormone spikes and it gets easier to gain weight. And your prefrontal cortex isn't at full power, so controlling what you eat gets harder. Right ingredient, no cake.</li>
+    <li><strong>Processing information</strong> - calls, decisions, research - but without proper sleep your brain can't sort through any of it. You work harder and think slower. Right ingredient, no cake.</li>
+  </ul>
+
+  <p>Everything was aimed at one piece. Maybe two. Never the foundation. Your morning routine is a partial Clock adjustment at best. Pomodoro and focus apps don't touch any of the three. Melatonin nudges the Clock slightly and does nothing for your Battery or Off-Switch - that's why it works for a week and stops. "Turn off your phone before bed" is one tiny piece of the Off-Switch, with two systems still completely broken.</p>
+
+  <p>Productivity coaches tell you to build better routines, better workflows, better habits. And you did. It didn't work - not because the advice was wrong, but because it was aimed at the wrong layer. Sleep books give you three hundred pages of why sleep matters and ten pages of what to do. Random tips aimed at random systems. No order. No protocol. Puzzle pieces without the picture on the box.</p>
+
+  <p class="pull">It's not that you failed. The approach was incomplete.</p>
+
+  <p>You were solving one piece of a three-piece problem. That's why the cycle doesn't break - you address one system, and the other two keep spinning the wheel.</p>
+
+  <h2>And your brain learned to stay awake</h2>
+
+  <p>Within just a few weeks of bad nights, your brain forms a new association: bed equals stress. It's called conditioned arousal. Your brain learned that when you lie down, it's time to think, to worry, to scroll. It's a trained response - like Pavlov's dog - and every bad night makes it stronger. This is why "just relax" doesn't work. Your brain is doing exactly what it learned to do.</p>
+
+  <p>And this doesn't get better on its own. It's not a phase or a rough patch. It's a pattern that self-reinforces. You carry it for years, and at some point you stop calling it a problem. You just call it... normal.</p>
+
+  <hr class="soft">
+
+  <span class="kicker">The good news</span>
+  <h2>Resetting all three doesn't require sacrifice</h2>
+
+  <p>You don't need to wake up at five AM, unless you want to. You don't need to give up coffee forever. You don't need to meditate every day, buy expensive gadgets, follow a rigid schedule, or spend hours on bedtime rituals.</p>
+
+  <div class="card green">
+    <p style="margin:0"><strong>What you actually need:</strong></p>
+    <ul class="clean" style="margin-bottom:0">
+      <li>Fifteen minutes a day</li>
+      <li>Something that works with any schedule, not against it</li>
+      <li>Progressive - one action per lesson</li>
+      <li>A system. Not willpower.</li>
+    </ul>
+  </div>
+
+  <p>You don't need more discipline. You need a system that runs without it.</p>
+
+  <p>This is informed by a clinical method called CBT-i - Cognitive Behavioral Therapy for insomnia. Clinics use it. We adapted the behavioral principles for self-guided use, specifically for people with irregular schedules. Not a hospital program - a protocol designed for the chaos of working from home. Because that's where I live. And probably where you live too.</p>
+
+  <h2>How fast does it work?</h2>
+
+  <div class="card">
+    <ul class="clean" style="margin:0">
+      <li><strong>Day 5 to 7</strong> - first changes. Mornings get easier.</li>
+      <li><strong>Day 14</strong> - falling asleep faster, less tossing.</li>
+      <li><strong>Day 28</strong> - protocol locked in, runs on autopilot.</li>
+    </ul>
+  </div>
+
+  <p>These are based on clinical research. Individual timelines vary - but most people who follow the protocol consistently see changes within this window.</p>
+
+  <p>Now you know why your brain has been running at sixty percent: three systems out of sync. And why no productivity hack or coffee fix ever solved it: an incomplete approach. Let's talk about what the fix actually looks like.</p>
+
+  <hr class="soft">
+
+  <span class="kicker">The fix</span>
+  <h2>One thing per lesson - not twenty</h2>
+
+  <p>You don't need more tips. You've had tips your entire life. Turn off your phone. Drink chamomile tea. Tips are random - no order, no sequence. Most programs dump twenty things on you on day one. This one gives you one thing per lesson. You stack them over four weeks, and by the end those actions are running on autopilot - but you never had to do ten things at once.</p>
+
+  <figure>
+    <img src="img/slide-059.png" alt="The 4-week roadmap">
+    <figcaption>Four weeks. One system at a time. Then it runs itself.</figcaption>
+  </figure>
+
+  <p><strong>Week one - Reset Your Clock.</strong> Get your mornings back. Your body learns when to sleep and when to wake.<br>
+  <strong>Week two - Charge Your Battery.</strong> Build real sleep pressure, so your body actually needs sleep when you lie down.<br>
+  <strong>Week three - Train Your Off-Switch.</strong> Shut down the racing brain at night.<br>
+  <strong>Week four - Sync All Three.</strong> Build your personal protocol. The system runs itself.</p>
+
+  <p>Remember those eight or ten hours where only three or four are sharp? They start actually counting. Not because you're trying harder, but because your system is working. You get the same hours back - except this time they're real hours. Sharp hours. Think about what those two or three hours are actually worth to you. Not in theory - in real money, in projects you finish, in clients you land.</p>
+
+  <p>This isn't biohacking, wellness-influencer advice, or guru wisdom. It's informed by CBT-i, used in clinics worldwide, adapted from the work of a sleep specialist with over thirty years of clinical practice. I'm not selling a personality. I'm sharing research that changed my life. Just the protocol, the research, and what actually works. Four weeks. That's it. Not a six-month commitment - a protocol with an end.</p>
+
+  <hr class="soft">
+
+  <span class="kicker">Free technique</span>
+  <h2>Something you can try tonight</h2>
+
+  <p>As promised - here's something free. No purchase required.</p>
+
+  <p>Ever wonder why you lie in bed and your brain just won't stop? Tomorrow's tasks, that email you forgot, something from last week. It's not stress. It's how your brain works. Every unfinished task stays open, like a browser tab running in the background, and your brain keeps pinging it. Over and over. Psychologists call it the Zeigarnik Effect.</p>
+
+  <p>Researchers at Baylor University tested what happens when you close those tabs. Real sleep lab, electrodes, controlled conditions. One group did a simple five-minute exercise before bed. They fell asleep nine minutes faster - on the very first night.</p>
+
+  <div class="card purple">
+    <h3 style="margin-top:0">The brain dump</h3>
+    <p style="margin-bottom:0">Tonight, before bed, grab a piece of paper. Write down everything on your mind - work tasks, personal stuff, all of it. Empty your head onto that paper, every last drop. Close the notebook and put it on your nightstand. Each item you write down is one less loop running in your brain. The more you write, the faster you fall asleep. Five minutes. Don't be lazy about it - really dump everything out. Then close the notebook and see what happens.</p>
+  </div>
+
+  <p>What you just learned is one element of the third system - the Off-Switch. The protocol covers all three systems, and goes much deeper. Imagine what happens when they work together.</p>
+
+  <hr class="soft">
+
+  <span class="kicker">The protocol</span>
+  <h2>The question isn't whether. It's when.</h2>
+
+  <p>I've given you the cliff notes: the three-system model, why nothing worked, one technique for tonight. But the cliff notes aren't the protocol. Before I show you the full thing, think about something. You've seen the pattern. You know it doesn't break on its own. How long have you been saying "I just need more discipline"? "It's just a bad week." "I'll get it together next Monday." I said that for three years. The question isn't whether to fix this. It's when.</p>
+
+  <p>You have two paths. <strong>Path one</strong> - take the free technique, do your own research, and spend a few months figuring out what works. <strong>Path two</strong> - get the solution now: a four-week protocol, all three systems, fifteen minutes a day, built for your life. This isn't a dramatic life change. Fifteen minutes a day. Four weeks. That's it.</p>
+
+  <p>And for the first time, this was built for people who work from home. Not a hospital program. Not advice for nine-to-five workers. Built for the chaos of no fixed schedule, no commute, no separation between work and rest.</p>
+
+  <h2>Let me show you what's inside</h2>
+
+  <p>This is <strong>The ZeroFog</strong>. This is a founding launch - you're getting in before anyone else. And to be clear: this isn't a sleep course. It's a brain performance program. A four-week protocol that addresses all three systems - your Clock, your Battery, and your Off-Switch - so your brain actually recovers at night and you wake up sharp instead of foggy.</p>
+
+  <p>The protocol is complete - I've tested it, my friends have tested it. I'm packaging it into short daily video lessons, ten to fifteen minutes each, so you can follow it step by step. Every lesson gives you one specific action. Week one is ready - you start immediately. The rest unlocks as I finish packaging it - recording, editing, making it clean. It's progressive: each week builds on the last. Zero fluff. No "why sleep matters" filler. You already know it matters. This is about getting your hours back.</p>
+
+  <figure>
+    <img src="img/slide-078.png" alt="Week 1 - Reset Your Clock">
+  </figure>
+
+  <p><strong>Week 1 - Reset Your Clock.</strong> Get your mornings back. This is where your body learns when to sleep and when to wake. By around day five to seven, mornings get easier. You stop dragging yourself out of bed. Monday stops feeling like a hangover.</p>
+
+  <figure>
+    <img src="img/slide-079.png" alt="Week 2 - Charge Your Battery">
+  </figure>
+
+  <p><strong>Week 2 - Charge Your Battery.</strong> Build real sleep pressure. This is where your body starts actually needing sleep when you lie down. Instead of tossing and turning, you feel that pull. By day ten to fourteen, you're falling asleep faster - and that third cup of coffee becomes optional.</p>
+
+  <figure>
+    <img src="img/slide-080.png" alt="Week 3 - Train Your Off-Switch">
+  </figure>
+
+  <p><strong>Week 3 - Train Your Off-Switch.</strong> Shut down the racing brain. This teaches your nervous system to actually transition out of work mode at night. By day twenty-one, those racing thoughts at bedtime start fading. You stop replaying the day at midnight.</p>
+
+  <figure>
+    <img src="img/slide-081.png" alt="Week 4 - Sync All Three">
+  </figure>
+
+  <p><strong>Week 4 - Sync All Three.</strong> The system runs itself. You build your personal protocol card - one page that's yours for life - and it goes on autopilot. Sleep efficiency eighty-five percent or higher: that means eighty-five percent of the time you're in bed, you're actually asleep, not staring at the ceiling. Those eight hours you work start actually counting. Not two sharp hours out of eight. Most of them sharp.</p>
+
+  <figure>
+    <img src="img/slide-082.png" alt="Everything you get">
+  </figure>
+
+  <div class="card">
+    <p style="margin:0"><strong>Everything you get:</strong></p>
+    <ul class="clean" style="margin-bottom:0">
+      <li>The full four-week protocol in video format</li>
+      <li>A sleep diary system that takes two minutes a day</li>
+      <li>A sleep assessment you take on day zero and day twenty-eight, so you can see exactly how far you've come</li>
+      <li>Your personal protocol card - one page, yours for life</li>
+      <li>Action cards - one per lesson, so you always know exactly what to do</li>
+      <li>A week-by-week protocol guide so you never get lost</li>
+    </ul>
+  </div>
+
+  <h2>Plus your bonuses for watching today</h2>
+
+  <figure>
+    <img src="img/slide-083.png" alt="Your bonuses">
+  </figure>
+
+  <p>Remember the three tools I mentioned at the start? Here's why they matter more now that you've seen the system.</p>
+
+  <ul class="clean">
+    <li><strong>Your Caffeine Blueprint</strong> - the personalized version of what we just covered. You saw how caffeine blocks your sleep pressure. This gives you your personal caffeine schedule.</li>
+    <li><strong>9 Recovery Mistakes</strong> - you saw today how most advice sounds logical but works against your biology. This breaks down nine more of those traps, so you stop falling for them.</li>
+    <li><strong>The Recovery Protocol</strong> - five changes to where your body actually recovers. The kind where one fix quietly improves everything else. You can start with any of them tonight.</li>
+  </ul>
+
+  <hr class="soft">
+
+  <span class="kicker">Honest answers</span>
+  <h2>"I've tried everything"</h2>
+
+  <p>I hear this a lot. But let's be real - most of what you tried was aimed at the wrong problem. More discipline. Better apps. Another morning routine. That was never going to work, because the root cause was somewhere else entirely. And even when it came to sleep, you tried pieces. Maybe melatonin. Maybe a tracker. Incomplete solutions - isolated tips that were never designed to work together. Never all three systems, in the right order. That's the difference.</p>
+
+  <h2>"What if it doesn't work?"</h2>
+
+  <p>Then you get your money back. Full thirty-day money-back guarantee. Try the entire protocol. If you're not sleeping better, you pay nothing.</p>
+
+  <p>One thing I want to mention: if you have diagnosed clinical insomnia or untreated sleep apnea, please see a specialist first. This protocol is powerful, but it's not a replacement for medical treatment. That said, even if you end up needing medical help, a solid sleep protocol is still your foundation. Doctors fix the condition. The protocol fixes everything around it.</p>
+
+  <hr class="soft">
+
+  <span class="kicker">The offer</span>
+  <h2>So what does this cost?</h2>
+
+  <p>Less than what you spend in one month on apps, subscriptions, and tools that weren't solving the real problem. You already know what those cost. But before I show you the number, let me put it in context. These are your real alternatives:</p>
+
+  <div class="compare">
+    <div class="row"><span class="n">See a sleep specialist (consult, diagnosis, possible sleep study, therapy)</span><span class="v">$300 - $2,000+</span></div>
+    <div class="row"><span class="n">Hire a sleep coach, one-on-one over weeks</span><span class="v">$750 - $2,000</span></div>
+    <div class="row"><span class="n">Keep Googling, trying things from Reddit, hoping something sticks</span><span class="v">Free, but slow</span></div>
+    <div class="row us"><span class="n">The ZeroFog - the full four-week protocol</span><span class="v">$67</span></div>
+  </div>
+
+  <p>And remember - you're already paying for this problem. The productivity apps. The courses. The supplements, the extra coffees just to function. For a lot of people that adds up to somewhere between three hundred and two thousand dollars a year - all of it spent upgrading the stereo in a car with a broken engine. What if you just fixed the engine?</p>
+
+  <div class="offer">
+    <div class="terms">The ZeroFog - one-time payment, lifetime access</div>
+    <div class="price"><small>$</small>67 <span style="font-size:22px;color:var(--dim);font-weight:400;text-decoration:line-through">$147</span></div>
+    <p style="color:var(--purple);font-weight:600;margin-bottom:4px">Founding member price - early access only <span style="color:var(--dim);font-weight:400">(goes back to $147 once this window closes)</span></p>
+    <p style="font-size:15px;color:var(--muted)">Right now you're here as a founding member - before testimonials, before the full launch. Once this window closes, the price goes back up. Same course, same access - just twice the price. You lock in the lowest price forever, and get first access to every new tool and update, including the AI assistant I'm building that knows your protocol and tells you exactly what to adjust. Founding members get it first, free.</p>
+    <a href="#" class="cta">Enroll now</a>
+    <!-- TODO: real checkout URL -->
+    <div class="guar">30-day money-back guarantee. Pay once. It's yours forever.</div>
+  </div>
+
+  <p>And here's the founding member promise: we'll find the right pace together. You can ask questions, share concerns, tell me what's not working. You can reach me directly by email while the course is still taking shape. You're not just buying a course - you're in the room while it's being built. You won't fall off track without support.</p>
+
+  <h2>How much has the productivity tax already cost you?</h2>
+
+  <p>Think about it. Not just in hours - in real money. Lost clients. Missed deadlines. Projects you couldn't finish. Remember: forty to sixty lost hours every month. Whatever your hour is worth, multiply it by forty. That's what you're losing every month. Plus the opportunities you didn't have the energy to take. Whatever that number is - and only you know it - this costs a fraction of one month of it. And that's before you count every app subscription, every course, every tool you bought hoping it would help. This fixes what those couldn't.</p>
+
+  <figure>
+    <img src="img/slide-091.png" alt="30-day sleep-or-refund guarantee">
+  </figure>
+
+  <h2>The guarantee</h2>
+
+  <p>Here's how confident I am. Follow the protocol for four weeks. You'll be tracking your sleep anyway - it's part of the system, there's a built-in diary. If after four weeks you're not sleeping better, email me, show me your diary, and I'll refund every cent. No drama. I only ask one thing: actually do the work. Fair?</p>
+
+  <p class="pull cyan">What if this gave you back just one focused hour a day - one hour where your brain actually works? Would that alone be worth it?</p>
+
+  <h2>To recap, you get</h2>
+
+  <div class="card">
+    <ul class="check clean" style="margin:0">
+      <li>Video lessons across four weeks</li>
+      <li>The sleep diary system</li>
+      <li>Before-and-after sleep assessment</li>
+      <li>Your personal protocol card</li>
+      <li>Action cards, one per lesson</li>
+      <li>The week-by-week protocol guide</li>
+      <li>A thirty-day money-back guarantee</li>
+      <li>Plus the bonuses: 9 Recovery Mistakes, Your Caffeine Blueprint, and The Recovery Protocol</li>
+    </ul>
+  </div>
+
+  <h2>The pattern doesn't break itself</h2>
+
+  <p>Here's what I want you to remember. Every week your sleep system stays broken is another week of brain fog. Another week of half-finished tasks. Another week where you're working twice as hard for half the result. It doesn't plateau. It compounds. The longer you wait, the deeper the hole gets.</p>
+
+  <p>You know the root cause. You've seen the proof. The question isn't whether this works - it's how you want to get there. <strong>Option one</strong> - go at it alone. You've got the knowledge now, but keeping all three systems in sync without a structure is where most people lose it. A good week, then back to old patterns. <strong>Option two</strong> - the four-week protocol. Fifteen minutes a day. All three systems in the right sequence. And a thirty-day money-back guarantee, so there's zero risk either way.</p>
+
+  <p>Something has to change. And it's not a huge sacrifice - it's a small decision and fifteen minutes a day for four weeks. The payoff? Your focus comes back. Your decisions get sharper. Your energy stops crashing at two PM.</p>
+
+  <p class="pull">Clock. Battery. Off-Switch. Reset all three.</p>
+
+  <p>Your sleep changes, and your work follows. The focus comes back. The energy comes back. You stop running on caffeine and willpower. Not because you tried harder - because the system works.</p>
+
+  <div class="offer">
+    <div class="terms">The ZeroFog - founding member access</div>
+    <div class="price"><small>$</small>67 <span style="font-size:22px;color:var(--dim);font-weight:400;text-decoration:line-through">$147</span></div>
+    <a href="#" class="cta">Enroll now</a>
+    <!-- TODO: real checkout URL -->
+    <div class="guar">One-time payment. Lifetime access. 30-day money-back guarantee. I'll see you inside.</div>
+  </div>
+
+  <p style="text-align:center;color:var(--muted)">If you have any questions about the protocol, the course, or whether this is right for you - just email me. I read every message personally.</p>
+
+  <div class="footer">
+    <p>The ZeroFog &nbsp;|&nbsp; This is an educational program for improving sleep and daytime performance. It is not a medical diagnosis or a substitute for professional advice. If you have diagnosed clinical insomnia or untreated sleep apnea, please consult a specialist.</p>
+  </div>
+
+</div>
+</body>
+</html>
