@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Caffeine Blueprint - The ZeroFog</title>
+<script>
+// First-paint theme detection (shared with the rest of the site via zf_theme)
+(function() {
+  var saved = localStorage.getItem('zf_theme');
+  var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var useDark = saved ? saved === 'dark' : prefersDark;
+  if (useDark) document.documentElement.classList.add('dark');
+})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* DARK (default) */
+  :root {
+    --bg: #1a1a1a;
+    --surface: rgba(189,147,249,0.05);
+    --surface-border: rgba(189,147,249,0.18);
+    --text: #f8f8f2;
+    --text2: #c6c6c6;
+    --text3: #8f8f8f;
+    --metric: #8a8a8a;
+    --accent: #bd93f9;
+    --hairline: rgba(255,255,255,0.07);
+    --rule: rgba(189,147,249,0.30);
+    --warn: #cf9a9a;
+    --warn-rule: rgba(255,85,85,0.3);
+    --footer: #5a5a5a;
+    --ui-bg: #222222;
+    --ui-border: rgba(255,255,255,0.10);
+  }
+  /* LIGHT (when .dark is absent) */
+  html:not(.dark) {
+    --bg: #fafafa;
+    --surface: rgba(124,92,191,0.06);
+    --surface-border: rgba(124,92,191,0.22);
+    --text: #1a1a1a;
+    --text2: #3f3f3f;
+    --text3: #6b6b6b;
+    --metric: #8a8a8a;
+    --accent: #7c5cbf;
+    --hairline: rgba(0,0,0,0.09);
+    --rule: rgba(124,92,191,0.32);
+    --warn: #b15a5a;
+    --warn-rule: rgba(190,60,60,0.35);
+    --footer: #9a9a9a;
+    --ui-bg: #ffffff;
+    --ui-border: #d8d8d8;
+  }
+
+  @page { size: A4; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg); color: var(--text);
+    transition: background 0.25s, color 0.25s;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.75;
+  }
+  .doc { max-width: 760px; margin: 0 auto; padding: 60px 68px 72px; }
+
+  /* CONTROLS */
+  .controls { position: fixed; top: 16px; right: 16px; z-index: 100; display: flex; gap: 8px; }
+  .ctrl-btn {
+    background: var(--ui-bg); border: 1px solid var(--ui-border);
+    border-radius: 20px; padding: 6px 14px; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 500;
+    color: var(--text3); letter-spacing: 1.2px; text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .ctrl-btn:hover { color: var(--text); border-color: var(--accent); }
+
+  /* HEADER */
+  .header { text-align: center; margin-bottom: 60px; }
+  .eyebrow {
+    font-size: 10.5px; font-weight: 600; letter-spacing: 3.5px; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 22px;
+  }
+  h1 {
+    font-family: 'Cormorant Garamond', serif; font-size: 56px; font-weight: 700;
+    line-height: 1.02; letter-spacing: -0.5px; margin-bottom: 18px; color: var(--text);
+  }
+  h1 .accent { font-style: italic; color: var(--accent); }
+  .subtitle {
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500;
+    font-size: 21px; color: var(--text2); max-width: 500px; margin: 0 auto; line-height: 1.5;
+  }
+  .rule-center { width: 40px; height: 2px; background: var(--accent); margin: 30px auto 0; opacity: 0.7; }
+
+  /* SECTIONS */
+  .section { margin-bottom: 52px; break-inside: avoid; }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif; font-size: 27px; font-weight: 600;
+    color: var(--text); margin-bottom: 20px; padding-left: 16px;
+    border-left: 3px solid var(--accent); line-height: 1.1;
+  }
+  .section p { font-size: 15px; color: var(--text2); line-height: 1.8; margin-bottom: 12px; }
+  .section p .hl { color: var(--accent); font-weight: 600; }
+
+  /* FORMULA */
+  .formula-box {
+    background: var(--surface); border: 1px solid var(--surface-border);
+    border-radius: 4px; padding: 30px 34px;
+  }
+  .formula-box .lead { font-size: 15px; color: var(--text); margin-bottom: 22px; line-height: 1.7; }
+  .fill-line { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; font-size: 15px; color: var(--text2); }
+  .fill-line .blank { flex: 0 0 150px; border-bottom: 1px solid var(--rule); height: 22px; }
+  .fill-line .label { color: var(--accent); font-weight: 500; font-size: 12.5px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+  /* DOWNLOAD BUTTON */
+  .dl-btn {
+    display: inline-flex; align-items: center;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 20px; padding: 7px 16px;
+    font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600;
+    letter-spacing: 1.2px; text-transform: uppercase; text-decoration: none;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .dl-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+  /* CALCULATOR */
+  .calc-input { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+  .calc-input label { font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text3); }
+  .calc-input input[type="time"] {
+    font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 600;
+    background: var(--bg); color: var(--text);
+    border: 1px solid var(--surface-border); border-radius: 6px;
+    padding: 10px 14px; cursor: pointer; color-scheme: light dark;
+  }
+  .calc-input input[type="time"]:focus { outline: none; border-color: var(--accent); }
+  .calc-results { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+  .calc-result {
+    border: 1px solid var(--surface-border); border-radius: 8px;
+    padding: 18px 22px; background: var(--bg);
+  }
+  .calc-result .calc-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+  .calc-result .calc-label em { font-style: normal; color: var(--accent); }
+  .calc-result .calc-value { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 700; line-height: 1; color: var(--text); }
+  .calc-result.ideal .calc-value { color: var(--accent); }
+  .calc-hint { font-size: 13.5px; color: var(--text3); font-style: italic; font-family: 'Cormorant Garamond', serif; font-size: 17px; }
+
+  /* TABLES */
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    color: var(--text3); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 0 14px 12px; text-align: left; border-bottom: 1px solid var(--rule);
+  }
+  tbody td {
+    padding: 13px 14px; font-size: 14px; color: var(--text2);
+    border-bottom: 1px solid var(--hairline); line-height: 1.5;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody td:first-child { color: var(--text); }
+  tbody td .metric { color: var(--metric); font-size: 12px; }
+  .num { font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 500; }
+
+  /* TIPS */
+  .tips-list { list-style: none; padding: 0; }
+  .tips-list li {
+    font-size: 15px; color: var(--text2); line-height: 1.8;
+    margin-bottom: 18px; padding-left: 26px; position: relative;
+  }
+  .tips-list li::before {
+    content: ''; position: absolute; left: 0; top: 11px;
+    width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid var(--accent);
+  }
+  .tips-list li strong { color: var(--text); font-weight: 600; }
+
+  .divider { width: 40px; height: 1px; background: var(--rule); margin: 52px auto; }
+
+  .footer { text-align: center; padding-top: 28px; margin-top: 8px; border-top: 1px solid var(--hairline); }
+  .footer p { font-size: 11px; color: var(--footer); line-height: 1.6; }
+
+  .medical-disclaimer {
+    border-left: 2px solid var(--warn-rule);
+    padding: 4px 0 4px 18px; margin-bottom: 36px; break-inside: avoid;
+  }
+  .medical-disclaimer p { font-size: 10.5px; color: var(--text3); line-height: 1.7; margin-bottom: 0; }
+  .medical-disclaimer strong { color: var(--warn); font-weight: 600; }
+
+  /* MOBILE */
+  @media (max-width: 640px) {
+    .doc { padding: 56px 24px 48px; }
+    h1 { font-size: 42px; }
+    .controls { top: 12px; right: 12px; }
+  }
+
+  /* PRINT - force light, hide controls, save ink */
+  @media print {
+    .controls { display: none !important; }
+    html, html:not(.dark) {
+      --bg: #ffffff; --surface: #f4f1fa; --surface-border: #ddd2f0;
+      --text: #1a1a1a; --text2: #333; --text3: #666; --metric: #888;
+      --accent: #7c5cbf; --hairline: #e2e2e2; --rule: #c9bce8;
+      --warn: #b15a5a; --warn-rule: #d8a0a0; --footer: #999;
+    }
+    body { background: #fff; }
+    .doc { padding: 24px 32px; max-width: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <button class="ctrl-btn" id="themeToggle" onclick="toggleTheme()">Light</button>
+  <a class="dl-btn" href="caffeine-blueprint.pdf" download>&#8595;&nbsp; Download PDF</a>
+</div>
+
+<div class="doc">
+
+<div class="header">
+  <div class="eyebrow">The ZeroFog &middot; Bonus Guide</div>
+  <h1>Your <span class="accent">Caffeine</span> Blueprint</h1>
+  <p class="subtitle">Stop guessing when to stop - know your exact cutoff so caffeine works for your focus, not against it</p>
+  <div class="rule-center"></div>
+</div>
+
+<div class="section">
+  <div class="section-title">The Science, in 30 Seconds</div>
+  <p>Caffeine has a half-life of 5-6 hours. Half the caffeine from your 2 PM coffee is still in your system at 8 PM. A quarter is still there at 2 AM.</p>
+  <p>You might fall asleep - but caffeine <span class="hl">reduces deep sleep by up to 20%</span>, even when you don't feel it.</p>
+  <p>After 2 weeks of daily use, caffeine stops giving energy - it only prevents withdrawal.</p>
+</div>
+
+<div class="section">
+  <div class="section-title">Your Cutoff, Calculated</div>
+  <div class="formula-box">
+    <p class="lead">Enter your target bedtime - your cutoffs update instantly. The rule: bedtime minus 8-10 hours.</p>
+    <div class="calc-input">
+      <label for="bedtime">Target bedtime</label>
+      <input type="time" id="bedtime" value="23:00">
+    </div>
+    <div class="calc-results">
+      <div class="calc-result safe">
+        <span class="calc-label">Safe cutoff <em>(&minus;8h)</em></span>
+        <span class="calc-value" id="safeCut">3:00 PM</span>
+      </div>
+      <div class="calc-result ideal">
+        <span class="calc-label">Ideal cutoff <em>(&minus;10h)</em></span>
+        <span class="calc-value" id="idealCut">1:00 PM</span>
+      </div>
+    </div>
+    <p class="calc-hint">After your cutoff, switch to decaf or herbal tea. Prefer pen and paper? Download the printable PDF above.</p>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Quick Reference</div>
+  <table>
+    <thead><tr><th>Bedtime</th><th>Safe Cutoff (-8h)</th><th>Ideal Cutoff (-10h)</th></tr></thead>
+    <tbody>
+      <tr><td>10:00 PM</td><td class="num">2:00 PM</td><td class="num">12:00 PM (noon)</td></tr>
+      <tr><td>11:00 PM</td><td class="num">3:00 PM</td><td class="num">1:00 PM</td></tr>
+      <tr><td>12:00 AM</td><td class="num">4:00 PM</td><td class="num">2:00 PM</td></tr>
+      <tr><td>1:00 AM</td><td class="num">5:00 PM</td><td class="num">3:00 PM</td></tr>
+      <tr><td>2:00 AM</td><td class="num">6:00 PM</td><td class="num">4:00 PM</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="divider"></div>
+
+<div class="section">
+  <div class="section-title">What Counts as Caffeine</div>
+  <table>
+    <thead><tr><th>Source</th><th>Caffeine</th><th>Equivalent</th></tr></thead>
+    <tbody>
+      <tr><td>Espresso (1 shot)</td><td class="num">63 mg</td><td>1 unit</td></tr>
+      <tr><td>Brewed coffee - 8 oz <span class="metric">(240 ml)</span></td><td class="num">95 mg</td><td>1.5 units</td></tr>
+      <tr><td>Black tea - 8 oz <span class="metric">(240 ml)</span></td><td class="num">47 mg</td><td>0.75 units</td></tr>
+      <tr><td>Green tea - 8 oz <span class="metric">(240 ml)</span></td><td class="num">28 mg</td><td>0.5 units</td></tr>
+      <tr><td>Cola - 12 oz can <span class="metric">(355 ml)</span></td><td class="num">34 mg</td><td>0.5 units</td></tr>
+      <tr><td>Energy drink - 8.4 oz can <span class="metric">(250 ml)</span></td><td class="num">80 mg</td><td>1.25 units</td></tr>
+      <tr><td>Dark chocolate - 1.5 oz <span class="metric">(43 g)</span></td><td class="num">25 mg</td><td>0.4 units</td></tr>
+      <tr><td>Pre-workout (1 scoop)</td><td class="num">150-300 mg</td><td>2-5 units</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <div class="section-title">Practical Tips</div>
+  <ul class="tips-list">
+    <li><strong>Time it, don't quit it.</strong> Drink coffee in the morning - it works WITH your cortisol peak. After cutoff - decaf or herbal tea.</li>
+    <li><strong>Hidden sources add up.</strong> Dark chocolate, green tea, pre-workout. Check the table above.</li>
+    <li><strong>Know your type.</strong> ~15% are slow metabolizers (coffee at 3 PM = can't sleep). ~10% fast (coffee before bed, no problem). Rest are average. This is genetic. If 8 hours isn't enough - try a 10-12h cutoff.</li>
+    <li><strong>Full reset.</strong> Reduce by 1 cup every 3 days for 2 weeks. After that, one cup hits like it used to.</li>
+  </ul>
+</div>
+
+<div class="medical-disclaimer">
+  <p><strong>Medical disclaimer:</strong> This guide is for educational purposes only and is not medical advice. The information here is not intended to diagnose, treat, cure, or prevent any disease or condition. Consult a qualified healthcare provider before changing your sleep, diet, supplements, caffeine intake, or routines, especially if you have a medical condition, are pregnant, or take medications. If you experience persistent insomnia, suspected sleep apnea, loud snoring with daytime sleepiness, or other concerning symptoms, see a sleep specialist or your physician. In an emergency, call 911 or your local emergency services.</p>
+</div>
+
+<div class="footer">
+  <p>This guide is part of The ZeroFog. Based on caffeine pharmacokinetics research and clinical sleep medicine.</p>
+</div>
+
+</div>
+
+<script>
+function toggleTheme() {
+  var isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('zf_theme', isDark ? 'dark' : 'light');
+  updateToggleLabel();
+}
+function updateToggleLabel() {
+  var isDark = document.documentElement.classList.contains('dark');
+  document.getElementById('themeToggle').textContent = isDark ? 'Light' : 'Dark';
+}
+updateToggleLabel();
+
+// Caffeine cutoff calculator
+function fmtTime(date) {
+  var h = date.getHours(), m = date.getMinutes();
+  var ampm = h >= 12 ? 'PM' : 'AM';
+  var h12 = h % 12; if (h12 === 0) h12 = 12;
+  var mm = (m < 10 ? '0' : '') + m;
+  var label = h12 + ':' + mm + ' ' + ampm;
+  if (h === 12 && m === 0) label += ' (noon)';
+  return label;
+}
+function calcCutoffs() {
+  var v = document.getElementById('bedtime').value;
+  if (!v) return;
+  var parts = v.split(':');
+  var bed = new Date(2000, 0, 2, parseInt(parts[0], 10), parseInt(parts[1], 10));
+  document.getElementById('safeCut').textContent = fmtTime(new Date(bed.getTime() - 8 * 3600000));
+  document.getElementById('idealCut').textContent = fmtTime(new Date(bed.getTime() - 10 * 3600000));
+}
+document.getElementById('bedtime').addEventListener('input', calcCutoffs);
+calcCutoffs();
+</script>
+
+</body>
+</html>
