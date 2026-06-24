@@ -62,8 +62,8 @@
   .seg .s{ flex:1; text-align:center; background:var(--panel2); border:1px solid var(--line); color:var(--muted);
         padding:12px 4px 9px; border-radius:10px; cursor:pointer; font-size:12px; font-weight:600; }
   .seg .s b{ display:block; font-size:18px; margin-bottom:2px; color:var(--text); font-weight:700; }
-  .seg .s.on{ background:rgba(80,250,123,0.14); border-color:var(--green); }
-  .seg .s.on b{ color:var(--green); }
+  .seg .s.on{ background:rgba(189,147,249,0.14); border-color:var(--purple); }
+  .seg .s.on b{ color:var(--purple); }
 
   /* live SE */
   .live{ position:sticky; bottom:84px; margin:18px 0 0; background:linear-gradient(180deg,var(--panel),#191919);
@@ -316,11 +316,11 @@
     $('seTib').textContent='time in bed '+fmt(tib);
     $('seTst').textContent='slept '+fmt(tst);
     const f=$('seFill'); f.style.width=Math.min(100,se)+'%';
-    let col=se>=85?'var(--green)':se>=75?'var(--orange)':'var(--red)';
+    let col=se>=85?'var(--green)':'var(--purple)';
     f.style.background=col;
     $('seMsg').innerHTML = se>=85 ? 'Healthy. <span style="color:var(--green)">85%+</span> is the target.' :
-      se>=75 ? 'Getting there. Aim for <span style="color:var(--orange)">85%+</span>.' :
-      'Below 75% means too much time in bed awake. The protocol fixes this.';
+      se>=75 ? 'Getting there. Aim for <span style="color:var(--purple)">85%+</span>.' :
+      '<span style="color:var(--purple)">Below 75% — too much time in bed awake. The protocol fixes this.</span>';
   }
 
   // ---- save ----
