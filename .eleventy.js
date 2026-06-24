@@ -19,6 +19,9 @@ module.exports = function (eleventyConfig) {
   // Standalone webinar text-version long-read (self-contained HTML, served verbatim, noindex)
   eleventyConfig.ignores.add("src/webinar-text/**");
   eleventyConfig.addPassthroughCopy("src/webinar-text");
+  // Webinar bonus guides (self-contained HTML + PDFs, served verbatim)
+  eleventyConfig.ignores.add("src/bonuses/**");
+  eleventyConfig.addPassthroughCopy("src/bonuses");
 
   // CSS processing via lightningcss
   eleventyConfig.addTemplateFormats("css");
