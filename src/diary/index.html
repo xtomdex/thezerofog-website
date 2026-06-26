@@ -93,6 +93,13 @@
   .wrow .wv{ font-size:12px; font-weight:700; width:42px; text-align:right; }
   .wavg{ font-size:12px; color:var(--muted); margin-top:8px; }
   .wavg b{ color:var(--purple); }
+
+  /* demo bar */
+  .demo-bar{ display:flex; gap:12px; align-items:center; margin:28px 4px 8px; padding-top:18px; border-top:1px solid var(--line); }
+  .demo-bar button{ background:none; border:1px solid var(--line); color:var(--dim); font-family:inherit; font-size:12px; font-weight:600; padding:7px 14px; border-radius:8px; cursor:pointer; transition:.15s; }
+  .demo-bar button:hover{ border-color:var(--purple); color:var(--purple); }
+  .demo-bar .clear{ border-color:transparent; color:var(--dim); }
+  .demo-bar .clear:hover{ border-color:var(--line); color:var(--muted); }
 </style>
 </head>
 <body>
@@ -246,6 +253,11 @@
       <div class="wavg" id="weekAvg"></div>
     </div>
 
+    <div class="demo-bar">
+      <button id="demoBtn">Load sample week</button>
+      <button class="clear" id="clearBtn">Clear all data</button>
+    </div>
+
   </div>
 
   <div class="savebar"><div class="inner">
@@ -383,6 +395,41 @@
   }
 
   loadDay(); renderWeek();
+
+  // ---- demo data ----
+  // 7 days ending today. Mix of green/orange/red SE values.
+  // SE per day: 93% | 74% | 59% | 83% | 72% | 90% | 81% → avg 79%
+  const DEMO_DAYS = [
+    [6, {intoBed:"23:00",tried:"23:10",sol:"7",  wakings:0,waso:"0", finalWake:"06:45",outBed:"07:00",quality:"4",caffeine:"14:00",alcohol:"none",nap:"none",   exercise:"morning",  aid:"none"}],
+    [5, {intoBed:"23:15",tried:"23:30",sol:"22", wakings:3,waso:"45",finalWake:"06:00",outBed:"06:30",quality:"2",caffeine:"17:30",alcohol:"1-2", nap:"none",   exercise:"none",     aid:"none",    notes:"Couldn't wind down"}],
+    [4, {intoBed:"22:30",tried:"23:00",sol:"45", wakings:2,waso:"45",finalWake:"05:30",outBed:"07:00",quality:"1",caffeine:"16:00",alcohol:"none",nap:"<20",    exercise:"none",     aid:"melatonin",notes:"Deadline stress, mind racing"}],
+    [3, {intoBed:"23:30",tried:"23:40",sol:"7",  wakings:2,waso:"45",finalWake:"07:00",outBed:"07:15",quality:"3",caffeine:"13:00",alcohol:"none",nap:"none",   exercise:"afternoon",aid:"none"}],
+    [2, {intoBed:"01:30",tried:"01:45",sol:"45", wakings:1,waso:"45",finalWake:"09:00",outBed:"09:30",quality:"3",caffeine:"15:00",alcohol:"3+", nap:"none",   exercise:"none",     aid:"none",    notes:"Late dinner with friends"}],
+    [1, {intoBed:"00:30",tried:"00:45",sol:"7",  wakings:0,waso:"0", finalWake:"08:30",outBed:"09:00",quality:"5",caffeine:"10:00",alcohol:"none",nap:"none",   exercise:"morning",  aid:"none"}],
+    [0, {intoBed:"23:00",tried:"23:15",sol:"22", wakings:2,waso:"22",finalWake:"06:30",outBed:"07:00",quality:"3",caffeine:"14:30",alcohol:"none",nap:"<20",    exercise:"afternoon",aid:"none"}],
+  ];
+
+  $('demoBtn').addEventListener('click', () => {
+    const all = load();
+    const today = new Date(); today.setHours(0,0,0,0);
+    DEMO_DAYS.forEach(([ago, data]) => {
+      const d = new Date(today); d.setDate(d.getDate() - ago);
+      const entry = {...data};
+      const se = seFor(entry); if(se != null) entry.se = se;
+      all[key(d)] = entry;
+    });
+    saveAll(all);
+    loadDay(); renderWeek();
+    const btn = $('demoBtn');
+    btn.textContent = 'Sample week loaded ✓';
+    setTimeout(() => btn.textContent = 'Load sample week', 2000);
+  });
+
+  $('clearBtn').addEventListener('click', () => {
+    if(!confirm('Clear all diary data?')) return;
+    localStorage.removeItem(KEY);
+    loadDay(); renderWeek();
+  });
 </script>
 
 <footer style="text-align:center;padding:24px 20px 32px;margin-top:16px;border-top:1px solid rgba(255,255,255,0.07)">
