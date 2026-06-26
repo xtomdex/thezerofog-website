@@ -237,6 +237,10 @@
   .consent{ display:flex; gap:8px; align-items:flex-start; font-size:13px; line-height:1.4; margin:10px 0; text-align:left; }
   .consent input{ margin-top:2px; flex:0 0 auto; }
   .locked-msg{ font-size:14px; line-height:1.5; margin:0 0 14px; }
+  /* Manage my data (deletion) — subtle, destructive. */
+  .manage-data{ text-align:center; margin:28px 0 8px; }
+  .danger-link{ background:none; border:none; color:#c0392b; font-size:13px; text-decoration:underline; cursor:pointer; padding:4px; }
+  .manage-err{ color:#c0392b; font-size:13px; margin-top:8px; min-height:1em; }
 </style>
 <!-- Generated public Supabase config (window globals) — must load before the app script. -->
 <script src="/app/config.js"></script>
@@ -360,6 +364,11 @@
       </div>
     </div>
     <div class="savewrap"><button class="save" id="save">Save today's entry</button></div>
+    <!-- Manage my data — right to erasure (irreversible). -->
+    <div class="manage-data">
+      <button class="danger-link" id="deleteData">Delete my data</button>
+      <div class="manage-err" id="deleteErr"></div>
+    </div>
   </div>
 
   <!-- ============ ASSESSMENT VIEW ============ -->
@@ -516,6 +525,27 @@ const DB = {
     } catch(e) { /* non-fatal */ }
   },
 
+  async deleteAccount(){
+    // Layer 1 (client, RLS-allowed): delete own diary + assessment rows.
+    // These also cascade when the auth user is removed, but we delete explicitly for
+    // immediate effect and clear feedback.
+    await sb.from('diary_entries').delete().eq('user_id', this._userId);
+    await sb.from('assessments').delete().eq('user_id', this._userId);
+
+    // Layer 2 (server): delete the auth user (+ cascade profile) via the function,
+    // authenticated with the current session's access token.
+    const { data: { session } } = await sb.auth.getSession();
+    const token = session?.access_token;
+    if(!token) throw new Error('Not signed in.');
+    const res = await fetch('/.netlify/functions/delete-account', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token },
+    });
+    if(!res.ok) throw new Error('Could not complete deletion. Please contact support.');
+    // Clear local session client-side.
+    await sb.auth.signOut();
+  },
+
   // ---- Diary: pack flat entry into a jsonb `data` column; flatten back on read ----
   async saveDiary(entry){
     const { entry_date, sleep_eff, ...rest } = entry; // rest = all the state fields
@@ -632,6 +662,19 @@ $('signOut').addEventListener('click', async () => {
 });
 $('lockedSignOut').addEventListener('click', async () => {
   await DB.signOut(); location.reload();
+});
+$('deleteData').addEventListener('click', async () => {
+  $('deleteErr').textContent = '';
+  // Deletion is irreversible — require explicit confirmation.
+  if(!window.confirm('Are you sure? This permanently deletes your sleep data and account. This cannot be undone.')) return;
+  $('deleteData').disabled = true;
+  try{
+    await DB.deleteAccount();
+    location.href = '/';
+  }catch(e){
+    $('deleteErr').textContent = e.message || 'Could not complete deletion. Please contact support.';
+    $('deleteData').disabled = false;
+  }
 });
 
 /* ============ TABS ============ */
