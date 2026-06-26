@@ -116,6 +116,19 @@
         font-size:16px; font-weight:700; padding:15px; cursor:pointer; }
   .save.saved{ background:var(--green); }
 
+  /* demo controls (preview build only) */
+  .demo-bar{ display:flex; gap:12px; align-items:center; justify-content:center; margin:0 20px 8px; padding-top:18px; border-top:1px solid var(--line); }
+  .demo-bar button{ background:none; border:1px solid var(--line); color:var(--dim); font-family:inherit; font-size:12px; font-weight:600; padding:7px 14px; border-radius:8px; cursor:pointer; transition:.15s; }
+  .demo-bar button:hover{ border-color:var(--purple); color:var(--purple); }
+  .demo-bar .clear{ border-color:transparent; }
+  .demo-bar .clear:hover{ border-color:var(--line); color:var(--muted); }
+
+  /* footer */
+  .app-footer{ text-align:center; padding:24px 20px calc(30px + env(safe-area-inset-bottom)); margin-top:8px; border-top:1px solid var(--line); }
+  .app-footer p{ font-size:11px; color:var(--dim); line-height:1.8; }
+  .app-footer a{ color:var(--dim); text-decoration:none; }
+  .app-footer a:hover{ color:var(--muted); }
+
   /* ===== ASSESSMENT ===== */
   .a-wrap{ padding:20px 20px 0; }
   .a-intro{ font-size:13.5px; color:var(--muted); text-align:center; margin-bottom:8px; }
@@ -369,6 +382,10 @@
       <button class="danger-link" id="deleteData">Delete my data</button>
       <div class="manage-err" id="deleteErr"></div>
     </div>
+    <div class="demo-bar">
+      <button id="demoLoad">Load 30-day sample</button>
+      <button class="clear" id="demoClear">Clear all data</button>
+    </div>
   </div>
 
   <!-- ============ ASSESSMENT VIEW ============ -->
@@ -395,6 +412,14 @@
       <div class="a-actions"><button type="button" class="btn" id="aRetake">Retake</button></div>
     </div>
   </div>
+
+  <footer class="app-footer">
+    <p>&copy; 2026 The ZeroFog. All rights reserved.<br>
+    <a href="/privacy/">Privacy</a> &middot;
+    <a href="/terms/">Terms</a> &middot;
+    <a href="/refunds/">Refunds</a> &middot;
+    <a href="/disclaimer/">Disclaimer</a></p>
+  </footer>
 
 </div>
 
@@ -748,6 +773,39 @@ $('save').addEventListener('click', async () => {
   const b=$('save'); b.classList.add('saved');
   b.textContent = r ? ('Saved ✓   SE '+r.se+'%') : 'Saved ✓';
   setTimeout(()=>{ b.classList.remove('saved'); b.textContent="Save today's entry"; },1800);
+});
+
+/* ---- DEMO DATA (preview build only) ----
+   Seeds 30 nights ending today so the Summary report fills out for
+   the 7-day, 30-day, and Custom ranges. Remove once Supabase is live. */
+const DEMO_ARCHETYPES = [
+  {intoBed:"23:00",tried:"23:10",sol:"7", wakings:0,waso:"0", finalWake:"06:45",outBed:"07:00",quality:"4",caffeine:"14:00",alcohol:"none",nap:"none",exercise:"morning",  aid:"none"},
+  {intoBed:"23:15",tried:"23:30",sol:"22",wakings:3,waso:"45",finalWake:"06:00",outBed:"06:30",quality:"2",caffeine:"17:30",alcohol:"1-2", nap:"none",exercise:"none",     aid:"none",     notes:"Couldn't wind down"},
+  {intoBed:"22:30",tried:"23:00",sol:"45",wakings:2,waso:"45",finalWake:"05:30",outBed:"07:00",quality:"1",caffeine:"16:00",alcohol:"none",nap:"<20",exercise:"none",     aid:"melatonin",notes:"Deadline stress, mind racing"},
+  {intoBed:"23:30",tried:"23:40",sol:"7", wakings:1,waso:"7", finalWake:"07:00",outBed:"07:15",quality:"4",caffeine:"13:00",alcohol:"none",nap:"none",exercise:"afternoon",aid:"none"},
+  {intoBed:"00:30",tried:"00:45",sol:"22",wakings:1,waso:"22",finalWake:"08:00",outBed:"08:30",quality:"3",caffeine:"15:00",alcohol:"none",nap:"none",exercise:"none",     aid:"none"},
+  {intoBed:"23:00",tried:"23:15",sol:"7", wakings:0,waso:"0", finalWake:"06:30",outBed:"06:45",quality:"5",caffeine:"10:00",alcohol:"none",nap:"none",exercise:"morning",  aid:"none"},
+  {intoBed:"01:00",tried:"01:20",sol:"45",wakings:2,waso:"45",finalWake:"08:30",outBed:"09:00",quality:"2",caffeine:"16:30",alcohol:"3+", nap:"none",exercise:"none",     aid:"none",     notes:"Late night out"},
+];
+$('demoLoad').addEventListener('click', async ()=>{
+  const today = new Date(); today.setHours(0,0,0,0);
+  for(let i=0;i<30;i++){
+    const d = new Date(today); d.setDate(d.getDate()-i);
+    const a = DEMO_ARCHETYPES[(i*3 + (i%5)) % DEMO_ARCHETYPES.length];
+    const entry = { ...a, entry_date: dkey(d) };
+    const r = seFrom(entry); entry.sleep_eff = r ? r.se : null;
+    await DB.saveDiary(entry);
+  }
+  await loadDay();
+  if(sumOverlay.classList.contains('show')) renderSummary();
+  const b = $('demoLoad'); b.textContent = '30-day sample loaded ✓';
+  setTimeout(()=>{ b.textContent = 'Load 30-day sample'; }, 2000);
+});
+$('demoClear').addEventListener('click', async ()=>{
+  if(!confirm('Clear all diary data?')) return;
+  localStorage.removeItem(DB._diaryKey());
+  await loadDay();
+  if(sumOverlay.classList.contains('show')) renderSummary();
 });
 
 function applyState(){
