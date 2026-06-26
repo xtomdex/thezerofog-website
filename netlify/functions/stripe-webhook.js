@@ -161,8 +161,108 @@ export default async function handler(req) {
     });
   }
 
+  // Best-effort app-user provisioning. Runs only after Make succeeded. Never affects the response:
+  // the course (via Make) is already guaranteed; app access is a bonus that support can fix if it
+  // fails. Awaited so it completes within the function lifetime, but fully wrapped.
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseSecret = process.env.SUPABASE_SECRET_KEY;
+  if (supabaseUrl && supabaseSecret) {
+    try {
+      await provisionAppUser(email, session.id, supabaseUrl, supabaseSecret);
+    } catch (err) {
+      // Defensive: provisionAppUser shouldn't throw, but never let it break the 200 response.
+      console.error('[provision] unexpected error (ignored):', err);
+    }
+  } else {
+    console.warn('[provision] SUPABASE_URL or SUPABASE_SECRET_KEY not set — skipping app provisioning');
+  }
+
   return received();
 }
+
+// Best-effort: create (or find) the Supabase auth user for this buyer and mark their profile paid.
+// MUST NOT throw — provisioning failure must not affect the Stripe response or course enrollment.
+async function provisionAppUser(email, sessionId, supabaseUrl, secretKey) {
+  const adminHeaders = {
+    'Content-Type': 'application/json',
+    'apikey': secretKey,
+    'Authorization': `Bearer ${secretKey}`,   // new key format: must equal apikey value
+    'User-Agent': 'zerofog-stripe-webhook',    // avoid 401 browser-origin rejection
+  };
+
+  let userId = null;
+
+  // 1) Try to create the user (email_confirm:true so they can log in via OTP without confirmation).
+  try {
+    const createRes = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
+      method: 'POST',
+      headers: adminHeaders,
+      body: JSON.stringify({ email, email_confirm: true }),
+    });
+    if (createRes.ok) {
+      const created = await createRes.json();
+      userId = created?.id || created?.user?.id || null;
+    } else {
+      // Likely already exists (e.g. repeat purchase or Stripe retry). Fall through to lookup.
+      console.warn('[provision] createUser non-OK:', createRes.status);
+    }
+  } catch (err) {
+    console.error('[provision] createUser error:', err);
+  }
+
+  // 2) If we don't have an id yet, look the user up by email (admin list with filter).
+  if (!userId) {
+    try {
+      const listRes = await fetch(
+        `${supabaseUrl}/auth/v1/admin/users?` + new URLSearchParams({ email }),
+        { method: 'GET', headers: adminHeaders }
+      );
+      if (listRes.ok) {
+        const data = await listRes.json();
+        const users = data?.users || data?.aud || [];
+        const match = Array.isArray(users)
+          ? users.find(u => (u.email || '').toLowerCase() === email.toLowerCase())
+          : null;
+        userId = match?.id || null;
+      } else {
+        console.warn('[provision] listUsers non-OK:', listRes.status);
+      }
+    } catch (err) {
+      console.error('[provision] listUsers error:', err);
+    }
+  }
+
+  if (!userId) {
+    console.error('[provision] could not resolve user id for', email, '- profile not written');
+    return;
+  }
+
+  // 3) Upsert the profile row marking the buyer paid (idempotent on user_id).
+  try {
+    const profRes = await fetch(
+      `${supabaseUrl}/rest/v1/profiles?on_conflict=user_id`,
+      {
+        method: 'POST',
+        headers: { ...adminHeaders, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+        body: JSON.stringify({
+          user_id: userId,
+          email,
+          is_paid: true,
+          paid_at: new Date().toISOString(),
+          payment_session_id: sessionId,
+        }),
+      }
+    );
+    if (!profRes.ok) {
+      console.error('[provision] profile upsert non-OK:', profRes.status, await safeText(profRes));
+    }
+  } catch (err) {
+    console.error('[provision] profile upsert error:', err);
+  }
+}
+
+// small helper so logging a non-OK body can't throw
+async function safeText(res){ try { return await res.text(); } catch { return ''; } }
 
 // Verifies a Stripe-Signature header against the raw body using the signing secret.
 // Header format: "t=TIMESTAMP,v1=SIGNATURE[,v1=SIGNATURE2...]". Returns
