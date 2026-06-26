@@ -4,16 +4,42 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
+<script>
+// Theme detection (runs before any CSS to prevent flash) - mirrors base.njk
+(function() {
+  var saved = localStorage.getItem('zf_theme');
+  var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var useDark = saved ? saved === 'dark' : prefersDark;
+  if (useDark) document.documentElement.classList.add('dark');
+})();
+</script>
 <title>Why You Lose 2-3 Sharp Hours Every Day - The ZeroFog</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+  /* LIGHT (default) - palette matches the rest of the site */
   :root{
+    --bg:#f3f3f6; --surface:#ffffff; --surface2:#eceef1; --line:rgba(0,0,0,0.10);
+    --text:#1a1a1a; --muted:#555555; --dim:#8a8a8a; --btn-text:#ffffff;
+    --purple:#6d28d9; --pink:#be185d; --cyan:#0e7490; --green:#15803d; --red:#dc2626; --orange:#b45309;
+  }
+  /* DARK (html.dark) - the original look */
+  html.dark{
     --bg:#1a1a1a; --surface:#222222; --surface2:#1e1e1e; --line:rgba(255,255,255,0.08);
-    --text:#f8f8f2; --muted:#b0b0b0; --dim:#777;
+    --text:#f8f8f2; --muted:#b0b0b0; --dim:#777; --btn-text:#1a1a1a;
     --purple:#bd93f9; --pink:#ff79c6; --cyan:#8be9fd; --green:#50fa7b; --red:#ff5555; --orange:#ffb86c;
   }
+  body{ transition:background .3s, color .3s; }
+
+  /* theme toggle - fixed pill, self-contained (page uses its own tokens) */
+  .theme-toggle{
+    position:fixed; top:16px; right:16px; z-index:100;
+    background:var(--surface2); border:1px solid var(--line); border-radius:20px;
+    padding:6px 14px; cursor:pointer; font-family:'Inter',sans-serif; font-size:11px;
+    font-weight:500; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; transition:all .3s;
+  }
+  .theme-toggle:hover{ color:var(--text); border-color:var(--purple); }
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{
@@ -80,7 +106,7 @@
   .offer .price small{font-size:20px;color:var(--dim)}
   .offer .terms{font-size:15px;color:var(--muted);margin-bottom:8px}
   .cta{
-    display:inline-block;background:var(--purple);color:#1a1a1a;font-weight:700;font-size:17px;
+    display:inline-block;background:var(--purple);color:var(--btn-text);font-weight:700;font-size:17px;
     padding:16px 40px;border-radius:12px;text-decoration:none;margin:18px 0 8px;transition:opacity .2s,transform .1s;
   }
   .cta:hover{opacity:.92}
@@ -107,6 +133,7 @@
 </style>
 </head>
 <body>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
 <!-- VISUALS: slide-number -> PNG filename mapping is best-effort (deck has 34b/86b, slide 45 missing, 100 silent). Spot-check each image matches its section before publishing. -->
 
 <div class="wrap">
@@ -577,5 +604,6 @@
   </div>
 
 </div>
+<script src="/assets/js/shared.js" defer></script>
 </body>
 </html>
