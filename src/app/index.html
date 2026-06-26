@@ -235,6 +235,10 @@
   #authGate{ align-items:center; }
   #authGate .modal{ border-radius:18px; margin:0 16px; }
 </style>
+<!-- Generated public Supabase config (window globals) — must load before the app script. -->
+<script src="/app/config.js"></script>
+<!-- Supabase JS client (UMD bundle exposes global `supabase` with createClient). -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="app">
@@ -424,71 +428,100 @@
 /* ============================================================
    DATA LAYER  (the ONLY place that touches storage)
    ------------------------------------------------------------
-   INTERIM: localStorage. SWAP to Supabase by replacing the
-   bodies of the DB methods below with Supabase calls. The rest
-   of the app calls DB.* and never touches storage directly.
-
-   Supabase wiring (when Dima gives project URL + anon key):
-     const sb = supabase.createClient(URL, ANON_KEY)
-     sendCode(email)   -> sb.auth.signInWithOtp({ email })
-     verifyCode(e,c)   -> sb.auth.verifyOtp({ email:e, token:c, type:'email' })
-     currentUser()     -> (await sb.auth.getUser()).data.user
-     signOut()         -> sb.auth.signOut()
-     saveDiary(entry)  -> sb.from('diary_entries').upsert(entry, {onConflict:'user_id,entry_date'})
-     getDiary(date)    -> sb.from('diary_entries').select().eq('entry_date',date).maybeSingle()
-     getDiaryRange     -> sb.from('diary_entries').select().gte('entry_date',from).lte('entry_date',to)
-     saveAssessment    -> sb.from('assessment_results').insert(rec)
-     getAssessments    -> sb.from('assessment_results').select().order('taken_on')
+   Backed by Supabase. The rest of the app calls DB.* and never
+   touches storage directly. Auth via email OTP (numeric code);
+   diary/assessment rows are scoped to the authenticated user and
+   protected by RLS (own rows + paid). Diary input fields are
+   packed into a jsonb `data` column and flattened back on read so
+   the rest of the app keeps seeing flat entry objects.
    ============================================================ */
-const DEMO = true; // <- false once Supabase is wired
+
+// Supabase client. URL + publishable key come from the generated /app/config.js (window globals).
+const SB_URL = window.ZF_SUPABASE_URL;
+const SB_KEY = window.ZF_SUPABASE_ANON_KEY;
+const sb = (SB_URL && SB_KEY) ? supabase.createClient(SB_URL, SB_KEY) : null;
 
 const DB = {
-  _diaryKey(){ return 'zf_diary::' + (this._email||'anon'); },
-  _assessKey(){ return 'zf_assess::' + (this._email||'anon'); },
+  _userId: null,
   _email: null,
-  _pendingCode: null,
 
   async currentUser(){
-    const e = localStorage.getItem('zf_user');
-    if(e){ this._email = e; return { email:e }; }
+    const { data } = await sb.auth.getUser();
+    const u = data && data.user;
+    if(u){ this._userId = u.id; this._email = u.email; return { email: u.email, id: u.id }; }
     return null;
   },
+
   async sendCode(email){
-    // DEMO: generate a code locally and show it. Supabase: signInWithOtp.
-    this._email = email;
-    this._pendingCode = String(Math.floor(100000 + Math.random()*900000));
-    return { demoCode: this._pendingCode };
+    // Email OTP (numeric code). Do NOT pass emailRedirectTo — its presence makes Supabase
+    // send a magic link instead of a code, which breaks verifyOtp({type:'email'}).
+    const { error } = await sb.auth.signInWithOtp({ email });
+    if(error) throw error;
+    return {};
   },
+
   async verifyCode(email, code){
-    if(DEMO){
-      if(code !== this._pendingCode) throw new Error('That code does not match. Check the code and try again.');
-    }
-    localStorage.setItem('zf_user', email);
-    this._email = email;
-    return { email };
+    const { data, error } = await sb.auth.verifyOtp({ email, token: code, type: 'email' });
+    if(error) throw new Error('That code does not match. Check the code and try again.');
+    const u = data.user;
+    this._userId = u.id; this._email = u.email;
+    return { email: u.email, id: u.id };
   },
+
   async signOut(){
-    localStorage.removeItem('zf_user'); this._email = null;
+    await sb.auth.signOut();
+    this._userId = null; this._email = null;
   },
 
-  _allDiary(){ try{ return JSON.parse(localStorage.getItem(this._diaryKey()))||{}; }catch(e){ return {}; } },
+  // ---- Diary: pack flat entry into a jsonb `data` column; flatten back on read ----
   async saveDiary(entry){
-    const all = this._allDiary(); all[entry.entry_date] = entry;
-    localStorage.setItem(this._diaryKey(), JSON.stringify(all));
-  },
-  async getDiary(dateStr){ return this._allDiary()[dateStr] || null; },
-  async getDiaryRange(from, to){
-    const all = this._allDiary();
-    return Object.values(all).filter(e => e.entry_date >= from && e.entry_date <= to)
-                 .sort((a,b)=> a.entry_date < b.entry_date ? -1 : 1);
+    const { entry_date, sleep_eff, ...rest } = entry; // rest = all the state fields
+    const row = { user_id: this._userId, entry_date, sleep_eff, data: rest };
+    const { error } = await sb.from('diary_entries').upsert(row, { onConflict: 'user_id,entry_date' });
+    if(error) throw error;
   },
 
-  async saveAssessment(rec){
-    let arr = []; try{ arr = JSON.parse(localStorage.getItem(this._assessKey()))||[]; }catch(e){}
-    arr.push(rec); localStorage.setItem(this._assessKey(), JSON.stringify(arr));
+  async getDiary(dateStr){
+    const { data, error } = await sb.from('diary_entries')
+      .select('entry_date, sleep_eff, data')
+      .eq('user_id', this._userId).eq('entry_date', dateStr).maybeSingle();
+    if(error) throw error;
+    if(!data) return null;
+    return { entry_date: data.entry_date, sleep_eff: data.sleep_eff, ...(data.data || {}) };
   },
+
+  async getDiaryRange(from, to){
+    const { data, error } = await sb.from('diary_entries')
+      .select('entry_date, sleep_eff, data')
+      .eq('user_id', this._userId)
+      .gte('entry_date', from).lte('entry_date', to)
+      .order('entry_date', { ascending: true });
+    if(error) throw error;
+    return (data || []).map(r => ({ entry_date: r.entry_date, sleep_eff: r.sleep_eff, ...(r.data || {}) }));
+  },
+
+  // ---- Assessment: direct column mapping; answers in jsonb ----
+  async saveAssessment(rec){
+    const row = {
+      user_id: this._userId,
+      taken_on: rec.taken_on,
+      score_total: rec.score_total,
+      score_clock: rec.score_clock,
+      score_battery: rec.score_battery,
+      score_offswitch: rec.score_offswitch,
+      answers: rec.answers,
+    };
+    const { error } = await sb.from('assessments').insert(row);
+    if(error) throw error;
+  },
+
   async getAssessments(){
-    try{ return (JSON.parse(localStorage.getItem(this._assessKey()))||[]).sort((a,b)=> a.taken_on < b.taken_on ? -1 : 1); }catch(e){ return []; }
+    const { data, error } = await sb.from('assessments')
+      .select('taken_on, score_total, score_clock, score_battery, score_offswitch, answers')
+      .eq('user_id', this._userId)
+      .order('taken_on', { ascending: true });
+    if(error) throw error;
+    return data || [];
   },
 };
 
@@ -513,10 +546,15 @@ function unlock(email){
 $('sendCode').addEventListener('click', async () => {
   const email = $('authEmail').value.trim();
   $('authErr').textContent = '';
+  if(!sb){ $('authErr').textContent = "The app isn't fully configured yet. Please try again later."; return; }
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ $('authErr').textContent='Enter a valid email.'; return; }
-  const res = await DB.sendCode(email);
+  try{
+    await DB.sendCode(email);
+  }catch(e){
+    $('authErr').textContent = "Couldn't send your code. Please try again in a moment.";
+    return;
+  }
   $('step-email').style.display='none'; $('step-code').style.display='block';
-  if(res.demoCode){ $('authDemo').style.display='block'; $('authDemo').innerHTML = 'Demo mode (no email sent yet). Your code is <b>'+res.demoCode+'</b>. Once Supabase is connected this arrives by email.'; }
   $('authCode').focus();
 });
 $('verifyCode').addEventListener('click', async () => {
@@ -527,7 +565,7 @@ $('verifyCode').addEventListener('click', async () => {
 });
 $('backToEmail').addEventListener('click', () => {
   $('step-code').style.display='none'; $('step-email').style.display='block';
-  $('authDemo').style.display='none'; $('authErr').textContent='';
+  $('authErr').textContent='';
 });
 $('signOut').addEventListener('click', async () => {
   await DB.signOut(); location.reload();
