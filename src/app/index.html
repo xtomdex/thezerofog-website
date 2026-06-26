@@ -234,6 +234,9 @@
   /* ===== auth gate ===== */
   #authGate{ align-items:center; }
   #authGate .modal{ border-radius:18px; margin:0 16px; }
+  .consent{ display:flex; gap:8px; align-items:flex-start; font-size:13px; line-height:1.4; margin:10px 0; text-align:left; }
+  .consent input{ margin-top:2px; flex:0 0 auto; }
+  .locked-msg{ font-size:14px; line-height:1.5; margin:0 0 14px; }
 </style>
 <!-- Generated public Supabase config (window globals) — must load before the app script. -->
 <script src="/app/config.js"></script>
@@ -395,12 +398,27 @@
     <div class="err" id="authErr"></div>
     <div id="step-email">
       <input type="email" id="authEmail" placeholder="you@email.com" autocomplete="email">
+      <label class="consent">
+        <input type="checkbox" id="consentChk">
+        <span>
+          <!-- TODO: final consent copy to be confirmed by Dima/Kirill. Must name that this stores
+               sensitive sleep/lifestyle (health-related) data, state the purpose, and link privacy. -->
+          I agree that my sleep and lifestyle entries will be stored to provide this app, as described
+          in the <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.
+        </span>
+      </label>
       <button class="mbtn" id="sendCode">Send my code</button>
     </div>
     <div id="step-code" style="display:none">
       <input type="text" id="authCode" placeholder="000000" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
       <button class="mbtn" id="verifyCode">Verify &amp; open</button>
       <button class="mlink" id="backToEmail">Use a different email</button>
+    </div>
+    <div id="step-locked" style="display:none">
+      <p class="locked-msg">This app is part of the program and is available to customers.
+         If you've purchased, make sure you're signing in with the same email you used at checkout.</p>
+      <a class="mbtn" href="/sales">See the program</a>
+      <button class="mlink" id="lockedSignOut">Sign out</button>
     </div>
   </div>
 </div>
@@ -441,6 +459,9 @@ const SB_URL = window.ZF_SUPABASE_URL;
 const SB_KEY = window.ZF_SUPABASE_ANON_KEY;
 const sb = (SB_URL && SB_KEY) ? supabase.createClient(SB_URL, SB_KEY) : null;
 
+// Version of the health-data consent copy the user agreed to (bump when copy changes).
+const CONSENT_VERSION = 'v1';
+
 const DB = {
   _userId: null,
   _email: null,
@@ -471,6 +492,28 @@ const DB = {
   async signOut(){
     await sb.auth.signOut();
     this._userId = null; this._email = null;
+  },
+
+  // ---- Access gating + consent (profiles row) ----
+  async isPaid(){
+    // Reads the current user's own profile row (RLS allows reading own row).
+    // Returns true only if a row exists AND is_paid === true.
+    const { data, error } = await sb.from('profiles')
+      .select('is_paid').eq('user_id', this._userId).maybeSingle();
+    if(error) return false;          // on error, fail closed (treat as not paid)
+    return !!(data && data.is_paid);
+  },
+
+  async recordConsent(version){
+    // Best-effort: stamp consent on the user's own profile row IF it exists.
+    // A non-paid user has no profiles row yet (created at purchase), so update may affect 0 rows —
+    // that's fine; consent will be (re)stamped after they have a row. Do not throw on failure.
+    try {
+      await sb.from('profiles').update({
+        consent_at: new Date().toISOString(),
+        consent_version: version
+      }).eq('user_id', this._userId);
+    } catch(e) { /* non-fatal */ }
   },
 
   // ---- Diary: pack flat entry into a jsonb `data` column; flatten back on read ----
@@ -533,7 +576,7 @@ function todayKey(){ const d=new Date(); d.setHours(0,0,0,0); return dkey(d); }
 const gate = $('authGate');
 async function boot(){
   const u = await DB.currentUser();
-  if(u){ unlock(u.email); }
+  if(u){ await enterApp(u.email); }
   else { gate.classList.add('show'); }
 }
 function unlock(email){
@@ -543,11 +586,24 @@ function unlock(email){
   diaryInit();
   assessInit();
 }
+// Decide where an authenticated user lands: paid → into the app; not paid → "customers only" screen.
+// RLS already blocks non-paid data access; this gate is defence-in-depth + a clear message.
+async function enterApp(email){
+  if(await DB.isPaid()){
+    unlock(email);
+  } else {
+    $('step-email').style.display='none';
+    $('step-code').style.display='none';
+    $('step-locked').style.display='block';
+    gate.classList.add('show'); // keep the overlay up; do NOT unlock the app
+  }
+}
 $('sendCode').addEventListener('click', async () => {
   const email = $('authEmail').value.trim();
   $('authErr').textContent = '';
   if(!sb){ $('authErr').textContent = "The app isn't fully configured yet. Please try again later."; return; }
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ $('authErr').textContent='Enter a valid email.'; return; }
+  if(!$('consentChk').checked){ $('authErr').textContent='Please agree to the data storage terms to continue.'; return; }
   try{
     await DB.sendCode(email);
   }catch(e){
@@ -560,7 +616,11 @@ $('sendCode').addEventListener('click', async () => {
 $('verifyCode').addEventListener('click', async () => {
   const email = $('authEmail').value.trim(), code = $('authCode').value.trim();
   $('authErr').textContent = '';
-  try{ const u = await DB.verifyCode(email, code); unlock(u.email); }
+  try{
+    const u = await DB.verifyCode(email, code);
+    await DB.recordConsent(CONSENT_VERSION); // best-effort; 0 rows for users without a profile yet
+    await enterApp(u.email);
+  }
   catch(e){ $('authErr').textContent = e.message; }
 });
 $('backToEmail').addEventListener('click', () => {
@@ -568,6 +628,9 @@ $('backToEmail').addEventListener('click', () => {
   $('authErr').textContent='';
 });
 $('signOut').addEventListener('click', async () => {
+  await DB.signOut(); location.reload();
+});
+$('lockedSignOut').addEventListener('click', async () => {
   await DB.signOut(); location.reload();
 });
 
