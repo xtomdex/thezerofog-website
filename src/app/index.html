@@ -493,10 +493,14 @@ const SB_URL = window.ZF_SUPABASE_URL;
 const SB_KEY = window.ZF_SUPABASE_ANON_KEY;
 const sb = (SB_URL && SB_KEY) ? supabase.createClient(SB_URL, SB_KEY) : null;
 
+// PREVIEW mode (?demo=1): swap the entire data layer to localStorage so we can load
+// sample data and see the report WITHOUT writing to the live Supabase DB. Never on for real users.
+const PREVIEW = new URLSearchParams(location.search).has('demo');
+
 // Version of the health-data consent copy the user agreed to (bump when copy changes).
 const CONSENT_VERSION = 'v1';
 
-const DB = {
+const DB_SB = {
   _userId: null,
   _email: null,
 
@@ -623,6 +627,31 @@ const DB = {
   },
 };
 
+/* ---- PREVIEW data layer: localStorage only, never touches Supabase. ----
+   Same interface as DB_SB. Auth/paid/consent are stubbed so ?demo=1 opens
+   straight into the app. Sample data + Clear live entirely in localStorage. */
+const DB_LOCAL = {
+  _email: 'preview@demo.local',
+  _diaryKey(){ return 'zf_demo_diary'; },
+  _assessKey(){ return 'zf_demo_assess'; },
+  async currentUser(){ return { email: this._email, id: 'demo' }; },
+  async sendCode(){ return {}; },
+  async verifyCode(){ return { email: this._email, id: 'demo' }; },
+  async signOut(){ /* noop in preview */ },
+  async isPaid(){ return true; },
+  async recordConsent(){ /* noop */ },
+  async deleteAccount(){ localStorage.removeItem(this._diaryKey()); localStorage.removeItem(this._assessKey()); },
+  _allDiary(){ try{ return JSON.parse(localStorage.getItem(this._diaryKey()))||{}; }catch(e){ return {}; } },
+  async saveDiary(entry){ const all=this._allDiary(); all[entry.entry_date]=entry; localStorage.setItem(this._diaryKey(), JSON.stringify(all)); },
+  async getDiary(dateStr){ return this._allDiary()[dateStr] || null; },
+  async getDiaryRange(from, to){ return Object.values(this._allDiary()).filter(e=>e.entry_date>=from && e.entry_date<=to).sort((a,b)=>a.entry_date<b.entry_date?-1:1); },
+  async saveAssessment(rec){ let arr=[]; try{ arr=JSON.parse(localStorage.getItem(this._assessKey()))||[]; }catch(e){} arr.push(rec); localStorage.setItem(this._assessKey(), JSON.stringify(arr)); },
+  async getAssessments(){ try{ return (JSON.parse(localStorage.getItem(this._assessKey()))||[]).sort((a,b)=>a.taken_on<b.taken_on?-1:1); }catch(e){ return []; } },
+};
+
+// The rest of the app calls DB.* and never knows which backend it is.
+const DB = PREVIEW ? DB_LOCAL : DB_SB;
+
 const $ = id => document.getElementById(id);
 function dkey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function todayKey(){ const d=new Date(); d.setHours(0,0,0,0); return dkey(d); }
@@ -630,6 +659,7 @@ function todayKey(){ const d=new Date(); d.setHours(0,0,0,0); return dkey(d); }
 /* ============ AUTH GATE ============ */
 const gate = $('authGate');
 async function boot(){
+  if(PREVIEW){ unlock(DB_LOCAL._email); return; }   // ?demo=1 : skip auth, open straight in
   const u = await DB.currentUser();
   if(u){ await enterApp(u.email); }
   else { gate.classList.add('show'); }
@@ -803,10 +833,12 @@ $('demoLoad').addEventListener('click', async ()=>{
 });
 $('demoClear').addEventListener('click', async ()=>{
   if(!confirm('Clear all diary data?')) return;
-  localStorage.removeItem(DB._diaryKey());
+  localStorage.removeItem(DB_LOCAL._diaryKey());
   await loadDay();
   if(sumOverlay.classList.contains('show')) renderSummary();
 });
+// Demo controls exist only in preview; hide them for real (Supabase) users so nothing can write sample data to the live DB.
+if(!PREVIEW){ const _demoBar = document.querySelector('.demo-bar'); if(_demoBar) _demoBar.style.display = 'none'; }
 
 function applyState(){
   document.querySelectorAll('.chip.on,.s.on').forEach(x=>x.classList.remove('on'));
