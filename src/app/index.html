@@ -111,6 +111,24 @@
   .live .se-bar{ height:7px; border-radius:5px; background:rgba(255,255,255,0.08); margin-top:10px; overflow:hidden; }
   .live .se-fill{ height:100%; width:0; transition:width .4s, background .4s; }
 
+  /* ===== CAFFEINE ===== */
+  .caff-out{ text-align:center; }
+  .caff-hint{ color:var(--muted); font-size:13.5px; margin:0; }
+  .caff-grid{ display:flex; gap:12px; }
+  .caff-cell{ flex:1; background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:14px 10px; }
+  .caff-cell.ideal{ border-color:rgba(80,250,123,0.4); }
+  .caff-cell .cl{ font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--dim); font-weight:700; }
+  .caff-cell .cv{ font-size:23px; font-weight:800; margin:4px 0 2px; }
+  .caff-cell.ideal .cv{ color:var(--green); }
+  .caff-cell .cs{ font-size:11px; color:var(--muted); }
+  .caff-after{ font-size:12.5px; color:var(--muted); margin:12px 0 0; }
+  .caff-note{ font-size:13px; color:var(--muted); line-height:1.65; margin:0; }
+  .caff-table{ padding:6px 2px; }
+  .caff-row{ display:flex; justify-content:space-between; gap:12px; padding:9px 14px; font-size:13.5px; border-bottom:1px solid var(--line); }
+  .caff-row:last-child{ border-bottom:none; }
+  .caff-row.caff-head{ color:var(--cyan); font-weight:700; font-size:10.5px; letter-spacing:1px; text-transform:uppercase; }
+  .caff-row span:last-child{ color:var(--text); font-weight:600; white-space:nowrap; }
+
   .savewrap{ padding:16px 20px calc(20px + env(safe-area-inset-bottom)); }
   .save{ width:100%; background:var(--purple); color:#1a1a1a; border:none; border-radius:13px; font-family:inherit;
         font-size:16px; font-weight:700; padding:15px; cursor:pointer; }
@@ -276,6 +294,7 @@
     <div class="tabs">
       <button class="tab on" data-view="diary">Sleep Diary</button>
       <button class="tab" data-view="assessment">Assessment</button>
+      <button class="tab" data-view="caffeine">Caffeine</button>
     </div>
   </div>
 
@@ -410,6 +429,43 @@
       <div class="sysrows"><h3>Your three systems</h3><div id="aSys"></div></div>
       <div class="a-note" id="aNote"></div>
       <div class="a-actions"><button type="button" class="btn" id="aRetake">Retake</button></div>
+    </div>
+  </div>
+
+  <!-- ============ CAFFEINE VIEW ============ -->
+  <div class="view" id="view-caffeine">
+    <div class="body">
+      <div class="section">
+        <div class="stitle">Your caffeine cutoff</div>
+        <div class="field">
+          <label>Your target bedtime</label>
+          <input type="time" id="caffBed">
+        </div>
+        <div class="live caff-out" id="caffOut"><p class="caff-hint">Enter your target bedtime to see your cutoff.</p></div>
+        <p class="caff-note" style="margin-top:12px">Caffeine has a half-life of 5-6 hours - half of your 2 PM coffee is still in you at 8 PM. Even when you fall asleep, it can cut your deep sleep by up to 20%. Stopping early enough keeps it out of your night.</p>
+      </div>
+
+      <div class="section">
+        <div class="stitle">What counts as caffeine</div>
+        <div class="field caff-table">
+          <div class="caff-row caff-head"><span>Source</span><span>Caffeine</span></div>
+          <div class="caff-row"><span>Espresso (1 shot)</span><span>63 mg</span></div>
+          <div class="caff-row"><span>Drip coffee (250 ml)</span><span>95 mg</span></div>
+          <div class="caff-row"><span>Black tea (250 ml)</span><span>47 mg</span></div>
+          <div class="caff-row"><span>Green tea (250 ml)</span><span>28 mg</span></div>
+          <div class="caff-row"><span>Energy drink (250 ml)</span><span>80 mg</span></div>
+          <div class="caff-row"><span>Cola (330 ml)</span><span>32 mg</span></div>
+          <div class="caff-row"><span>Dark chocolate (50 g)</span><span>25 mg</span></div>
+          <div class="caff-row"><span>Pre-workout</span><span>150-300 mg</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="stitle">Everyone absorbs it differently</div>
+        <div class="field">
+          <p class="caff-note">About 15% of people are slow metabolizers - coffee at 3 PM and they're wired at midnight. About 10% are fast - espresso after dinner, no problem. The rest are in between. It's largely genetic, and you can get it tested if you want to know your type. If an 8-hour cutoff isn't enough for you, push it to 10-12 hours.</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -740,6 +796,23 @@ document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () =>
   $('view-'+t.dataset.view).classList.add('on');
   window.scrollTo(0,0);
 }));
+
+/* ============ CAFFEINE ============ */
+function caffFmt(mins){ mins=((mins%1440)+1440)%1440; let hh=Math.floor(mins/60), mm=mins%60; const ap=hh<12?'AM':'PM'; let h12=hh%12; if(h12===0)h12=12; return h12+':'+String(mm).padStart(2,'0')+' '+ap; }
+function caffCalc(){
+  const v=$('caffBed').value, out=$('caffOut');
+  if(!v){ out.innerHTML='<p class="caff-hint">Enter your target bedtime to see your cutoff.</p>'; return; }
+  const [h,m]=v.split(':').map(Number); const bed=h*60+m;
+  out.innerHTML =
+    '<div class="caff-grid">'+
+      '<div class="caff-cell"><div class="cl">Safe cutoff</div><div class="cv">'+caffFmt(bed-480)+'</div><div class="cs">- 8 hours before bed</div></div>'+
+      '<div class="caff-cell ideal"><div class="cl">Ideal cutoff</div><div class="cv">'+caffFmt(bed-600)+'</div><div class="cs">- 10 hours before bed</div></div>'+
+    '</div>'+
+    '<p class="caff-after">After this, switch to decaf or herbal - a last call, not a "never."</p>';
+  try{ localStorage.setItem('zf_caffeine_bedtime', v); }catch(e){}
+}
+$('caffBed').addEventListener('input', caffCalc);
+(function(){ try{ const v=localStorage.getItem('zf_caffeine_bedtime'); if(v){ $('caffBed').value=v; caffCalc(); } }catch(e){} })();
 
 /* ============ DIARY ============ */
 let cur = new Date(); cur.setHours(0,0,0,0);
