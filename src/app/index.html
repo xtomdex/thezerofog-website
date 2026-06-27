@@ -262,6 +262,28 @@
   .nrow .nf{ height:100%; }
   .nrow .nv{ font-size:11px; font-weight:700; width:40px; text-align:right; }
 
+  /* summary diagnostic — fix-first + secondary flags */
+  .sum-fix{ margin:16px 0 4px; padding:14px 15px; text-align:left; border-radius:12px;
+        border:1px solid rgba(255,184,108,0.35); border-left:3px solid var(--orange); background:rgba(255,184,108,0.07); }
+  .sum-fix .fl-lab{ font-size:10.5px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; color:var(--orange); margin-bottom:7px; }
+  .sum-fix .fl-txt{ font-size:14px; line-height:1.5; color:var(--text); }
+  .sum-fix .fl-txt b{ font-weight:700; }
+  .sum-lesson{ display:block; margin-top:10px; font-size:12.5px; font-weight:600; color:var(--purple); text-decoration:none; }
+  .sum-lesson:hover{ text-decoration:underline; }
+  .sum-flags{ margin:14px 0 4px; text-align:left; }
+  .sum-flags .ff-lab{ font-size:10.5px; font-weight:800; letter-spacing:1.2px; text-transform:uppercase; color:var(--dim); margin-bottom:9px; }
+  .sum-flags.hard .ff-lab{ color:var(--orange); }
+  .ff-item{ position:relative; padding:0 0 11px 16px; }
+  .ff-item::before{ content:''; position:absolute; left:2px; top:7px; width:6px; height:6px; border-radius:50%; background:var(--purple); }
+  .ff-item .ff-t{ font-size:13.5px; line-height:1.45; color:var(--text); }
+  .ff-item .ff-t b{ font-weight:700; }
+  .ff-l{ color:var(--purple); text-decoration:none; white-space:nowrap; }
+  .ff-l:hover{ text-decoration:underline; }
+  .sum-ok{ margin:16px 0 4px; padding:13px 15px; text-align:left; border-radius:12px; font-size:13.5px; line-height:1.5; color:var(--text);
+        border:1px solid rgba(80,250,123,0.3); border-left:3px solid var(--green); background:rgba(80,250,123,0.06); }
+  .sum-gate{ margin:16px 0 4px; padding:14px 15px; text-align:center; border:1px dashed var(--line); border-radius:12px;
+        font-size:13px; line-height:1.5; color:var(--muted); }
+
   /* ===== auth gate ===== */
   #authGate{ align-items:center; }
   #authGate .modal{ border-radius:18px; margin:0 16px; }
@@ -948,6 +970,86 @@ document.querySelectorAll('.preset').forEach(p=>p.addEventListener('click', ()=>
 }));
 ['rangeFrom','rangeTo'].forEach(id=>$(id).addEventListener('change', renderSummary));
 
+/* ---- Diagnostic: surface the biggest fixable lever, ranked by course order ----
+   Titles are the final, locked lesson names. url stays '' until lesson URLs are
+   collected from Systeme; lessonRef renders plain text until then (placeholder). */
+const LESSONS = {
+  wake:  { n:'1.1', title:'The One Change That Fixes Everything Else', url:'' },
+  caff:  { n:'2.1', title:'Why Your Third Coffee Stopped Working',     url:'' },
+  alc:   { n:'3.1', title:'Fuel and Drinks: The Evening Rules',        url:'' },
+  onset: { n:'4.2', title:"The Night Protocol: If You Wake Up or Can't Fall Asleep", url:'' },
+};
+function lessonRef(L, cls){
+  const label = 'Lesson '+L.n+' · '+L.title;
+  return L.url
+    ? '<a class="'+cls+'" target="_blank" rel="noopener noreferrer" href="'+L.url+'">'+label+' →</a>'
+    : '<span class="'+cls+'">'+label+'</span>';
+}
+function diagnose(rows){
+  const N = rows.length;
+  const flags = [];
+
+  // 1.1 — wake-time consistency (the anchor everything hangs on)
+  const wakes = rows.map(r=>toMin(r.finalWake)).filter(v=>v!=null);
+  if(wakes.length>=3){
+    const mn=Math.min(...wakes), mx=Math.max(...wakes), spread=mx-mn;
+    if(spread>=60) flags.push({ rank:0, sev:Math.max(.35,Math.min(1,spread/180)),
+      txt:'Your wake-up ranged from <b>'+caffFmt(mn)+'</b> to <b>'+caffFmt(mx)+'</b> - a '+fmt(spread)+' swing. A steady wake time is the anchor everything else hangs on. Lock this before the rest.',
+      short:'Wake-up swings <b>'+fmt(spread)+'</b> ('+caffFmt(mn)+' to '+caffFmt(mx)+'). The anchor for everything else.',
+      L:LESSONS.wake });
+  }
+
+  // 2.1 — caffeine inside the 8-hour cutoff (safe = bedtime minus 8h)
+  let caffLate=0, caffElig=0;
+  rows.forEach(r=>{
+    const bed=toMin(r.intoBed), caff=(r.caffeine&&r.caffeine!=='none')?toMin(r.caffeine):null;
+    if(bed==null||caff==null) return; caffElig++;
+    if(((bed-caff+1440)%1440) < 480) caffLate++;   // caffeine was less than 8h before bed
+  });
+  if(caffLate>=2) flags.push({ rank:1, sev:caffLate/Math.max(caffElig,1),
+    txt:'You had caffeine inside your <b>8-hour cutoff</b> on <b>'+caffLate+' of '+caffElig+'</b> nights. Late caffeine thins your deep sleep even when you fall asleep fine.',
+    short:'Caffeine after your cutoff - <b>'+caffLate+' of '+caffElig+'</b> nights.',
+    L:LESSONS.caff });
+
+  // 3.1 — alcohol in the evening
+  let alc=0; rows.forEach(r=>{ if(r.alcohol&&r.alcohol!=='none') alc++; });
+  if(alc>=3) flags.push({ rank:2, sev:alc/N,
+    txt:'You had alcohol on <b>'+alc+' of '+N+'</b> nights. A nightcap helps you fall asleep but fragments the second half of the night.',
+    short:'Alcohol on <b>'+alc+' of '+N+'</b> nights.',
+    L:LESSONS.alc });
+
+  // 4.2 — trouble falling or staying asleep
+  let slow=0, restless=0, affected=0;
+  rows.forEach(r=>{ const sol=+r.sol||0, waso=+r.waso||0, wk=+r.wakings||0;
+    const s=sol>=30, m=(waso>=30||wk>=3); if(s)slow++; if(m)restless++; if(s||m)affected++; });
+  if(affected>=3){
+    const slowDom = slow>=restless;
+    flags.push({ rank:3, sev:affected/N,
+      txt: slowDom
+        ? 'You took <b>30 minutes or more to fall asleep</b> on <b>'+slow+'</b> nights. Lying in bed awake teaches your brain that bed is a place to be awake.'
+        : 'You were <b>awake in the night</b> on <b>'+restless+'</b> nights. There is a simple protocol for exactly what to do when that happens.',
+      short: slowDom ? 'Slow to fall asleep - <b>'+slow+' of '+N+'</b> nights.' : 'Waking in the night - <b>'+restless+' of '+N+'</b> nights.',
+      L:LESSONS.onset });
+  }
+
+  if(!flags.length) return { ok:true };
+  flags.sort((a,b)=>a.rank-b.rank);
+  return { ok:false, fix:flags[0], others:flags.slice(1,3) };
+}
+function diagnosticHtml(rows){
+  if(rows.length<4) return '<div class="sum-gate">Log at least 4 nights to see your biggest lever to fix first.</div>';
+  const d = diagnose(rows);
+  if(d.ok) return '<div class="sum-ok">No major leverage points here - your inputs look solid. Keep logging to hold the trend.</div>';
+  let h = '<div class="sum-fix"><div class="fl-lab">⚑ Fix this first</div><div class="fl-txt">'+d.fix.txt+'</div>'+lessonRef(d.fix.L,'sum-lesson')+'</div>';
+  if(d.others.length){
+    const hard = d.others.some(f=>f.sev>=0.5);
+    h += '<div class="sum-flags'+(hard?' hard':'')+'"><div class="ff-lab">'+(hard?'Also hitting your sleep hard':'Also worth a look')+'</div>';
+    d.others.forEach(f=>{ h += '<div class="ff-item"><div class="ff-t">'+f.short+' '+lessonRef(f.L,'ff-l')+'</div></div>'; });
+    h += '</div>';
+  }
+  return h;
+}
+
 async function renderSummary(){
   let from, to;
   const today = new Date(); today.setHours(0,0,0,0);
@@ -985,6 +1087,7 @@ async function renderSummary(){
       '<div class="sum-cell"><div class="k">Avg time in bed</div><div class="v">'+fmt(avgTib)+'</div></div>'+
       '<div class="sum-cell"><div class="k">Avg slept</div><div class="v">'+fmt(avgTst)+'</div></div>'+
     '</div>'+
+    diagnosticHtml(rows)+
     '<div class="sum-nights">'+nights+'</div>';
 }
 
