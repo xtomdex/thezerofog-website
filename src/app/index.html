@@ -994,8 +994,9 @@ document.querySelectorAll('.preset').forEach(p=>p.addEventListener('click', ()=>
 const LESSONS = {
   wake:  { n:'1.1', title:'The One Change That Fixes Everything Else', url:'' },
   caff:  { n:'2.1', title:'Why Your Third Coffee Stopped Working',     url:'' },
-  alc:   { n:'3.1', title:'Fuel and Drinks: The Evening Rules',        url:'' },
-  onset: { n:'4.2', title:"The Night Protocol: If You Wake Up or Can't Fall Asleep", url:'' },
+  alc:   { n:'3.1', title:"Why Your Last Meal Decides Tomorrow's Morning", url:'' },
+  bed:   { n:'4.1', title:'Your Bed Has One Job', url:'' },
+  night: { n:'4.2', title:"The Night Protocol: If You Wake Up or Can't Fall Asleep", url:'' },
 };
 function lessonRef(L, cls, full){
   const label = full ? ('Lesson '+L.n+' · '+L.title) : ('Lesson '+L.n);
@@ -1047,7 +1048,7 @@ function diagnose(rows){
         ? 'You took <b>30+ minutes to fall asleep</b> on <b>'+slow+'</b> nights. Lying in bed awake trains your brain that bed is for being awake.'
         : 'You were <b>awake in the night</b> on <b>'+restless+'</b> nights - there is a simple protocol for exactly what to do.',
       short: slowDom ? 'Slow to fall asleep <b>'+slow+'/'+N+'</b>.' : 'Waking in the night <b>'+restless+'/'+N+'</b>.',
-      L:LESSONS.onset });
+      L: slowDom ? LESSONS.bed : LESSONS.night });
   }
 
   if(!flags.length) return { ok:true };
