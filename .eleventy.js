@@ -22,6 +22,9 @@ module.exports = function (eleventyConfig) {
   // Webinar bonus guides (self-contained HTML + PDFs, served verbatim)
   eleventyConfig.ignores.add("src/bonuses/**");
   eleventyConfig.addPassthroughCopy("src/bonuses");
+  // Combined webinar bonuses page (self-contained HTML+JS, served verbatim, noindex)
+  eleventyConfig.ignores.add("src/webinar-bonuses/**");
+  eleventyConfig.addPassthroughCopy("src/webinar-bonuses");
 
   // CSS processing via lightningcss
   eleventyConfig.addTemplateFormats("css");
