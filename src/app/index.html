@@ -283,6 +283,12 @@
         border:1px solid rgba(80,250,123,0.3); border-left:3px solid var(--green); background:rgba(80,250,123,0.06); }
   .sum-gate{ margin:16px 0 4px; padding:14px 15px; text-align:center; border:1px dashed var(--line); border-radius:12px;
         font-size:13px; line-height:1.5; color:var(--muted); }
+  .sum-nights-d{ margin-top:16px; border-top:1px solid var(--line); padding-top:12px; }
+  .sum-nights-d > summary{ list-style:none; cursor:pointer; font-size:12px; font-weight:600; color:var(--purple); padding:2px 0; user-select:none; }
+  .sum-nights-d > summary::-webkit-details-marker{ display:none; }
+  .sum-nights-d > summary::after{ content:' ▾'; }
+  .sum-nights-d[open] > summary::after{ content:' ▴'; }
+  .sum-nights-d .sum-nights{ margin-top:12px; }
 
   /* ===== auth gate ===== */
   #authGate{ align-items:center; }
@@ -979,8 +985,8 @@ const LESSONS = {
   alc:   { n:'3.1', title:'Fuel and Drinks: The Evening Rules',        url:'' },
   onset: { n:'4.2', title:"The Night Protocol: If You Wake Up or Can't Fall Asleep", url:'' },
 };
-function lessonRef(L, cls){
-  const label = 'Lesson '+L.n+' · '+L.title;
+function lessonRef(L, cls, full){
+  const label = full ? ('Lesson '+L.n+' · '+L.title) : ('Lesson '+L.n);
   return L.url
     ? '<a class="'+cls+'" target="_blank" rel="noopener noreferrer" href="'+L.url+'">'+label+' →</a>'
     : '<span class="'+cls+'">'+label+'</span>';
@@ -994,8 +1000,8 @@ function diagnose(rows){
   if(wakes.length>=3){
     const mn=Math.min(...wakes), mx=Math.max(...wakes), spread=mx-mn;
     if(spread>=60) flags.push({ rank:0, sev:Math.max(.35,Math.min(1,spread/180)),
-      txt:'Your wake-up ranged from <b>'+caffFmt(mn)+'</b> to <b>'+caffFmt(mx)+'</b> - a '+fmt(spread)+' swing. A steady wake time is the anchor everything else hangs on. Lock this before the rest.',
-      short:'Wake-up swings <b>'+fmt(spread)+'</b> ('+caffFmt(mn)+' to '+caffFmt(mx)+'). The anchor for everything else.',
+      txt:'Your wake-up swings <b>'+fmt(spread)+'</b> ('+caffFmt(mn)+' to '+caffFmt(mx)+'). Steady it first - it is the anchor everything else hangs on.',
+      short:'Wake-up swings <b>'+fmt(spread)+'</b> ('+caffFmt(mn)+' to '+caffFmt(mx)+').',
       L:LESSONS.wake });
   }
 
@@ -1007,15 +1013,15 @@ function diagnose(rows){
     if(((bed-caff+1440)%1440) < 480) caffLate++;   // caffeine was less than 8h before bed
   });
   if(caffLate>=2) flags.push({ rank:1, sev:caffLate/Math.max(caffElig,1),
-    txt:'You had caffeine inside your <b>8-hour cutoff</b> on <b>'+caffLate+' of '+caffElig+'</b> nights. Late caffeine thins your deep sleep even when you fall asleep fine.',
-    short:'Caffeine after your cutoff - <b>'+caffLate+' of '+caffElig+'</b> nights.',
+    txt:'Caffeine landed inside your <b>8-hour cutoff</b> on <b>'+caffLate+' of '+caffElig+'</b> nights - it thins deep sleep even when you fall asleep fine.',
+    short:'Caffeine after cutoff <b>'+caffLate+'/'+caffElig+'</b>.',
     L:LESSONS.caff });
 
   // 3.1 — alcohol in the evening
   let alc=0; rows.forEach(r=>{ if(r.alcohol&&r.alcohol!=='none') alc++; });
   if(alc>=3) flags.push({ rank:2, sev:alc/N,
-    txt:'You had alcohol on <b>'+alc+' of '+N+'</b> nights. A nightcap helps you fall asleep but fragments the second half of the night.',
-    short:'Alcohol on <b>'+alc+' of '+N+'</b> nights.',
+    txt:'Alcohol on <b>'+alc+' of '+N+'</b> nights. A nightcap speeds sleep onset but fragments the second half of the night.',
+    short:'Alcohol <b>'+alc+'/'+N+'</b> nights.',
     L:LESSONS.alc });
 
   // 4.2 — trouble falling or staying asleep
@@ -1026,9 +1032,9 @@ function diagnose(rows){
     const slowDom = slow>=restless;
     flags.push({ rank:3, sev:affected/N,
       txt: slowDom
-        ? 'You took <b>30 minutes or more to fall asleep</b> on <b>'+slow+'</b> nights. Lying in bed awake teaches your brain that bed is a place to be awake.'
-        : 'You were <b>awake in the night</b> on <b>'+restless+'</b> nights. There is a simple protocol for exactly what to do when that happens.',
-      short: slowDom ? 'Slow to fall asleep - <b>'+slow+' of '+N+'</b> nights.' : 'Waking in the night - <b>'+restless+' of '+N+'</b> nights.',
+        ? 'You took <b>30+ minutes to fall asleep</b> on <b>'+slow+'</b> nights. Lying in bed awake trains your brain that bed is for being awake.'
+        : 'You were <b>awake in the night</b> on <b>'+restless+'</b> nights - there is a simple protocol for exactly what to do.',
+      short: slowDom ? 'Slow to fall asleep <b>'+slow+'/'+N+'</b>.' : 'Waking in the night <b>'+restless+'/'+N+'</b>.',
       L:LESSONS.onset });
   }
 
@@ -1040,11 +1046,11 @@ function diagnosticHtml(rows){
   if(rows.length<4) return '<div class="sum-gate">Log at least 4 nights to see your biggest lever to fix first.</div>';
   const d = diagnose(rows);
   if(d.ok) return '<div class="sum-ok">No major leverage points here - your inputs look solid. Keep logging to hold the trend.</div>';
-  let h = '<div class="sum-fix"><div class="fl-lab">⚑ Fix this first</div><div class="fl-txt">'+d.fix.txt+'</div>'+lessonRef(d.fix.L,'sum-lesson')+'</div>';
+  let h = '<div class="sum-fix"><div class="fl-lab">⚑ Fix this first</div><div class="fl-txt">'+d.fix.txt+'</div>'+lessonRef(d.fix.L,'sum-lesson',true)+'</div>';
   if(d.others.length){
     const hard = d.others.some(f=>f.sev>=0.5);
     h += '<div class="sum-flags'+(hard?' hard':'')+'"><div class="ff-lab">'+(hard?'Also hitting your sleep hard':'Also worth a look')+'</div>';
-    d.others.forEach(f=>{ h += '<div class="ff-item"><div class="ff-t">'+f.short+' '+lessonRef(f.L,'ff-l')+'</div></div>'; });
+    d.others.forEach(f=>{ h += '<div class="ff-item"><div class="ff-t">'+f.short+' · '+lessonRef(f.L,'ff-l',false)+'</div></div>'; });
     h += '</div>';
   }
   return h;
@@ -1088,7 +1094,7 @@ async function renderSummary(){
       '<div class="sum-cell"><div class="k">Avg slept</div><div class="v">'+fmt(avgTst)+'</div></div>'+
     '</div>'+
     diagnosticHtml(rows)+
-    '<div class="sum-nights">'+nights+'</div>';
+    '<details class="sum-nights-d"><summary>Show nightly breakdown</summary><div class="sum-nights">'+nights+'</div></details>';
 }
 
 /* ============ ASSESSMENT ============ */
