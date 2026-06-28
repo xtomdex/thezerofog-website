@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex">
 <title>Your ZeroFog Bonuses</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<script>try{if((localStorage.getItem('zf_theme')||'dark')==='light')document.documentElement.classList.add('light');}catch(e){}</script>
+<script>try{var s=localStorage.getItem('zf_theme');var l=s?s==='light':(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches);if(l)document.documentElement.classList.add('light');}catch(e){}</script>
 <style>
   @page { size: A4; margin: 0; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -594,7 +594,7 @@
   var root=document.documentElement, btn=document.getElementById('themeToggle');
   function apply(t){ root.classList.toggle('light', t==='light'); btn.textContent = t==='light'?'☀':'☾';
     var m=document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute('content', t==='light'?'#ffffff':'#1a1a1a'); }
-  var theme; try{ theme=localStorage.getItem('zf_theme')||'dark'; }catch(e){ theme='dark'; }
+  var theme; try{ theme=localStorage.getItem('zf_theme')||((window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark'); }catch(e){ theme='dark'; }
   apply(theme);
   btn.addEventListener('click', function(){ theme=theme==='light'?'dark':'light'; try{localStorage.setItem('zf_theme',theme);}catch(e){} apply(theme); });
 })();
