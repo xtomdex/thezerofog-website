@@ -11,9 +11,10 @@
 
 /* === HEADLINE === */
 .ty-headline {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Inter', sans-serif;
   font-size: clamp(1.8rem, 3.8vw, 2.7rem);
-  font-weight: 700;
+  font-weight: 900;
+  letter-spacing: -0.02em;
   line-height: 1.1;
   color: var(--cta);
   margin-bottom: 16px;
