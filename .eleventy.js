@@ -9,13 +9,6 @@ module.exports = function (eleventyConfig) {
 
   // Passthrough copy
   eleventyConfig.addPassthroughCopy("src/assets");
-  // Standalone interactive Sleep Assessment (self-contained HTML+JS, served verbatim)
-  // ignore as a template input so Liquid never touches the inline JS; copy it as-is
-  eleventyConfig.ignores.add("src/sleep-assessment/**");
-  eleventyConfig.addPassthroughCopy("src/sleep-assessment");
-  // Standalone app-style Sleep Diary (self-contained HTML+JS, served verbatim)
-  eleventyConfig.ignores.add("src/diary/**");
-  eleventyConfig.addPassthroughCopy("src/diary");
   // Standalone webinar text-version long-read (self-contained HTML, served verbatim, noindex)
   eleventyConfig.ignores.add("src/webinar-text/**");
   eleventyConfig.addPassthroughCopy("src/webinar-text");
