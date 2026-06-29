@@ -121,9 +121,10 @@ body {
 }
 
 .headline {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Inter', sans-serif;
   font-size: clamp(2rem, 4.8vw, 3.3rem);
-  font-weight: 700;
+  font-weight: 900;
+  letter-spacing: -0.02em;
   line-height: 1.08;
   color: var(--text);
   margin-bottom: 20px;
