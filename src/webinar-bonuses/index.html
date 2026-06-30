@@ -8,7 +8,12 @@
 <title>Your ZeroFog Bonuses</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script>try{var s=localStorage.getItem('zf_theme');var l=s?s==='light':(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches);if(l)document.documentElement.classList.add('light');}catch(e){}</script>
+<script>try{if(/[?&]embed/.test(location.search))document.documentElement.classList.add('embed');}catch(e){}</script>
 <style>
+  /* embed mode: served inside the app shell - drop welcome modal + page-level footer chrome */
+  html.embed .welcome-overlay{ display:none !important; }
+  html.embed .contact, html.embed .legal-foot{ display:none !important; }
+  html.embed .page{ padding-top:0 !important; }
   @page { size: A4; margin: 0; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
