@@ -133,3 +133,33 @@ create policy "assessments: own rows, paid, insert"
 create policy "assessments: own rows, delete"
   on public.assessments for delete
   using (user_id = auth.uid());
+
+-- ---------------------------------------------------------------------------
+-- protocol_cards — one row per user; their one-page Protocol Card (14 settings).
+-- Singleton per user: PK is user_id, the app upserts onConflict: 'user_id'.
+-- Same access model as diary/assessment: own row AND paid for read/write,
+-- delete ungated by payment (right to erasure).
+-- ---------------------------------------------------------------------------
+create table if not exists public.protocol_cards (
+  user_id    uuid        primary key references auth.users(id) on delete cascade,
+  data       jsonb       not null default '{}'::jsonb,  -- the 14 protocol fields (wake, sleep, caffeine, ...)
+  updated_at timestamptz not null default now()
+);
+
+alter table public.protocol_cards enable row level security;
+
+create policy "protocol: own row, paid, select"
+  on public.protocol_cards for select
+  using (user_id = auth.uid() and public.is_paid_user());
+
+create policy "protocol: own row, paid, insert"
+  on public.protocol_cards for insert
+  with check (user_id = auth.uid() and public.is_paid_user());
+
+create policy "protocol: own row, paid, update"
+  on public.protocol_cards for update
+  using (user_id = auth.uid() and public.is_paid_user());
+
+create policy "protocol: own row, delete"
+  on public.protocol_cards for delete
+  using (user_id = auth.uid());

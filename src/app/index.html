@@ -45,9 +45,10 @@
   .acct{ display:flex; align-items:center; gap:9px; font-size:11px; color:var(--dim); }
   .acct .em{ max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .acct button{ background:none; border:none; color:var(--purple); font-size:11px; cursor:pointer; font-family:inherit; }
-  .tabs{ display:flex; gap:6px; margin-top:12px; }
-  .tab{ flex:1; text-align:center; background:none; border:none; color:var(--muted); font-family:inherit;
-        font-size:13.5px; font-weight:600; padding:11px 4px 13px; cursor:pointer; border-bottom:2px solid transparent; }
+  .tabs{ display:flex; gap:4px; margin-top:12px; overflow-x:auto; scrollbar-width:none; }
+  .tabs::-webkit-scrollbar{ display:none; }
+  .tab{ flex:0 0 auto; text-align:center; background:none; border:none; color:var(--muted); font-family:inherit;
+        font-size:13px; font-weight:600; padding:11px 11px 13px; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
   .tab.on{ color:var(--text); border-bottom-color:var(--purple); }
 
   .view{ display:none; }
@@ -308,6 +309,68 @@
   .manage-data{ text-align:center; margin:28px 0 8px; }
   .danger-link{ background:none; border:none; color:#c0392b; font-size:13px; text-decoration:underline; cursor:pointer; padding:4px; }
   .manage-err{ color:#c0392b; font-size:13px; margin-top:8px; min-height:1em; }
+
+  /* ===== PROTOCOL CARD ===== */
+  .pc-body{ padding:18px 20px 30px; }
+  .pc-head h2{ font-size:21px; font-weight:800; letter-spacing:-0.3px; }
+  .pc-head p{ font-size:13px; color:var(--muted); margin-top:6px; }
+  .pc-head b{ color:var(--text); }
+  .pc-tips{ display:flex; gap:9px; margin:16px 0 6px; }
+  .pc-tip{ flex:1; background:var(--panel); border:1px solid var(--line); border-radius:11px; padding:11px 13px; font-size:11.5px; color:var(--muted); line-height:1.45; }
+  .pc-tip b{ display:block; font-size:10px; letter-spacing:.8px; text-transform:uppercase; margin-bottom:3px; font-weight:700; }
+  .pc-tip.w b{ color:var(--cyan); } .pc-tip.r b{ color:var(--green); }
+  .pc-line{ background:var(--panel); border:1px solid var(--line); border-radius:13px; padding:14px 15px; margin-bottom:9px; }
+  .pc-line.filled{ border-color:rgba(189,147,249,0.3); }
+  .pc-lh{ display:flex; gap:11px; margin-bottom:10px; align-items:flex-start; }
+  .pc-ln{ flex:0 0 26px; height:26px; border-radius:8px; background:rgba(189,147,249,0.13); color:var(--purple); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+  .pc-lh label{ display:block; font-size:14px; font-weight:700; line-height:1.3; }
+  .pc-lh .hint{ display:block; font-size:11.5px; color:var(--dim); font-weight:400; margin-top:2px; }
+  .pc-cell{ width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--text); font-family:inherit; font-size:14px; padding:10px 12px; border-radius:9px; }
+  .pc-cell:focus{ outline:none; border-color:rgba(189,147,249,0.5); }
+  textarea.pc-cell{ resize:none; overflow:hidden; min-height:44px; line-height:1.5; }
+  .pc-win{ display:flex; align-items:center; gap:9px; } .pc-win .pc-cell{ flex:1; } .pc-win .to{ font-size:12px; color:var(--dim); font-weight:600; }
+  .pc-actions{ display:flex; gap:10px; margin-top:16px; }
+  .pc-save{ flex:1; background:var(--purple); color:#1a1a1a; border:none; border-radius:11px; font-family:inherit; font-size:15px; font-weight:700; padding:13px; cursor:pointer; }
+  body.light .pc-save{ color:#fff; }
+  .pc-save.saved{ background:var(--green); }
+  .pc-ghost{ background:var(--panel); border:1px solid var(--line); color:var(--muted); border-radius:11px; font-family:inherit; font-size:13px; font-weight:600; padding:13px 15px; cursor:pointer; }
+  .pc-ghost:hover{ border-color:var(--purple); color:var(--purple); }
+  .pc-demo{ display:flex; gap:10px; margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
+  .pc-demo button{ background:none; border:1px solid var(--line); color:var(--dim); font-family:inherit; font-size:12px; font-weight:600; padding:8px 14px; border-radius:8px; cursor:pointer; }
+  .pc-demo button:hover{ border-color:var(--purple); color:var(--purple); }
+  .pc-demo .clear:hover{ border-color:#c0392b; color:#c0392b; }
+
+  /* ===== GUIDES HUB ===== */
+  .g-body{ padding:18px 20px 30px; }
+  .g-head h2{ font-size:21px; font-weight:800; letter-spacing:-0.3px; }
+  .g-head p{ font-size:13px; color:var(--muted); margin:6px 0 16px; }
+  .gcard{ display:flex; align-items:center; gap:13px; background:var(--panel); border:1px solid var(--line); border-radius:15px; padding:14px 15px; margin-bottom:10px; cursor:pointer; transition:border-color .15s; text-decoration:none; color:inherit; }
+  .gcard:hover{ border-color:rgba(189,147,249,0.4); }
+  .gic{ flex:0 0 42px; width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; }
+  .gic svg{ width:21px; height:21px; stroke-width:1.9; fill:none; stroke:currentColor; }
+  .gic.or{ background:rgba(255,184,108,0.16); color:var(--orange); }
+  .gic.pk{ background:rgba(255,121,198,0.15); color:var(--pink); }
+  .gic.yl{ background:rgba(241,250,140,0.16); color:var(--yellow); }
+  body.light .gic.yl{ color:#a16207; background:rgba(161,98,7,0.12); }
+  .gtx{ flex:1; min-width:0; }
+  .gtt{ font-size:15px; font-weight:700; }
+  .gts{ font-size:12px; color:var(--muted); margin-top:2px; }
+  .gchev{ flex:0 0 auto; color:var(--dim); font-size:19px; }
+
+  /* print: isolate the Protocol Card to a clean light page */
+  @media print{
+    body.printing-pc{ background:#fff; }
+    body.printing-pc .top, body.printing-pc .install, body.printing-pc #authGate, body.printing-pc .app-footer,
+    body.printing-pc .view:not(#view-protocol), body.printing-pc .pc-tips,
+    body.printing-pc .pc-actions, body.printing-pc .pc-demo{ display:none !important; }
+    body.printing-pc .app{ background:#fff; }
+    body.printing-pc .pc-head h2, body.printing-pc .pc-head p{ color:#000; }
+    body.printing-pc .pc-line{ border:1px solid #999; break-inside:avoid; margin-bottom:8px; }
+    body.printing-pc .pc-ln{ background:none; border:1px solid #999; color:#000; }
+    body.printing-pc .pc-lh label{ color:#000; } body.printing-pc .pc-lh .hint{ color:#444; }
+    body.printing-pc .pc-cell{ background:none; border:none; border-bottom:1px solid #ccc; border-radius:0; color:#000; overflow:visible; }
+    body.printing-pc .pc-win .to{ color:#000; }
+  }
 </style>
 <!-- Generated public Supabase config (window globals) — must load before the app script. -->
 <script src="/app/config.js"></script>
@@ -331,6 +394,8 @@
       <button class="tab on" data-view="diary">Sleep Diary</button>
       <button class="tab" data-view="assessment">Assessment</button>
       <button class="tab" data-view="caffeine">Caffeine</button>
+      <button class="tab" data-view="protocol">Protocol Card</button>
+      <button class="tab" data-view="guides">Guides</button>
     </div>
   </div>
 
@@ -505,6 +570,54 @@
     </div>
   </div>
 
+  <!-- ============ PROTOCOL CARD VIEW ============ -->
+  <div class="view" id="view-protocol">
+    <div class="pc-body">
+      <div class="pc-head">
+        <h2>Your Protocol Card</h2>
+        <p><b>14 lines. One page.</b> The settings that made the biggest difference for you. Fill it in, save it, print it.</p>
+      </div>
+      <div class="pc-tips">
+        <div class="pc-tip w"><b>Windows, not fixed times</b>A 30-60 min range beats "exactly 7:00." Less stress, higher consistency.</div>
+        <div class="pc-tip r"><b>The 80% rule</b>Follow it 80% of the time and the system holds. Miss a day, pick it back up.</div>
+      </div>
+      <form id="pcCard"></form>
+      <div class="pc-actions">
+        <button class="pc-save" id="pcSave">Save my card</button>
+        <button class="pc-ghost" id="pcPrint">Print / Save as PDF</button>
+      </div>
+      <div class="pc-demo">
+        <button id="pcDemo">Load founder's example</button>
+        <button class="clear" id="pcClear">Clear card</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ GUIDES VIEW ============ -->
+  <div class="view" id="view-guides">
+    <div class="g-body">
+      <div class="g-head">
+        <h2>Your guides</h2>
+        <p>Three bonus guides - read online or print. Each opens the full guide.</p>
+      </div>
+      <a class="gcard" href="/webinar-bonuses/?embed=1#caffeine" target="_blank" rel="noopener">
+        <div class="gic or"><svg viewBox="0 0 24 24"><path d="M4 8h12v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/><path d="M16 9h2a2 2 0 0 1 0 4h-2"/><path d="M7 3v2M10 3v2M13 3v2"/></svg></div>
+        <div class="gtx"><div class="gtt">Caffeine Blueprint</div><div class="gts">When to stop, how to cut back without the crash</div></div>
+        <span class="gchev">›</span>
+      </a>
+      <a class="gcard" href="/webinar-bonuses/?embed=1#bedroom" target="_blank" rel="noopener">
+        <div class="gic pk"><svg viewBox="0 0 24 24"><path d="M3 18v-5a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v5"/><path d="M3 18h18M6 10V7h12v3"/></svg></div>
+        <div class="gtx"><div class="gtt">Bedroom Tune-Up</div><div class="gts">Light, sound, temperature - the quick wins</div></div>
+        <span class="gchev">›</span>
+      </a>
+      <a class="gcard" href="/webinar-bonuses/?embed=1#mistakes" target="_blank" rel="noopener">
+        <div class="gic yl"><svg viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></svg></div>
+        <div class="gtx"><div class="gtt">9 Recovery Mistakes</div><div class="gts">Common moves that quietly keep you tired</div></div>
+        <span class="gchev">›</span>
+      </a>
+    </div>
+  </div>
+
   <footer class="app-footer">
     <p>&copy; 2026 The ZeroFog. All rights reserved.<br>
     <a href="/privacy/">Privacy</a> &middot;
@@ -656,6 +769,7 @@ const DB_SB = {
     // immediate effect and clear feedback.
     await sb.from('diary_entries').delete().eq('user_id', this._userId);
     await sb.from('assessments').delete().eq('user_id', this._userId);
+    await sb.from('protocol_cards').delete().eq('user_id', this._userId);
 
     // Layer 2 (server): delete the auth user (+ cascade profile) via the function,
     // authenticated with the current session's access token.
@@ -721,6 +835,20 @@ const DB_SB = {
     if(error) throw error;
     return data || [];
   },
+
+  // ---- Protocol Card: singleton row per user; the 14 fields live in jsonb `data` ----
+  async saveProtocol(data){
+    const row = { user_id: this._userId, data, updated_at: new Date().toISOString() };
+    const { error } = await sb.from('protocol_cards').upsert(row, { onConflict: 'user_id' });
+    if(error) throw error;
+  },
+
+  async getProtocol(){
+    const { data, error } = await sb.from('protocol_cards')
+      .select('data').eq('user_id', this._userId).maybeSingle();
+    if(error) throw error;
+    return data ? (data.data || {}) : {};
+  },
 };
 
 /* ---- PREVIEW data layer: localStorage only, never touches Supabase. ----
@@ -730,19 +858,22 @@ const DB_LOCAL = {
   _email: 'preview@demo.local',
   _diaryKey(){ return 'zf_demo_diary'; },
   _assessKey(){ return 'zf_demo_assess'; },
+  _protoKey(){ return 'zf_demo_protocol'; },
   async currentUser(){ return { email: this._email, id: 'demo' }; },
   async sendCode(){ return {}; },
   async verifyCode(){ return { email: this._email, id: 'demo' }; },
   async signOut(){ /* noop in preview */ },
   async isPaid(){ return true; },
   async recordConsent(){ /* noop */ },
-  async deleteAccount(){ localStorage.removeItem(this._diaryKey()); localStorage.removeItem(this._assessKey()); },
+  async deleteAccount(){ localStorage.removeItem(this._diaryKey()); localStorage.removeItem(this._assessKey()); localStorage.removeItem(this._protoKey()); },
   _allDiary(){ try{ return JSON.parse(localStorage.getItem(this._diaryKey()))||{}; }catch(e){ return {}; } },
   async saveDiary(entry){ const all=this._allDiary(); all[entry.entry_date]=entry; localStorage.setItem(this._diaryKey(), JSON.stringify(all)); },
   async getDiary(dateStr){ return this._allDiary()[dateStr] || null; },
   async getDiaryRange(from, to){ return Object.values(this._allDiary()).filter(e=>e.entry_date>=from && e.entry_date<=to).sort((a,b)=>a.entry_date<b.entry_date?-1:1); },
   async saveAssessment(rec){ let arr=[]; try{ arr=JSON.parse(localStorage.getItem(this._assessKey()))||[]; }catch(e){} arr.push(rec); localStorage.setItem(this._assessKey(), JSON.stringify(arr)); },
   async getAssessments(){ try{ return (JSON.parse(localStorage.getItem(this._assessKey()))||[]).sort((a,b)=>a.taken_on<b.taken_on?-1:1); }catch(e){ return []; } },
+  async saveProtocol(data){ localStorage.setItem(this._protoKey(), JSON.stringify(data)); },
+  async getProtocol(){ try{ return JSON.parse(localStorage.getItem(this._protoKey()))||{}; }catch(e){ return {}; } },
 };
 
 // The rest of the app calls DB.* and never knows which backend it is.
@@ -766,6 +897,7 @@ function unlock(email){
   $('acctEmail').textContent = email;
   diaryInit();
   assessInit();
+  protocolInit();
 }
 // Decide where an authenticated user lands: paid → into the app; not paid → "customers only" screen.
 // RLS already blocks non-paid data access; this gate is defence-in-depth + a clear message.
@@ -1251,6 +1383,75 @@ $('themeToggle').addEventListener('click', ()=>{
   try{ localStorage.setItem('zf_theme', theme); }catch(e){}
   applyTheme(theme);
 });
+
+/* ============ PROTOCOL CARD ============ */
+let pcBuilt = false;
+function protocolInit(){
+  const form = $('pcCard');
+  if(!form || pcBuilt) return;
+  pcBuilt = true;
+  const FIELDS = [
+    { id:'wake', label:'My wake window', hint:'observed, not a target', type:'window' },
+    { id:'sleep', label:'My sleep window', hint:'when you actually sleep - observed', type:'window' },
+    { id:'caffeine', label:'My caffeine cutoff', hint:'aim for 8h before your sleep window', type:'text', ph:'e.g. 5:00 PM' },
+    { id:'morning', label:'My morning routine', hint:'first hour - light, phone-free, movement', type:'area', ph:'Light first. Phone-free 30-60 min. Some movement...' },
+    { id:'meal', label:'My last meal', hint:'dinner window + a backup snack', type:'area', ph:'Dinner window ___ to ___, plus a light backup snack.' },
+    { id:'winddown', label:'My wind-down window', hint:'where the day starts powering down', type:'window' },
+    { id:'screen', label:'My screen rule', hint:'no active screens after ___', type:'area', ph:'No active screens after ___. Passive only, brightness down.' },
+    { id:'breathing', label:'My breathing', hint:'when you use it', type:'area', ph:'When I reach for it - before sleep, stress, if I wake at night.' },
+    { id:'exercise', label:'My exercise window', hint:'what / when / how often', type:'area', ph:'Morning: ___. Midday: ___. Evening: ___.' },
+    { id:'worry', label:'My worry time', hint:'a daily time + a place for it', type:'area', ph:'Time + place. To-do list, then a brain dump on paper.' },
+    { id:'night', label:'My night protocol', hint:"if you can't fall asleep, or wake in the night", type:'area', ph:"Can't sleep: get up, leave the bedroom. No phone, no clock." },
+    { id:'reset', label:'My reset plan', hint:'after travel or a disruption', type:'area', ph:'Shift back gradually - an hour at a time. Walk more.' },
+    { id:'smoking', label:'My smoking rule', hint:'if applicable', type:'area', ph:'Last one ___ before bed. None for the first ___ after waking.' },
+    { id:'triggers', label:'My triggers + solutions', hint:'from your Block 2.4 map - the ones that still need a rule', type:'area', ph:'(1) Trigger -> solution. (2) Trigger -> solution.' },
+  ];
+  const DEMO_PC = {
+    wake:{from:'10:00 AM',to:'10:30 AM'}, sleep:{from:'1:00 AM',to:'2:00 AM'}, caffeine:'5:00 PM',
+    morning:"Curtains open everywhere for light. Phone-free 30-60 min. Lo-fi or classical on. Stretch, wash up, a few chores. A 15-min walk if the weather allows. No scrolling, no news until the window is up.",
+    meal:"Dinner window 8:00-10:00 PM - protein with rice or noodles. If hungry later: almonds, a light salad, jerky, or a glass of kefir.",
+    winddown:{from:'12:00 AM',to:'12:30 AM'},
+    screen:"No active screens after ~12:45 AM. Passive only: a show on the laptop, brightness way down, volume almost off, at the edge of the nightstand. Usually out within 5-10 minutes.",
+    breathing:"Trained it daily for weeks while building the system. Now it's a reflex - I use it when needed: stress, before a call, if I wake at night.",
+    exercise:"Morning (first 30-60 min): stretching. Midday: 30 squats, 30 pushups, 30 abs. Evening: a 20-30 min walk. Swimming in the morning when the season allows.",
+    worry:"11:30 PM, at my desk - work ends. Tomorrow's to-do list, then a brain dump on paper. Out of the head, onto the page.",
+    night:"Can't fall asleep (rare): get up, go sit in fresh air. If I wake up: usually back immediately. If not - bathroom, then fresh air. No phone. No clock.",
+    reset:"Drift 1-2h over a few days: shift back an hour at a time. Rough stretch: 30-min shifts, gradually. During any reset: walk more, longer evenings.",
+    smoking:"No smoking the first 30-60 min after waking. Last one at least 1.5h before bed - pushing toward 2-3h.",
+    triggers:"(1) Interrupted in work mode -> irritation. Fix: clear work hours + \"I'll call back when I'm free.\" (2) Work pile + family tasks -> a noisy head. Fix: write it down, rate the urgency, set a reminder.",
+  };
+  FIELDS.forEach((f,i)=>{
+    const line=document.createElement('div'); line.className='pc-line'; line.dataset.id=f.id;
+    const num=String(i+1).padStart(2,'0'); let fill;
+    if(f.type==='window') fill='<div class="pc-win"><input class="pc-cell" data-part="from" placeholder="from"><span class="to">to</span><input class="pc-cell" data-part="to" placeholder="to"></div>';
+    else if(f.type==='text') fill='<input class="pc-cell" placeholder="'+(f.ph||'')+'">';
+    else fill='<textarea class="pc-cell" rows="2" placeholder="'+(f.ph||'')+'"></textarea>';
+    line.innerHTML='<div class="pc-lh"><div class="pc-ln">'+num+'</div><div><label>'+f.label+'</label><span class="hint">'+f.hint+'</span></div></div><div>'+fill+'</div>';
+    form.appendChild(line);
+  });
+  const lines=[...form.querySelectorAll('.pc-line')];
+  function grow(t){ t.style.height='auto'; t.style.height=t.scrollHeight+'px'; }
+  function mark(l){ l.classList.toggle('filled', [...l.querySelectorAll('.pc-cell')].some(e=>e.value.trim()!=='')); }
+  form.addEventListener('input',e=>{ if(e.target.tagName==='TEXTAREA') grow(e.target); mark(e.target.closest('.pc-line')); });
+  function read(){ const d={}; FIELDS.forEach((f,i)=>{ const l=lines[i];
+    if(f.type==='window') d[f.id]={from:l.querySelector('[data-part="from"]').value,to:l.querySelector('[data-part="to"]').value};
+    else d[f.id]=l.querySelector('.pc-cell').value; }); return d; }
+  function writeData(d){ d=d||{}; FIELDS.forEach((f,i)=>{ const l=lines[i], v=d[f.id];
+    if(f.type==='window'){ l.querySelector('[data-part="from"]').value=(v&&v.from)||''; l.querySelector('[data-part="to"]').value=(v&&v.to)||''; }
+    else { const e=l.querySelector('.pc-cell'); e.value=v||''; if(e.tagName==='TEXTAREA') grow(e); } mark(l); }); }
+  DB.getProtocol().then(writeData).catch(()=>{});
+  const sv=$('pcSave');
+  sv.addEventListener('click', async ()=>{
+    try{ await DB.saveProtocol(read()); sv.classList.add('saved'); sv.textContent='Saved ✓'; }
+    catch(e){ sv.textContent='Could not save'; }
+    setTimeout(()=>{ sv.classList.remove('saved'); sv.textContent='Save my card'; }, 1600);
+  });
+  $('pcPrint').addEventListener('click',()=>{ form.querySelectorAll('textarea.pc-cell').forEach(grow);
+    document.body.classList.add('printing-pc'); window.print(); setTimeout(()=>document.body.classList.remove('printing-pc'),300); });
+  $('pcDemo').addEventListener('click',()=>{ writeData(DEMO_PC);
+    const b=$('pcDemo'); b.textContent="Loaded ✓"; setTimeout(()=>b.textContent="Load founder's example",1600); });
+  $('pcClear').addEventListener('click', async ()=>{ if(!confirm('Clear the whole card?')) return; writeData({}); try{ await DB.saveProtocol({}); }catch(e){} });
+}
 
 boot();
 </script>
