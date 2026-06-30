@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d0d0d">
+<title>The ZeroFog - App</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#161616; --panel:#202020; --panel2:#1b1b1b; --line:rgba(255,255,255,0.08);
+    --text:#f8f8f2; --muted:#9a9a9a; --dim:#6a6a6a;
+    --purple:#bd93f9; --cyan:#8be9fd; --green:#50fa7b; --orange:#ffb86c; --pink:#ff79c6; --red:#ff5555; --yellow:#f1fa8c;
+  }
+  /* ===== LIGHT THEME (toggle) ===== */
+  body.light{
+    background:#e7e7ec;
+    --bg:#f3f3f6; --panel:#ffffff; --panel2:#eceef1; --line:rgba(0,0,0,0.10);
+    --text:#1a1a1a; --muted:#555555; --dim:#8a8a8a;
+    --purple:#6d28d9; --cyan:#0e7490; --green:#15803d; --orange:#b45309; --pink:#be185d; --red:#dc2626; --yellow:#a16207;
+  }
+  body.light .top,body.light .a-progress{ background:rgba(243,243,246,0.94); }
+  body.light .live{ background:var(--panel); }
+  body.light .se-bar,body.light .meter,body.light .sys-bar,body.light .a-progress .bar,body.light .nrow .nb,body.light .progress .bar{ background:rgba(0,0,0,0.08); }
+  body.light .opt .box,body.light .aopt .box{ border-color:rgba(0,0,0,0.12); }
+  body.light .save,body.light .mbtn,body.light .a-progress .btn,body.light #installBtn{ color:#ffffff; }
+  body.light input[type=time]::-webkit-calendar-picker-indicator,
+  body.light input[type=date]::-webkit-calendar-picker-indicator{ filter:none; }
+  body.light .total-card,body.light .modal{ background:var(--panel); }
+  .themebtn{ background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; line-height:1; padding:4px; }
+
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{scroll-behavior:smooth}
+  body{ font-family:'Inter',sans-serif; background:#0d0d0d; color:var(--text); line-height:1.5; }
+  .app{ max-width:480px; margin:0 auto; min-height:100vh; background:var(--bg); position:relative; }
+
+  /* ===== Top bar with tabs ===== */
+  .top{ position:sticky; top:0; z-index:20; background:rgba(22,22,22,0.94); backdrop-filter:blur(10px);
+        border-bottom:1px solid var(--line); padding:14px 20px 0; padding-top:max(14px,env(safe-area-inset-top)); }
+  .top .barrow{ display:flex; align-items:center; justify-content:space-between; }
+  .top .brand{ font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:700; }
+  .top .brand .accent{ color:var(--purple); }
+  .acct{ display:flex; align-items:center; gap:9px; font-size:11px; color:var(--dim); }
+  .acct .em{ max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .acct button{ background:none; border:none; color:var(--purple); font-size:11px; cursor:pointer; font-family:inherit; }
+  .tabs{ display:flex; gap:4px; margin-top:12px; overflow-x:auto; scrollbar-width:none; }
+  .tabs::-webkit-scrollbar{ display:none; }
+  .tab{ flex:0 0 auto; text-align:center; background:none; border:none; color:var(--muted); font-family:inherit;
+        font-size:13px; font-weight:600; padding:11px 11px 13px; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
+  .tab.on{ color:var(--text); border-bottom-color:var(--purple); }
+
+  .view{ display:none; }
+  .view.on{ display:block; }
+
+  /* ===== install hint ===== */
+  .install{ display:none; margin:14px 20px 0; background:rgba(189,147,249,0.10); border:1px solid rgba(189,147,249,0.3);
+            border-radius:12px; padding:12px 14px; font-size:12.5px; color:var(--muted); align-items:center; gap:10px; }
+  .install.show{ display:flex; }
+  .install b{ color:var(--text); }
+  .install button{ margin-left:auto; background:var(--purple); color:#1a1a1a; border:none; border-radius:9px;
+        font-family:inherit; font-weight:700; font-size:12.5px; padding:9px 14px; cursor:pointer; white-space:nowrap; }
+  .install .x{ background:none; color:var(--dim); padding:6px; font-size:16px; margin-left:6px; }
+
+  /* ===== DIARY ===== */
+  .body{ padding:16px 20px 0; }
+  .dpick{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:4px; }
+  .dpick .nav{ display:flex; align-items:center; gap:8px; }
+  .dpick .nav button{ background:var(--panel); border:1px solid var(--line); color:var(--muted); width:34px; height:34px;
+        border-radius:9px; font-size:16px; cursor:pointer; }
+  .dpick .d{ font-size:13px; color:var(--muted); font-weight:600; min-width:104px; text-align:center; }
+  .sumbtn{ background:rgba(189,147,249,0.14); border:1px solid rgba(189,147,249,0.3); color:var(--purple);
+        font-family:inherit; font-size:12.5px; font-weight:700; padding:9px 14px; border-radius:10px; cursor:pointer; white-space:nowrap; }
+
+  .section{ margin-bottom:10px; }
+  .stitle{ font-size:11px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase; color:var(--cyan); margin:18px 4px 10px; }
+  .section.ctx .stitle{ color:var(--orange); }
+  .field{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:15px 16px; margin-bottom:10px; }
+  .field > label{ display:block; font-size:14px; font-weight:600; margin-bottom:11px; }
+  .field .hint{ font-weight:400; color:var(--dim); font-size:12px; }
+  input[type=time]{ width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--text);
+        font-family:inherit; font-size:17px; font-weight:600; padding:11px 14px; border-radius:10px; }
+  input[type=time]::-webkit-calendar-picker-indicator{ filter:invert(0.7); }
+  .two{ display:flex; gap:10px; }
+  .two .field{ flex:1; margin-bottom:10px; }
+  textarea{ width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--text);
+        font-family:inherit; font-size:14px; padding:12px 14px; border-radius:10px; resize:vertical; min-height:62px; }
+  textarea::placeholder{ color:var(--dim); }
+  .chips{ display:flex; gap:8px; flex-wrap:wrap; }
+  .chip{ flex:1; min-width:60px; text-align:center; background:var(--panel2); border:1px solid var(--line);
+        color:var(--muted); font-family:inherit; font-size:13px; font-weight:600; padding:11px 6px; border-radius:10px; cursor:pointer; transition:.12s; }
+  .chip.on{ background:rgba(189,147,249,0.16); border-color:var(--purple); color:var(--text); }
+  .stepper{ display:flex; align-items:center; gap:14px; }
+  .stepper button{ width:42px; height:42px; border-radius:11px; background:var(--panel2); border:1px solid var(--line);
+        color:var(--text); font-size:22px; font-weight:600; cursor:pointer; }
+  .stepper .val{ font-size:20px; font-weight:700; min-width:36px; text-align:center; }
+  .seg{ display:flex; gap:7px; }
+  .seg .s{ flex:1; text-align:center; background:var(--panel2); border:1px solid var(--line); color:var(--muted);
+        padding:12px 4px 9px; border-radius:10px; cursor:pointer; font-size:12px; font-weight:600; }
+  .seg .s b{ display:block; font-size:18px; margin-bottom:2px; color:var(--text); font-weight:700; }
+  .seg .s.on{ background:rgba(80,250,123,0.14); border-color:var(--green); }
+  .seg .s.on b{ color:var(--green); }
+
+  .live{ margin:18px 0 0; background:linear-gradient(180deg,var(--panel),#191919);
+        border:1px solid rgba(189,147,249,0.25); border-radius:16px; padding:16px 18px; }
+  .live .se-top{ display:flex; align-items:baseline; justify-content:space-between; }
+  .live .se-lab{ font-size:11px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--dim); }
+  .live .se-num{ font-size:34px; font-weight:800; }
+  .live .se-num span{ font-size:16px; color:var(--dim); font-weight:700; }
+  .live .se-sub{ font-size:12px; color:var(--muted); margin-top:4px; }
+  .live .se-bar{ height:7px; border-radius:5px; background:rgba(255,255,255,0.08); margin-top:10px; overflow:hidden; }
+  .live .se-fill{ height:100%; width:0; transition:width .4s, background .4s; }
+
+  /* ===== CAFFEINE ===== */
+  .caff-out{ text-align:center; }
+  .caff-hint{ color:var(--muted); font-size:13.5px; margin:0; }
+  .caff-grid{ display:flex; gap:12px; }
+  .caff-cell{ flex:1; background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:14px 10px; }
+  .caff-cell.ideal{ border-color:rgba(80,250,123,0.4); }
+  .caff-cell .cl{ font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--dim); font-weight:700; }
+  .caff-cell .cv{ font-size:23px; font-weight:800; margin:4px 0 2px; }
+  .caff-cell.ideal .cv{ color:var(--green); }
+  .caff-cell .cs{ font-size:11px; color:var(--muted); }
+  .caff-after{ font-size:12.5px; color:var(--muted); margin:12px 0 0; }
+  .caff-note{ font-size:13px; color:var(--muted); line-height:1.65; margin:0; }
+  .caff-table{ padding:6px 2px; }
+  .caff-row{ display:flex; justify-content:space-between; gap:12px; padding:9px 14px; font-size:13.5px; border-bottom:1px solid var(--line); }
+  .caff-row:last-child{ border-bottom:none; }
+  .caff-row.caff-head{ color:var(--cyan); font-weight:700; font-size:10.5px; letter-spacing:1px; text-transform:uppercase; }
+  .caff-row span:last-child{ color:var(--text); font-weight:600; white-space:nowrap; }
+
+  .savewrap{ padding:16px 20px calc(20px + env(safe-area-inset-bottom)); }
+  .save{ width:100%; background:var(--purple); color:#1a1a1a; border:none; border-radius:13px; font-family:inherit;
+        font-size:16px; font-weight:700; padding:15px; cursor:pointer; }
+  .save.saved{ background:var(--green); }
+
+  /* demo controls (preview build only) */
+  .demo-bar{ display:flex; gap:12px; align-items:center; justify-content:center; margin:0 20px 8px; padding-top:18px; border-top:1px solid var(--line); }
+  .demo-bar button{ background:none; border:1px solid var(--line); color:var(--dim); font-family:inherit; font-size:12px; font-weight:600; padding:7px 14px; border-radius:8px; cursor:pointer; transition:.15s; }
+  .demo-bar button:hover{ border-color:var(--purple); color:var(--purple); }
+  .demo-bar .clear{ border-color:transparent; }
+  .demo-bar .clear:hover{ border-color:var(--line); color:var(--muted); }
+
+  /* footer */
+  .app-footer{ text-align:center; padding:24px 20px calc(30px + env(safe-area-inset-bottom)); margin-top:8px; border-top:1px solid var(--line); }
+  .app-footer p{ font-size:11px; color:var(--dim); line-height:1.8; }
+  .app-footer a{ color:var(--dim); text-decoration:none; }
+  .app-footer a:hover{ color:var(--muted); }
+
+  /* ===== ASSESSMENT ===== */
+  .a-wrap{ padding:20px 20px 0; }
+  .a-intro{ font-size:13.5px; color:var(--muted); text-align:center; margin-bottom:8px; }
+  .a-intro .hl{ color:var(--pink); font-weight:600; }
+  .a-sechead{ margin:24px 0 12px; padding-bottom:8px; border-bottom:1px solid var(--line); }
+  .a-sechead .eb{ font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; }
+  .a-sechead h2{ font-size:18px; font-weight:800; margin-top:3px; }
+  .a-sechead p{ font-size:12.5px; color:var(--dim); margin-top:2px; }
+  .sec-a .eb,.sec-a h2{ color:var(--cyan);} .sec-b .eb,.sec-b h2{ color:var(--green);} .sec-c .eb,.sec-c h2{ color:var(--pink);}
+  .aq{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px 16px; margin-bottom:12px; }
+  .aq.answered{ border-color:rgba(189,147,249,0.35); }
+  .aq.flash{ animation:flash .6s; }
+  @keyframes flash{0%,100%{border-color:var(--line)}30%{border-color:var(--red)}}
+  .aq-head{ display:flex; gap:11px; margin-bottom:12px; }
+  .aq-num{ flex:0 0 28px; height:28px; border-radius:50%; background:rgba(189,147,249,0.15); color:var(--purple);
+        font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  .aq-text{ flex:1; font-size:14.5px; font-weight:600; line-height:1.45; padding-top:3px; }
+  .aopts{ display:flex; flex-direction:column; gap:7px; }
+  .aopt{ position:relative; display:block; cursor:pointer; }
+  .aopt input{ position:absolute; opacity:0; width:0; height:0; }
+  .aopt .box{ display:flex; align-items:center; gap:11px; padding:11px 13px; border:1px solid rgba(255,255,255,0.1);
+        border-radius:10px; background:var(--panel2); font-size:13.5px; color:var(--muted); transition:all .15s; }
+  .aopt .dot{ flex:0 0 17px; height:17px; border-radius:50%; border:2px solid var(--dim); transition:all .15s; }
+  .aopt input:checked + .box{ border-color:var(--purple); background:rgba(189,147,249,0.1); color:var(--text); }
+  .aopt input:checked + .box .dot{ border-color:var(--purple); background:var(--purple); box-shadow:inset 0 0 0 3px var(--panel2); }
+
+  .a-progress{ position:sticky; bottom:0; margin-top:18px; background:rgba(22,22,22,0.94); backdrop-filter:blur(8px);
+        border:1px solid var(--line); border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:14px;
+        margin-bottom:calc(16px + env(safe-area-inset-bottom)); }
+  .a-progress .bar{ flex:1; height:8px; border-radius:6px; background:rgba(255,255,255,0.08); overflow:hidden; }
+  .a-progress .pf{ height:100%; width:0; background:linear-gradient(90deg,var(--purple),var(--cyan)); transition:width .3s; }
+  .a-progress .ct{ font-size:12px; color:var(--muted); font-weight:600; white-space:nowrap; }
+  .a-progress .btn{ background:var(--purple); color:#1a1a1a; border:none; border-radius:10px; font-family:inherit;
+        font-size:14px; font-weight:700; padding:11px 18px; cursor:pointer; white-space:nowrap; }
+  .a-progress .btn:disabled{ opacity:.4; cursor:not-allowed; }
+
+  .a-result{ display:none; padding:0 20px; }
+  .a-result.show{ display:block; padding-bottom:calc(30px + env(safe-area-inset-bottom)); animation:fade .4s; }
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .total-card{ background:var(--panel); border:1px solid rgba(189,147,249,0.25); border-radius:16px; padding:26px 22px; text-align:center; margin:16px 0; }
+  .total-card .label{ font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--dim); font-weight:700; }
+  .total-card .num{ font-size:52px; font-weight:900; line-height:1; margin:8px 0; }
+  .total-card .num span{ font-size:22px; color:var(--dim); font-weight:700; }
+  .total-card .band{ display:inline-block; font-size:13px; font-weight:700; padding:5px 14px; border-radius:20px; margin:6px 0 12px; }
+  .total-card .band-desc{ font-size:13.5px; color:var(--muted); line-height:1.6; }
+  .meter{ height:9px; border-radius:6px; background:rgba(255,255,255,0.08); overflow:hidden; margin-top:16px; }
+  .meter .mf{ height:100%; width:0; transition:width .6s ease; }
+  .sysrows h3{ font-size:12px; letter-spacing:1px; text-transform:uppercase; color:var(--purple); margin:8px 0 12px; font-weight:700; }
+  .sys{ background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:15px 16px; margin-bottom:10px; }
+  .sys.weak{ border-color:rgba(255,85,85,0.4); }
+  .sys-top{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:8px; }
+  .sys-name{ font-size:14.5px; font-weight:700; }
+  .sys-name .tag{ font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--red); margin-left:6px; }
+  .sys-score{ font-size:13px; color:var(--muted); font-weight:600; }
+  .sys-bar{ height:8px; border-radius:6px; background:rgba(255,255,255,0.08); overflow:hidden; margin-bottom:8px; }
+  .sys-bar .sf{ height:100%; width:0; transition:width .6s ease; }
+  .sys-status{ font-size:12.5px; color:var(--muted); line-height:1.5; }
+  .sa .sys-name{color:var(--cyan)} .sb .sys-name{color:var(--green)} .sc .sys-name{color:var(--pink)}
+  .a-note{ text-align:center; font-size:12.5px; color:var(--muted); margin-top:16px; padding:14px;
+        border:1px dashed rgba(189,147,249,0.25); border-radius:12px; }
+  .a-note .hl{ color:var(--purple); font-weight:600; } .a-note .up{ color:var(--green); font-weight:700; } .a-note .down{ color:var(--orange); font-weight:700; }
+  .a-actions{ display:flex; gap:10px; justify-content:center; margin-top:18px; }
+  .a-actions .btn{ background:transparent; border:1px solid var(--purple); color:var(--purple); border-radius:10px;
+        font-family:inherit; font-size:13.5px; font-weight:700; padding:11px 18px; cursor:pointer; }
+
+  /* ===== modal / popup (shared) ===== */
+  .overlay{ position:fixed; inset:0; z-index:60; background:rgba(0,0,0,0.66); backdrop-filter:blur(3px);
+        display:none; align-items:flex-end; justify-content:center; }
+  .overlay.show{ display:flex; }
+  @media (min-width:520px){ .overlay{ align-items:center; } }
+  .modal{ width:100%; max-width:480px; background:var(--bg); border:1px solid var(--line);
+        border-radius:18px 18px 0 0; padding:24px 22px calc(24px + env(safe-area-inset-bottom)); }
+  @media (min-width:520px){ .modal{ border-radius:18px; } }
+  .modal h3{ font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:700; margin-bottom:6px; }
+  .modal .sub{ font-size:13px; color:var(--muted); margin-bottom:18px; line-height:1.5; }
+  .modal input[type=email],.modal input[type=text]{ width:100%; background:var(--panel2); border:1px solid var(--line);
+        color:var(--text); font-family:inherit; font-size:16px; padding:13px 15px; border-radius:11px; margin-bottom:12px; }
+  .modal input[type=text]{ letter-spacing:6px; text-align:center; font-weight:700; }
+  .modal .mbtn{ width:100%; background:var(--purple); color:#1a1a1a; border:none; border-radius:12px; font-family:inherit;
+        font-size:15.5px; font-weight:700; padding:14px; cursor:pointer; }
+  .modal .mbtn:disabled{ opacity:.4; cursor:not-allowed; }
+  .modal .mlink{ display:block; text-align:center; background:none; border:none; color:var(--dim); font-size:12.5px;
+        margin-top:14px; cursor:pointer; font-family:inherit; text-decoration:underline; }
+  .modal .demo{ font-size:12px; color:var(--yellow); background:rgba(241,250,140,0.08); border:1px dashed rgba(241,250,140,0.3);
+        border-radius:9px; padding:9px 11px; margin-bottom:12px; line-height:1.45; }
+  .modal .err{ font-size:12.5px; color:var(--red); margin-bottom:10px; min-height:16px; }
+
+  /* summary popup */
+  .sum-modal{ display:flex; flex-direction:column; max-height:90vh; max-height:90dvh; padding:0; overflow:hidden; }
+  .sum-head{ flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; gap:12px;
+        padding:20px 22px 14px; border-bottom:1px solid var(--line); }
+  .sum-head h3{ margin:0; }
+  .sum-x{ flex:0 0 auto; width:34px; height:34px; border-radius:9px; background:var(--panel2); border:1px solid var(--line);
+        color:var(--text); font-family:inherit; font-size:21px; line-height:1; cursor:pointer; }
+  .sum-x:hover{ border-color:var(--purple); color:var(--purple); }
+  .sum-scroll{ overflow-y:auto; -webkit-overflow-scrolling:touch; padding:18px 22px calc(22px + env(safe-area-inset-bottom)); }
+  .presets{ display:flex; gap:8px; margin-bottom:14px; }
+  .preset{ flex:1; background:var(--panel2); border:1px solid var(--line); color:var(--muted); font-family:inherit;
+        font-size:12.5px; font-weight:600; padding:11px 6px; border-radius:10px; cursor:pointer; }
+  .preset.on{ background:rgba(189,147,249,0.16); border-color:var(--purple); color:var(--text); }
+  .custom-range{ display:none; gap:10px; margin-bottom:14px; }
+  .custom-range.show{ display:flex; }
+  .custom-range .cr{ flex:1; }
+  .custom-range label{ font-size:11px; color:var(--dim); display:block; margin-bottom:4px; }
+  .custom-range input[type=date]{ width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--text);
+        font-family:inherit; font-size:14px; padding:10px 12px; border-radius:10px; }
+  .custom-range input[type=date]::-webkit-calendar-picker-indicator{ filter:invert(0.7); }
+  .sum-out .big{ text-align:center; padding:18px 0 10px; }
+  .sum-out .big .n{ font-size:46px; font-weight:900; line-height:1; }
+  .sum-out .big .n span{ font-size:18px; color:var(--dim); }
+  .sum-out .big .l{ font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--dim); font-weight:700; margin-top:6px; }
+  .sum-grid{ display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:12px 0; }
+  .sum-cell{ background:var(--panel); border:1px solid var(--line); border-radius:11px; padding:12px 13px; }
+  .sum-cell .k{ font-size:11px; color:var(--dim); }
+  .sum-cell .v{ font-size:18px; font-weight:700; margin-top:2px; }
+  .sum-empty{ text-align:center; color:var(--muted); font-size:13.5px; padding:20px 0; }
+  .sum-nights{ margin-top:6px; }
+  .nrow{ display:flex; align-items:center; gap:10px; margin-bottom:7px; }
+  .nrow .nd{ font-size:11px; color:var(--muted); width:64px; }
+  .nrow .nb{ flex:1; height:7px; border-radius:5px; background:rgba(255,255,255,0.07); overflow:hidden; }
+  .nrow .nf{ height:100%; }
+  .nrow .nv{ font-size:11px; font-weight:700; width:40px; text-align:right; }
+
+  /* summary diagnostic — fix-first + secondary flags */
+  .sum-fix{ margin:16px 0 4px; padding:14px 15px; text-align:left; border-radius:12px;
+        border:1px solid rgba(255,184,108,0.35); border-left:3px solid var(--orange); background:rgba(255,184,108,0.07); }
+  .sum-fix .fl-lab{ font-size:10.5px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; color:var(--orange); margin-bottom:7px; }
+  .sum-fix .fl-txt{ font-size:14px; line-height:1.5; color:var(--text); }
+  .sum-fix .fl-txt b{ font-weight:700; }
+  .sum-lesson{ display:block; margin-top:10px; font-size:12.5px; font-weight:600; color:var(--purple); text-decoration:none; }
+  .sum-lesson:hover{ text-decoration:underline; }
+  .sum-flags{ margin:14px 0 4px; text-align:left; }
+  .sum-flags .ff-lab{ font-size:10.5px; font-weight:800; letter-spacing:1.2px; text-transform:uppercase; color:var(--dim); margin-bottom:9px; }
+  .sum-flags.hard .ff-lab{ color:var(--orange); }
+  .ff-item{ position:relative; padding:0 0 11px 16px; }
+  .ff-item::before{ content:''; position:absolute; left:2px; top:7px; width:6px; height:6px; border-radius:50%; background:var(--purple); }
+  .ff-item .ff-t{ font-size:13.5px; line-height:1.45; color:var(--text); }
+  .ff-item .ff-t b{ font-weight:700; }
+  .ff-l{ color:var(--purple); text-decoration:none; white-space:nowrap; }
+  .ff-l:hover{ text-decoration:underline; }
+  .sum-ok{ margin:16px 0 4px; padding:13px 15px; text-align:left; border-radius:12px; font-size:13.5px; line-height:1.5; color:var(--text);
+        border:1px solid rgba(80,250,123,0.3); border-left:3px solid var(--green); background:rgba(80,250,123,0.06); }
+  .sum-gate{ margin:16px 0 4px; padding:14px 15px; text-align:center; border:1px dashed var(--line); border-radius:12px;
+        font-size:13px; line-height:1.5; color:var(--muted); }
+  .sum-nights-d{ margin-top:16px; border-top:1px solid var(--line); padding-top:12px; }
+  .sum-nights-d > summary{ list-style:none; cursor:pointer; font-size:12px; font-weight:600; color:var(--purple); padding:2px 0; user-select:none; }
+  .sum-nights-d > summary::-webkit-details-marker{ display:none; }
+  .sum-nights-d > summary::after{ content:' ▾'; }
+  .sum-nights-d[open] > summary::after{ content:' ▴'; }
+  .sum-nights-d .sum-nights{ margin-top:12px; }
+
+  /* ===== auth gate ===== */
+  #authGate{ align-items:center; }
+  #authGate .modal{ border-radius:18px; margin:0 16px; }
+  .consent{ display:flex; gap:8px; align-items:flex-start; font-size:13px; line-height:1.4; margin:10px 0; text-align:left; }
+  .consent input{ margin-top:2px; flex:0 0 auto; }
+  .locked-msg{ font-size:14px; line-height:1.5; margin:0 0 14px; }
+  /* Manage my data (deletion) — subtle, destructive. */
+  .manage-data{ text-align:center; margin:28px 0 8px; }
+  .danger-link{ background:none; border:none; color:#c0392b; font-size:13px; text-decoration:underline; cursor:pointer; padding:4px; }
+  .manage-err{ color:#c0392b; font-size:13px; margin-top:8px; min-height:1em; }
+
+  /* ===== PROTOCOL CARD ===== */
+  .pc-body{ padding:18px 20px 30px; }
+  .pc-head h2{ font-size:21px; font-weight:800; letter-spacing:-0.3px; }
+  .pc-head p{ font-size:13px; color:var(--muted); margin-top:6px; }
+  .pc-head b{ color:var(--text); }
+  .pc-tips{ display:flex; gap:9px; margin:16px 0 6px; }
+  .pc-tip{ flex:1; background:var(--panel); border:1px solid var(--line); border-radius:11px; padding:11px 13px; font-size:11.5px; color:var(--muted); line-height:1.45; }
+  .pc-tip b{ display:block; font-size:10px; letter-spacing:.8px; text-transform:uppercase; margin-bottom:3px; font-weight:700; }
+  .pc-tip.w b{ color:var(--cyan); } .pc-tip.r b{ color:var(--green); }
+  .pc-line{ background:var(--panel); border:1px solid var(--line); border-radius:13px; padding:14px 15px; margin-bottom:9px; }
+  .pc-line.filled{ border-color:rgba(189,147,249,0.3); }
+  .pc-lh{ display:flex; gap:11px; margin-bottom:10px; align-items:flex-start; }
+  .pc-ln{ flex:0 0 26px; height:26px; border-radius:8px; background:rgba(189,147,249,0.13); color:var(--purple); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+  .pc-lh label{ display:block; font-size:14px; font-weight:700; line-height:1.3; }
+  .pc-lh .hint{ display:block; font-size:11.5px; color:var(--dim); font-weight:400; margin-top:2px; }
+  .pc-cell{ width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--text); font-family:inherit; font-size:14px; padding:10px 12px; border-radius:9px; }
+  .pc-cell:focus{ outline:none; border-color:rgba(189,147,249,0.5); }
+  textarea.pc-cell{ resize:none; overflow:hidden; min-height:44px; line-height:1.5; }
+  .pc-win{ display:flex; align-items:center; gap:9px; } .pc-win .pc-cell{ flex:1; } .pc-win .to{ font-size:12px; color:var(--dim); font-weight:600; }
+  .pc-actions{ display:flex; gap:10px; margin-top:16px; }
+  .pc-save{ flex:1; background:var(--purple); color:#1a1a1a; border:none; border-radius:11px; font-family:inherit; font-size:15px; font-weight:700; padding:13px; cursor:pointer; }
+  body.light .pc-save{ color:#fff; }
+  .pc-save.saved{ background:var(--green); }
+  .pc-ghost{ background:var(--panel); border:1px solid var(--line); color:var(--muted); border-radius:11px; font-family:inherit; font-size:13px; font-weight:600; padding:13px 15px; cursor:pointer; }
+  .pc-ghost:hover{ border-color:var(--purple); color:var(--purple); }
+  .pc-demo{ display:flex; gap:10px; margin-top:18px; padding-top:16px; border-top:1px solid var(--line); }
+  .pc-demo button{ background:none; border:1px solid var(--line); color:var(--dim); font-family:inherit; font-size:12px; font-weight:600; padding:8px 14px; border-radius:8px; cursor:pointer; }
+  .pc-demo button:hover{ border-color:var(--purple); color:var(--purple); }
+  .pc-demo .clear:hover{ border-color:#c0392b; color:#c0392b; }
+
+  /* ===== GUIDES HUB ===== */
+  .g-body{ padding:18px 20px 30px; }
+  .g-head h2{ font-size:21px; font-weight:800; letter-spacing:-0.3px; }
+  .g-head p{ font-size:13px; color:var(--muted); margin:6px 0 16px; }
+  .gcard{ display:flex; align-items:center; gap:13px; background:var(--panel); border:1px solid var(--line); border-radius:15px; padding:14px 15px; margin-bottom:10px; cursor:pointer; transition:border-color .15s; text-decoration:none; color:inherit; }
+  .gcard:hover{ border-color:rgba(189,147,249,0.4); }
+  .gic{ flex:0 0 42px; width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; }
+  .gic svg{ width:21px; height:21px; stroke-width:1.9; fill:none; stroke:currentColor; }
+  .gic.or{ background:rgba(255,184,108,0.16); color:var(--orange); }
+  .gic.pk{ background:rgba(255,121,198,0.15); color:var(--pink); }
+  .gic.yl{ background:rgba(241,250,140,0.16); color:var(--yellow); }
+  body.light .gic.yl{ color:#a16207; background:rgba(161,98,7,0.12); }
+  .gtx{ flex:1; min-width:0; }
+  .gtt{ font-size:15px; font-weight:700; }
+  .gts{ font-size:12px; color:var(--muted); margin-top:2px; }
+  .gchev{ flex:0 0 auto; color:var(--dim); font-size:19px; }
+
+  /* print: isolate the Protocol Card to a clean light page */
+  @media print{
+    body.printing-pc{ background:#fff; }
+    body.printing-pc .top, body.printing-pc .install, body.printing-pc #authGate, body.printing-pc .app-footer,
+    body.printing-pc .view:not(#view-protocol), body.printing-pc .pc-tips,
+    body.printing-pc .pc-actions, body.printing-pc .pc-demo{ display:none !important; }
+    body.printing-pc .app{ background:#fff; }
+    body.printing-pc .pc-head h2, body.printing-pc .pc-head p{ color:#000; }
+    body.printing-pc .pc-line{ border:1px solid #999; break-inside:avoid; margin-bottom:8px; }
+    body.printing-pc .pc-ln{ background:none; border:1px solid #999; color:#000; }
+    body.printing-pc .pc-lh label{ color:#000; } body.printing-pc .pc-lh .hint{ color:#444; }
+    body.printing-pc .pc-cell{ background:none; border:none; border-bottom:1px solid #ccc; border-radius:0; color:#000; overflow:visible; }
+    body.printing-pc .pc-win .to{ color:#000; }
+  }
+</style>
+<!-- Generated public Supabase config (window globals) — must load before the app script. -->
+<script src="/app/config.js"></script>
+<!-- Supabase JS client (UMD bundle exposes global `supabase` with createClient). -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="app">
+
+  <div class="top">
+    <div class="barrow">
+      <div class="brand">The <span class="accent">ZeroFog</span></div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <button class="themebtn" id="themeToggle" title="Switch light / dark" aria-label="Switch theme">☾</button>
+        <div class="acct" id="acct" style="visibility:hidden">
+          <span class="em" id="acctEmail"></span><button id="signOut">Sign out</button>
+        </div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab on" data-view="diary">Sleep Diary</button>
+      <button class="tab" data-view="assessment">Assessment</button>
+      <button class="tab" data-view="caffeine">Caffeine</button>
+      <button class="tab" data-view="protocol">Protocol Card</button>
+      <button class="tab" data-view="guides">Guides</button>
+    </div>
+  </div>
+
+  <!-- PWA install hint -->
+  <div class="install" id="install">
+    <span id="installTxt"></span>
+    <button id="installBtn">Install</button>
+    <button class="x" id="installX">×</button>
+  </div>
+
+  <!-- ============ DIARY VIEW ============ -->
+  <div class="view on" id="view-diary">
+    <div class="body">
+      <div class="dpick">
+        <div class="nav">
+          <button id="prev">‹</button>
+          <div class="d" id="dlabel">Today</div>
+          <button id="next">›</button>
+        </div>
+        <button class="sumbtn" id="openSummary">📊 Summary</button>
+      </div>
+
+      <div class="section">
+        <div class="stitle">Last night</div>
+        <div class="two">
+          <div class="field"><label>Into bed</label><input type="time" id="intoBed"></div>
+          <div class="field"><label>Lights out <span class="hint">- optional</span></label><input type="time" id="tried"></div>
+        </div>
+        <div class="field">
+          <label>Time to fall asleep <span class="hint">- minutes after lights out</span></label>
+          <div class="chips" data-chip="sol">
+            <div class="chip" data-v="7">&lt; 15 min</div><div class="chip" data-v="22">15-30</div>
+            <div class="chip" data-v="45">30-60</div><div class="chip" data-v="75">60+ min</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Times you woke up <span class="hint">- in the night</span></label>
+          <div class="stepper"><button data-step="-1">-</button><div class="val" id="wakeVal">0</div><button data-step="1">+</button></div>
+        </div>
+        <div class="field">
+          <label>Total time awake <span class="hint">- during those wake-ups</span></label>
+          <div class="chips" data-chip="waso">
+            <div class="chip" data-v="0">0</div><div class="chip" data-v="7">&lt; 15</div>
+            <div class="chip" data-v="22">15-30</div><div class="chip" data-v="45">30-60</div><div class="chip" data-v="75">60+</div>
+          </div>
+        </div>
+        <div class="two">
+          <div class="field"><label>Final wake-up</label><input type="time" id="finalWake"></div>
+          <div class="field"><label>Out of bed <span class="hint">- optional</span></label><input type="time" id="outBed"></div>
+        </div>
+        <div class="field">
+          <label>Sleep quality</label>
+          <div class="seg" data-seg="quality">
+            <div class="s" data-v="1"><b>1</b>poor</div><div class="s" data-v="2"><b>2</b></div>
+            <div class="s" data-v="3"><b>3</b>ok</div><div class="s" data-v="4"><b>4</b></div><div class="s" data-v="5"><b>5</b>great</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section ctx">
+        <div class="stitle">Yesterday</div>
+        <div class="field">
+          <label>Last caffeine</label>
+          <div class="two" style="gap:10px;align-items:stretch">
+            <input type="time" id="caffeine" style="flex:1">
+            <div class="chip" id="caffNone" style="flex:0 0 96px;display:flex;align-items:center;justify-content:center">None</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Alcohol</label>
+          <div class="chips" data-chip="alcohol"><div class="chip" data-v="none">None</div><div class="chip" data-v="1-2">1-2</div><div class="chip" data-v="3+">3+</div></div>
+        </div>
+        <div class="field">
+          <label>Daytime nap</label>
+          <div class="chips" data-chip="nap"><div class="chip" data-v="none">None</div><div class="chip" data-v="<20">&lt; 20 min</div><div class="chip" data-v="20-40">20-40</div><div class="chip" data-v="40+">40+</div></div>
+        </div>
+        <div class="field">
+          <label>Exercise <span class="hint">- when</span></label>
+          <div class="chips" data-chip="exercise"><div class="chip" data-v="none">None</div><div class="chip" data-v="morning">Morning</div><div class="chip" data-v="afternoon">Afternoon</div><div class="chip" data-v="evening">Evening</div></div>
+        </div>
+        <div class="field">
+          <label>Sleep aid <span class="hint">- taken last night</span></label>
+          <div class="chips" data-chip="aid"><div class="chip" data-v="none">None</div><div class="chip" data-v="melatonin">Melatonin</div><div class="chip" data-v="magnesium">Magnesium</div><div class="chip" data-v="other">Other</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="stitle">Notes <span style="color:var(--dim);font-weight:400;letter-spacing:0">- optional</span></div>
+        <div class="field"><textarea id="notes" placeholder="Anything unusual - stress, travel, illness, late meal, sick kid..."></textarea></div>
+      </div>
+
+      <div class="live">
+        <div class="se-top">
+          <div><div class="se-lab">Sleep efficiency</div><div class="se-num" id="seNum">--<span>%</span></div></div>
+          <div style="text-align:right"><div class="se-sub" id="seTib">time in bed --</div><div class="se-sub" id="seTst">slept --</div></div>
+        </div>
+        <div class="se-bar"><div class="se-fill" id="seFill"></div></div>
+        <div class="se-sub" id="seMsg" style="margin-top:9px"></div>
+      </div>
+    </div>
+    <div class="savewrap"><button class="save" id="save">Save today's entry</button></div>
+    <!-- Manage my data — right to erasure (irreversible). -->
+    <div class="manage-data">
+      <button class="danger-link" id="deleteData">Delete my data</button>
+      <div class="manage-err" id="deleteErr"></div>
+    </div>
+    <div class="demo-bar">
+      <button id="demoLoad">Load 30-day sample</button>
+      <button class="clear" id="demoClear">Clear all data</button>
+    </div>
+  </div>
+
+  <!-- ============ ASSESSMENT VIEW ============ -->
+  <div class="view" id="view-assessment">
+    <div class="a-wrap">
+      <p class="a-intro">Answer based on <span class="hl">the past 2 to 4 weeks</span> - the pattern, not one rough night.</p>
+      <form id="aform"></form>
+      <div class="a-progress" id="aprogress">
+        <div class="ct" id="act">0 / 16</div>
+        <div class="bar"><div class="pf" id="apf"></div></div>
+        <button type="button" class="btn" id="asubmit" disabled>See result</button>
+      </div>
+    </div>
+    <div class="a-result" id="aresult">
+      <div class="total-card">
+        <div class="label" id="aTotLabel">Your baseline score</div>
+        <div class="num" id="aTotNum">0<span>/ 48</span></div>
+        <div class="band" id="aBand"></div>
+        <p class="band-desc" id="aBandDesc"></p>
+        <div class="meter"><div class="mf" id="aMeter"></div></div>
+      </div>
+      <div class="sysrows"><h3>Your three systems</h3><div id="aSys"></div></div>
+      <div class="a-note" id="aNote"></div>
+      <div class="a-actions"><button type="button" class="btn" id="aRetake">Retake</button></div>
+    </div>
+  </div>
+
+  <!-- ============ CAFFEINE VIEW ============ -->
+  <div class="view" id="view-caffeine">
+    <div class="body">
+      <div class="section">
+        <div class="stitle">Your caffeine cutoff</div>
+        <div class="field">
+          <label>Your target bedtime</label>
+          <input type="time" id="caffBed">
+        </div>
+        <div class="live caff-out" id="caffOut"><p class="caff-hint">Enter your target bedtime to see your cutoff.</p></div>
+        <p class="caff-note" style="margin-top:12px">Caffeine has a half-life of 5-6 hours - half of your 2 PM coffee is still in you at 8 PM. Even when you fall asleep, it can cut your deep sleep by up to 20%. Stopping early enough keeps it out of your night.</p>
+      </div>
+
+      <div class="section">
+        <div class="stitle">What counts as caffeine</div>
+        <div class="field caff-table">
+          <div class="caff-row caff-head"><span>Source</span><span>Caffeine</span></div>
+          <div class="caff-row"><span>Espresso (1 shot)</span><span>63 mg</span></div>
+          <div class="caff-row"><span>Drip coffee (250 ml)</span><span>95 mg</span></div>
+          <div class="caff-row"><span>Black tea (250 ml)</span><span>47 mg</span></div>
+          <div class="caff-row"><span>Green tea (250 ml)</span><span>28 mg</span></div>
+          <div class="caff-row"><span>Energy drink (250 ml)</span><span>80 mg</span></div>
+          <div class="caff-row"><span>Cola (330 ml)</span><span>32 mg</span></div>
+          <div class="caff-row"><span>Dark chocolate (50 g)</span><span>25 mg</span></div>
+          <div class="caff-row"><span>Pre-workout</span><span>150-300 mg</span></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="stitle">Everyone absorbs it differently</div>
+        <div class="field">
+          <p class="caff-note">About 15% of people are slow metabolizers - coffee at 3 PM and they're wired at midnight. About 10% are fast - espresso after dinner, no problem. The rest are in between. It's largely genetic, and you can get it tested if you want to know your type. If an 8-hour cutoff isn't enough for you, push it to 10-12 hours.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ PROTOCOL CARD VIEW ============ -->
+  <div class="view" id="view-protocol">
+    <div class="pc-body">
+      <div class="pc-head">
+        <h2>Your Protocol Card</h2>
+        <p><b>14 lines. One page.</b> The settings that made the biggest difference for you. Fill it in, save it, print it.</p>
+      </div>
+      <div class="pc-tips">
+        <div class="pc-tip w"><b>Windows, not fixed times</b>A 30-60 min range beats "exactly 7:00." Less stress, higher consistency.</div>
+        <div class="pc-tip r"><b>The 80% rule</b>Follow it 80% of the time and the system holds. Miss a day, pick it back up.</div>
+      </div>
+      <form id="pcCard"></form>
+      <div class="pc-actions">
+        <button class="pc-save" id="pcSave">Save my card</button>
+        <button class="pc-ghost" id="pcPrint">Print / Save as PDF</button>
+      </div>
+      <div class="pc-demo">
+        <button id="pcDemo">Load founder's example</button>
+        <button class="clear" id="pcClear">Clear card</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ GUIDES VIEW ============ -->
+  <div class="view" id="view-guides">
+    <div class="g-body">
+      <div class="g-head">
+        <h2>Your guides</h2>
+        <p>Three bonus guides - read online or print. Each opens the full guide.</p>
+      </div>
+      <a class="gcard" href="/webinar-bonuses/?embed=1#caffeine" target="_blank" rel="noopener">
+        <div class="gic or"><svg viewBox="0 0 24 24"><path d="M4 8h12v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/><path d="M16 9h2a2 2 0 0 1 0 4h-2"/><path d="M7 3v2M10 3v2M13 3v2"/></svg></div>
+        <div class="gtx"><div class="gtt">Caffeine Blueprint</div><div class="gts">When to stop, how to cut back without the crash</div></div>
+        <span class="gchev">›</span>
+      </a>
+      <a class="gcard" href="/webinar-bonuses/?embed=1#bedroom" target="_blank" rel="noopener">
+        <div class="gic pk"><svg viewBox="0 0 24 24"><path d="M3 18v-5a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v5"/><path d="M3 18h18M6 10V7h12v3"/></svg></div>
+        <div class="gtx"><div class="gtt">Bedroom Tune-Up</div><div class="gts">Light, sound, temperature - the quick wins</div></div>
+        <span class="gchev">›</span>
+      </a>
+      <a class="gcard" href="/webinar-bonuses/?embed=1#mistakes" target="_blank" rel="noopener">
+        <div class="gic yl"><svg viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></svg></div>
+        <div class="gtx"><div class="gtt">9 Recovery Mistakes</div><div class="gts">Common moves that quietly keep you tired</div></div>
+        <span class="gchev">›</span>
+      </a>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <p>&copy; 2026 The ZeroFog. All rights reserved.<br>
+    <a href="/privacy/">Privacy</a> &middot;
+    <a href="/terms/">Terms</a> &middot;
+    <a href="/refunds/">Refunds</a> &middot;
+    <a href="/disclaimer/">Disclaimer</a></p>
+  </footer>
+
+</div>
+
+<!-- ===== AUTH GATE ===== -->
+<div class="overlay show" id="authGate">
+  <div class="modal">
+    <h3>Your sleep tools</h3>
+    <p class="sub">Sign in with your email to save your diary and assessment - on any device. We send you a one-time code, no password.</p>
+    <div class="demo" id="authDemo" style="display:none"></div>
+    <div class="err" id="authErr"></div>
+    <div id="step-email">
+      <input type="email" id="authEmail" placeholder="you@email.com" autocomplete="email">
+      <label class="consent">
+        <input type="checkbox" id="consentChk">
+        <span>
+          <!-- TODO: final consent copy to be confirmed by Dima/Kirill. Must name that this stores
+               sensitive sleep/lifestyle (health-related) data, state the purpose, and link privacy. -->
+          I agree that my sleep and lifestyle entries will be stored to provide this app, as described
+          in the <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.
+        </span>
+      </label>
+      <button class="mbtn" id="sendCode">Send my code</button>
+    </div>
+    <div id="step-code" style="display:none">
+      <input type="text" id="authCode" placeholder="000000" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
+      <button class="mbtn" id="verifyCode">Verify &amp; open</button>
+      <button class="mlink" id="backToEmail">Use a different email</button>
+    </div>
+    <div id="step-locked" style="display:none">
+      <p class="locked-msg">This app is part of the program and is available to customers.
+         If you've purchased, make sure you're signing in with the same email you used at checkout.</p>
+      <a class="mbtn" href="/sales">See the program</a>
+      <button class="mlink" id="lockedSignOut">Sign out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SUMMARY POPUP ===== -->
+<div class="overlay" id="summaryOverlay">
+  <div class="modal sum-modal">
+    <div class="sum-head">
+      <h3>Your summary</h3>
+      <button class="sum-x" id="closeSummary" aria-label="Close summary">×</button>
+    </div>
+    <div class="sum-scroll">
+      <p class="sub">Averages over the range you pick. Calculated from your saved entries.</p>
+      <div class="presets">
+        <button class="preset on" data-range="7">Last 7 days</button>
+        <button class="preset" data-range="30">Last 30 days</button>
+        <button class="preset" data-range="custom">Custom</button>
+      </div>
+      <div class="custom-range" id="customRange">
+        <div class="cr"><label>From</label><input type="date" id="rangeFrom"></div>
+        <div class="cr"><label>To</label><input type="date" id="rangeTo"></div>
+      </div>
+      <div class="sum-out" id="sumOut"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DATA LAYER  (the ONLY place that touches storage)
+   ------------------------------------------------------------
+   Backed by Supabase. The rest of the app calls DB.* and never
+   touches storage directly. Auth via email OTP (numeric code);
+   diary/assessment rows are scoped to the authenticated user and
+   protected by RLS (own rows + paid). Diary input fields are
+   packed into a jsonb `data` column and flattened back on read so
+   the rest of the app keeps seeing flat entry objects.
+   ============================================================ */
+
+// Supabase client. URL + publishable key come from the generated /app/config.js (window globals).
+const SB_URL = window.ZF_SUPABASE_URL;
+const SB_KEY = window.ZF_SUPABASE_ANON_KEY;
+const sb = (SB_URL && SB_KEY) ? supabase.createClient(SB_URL, SB_KEY) : null;
+
+// PREVIEW mode (?demo=1): swap the entire data layer to localStorage so we can load
+// sample data and see the report WITHOUT writing to the live Supabase DB. Never on for real users.
+const PREVIEW = new URLSearchParams(location.search).has('demo');
+
+// Version of the health-data consent copy the user agreed to (bump when copy changes).
+const CONSENT_VERSION = 'v1';
+
+const DB_SB = {
+  _userId: null,
+  _email: null,
+
+  async currentUser(){
+    const { data } = await sb.auth.getUser();
+    const u = data && data.user;
+    if(u){ this._userId = u.id; this._email = u.email; return { email: u.email, id: u.id }; }
+    return null;
+  },
+
+  async sendCode(email){
+    // Email OTP (numeric code). Do NOT pass emailRedirectTo — its presence makes Supabase
+    // send a magic link instead of a code, which breaks verifyOtp({type:'email'}).
+    const { error } = await sb.auth.signInWithOtp({ email });
+    if(error) throw error;
+    return {};
+  },
+
+  async verifyCode(email, code){
+    const { data, error } = await sb.auth.verifyOtp({ email, token: code, type: 'email' });
+    if(error) throw new Error('That code does not match. Check the code and try again.');
+    const u = data.user;
+    this._userId = u.id; this._email = u.email;
+    return { email: u.email, id: u.id };
+  },
+
+  async signOut(){
+    await sb.auth.signOut();
+    this._userId = null; this._email = null;
+  },
+
+  // ---- Access gating + consent (profiles row) ----
+  async isPaid(){
+    // Reads the current user's own profile row (RLS allows reading own row).
+    // Returns true only if a row exists AND is_paid === true.
+    const { data, error } = await sb.from('profiles')
+      .select('is_paid').eq('user_id', this._userId).maybeSingle();
+    if(error) return false;          // on error, fail closed (treat as not paid)
+    return !!(data && data.is_paid);
+  },
+
+  async recordConsent(version){
+    // Best-effort: stamp consent on the user's own profile row IF it exists.
+    // A non-paid user has no profiles row yet (created at purchase), so update may affect 0 rows —
+    // that's fine; consent will be (re)stamped after they have a row. Do not throw on failure.
+    try {
+      await sb.from('profiles').update({
+        consent_at: new Date().toISOString(),
+        consent_version: version
+      }).eq('user_id', this._userId);
+    } catch(e) { /* non-fatal */ }
+  },
+
+  async deleteAccount(){
+    // Layer 1 (client, RLS-allowed): delete own diary + assessment rows.
+    // These also cascade when the auth user is removed, but we delete explicitly for
+    // immediate effect and clear feedback.
+    await sb.from('diary_entries').delete().eq('user_id', this._userId);
+    await sb.from('assessments').delete().eq('user_id', this._userId);
+    await sb.from('protocol_cards').delete().eq('user_id', this._userId);
+
+    // Layer 2 (server): delete the auth user (+ cascade profile) via the function,
+    // authenticated with the current session's access token.
+    const { data: { session } } = await sb.auth.getSession();
+    const token = session?.access_token;
+    if(!token) throw new Error('Not signed in.');
+    const res = await fetch('/.netlify/functions/delete-account', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token },
+    });
+    if(!res.ok) throw new Error('Could not complete deletion. Please contact support.');
+    // Clear local session client-side.
+    await sb.auth.signOut();
+  },
+
+  // ---- Diary: pack flat entry into a jsonb `data` column; flatten back on read ----
+  async saveDiary(entry){
+    const { entry_date, sleep_eff, ...rest } = entry; // rest = all the state fields
+    const row = { user_id: this._userId, entry_date, sleep_eff, data: rest };
+    const { error } = await sb.from('diary_entries').upsert(row, { onConflict: 'user_id,entry_date' });
+    if(error) throw error;
+  },
+
+  async getDiary(dateStr){
+    const { data, error } = await sb.from('diary_entries')
+      .select('entry_date, sleep_eff, data')
+      .eq('user_id', this._userId).eq('entry_date', dateStr).maybeSingle();
+    if(error) throw error;
+    if(!data) return null;
+    return { entry_date: data.entry_date, sleep_eff: data.sleep_eff, ...(data.data || {}) };
+  },
+
+  async getDiaryRange(from, to){
+    const { data, error } = await sb.from('diary_entries')
+      .select('entry_date, sleep_eff, data')
+      .eq('user_id', this._userId)
+      .gte('entry_date', from).lte('entry_date', to)
+      .order('entry_date', { ascending: true });
+    if(error) throw error;
+    return (data || []).map(r => ({ entry_date: r.entry_date, sleep_eff: r.sleep_eff, ...(r.data || {}) }));
+  },
+
+  // ---- Assessment: direct column mapping; answers in jsonb ----
+  async saveAssessment(rec){
+    const row = {
+      user_id: this._userId,
+      taken_on: rec.taken_on,
+      score_total: rec.score_total,
+      score_clock: rec.score_clock,
+      score_battery: rec.score_battery,
+      score_offswitch: rec.score_offswitch,
+      answers: rec.answers,
+    };
+    const { error } = await sb.from('assessments').insert(row);
+    if(error) throw error;
+  },
+
+  async getAssessments(){
+    const { data, error } = await sb.from('assessments')
+      .select('taken_on, score_total, score_clock, score_battery, score_offswitch, answers')
+      .eq('user_id', this._userId)
+      .order('taken_on', { ascending: true });
+    if(error) throw error;
+    return data || [];
+  },
+
+  // ---- Protocol Card: singleton row per user; the 14 fields live in jsonb `data` ----
+  async saveProtocol(data){
+    const row = { user_id: this._userId, data, updated_at: new Date().toISOString() };
+    const { error } = await sb.from('protocol_cards').upsert(row, { onConflict: 'user_id' });
+    if(error) throw error;
+  },
+
+  async getProtocol(){
+    const { data, error } = await sb.from('protocol_cards')
+      .select('data').eq('user_id', this._userId).maybeSingle();
+    if(error) throw error;
+    return data ? (data.data || {}) : {};
+  },
+};
+
+/* ---- PREVIEW data layer: localStorage only, never touches Supabase. ----
+   Same interface as DB_SB. Auth/paid/consent are stubbed so ?demo=1 opens
+   straight into the app. Sample data + Clear live entirely in localStorage. */
+const DB_LOCAL = {
+  _email: 'preview@demo.local',
+  _diaryKey(){ return 'zf_demo_diary'; },
+  _assessKey(){ return 'zf_demo_assess'; },
+  _protoKey(){ return 'zf_demo_protocol'; },
+  async currentUser(){ return { email: this._email, id: 'demo' }; },
+  async sendCode(){ return {}; },
+  async verifyCode(){ return { email: this._email, id: 'demo' }; },
+  async signOut(){ /* noop in preview */ },
+  async isPaid(){ return true; },
+  async recordConsent(){ /* noop */ },
+  async deleteAccount(){ localStorage.removeItem(this._diaryKey()); localStorage.removeItem(this._assessKey()); localStorage.removeItem(this._protoKey()); },
+  _allDiary(){ try{ return JSON.parse(localStorage.getItem(this._diaryKey()))||{}; }catch(e){ return {}; } },
+  async saveDiary(entry){ const all=this._allDiary(); all[entry.entry_date]=entry; localStorage.setItem(this._diaryKey(), JSON.stringify(all)); },
+  async getDiary(dateStr){ return this._allDiary()[dateStr] || null; },
+  async getDiaryRange(from, to){ return Object.values(this._allDiary()).filter(e=>e.entry_date>=from && e.entry_date<=to).sort((a,b)=>a.entry_date<b.entry_date?-1:1); },
+  async saveAssessment(rec){ let arr=[]; try{ arr=JSON.parse(localStorage.getItem(this._assessKey()))||[]; }catch(e){} arr.push(rec); localStorage.setItem(this._assessKey(), JSON.stringify(arr)); },
+  async getAssessments(){ try{ return (JSON.parse(localStorage.getItem(this._assessKey()))||[]).sort((a,b)=>a.taken_on<b.taken_on?-1:1); }catch(e){ return []; } },
+  async saveProtocol(data){ localStorage.setItem(this._protoKey(), JSON.stringify(data)); },
+  async getProtocol(){ try{ return JSON.parse(localStorage.getItem(this._protoKey()))||{}; }catch(e){ return {}; } },
+};
+
+// The rest of the app calls DB.* and never knows which backend it is.
+const DB = PREVIEW ? DB_LOCAL : DB_SB;
+
+const $ = id => document.getElementById(id);
+function dkey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function todayKey(){ const d=new Date(); d.setHours(0,0,0,0); return dkey(d); }
+
+/* ============ AUTH GATE ============ */
+const gate = $('authGate');
+async function boot(){
+  if(PREVIEW){ unlock(DB_LOCAL._email); return; }   // ?demo=1 : skip auth, open straight in
+  const u = await DB.currentUser();
+  if(u){ await enterApp(u.email); }
+  else { gate.classList.add('show'); }
+}
+function unlock(email){
+  gate.classList.remove('show');
+  $('acct').style.visibility = 'visible';
+  $('acctEmail').textContent = email;
+  diaryInit();
+  assessInit();
+  protocolInit();
+}
+// Decide where an authenticated user lands: paid → into the app; not paid → "customers only" screen.
+// RLS already blocks non-paid data access; this gate is defence-in-depth + a clear message.
+async function enterApp(email){
+  if(await DB.isPaid()){
+    unlock(email);
+  } else {
+    $('step-email').style.display='none';
+    $('step-code').style.display='none';
+    $('step-locked').style.display='block';
+    gate.classList.add('show'); // keep the overlay up; do NOT unlock the app
+  }
+}
+$('sendCode').addEventListener('click', async () => {
+  const email = $('authEmail').value.trim();
+  $('authErr').textContent = '';
+  if(!sb){ $('authErr').textContent = "The app isn't fully configured yet. Please try again later."; return; }
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ $('authErr').textContent='Enter a valid email.'; return; }
+  if(!$('consentChk').checked){ $('authErr').textContent='Please agree to the data storage terms to continue.'; return; }
+  try{
+    await DB.sendCode(email);
+  }catch(e){
+    $('authErr').textContent = "Couldn't send your code. Please try again in a moment.";
+    return;
+  }
+  $('step-email').style.display='none'; $('step-code').style.display='block';
+  $('authCode').focus();
+});
+$('verifyCode').addEventListener('click', async () => {
+  const email = $('authEmail').value.trim(), code = $('authCode').value.trim();
+  $('authErr').textContent = '';
+  try{
+    const u = await DB.verifyCode(email, code);
+    await DB.recordConsent(CONSENT_VERSION); // best-effort; 0 rows for users without a profile yet
+    await enterApp(u.email);
+  }
+  catch(e){ $('authErr').textContent = e.message; }
+});
+$('backToEmail').addEventListener('click', () => {
+  $('step-code').style.display='none'; $('step-email').style.display='block';
+  $('authErr').textContent='';
+});
+$('signOut').addEventListener('click', async () => {
+  await DB.signOut(); location.reload();
+});
+$('lockedSignOut').addEventListener('click', async () => {
+  await DB.signOut(); location.reload();
+});
+$('deleteData').addEventListener('click', async () => {
+  $('deleteErr').textContent = '';
+  // Deletion is irreversible — require explicit confirmation.
+  if(!window.confirm('Are you sure? This permanently deletes your sleep data and account. This cannot be undone.')) return;
+  $('deleteData').disabled = true;
+  try{
+    await DB.deleteAccount();
+    location.href = '/';
+  }catch(e){
+    $('deleteErr').textContent = e.message || 'Could not complete deletion. Please contact support.';
+    $('deleteData').disabled = false;
+  }
+});
+
+/* ============ TABS ============ */
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on');
+  $('view-'+t.dataset.view).classList.add('on');
+  window.scrollTo(0,0);
+}));
+
+/* ============ CAFFEINE ============ */
+function caffFmt(mins){ mins=((mins%1440)+1440)%1440; let hh=Math.floor(mins/60), mm=mins%60; const ap=hh<12?'AM':'PM'; let h12=hh%12; if(h12===0)h12=12; return h12+':'+String(mm).padStart(2,'0')+' '+ap; }
+function caffCalc(){
+  const v=$('caffBed').value, out=$('caffOut');
+  if(!v){ out.innerHTML='<p class="caff-hint">Enter your target bedtime to see your cutoff.</p>'; return; }
+  const [h,m]=v.split(':').map(Number); const bed=h*60+m;
+  out.innerHTML =
+    '<div class="caff-grid">'+
+      '<div class="caff-cell"><div class="cl">Safe cutoff</div><div class="cv">'+caffFmt(bed-480)+'</div><div class="cs">- 8 hours before bed</div></div>'+
+      '<div class="caff-cell ideal"><div class="cl">Ideal cutoff</div><div class="cv">'+caffFmt(bed-600)+'</div><div class="cs">- 10 hours before bed</div></div>'+
+    '</div>'+
+    '<p class="caff-after">After this, switch to decaf or herbal - a last call, not a "never."</p>';
+  try{ localStorage.setItem('zf_caffeine_bedtime', v); }catch(e){}
+}
+$('caffBed').addEventListener('input', caffCalc);
+(function(){ try{ const v=localStorage.getItem('zf_caffeine_bedtime'); if(v){ $('caffBed').value=v; caffCalc(); } }catch(e){} })();
+
+/* ============ DIARY ============ */
+let cur = new Date(); cur.setHours(0,0,0,0);
+const state = {};
+function diaryInit(){ loadDay(); }
+
+document.querySelectorAll('[data-chip]').forEach(group=>{
+  group.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{
+    group.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on'); state[group.dataset.chip]=c.dataset.v; calc();
+  }));
+});
+document.querySelectorAll('[data-seg]').forEach(group=>{
+  group.querySelectorAll('.s').forEach(c=>c.addEventListener('click',()=>{
+    group.querySelectorAll('.s').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on'); state[group.dataset.seg]=c.dataset.v;
+  }));
+});
+document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>{
+  let v=(state.wakings||0)+parseInt(b.dataset.step,10); v=Math.max(0,Math.min(9,v));
+  state.wakings=v; $('wakeVal').textContent=v;
+}));
+['intoBed','tried','finalWake','outBed','caffeine'].forEach(id=>{
+  $(id).addEventListener('input',()=>{ state[id]=$(id).value; if(id==='caffeine'){ $('caffNone').classList.remove('on'); } calc(); });
+});
+$('notes').addEventListener('input',()=>{ state.notes=$('notes').value; });
+$('caffNone').addEventListener('click',()=>{
+  $('caffNone').classList.toggle('on');
+  if($('caffNone').classList.contains('on')){ $('caffeine').value=''; state.caffeine='none'; } else state.caffeine='';
+});
+
+function toMin(t){ if(!t) return null; const [h,m]=t.split(':').map(Number); return h*60+m; }
+function chain(...vals){ let out=[], add=0, prev=null;
+  for(const v of vals){ if(v==null){ out.push(null); continue; } let x=v+add; if(prev!=null && x<prev){ x+=1440; add+=1440; } out.push(x); prev=x; } return out; }
+function seFrom(s){
+  let ib=toMin(s.intoBed), tr=toMin(s.tried), fw=toMin(s.finalWake), ob=toMin(s.outBed);
+  const sol=s.sol!=null?+s.sol:null, waso=s.waso!=null?+s.waso:0;
+  if(ib==null||fw==null||sol==null) return null;
+  if(tr==null) tr=ib; if(ob==null) ob=fw;
+  const c=chain(ib,tr,fw,ob); ib=c[0]; tr=c[1]; fw=c[2]; ob=c[3];
+  const tib=ob-ib, tst=(fw-tr)-sol-waso; if(tib<=0||tst<=0) return null;
+  return { se:Math.round(tst/tib*100), tib, tst };
+}
+function fmt(m){ return Math.floor(m/60)+'h '+(m%60)+'m'; }
+function calc(){
+  const r = seFrom(state);
+  if(!r){ $('seNum').innerHTML='--<span>%</span>'; $('seFill').style.width='0'; $('seTib').textContent='time in bed --'; $('seTst').textContent='slept --'; $('seMsg').textContent='Need: Into bed, Final wake-up, and Time to fall asleep.'; return; }
+  $('seNum').innerHTML=r.se+'<span>%</span>';
+  $('seTib').textContent='time in bed '+fmt(r.tib); $('seTst').textContent='slept '+fmt(r.tst);
+  const f=$('seFill'); f.style.width=Math.min(100,r.se)+'%';
+  f.style.background = r.se>=85?'var(--green)':r.se>=75?'var(--orange)':'var(--red)';
+  $('seMsg').innerHTML = r.se>=85 ? 'Healthy. <span style="color:var(--green)">85%+</span> is the target.' :
+    r.se>=75 ? 'Getting there. Aim for <span style="color:var(--orange)">85%+</span>.' :
+    'Below 75% means too much time in bed awake. The protocol fixes this.';
+}
+
+$('save').addEventListener('click', async () => {
+  const r = seFrom(state);
+  const entry = { ...state, entry_date: dkey(cur), sleep_eff: r? r.se : null };
+  await DB.saveDiary(entry);
+  const b=$('save'); b.classList.add('saved');
+  b.textContent = r ? ('Saved ✓   SE '+r.se+'%') : 'Saved ✓';
+  setTimeout(()=>{ b.classList.remove('saved'); b.textContent="Save today's entry"; },1800);
+});
+
+/* ---- DEMO DATA (preview build only) ----
+   Seeds 30 nights ending today so the Summary report fills out for
+   the 7-day, 30-day, and Custom ranges. Remove once Supabase is live. */
+const DEMO_ARCHETYPES = [
+  {intoBed:"23:00",tried:"23:10",sol:"7", wakings:0,waso:"0", finalWake:"06:45",outBed:"07:00",quality:"4",caffeine:"14:00",alcohol:"none",nap:"none",exercise:"morning",  aid:"none"},
+  {intoBed:"23:15",tried:"23:30",sol:"22",wakings:3,waso:"45",finalWake:"06:00",outBed:"06:30",quality:"2",caffeine:"17:30",alcohol:"1-2", nap:"none",exercise:"none",     aid:"none",     notes:"Couldn't wind down"},
+  {intoBed:"22:30",tried:"23:00",sol:"45",wakings:2,waso:"45",finalWake:"05:30",outBed:"07:00",quality:"1",caffeine:"16:00",alcohol:"none",nap:"<20",exercise:"none",     aid:"melatonin",notes:"Deadline stress, mind racing"},
+  {intoBed:"23:30",tried:"23:40",sol:"7", wakings:1,waso:"7", finalWake:"07:00",outBed:"07:15",quality:"4",caffeine:"13:00",alcohol:"none",nap:"none",exercise:"afternoon",aid:"none"},
+  {intoBed:"00:30",tried:"00:45",sol:"22",wakings:1,waso:"22",finalWake:"08:00",outBed:"08:30",quality:"3",caffeine:"15:00",alcohol:"none",nap:"none",exercise:"none",     aid:"none"},
+  {intoBed:"23:00",tried:"23:15",sol:"7", wakings:0,waso:"0", finalWake:"06:30",outBed:"06:45",quality:"5",caffeine:"10:00",alcohol:"none",nap:"none",exercise:"morning",  aid:"none"},
+  {intoBed:"01:00",tried:"01:20",sol:"45",wakings:2,waso:"45",finalWake:"08:30",outBed:"09:00",quality:"2",caffeine:"16:30",alcohol:"3+", nap:"none",exercise:"none",     aid:"none",     notes:"Late night out"},
+];
+$('demoLoad').addEventListener('click', async ()=>{
+  const today = new Date(); today.setHours(0,0,0,0);
+  for(let i=0;i<30;i++){
+    const d = new Date(today); d.setDate(d.getDate()-i);
+    const a = DEMO_ARCHETYPES[(i*3 + (i%5)) % DEMO_ARCHETYPES.length];
+    const entry = { ...a, entry_date: dkey(d) };
+    const r = seFrom(entry); entry.sleep_eff = r ? r.se : null;
+    await DB.saveDiary(entry);
+  }
+  await loadDay();
+  if(sumOverlay.classList.contains('show')) renderSummary();
+  const b = $('demoLoad'); b.textContent = '30-day sample loaded ✓';
+  setTimeout(()=>{ b.textContent = 'Load 30-day sample'; }, 2000);
+});
+$('demoClear').addEventListener('click', async ()=>{
+  if(!confirm('Clear all diary data?')) return;
+  localStorage.removeItem(DB_LOCAL._diaryKey());
+  await loadDay();
+  if(sumOverlay.classList.contains('show')) renderSummary();
+});
+// Demo controls exist only in preview; hide them for real (Supabase) users so nothing can write sample data to the live DB.
+if(!PREVIEW){ const _demoBar = document.querySelector('.demo-bar'); if(_demoBar) _demoBar.style.display = 'none'; }
+
+function applyState(){
+  document.querySelectorAll('.chip.on,.s.on').forEach(x=>x.classList.remove('on'));
+  ['intoBed','tried','finalWake','outBed','caffeine'].forEach(id=>$(id).value=state[id]&&state[id]!=='none'?state[id]:'');
+  $('notes').value=state.notes||''; $('wakeVal').textContent=state.wakings||0;
+  if(state.caffeine==='none') $('caffNone').classList.add('on');
+  ['sol','waso','alcohol','nap','exercise','aid'].forEach(k=>{
+    const g=document.querySelector('[data-chip="'+k+'"]'); if(g&&state[k]!=null){ const c=g.querySelector('[data-v="'+state[k]+'"]'); if(c)c.classList.add('on'); }
+  });
+  if(state.quality){ const c=document.querySelector('[data-seg="quality"] [data-v="'+state.quality+'"]'); if(c)c.classList.add('on'); }
+  calc();
+}
+async function loadDay(){
+  const k=dkey(cur);
+  for(const p in state) delete state[p];
+  const rec = await DB.getDiary(k); if(rec) Object.assign(state, rec);
+  $('dlabel').textContent = k===todayKey() ? 'Today' : cur.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  applyState();
+}
+$('prev').addEventListener('click',()=>{ cur.setDate(cur.getDate()-1); loadDay(); });
+$('next').addEventListener('click',()=>{ const t=new Date(); t.setHours(0,0,0,0); if(cur<t){ cur.setDate(cur.getDate()+1); loadDay(); } });
+
+/* ============ SUMMARY POPUP ============ */
+const sumOverlay = $('summaryOverlay');
+let sumRange = '7';
+$('openSummary').addEventListener('click', ()=>{ sumOverlay.classList.add('show'); renderSummary(); });
+$('closeSummary').addEventListener('click', ()=>{ sumOverlay.classList.remove('show'); });
+sumOverlay.addEventListener('click', e=>{ if(e.target===sumOverlay) sumOverlay.classList.remove('show'); });
+document.querySelectorAll('.preset').forEach(p=>p.addEventListener('click', ()=>{
+  document.querySelectorAll('.preset').forEach(x=>x.classList.remove('on'));
+  p.classList.add('on'); sumRange = p.dataset.range;
+  $('customRange').classList.toggle('show', sumRange==='custom');
+  if(sumRange!=='custom') renderSummary();
+}));
+['rangeFrom','rangeTo'].forEach(id=>$(id).addEventListener('change', renderSummary));
+
+/* ---- Diagnostic: surface the biggest fixable lever, ranked by course order ----
+   Titles are the final, locked lesson names. url stays '' until lesson URLs are
+   collected from Systeme; lessonRef renders plain text until then (placeholder). */
+const LESSONS = {
+  wake:  { n:'1.1', title:'The One Change That Fixes Everything Else', url:'' },
+  caff:  { n:'2.1', title:'Why Your Third Coffee Stopped Working',     url:'' },
+  alc:   { n:'3.1', title:"Why Your Last Meal Decides Tomorrow's Morning", url:'' },
+  bed:   { n:'4.1', title:'Your Bed Has One Job', url:'' },
+  night: { n:'4.2', title:"The Night Protocol: If You Wake Up or Can't Fall Asleep", url:'' },
+};
+function lessonRef(L, cls, full){
+  const label = full ? ('Lesson '+L.n+' · '+L.title) : ('Lesson '+L.n);
+  return L.url
+    ? '<a class="'+cls+'" target="_blank" rel="noopener noreferrer" href="'+L.url+'">'+label+' →</a>'
+    : '<span class="'+cls+'">'+label+'</span>';
+}
+function diagnose(rows){
+  const N = rows.length;
+  const flags = [];
+
+  // 1.1 — wake-time consistency (the anchor everything hangs on)
+  const wakes = rows.map(r=>toMin(r.finalWake)).filter(v=>v!=null);
+  if(wakes.length>=3){
+    const mn=Math.min(...wakes), mx=Math.max(...wakes), spread=mx-mn;
+    if(spread>=60) flags.push({ rank:0, sev:Math.max(.35,Math.min(1,spread/180)),
+      txt:'Your wake-up swings <b>'+fmt(spread)+'</b> ('+caffFmt(mn)+' to '+caffFmt(mx)+'). Steady it first - it is the anchor everything else hangs on.',
+      short:'Wake-up swings <b>'+fmt(spread)+'</b> ('+caffFmt(mn)+' to '+caffFmt(mx)+').',
+      L:LESSONS.wake });
+  }
+
+  // 2.1 — caffeine inside the 8-hour cutoff (safe = bedtime minus 8h)
+  let caffLate=0, caffElig=0;
+  rows.forEach(r=>{
+    const bed=toMin(r.intoBed), caff=(r.caffeine&&r.caffeine!=='none')?toMin(r.caffeine):null;
+    if(bed==null||caff==null) return; caffElig++;
+    if(((bed-caff+1440)%1440) < 480) caffLate++;   // caffeine was less than 8h before bed
+  });
+  if(caffLate>=2) flags.push({ rank:1, sev:caffLate/Math.max(caffElig,1),
+    txt:'Caffeine landed inside your <b>8-hour cutoff</b> on <b>'+caffLate+' of '+caffElig+'</b> nights - it thins deep sleep even when you fall asleep fine.',
+    short:'Caffeine after cutoff <b>'+caffLate+'/'+caffElig+'</b>.',
+    L:LESSONS.caff });
+
+  // 3.1 — alcohol in the evening
+  let alc=0; rows.forEach(r=>{ if(r.alcohol&&r.alcohol!=='none') alc++; });
+  if(alc>=3) flags.push({ rank:2, sev:alc/N,
+    txt:'Alcohol on <b>'+alc+' of '+N+'</b> nights. A nightcap speeds sleep onset but fragments the second half of the night.',
+    short:'Alcohol <b>'+alc+'/'+N+'</b> nights.',
+    L:LESSONS.alc });
+
+  // 4.2 — trouble falling or staying asleep
+  let slow=0, restless=0, affected=0;
+  rows.forEach(r=>{ const sol=+r.sol||0, waso=+r.waso||0, wk=+r.wakings||0;
+    const s=sol>=30, m=(waso>=30||wk>=3); if(s)slow++; if(m)restless++; if(s||m)affected++; });
+  if(affected>=3){
+    const slowDom = slow>=restless;
+    flags.push({ rank:3, sev:affected/N,
+      txt: slowDom
+        ? 'You took <b>30+ minutes to fall asleep</b> on <b>'+slow+'</b> nights. Lying in bed awake trains your brain that bed is for being awake.'
+        : 'You were <b>awake in the night</b> on <b>'+restless+'</b> nights - there is a simple protocol for exactly what to do.',
+      short: slowDom ? 'Slow to fall asleep <b>'+slow+'/'+N+'</b>.' : 'Waking in the night <b>'+restless+'/'+N+'</b>.',
+      L: slowDom ? LESSONS.bed : LESSONS.night });
+  }
+
+  if(!flags.length) return { ok:true };
+  flags.sort((a,b)=>a.rank-b.rank);
+  return { ok:false, fix:flags[0], others:flags.slice(1,3) };
+}
+function diagnosticHtml(rows){
+  if(rows.length<4) return '<div class="sum-gate">Log at least 4 nights to see your biggest lever to fix first.</div>';
+  const d = diagnose(rows);
+  if(d.ok) return '<div class="sum-ok">No major leverage points here - your inputs look solid. Keep logging to hold the trend.</div>';
+  let h = '<div class="sum-fix"><div class="fl-lab">⚑ Fix this first</div><div class="fl-txt">'+d.fix.txt+'</div>'+lessonRef(d.fix.L,'sum-lesson',true)+'</div>';
+  if(d.others.length){
+    const hard = d.others.some(f=>f.sev>=0.5);
+    h += '<div class="sum-flags'+(hard?' hard':'')+'"><div class="ff-lab">'+(hard?'Also hitting your sleep hard':'Also worth a look')+'</div>';
+    d.others.forEach(f=>{ h += '<div class="ff-item"><div class="ff-t">'+f.short+' · '+lessonRef(f.L,'ff-l',false)+'</div></div>'; });
+    h += '</div>';
+  }
+  return h;
+}
+
+async function renderSummary(){
+  let from, to;
+  const today = new Date(); today.setHours(0,0,0,0);
+  if(sumRange==='custom'){
+    if(!$('rangeFrom').value || !$('rangeTo').value){ $('sumOut').innerHTML='<div class="sum-empty">Pick a start and end date.</div>'; return; }
+    from = $('rangeFrom').value; to = $('rangeTo').value;
+  } else {
+    const days = parseInt(sumRange,10);
+    const f = new Date(today); f.setDate(f.getDate()-(days-1));
+    from = dkey(f); to = dkey(today);
+  }
+  const rows = await DB.getDiaryRange(from, to);
+  const withSE = rows.map(r=>({ r, m:seFrom(r) })).filter(x=>x.m);
+  if(!withSE.length){ $('sumOut').innerHTML='<div class="sum-empty">No saved nights in this range yet.</div>'; return; }
+
+  const avg = a => Math.round(a.reduce((s,x)=>s+x,0)/a.length);
+  const avgSE = avg(withSE.map(x=>x.m.se));
+  const avgTib = avg(withSE.map(x=>x.m.tib));
+  const avgTst = avg(withSE.map(x=>x.m.tst));
+  const quals = rows.map(r=>+r.quality).filter(q=>q); const avgQ = quals.length? (quals.reduce((s,x)=>s+x,0)/quals.length).toFixed(1):'-';
+  const col = se => se>=85?'var(--green)':se>=75?'var(--orange)':'var(--red)';
+
+  const nights = withSE.slice(-14).map(x=>{
+    const d = new Date(x.r.entry_date+'T00:00:00');
+    return '<div class="nrow"><div class="nd">'+d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+'</div>'+
+      '<div class="nb"><div class="nf" style="width:'+Math.min(100,x.m.se)+'%;background:'+col(x.m.se)+'"></div></div>'+
+      '<div class="nv" style="color:'+col(x.m.se)+'">'+x.m.se+'%</div></div>';
+  }).join('');
+
+  $('sumOut').innerHTML =
+    '<div class="big"><div class="n" style="color:'+col(avgSE)+'">'+avgSE+'<span>%</span></div><div class="l">Average sleep efficiency</div></div>'+
+    '<div class="sum-grid">'+
+      '<div class="sum-cell"><div class="k">Nights logged</div><div class="v">'+withSE.length+'</div></div>'+
+      '<div class="sum-cell"><div class="k">Avg sleep quality</div><div class="v">'+avgQ+(avgQ!=='-'?' / 5':'')+'</div></div>'+
+      '<div class="sum-cell"><div class="k">Avg time in bed</div><div class="v">'+fmt(avgTib)+'</div></div>'+
+      '<div class="sum-cell"><div class="k">Avg slept</div><div class="v">'+fmt(avgTst)+'</div></div>'+
+    '</div>'+
+    diagnosticHtml(rows)+
+    '<details class="sum-nights-d"><summary>Show nightly breakdown</summary><div class="sum-nights">'+nights+'</div></details>';
+}
+
+/* ============ ASSESSMENT ============ */
+const QUESTIONS = [
+  { s:'A', t:'How much does your wake-up time vary across the week?', o:['Within 30 minutes - roughly the same time every day','30 to 60 minutes variation','1 to 2 hours variation','More than 2 hours (e.g. 8 AM weekdays, noon weekends)'] },
+  { s:'A', t:'Do you get at least 10 minutes of bright light (outdoors or by a window) within 30 minutes of waking?', o:['Yes, most days','Sometimes','Rarely - I go straight to my desk or screen','Almost never - I work in a dim room all morning'] },
+  { s:'A', t:'How consistent is your energy in the first 2 hours after waking?', o:['Consistently good - I can focus and work','Varies - some mornings fine, others foggy for no clear reason','Usually foggy - takes me 1 to 2 hours to boot up','Most mornings are a write-off - real work starts late morning or afternoon'] },
+  { s:'A', t:'On a free day with no obligations, what time do you naturally wake up?', o:['Within 1 hour of my weekday wake time','1 to 2 hours later','2 to 3 hours later','3+ hours later'] },
+  { s:'A', t:'Do you feel alert and tired at roughly the same times each day, or does it shift unpredictably?', o:['Pretty consistent - I know when my energy peaks and dips','Somewhat consistent, with occasional off days','Unpredictable - good days and bad days seem random','Completely chaotic - I never know what kind of day I will get'] },
+  { s:'B', t:'How long does it usually take you to fall asleep after lights out?', o:['Less than 15 minutes','15 to 30 minutes','30 to 60 minutes','More than 60 minutes'] },
+  { s:'B', t:'How much caffeine do you have, and when is your last cup?', o:['None, or 1 to 2 cups before noon','2 to 3 cups, last one before 2 PM','3 to 4 cups, or last one between 2 and 5 PM','4+ cups, or caffeine after 5 PM (including energy drinks, pre-workout)'] },
+  { s:'B', t:'Do you get a strong energy crash in the afternoon (the 2 PM wall)?', o:['Rarely or never','Occasionally - once or twice a week','Most days - a clear dip around 2 to 4 PM','Every day - by mid-afternoon I am basically useless'] },
+  { s:'B', t:'How many hours are you actually in bed per night (getting in to getting out)?', o:['7 to 8 hours','8 to 9 hours','9 to 10 hours','More than 10 hours (including lying awake, scrolling)'] },
+  { s:'B', t:'When you wake up in the morning, how rested do you feel?', o:['Refreshed - ready to start the day','Okay - not great, not terrible','Tired - like I barely slept, even after enough time in bed','Exhausted - some mornings I want to go back to sleep within an hour'] },
+  { s:'C', t:'When you get into bed, does your mind start racing about work, tasks, or problems?', o:['Rarely - I can relax and drift off','Sometimes - depends on the day','Often - I lie there planning, reviewing, worrying','Almost every night - a full board meeting the moment I lie down'] },
+  { s:'C', t:'Do you wake up during the night?', o:['Rarely or never','Once, and I fall back asleep quickly','2 to 3 times, sometimes slow to fall back asleep','Frequently - awake 30+ minutes in the middle of the night'] },
+  { s:'C', t:'Do you use screens (phone, laptop, tablet) in bed or within 30 minutes of trying to sleep?', o:['No - I stop screens at least 30 minutes before bed','Occasionally - maybe a quick check','Most nights - I scroll or watch something in bed','Every night - I fall asleep with my phone or laptop'] },
+  { s:'C', t:'Do you work from your bedroom, or use your bed for non-sleep activities (work, calls, eating)?', o:['No - my bed is for sleep only','Occasionally','Regularly - I sometimes work from bed, or my desk is in the bedroom','Always - my bed is my office'] },
+  { s:'C', t:'When you think about bedtime, what is your dominant feeling?', o:['Neutral or slightly positive - bed means rest','Indifferent','Mildly anxious - I hope I can sleep tonight','Dread or frustration - here we go again'] },
+  { s:'C', t:'Rate your overall daytime energy over the past 2 to 4 weeks.', o:['8 to 10 - good, consistent energy most days','6 to 7 - decent but drops noticeably in the afternoon','4 to 5 - low, surviving on caffeine and willpower','1 to 3 - running on empty, brain fog most of the day'] },
+];
+const SECTIONS = {
+  A:{ cls:'sa sec-a', eyebrow:'Section A', name:'The Clock', sub:'How stable is your timing system?', max:15 },
+  B:{ cls:'sb sec-b', eyebrow:'Section B', name:'The Battery', sub:'How well is your recovery system charging?', max:15 },
+  C:{ cls:'sc sec-c', eyebrow:'Section C', name:'The Off-Switch', sub:'Can your brain actually shut down?', max:18 },
+};
+const TOTAL_BANDS = [
+  { max:8,  color:'var(--green)',  label:'Mostly working',        desc:'Your system is mostly working. Fine-tuning will sharpen what is already there.' },
+  { max:18, color:'var(--yellow)', label:'Moderate disruption',   desc:'Moderate disruption. One or two systems need attention. This course will make a noticeable difference.' },
+  { max:30, color:'var(--orange)', label:'Significant disruption', desc:'Significant disruption. Multiple systems are out of sync. This is exactly what the protocol is built to fix.' },
+  { max:48, color:'var(--red)',    label:'Major disruption',      desc:'Major disruption. Your systems have been off for a while. The protocol works here too - it just means your starting point is lower, so the improvements will feel more dramatic.' },
+];
+function sectionStatus(score){
+  if(score<=3)  return { color:'var(--green)',  text:'This system is functioning. We will keep it that way.' };
+  if(score<=7)  return { color:'var(--yellow)', text:'This system needs calibration. Expect improvement during its week.' };
+  if(score<=11) return { color:'var(--orange)', text:'This system is significantly off. This will be one of your biggest areas of change.' };
+  return          { color:'var(--red)',    text:'This system is deeply disrupted. It gets priority attention during its week.' };
+}
+const aform = $('aform'); let builtA = false;
+function assessInit(){
+  if(builtA) return; builtA = true;
+  let last=null;
+  QUESTIONS.forEach((q,i)=>{
+    if(q.s!==last){ const sec=SECTIONS[q.s]; const h=document.createElement('div'); h.className='a-sechead '+sec.cls;
+      h.innerHTML=`<div class="eb">${sec.eyebrow} - ${sec.name}</div><h2>${sec.name}</h2><p>${sec.sub}</p>`; aform.appendChild(h); last=q.s; }
+    const w=document.createElement('div'); w.className='aq'; w.id='aq'+i;
+    let opts=''; q.o.forEach((opt,j)=>{ opts+=`<label class="aopt"><input type="radio" name="aq${i}" value="${j}" data-section="${q.s}"><span class="box"><span class="dot"></span><span>${opt}</span></span></label>`; });
+    w.innerHTML=`<div class="aq-head"><div class="aq-num">${i+1}</div><div class="aq-text">${q.t}</div></div><div class="aopts">${opts}</div>`;
+    aform.appendChild(w);
+  });
+}
+const aTotal = QUESTIONS.length;
+function aAnswered(){ return new Set([...aform.querySelectorAll('input:checked')].map(i=>i.name)).size; }
+function aRefresh(){ const n=aAnswered(); $('apf').style.width=(n/aTotal*100)+'%'; $('act').textContent=n+' / '+aTotal; $('asubmit').disabled=n<aTotal; }
+aform.addEventListener('change', e=>{ const q=e.target.closest('.aq'); if(q)q.classList.add('answered'); aRefresh(); });
+
+$('asubmit').addEventListener('click', async ()=>{
+  for(let i=0;i<aTotal;i++){ if(!aform.querySelector(`input[name="aq${i}"]:checked`)){ const el=$('aq'+i); el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'),600); el.scrollIntoView({behavior:'smooth',block:'center'}); return; } }
+  const sec={A:0,B:0,C:0};
+  aform.querySelectorAll('input:checked').forEach(i=>{ sec[i.dataset.section]+=parseInt(i.value,10); });
+  const totalScore=sec.A+sec.B+sec.C;
+  const answers={}; aform.querySelectorAll('input:checked').forEach(i=>{ answers[i.name]=parseInt(i.value,10); });
+
+  const prior = await DB.getAssessments();
+  const rec = { taken_on: todayKey(), score_clock:sec.A, score_battery:sec.B, score_offswitch:sec.C, score_total:totalScore, answers };
+  await DB.saveAssessment(rec);
+
+  const band=TOTAL_BANDS.find(b=>totalScore<=b.max);
+  $('aTotLabel').textContent = prior.length ? 'Your latest score' : 'Your baseline score';
+  $('aTotNum').innerHTML=totalScore+'<span>/ 48</span>';
+  const be=$('aBand'); be.textContent=band.label; be.style.color=band.color; be.style.background='rgba(255,255,255,0.06)'; be.style.border='1px solid '+band.color;
+  $('aBandDesc').textContent=band.desc;
+  const mf=$('aMeter'); mf.style.background=band.color; setTimeout(()=>mf.style.width=(totalScore/48*100)+'%',60);
+
+  const order=['A','B','C']; let weakKey=order[0], weakPct=-1;
+  order.forEach(k=>{ const p=sec[k]/SECTIONS[k].max; if(p>weakPct){weakPct=p;weakKey=k;} });
+  const rows=$('aSys'); rows.innerHTML='';
+  order.forEach(k=>{ const S=SECTIONS[k], score=sec[k], st=sectionStatus(score), isWeak=(k===weakKey&&weakPct>0);
+    const row=document.createElement('div'); row.className='sys '+S.cls.split(' ')[0]+(isWeak?' weak':'');
+    row.innerHTML=`<div class="sys-top"><div class="sys-name">${S.name}${isWeak?'<span class="tag">most disrupted</span>':''}</div><div class="sys-score">${score} / ${S.max}</div></div><div class="sys-bar"><div class="sf" style="background:${st.color}"></div></div><div class="sys-status">${st.text}</div>`;
+    rows.appendChild(row); setTimeout(()=>row.querySelector('.sf').style.width=(score/S.max*100)+'%',80);
+  });
+
+  // baseline vs latest (computed on the fly from stored results)
+  const note=$('aNote');
+  if(!prior.length){
+    note.innerHTML=`Saved as your <span class="hl">Day 0 baseline</span> (${rec.taken_on}). Come back after about 4 weeks and retake - this page will show you the change.`;
+  } else {
+    const base=prior[0]; const diff=base.score_total-totalScore;
+    let line = diff>0 ? `down <span class="up">${diff} points</span> - lower is better, your systems are settling`
+            : diff<0 ? `up <span class="down">${Math.abs(diff)} points</span> - worth checking which system slipped`
+            : `unchanged so far`;
+    note.innerHTML=`Baseline: <span class="hl">${base.score_total}/48</span> (${base.taken_on}) &nbsp;|&nbsp; Today: <span class="hl">${totalScore}/48</span> (${rec.taken_on})<br>That is ${line}.`;
+  }
+  $('aprogress').style.display='none';
+  $('aresult').classList.add('show');
+  $('aresult').scrollIntoView({behavior:'smooth',block:'start'});
+});
+$('aRetake').addEventListener('click', ()=>{
+  aform.querySelectorAll('input:checked').forEach(i=>i.checked=false);
+  aform.querySelectorAll('.aq').forEach(q=>q.classList.remove('answered'));
+  $('aresult').classList.remove('show'); $('aprogress').style.display='flex'; aRefresh();
+  $('view-assessment').scrollIntoView({behavior:'smooth'});
+});
+
+/* ============ PWA ============ */
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault(); deferredPrompt = e;
+  $('installTxt').innerHTML = '<b>Add this to your home screen</b> - use it like an app, even offline.';
+  $('installBtn').style.display=''; $('install').classList.add('show');
+});
+$('installBtn').addEventListener('click', async ()=>{
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; $('install').classList.remove('show');
+});
+$('installX').addEventListener('click', ()=>{ $('install').classList.remove('show'); try{ localStorage.setItem('zf_install_dismissed','1'); }catch(e){} });
+// iOS has no install prompt - show manual hint
+(function(){
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const standalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+  const dismissed = (()=>{ try{ return localStorage.getItem('zf_install_dismissed'); }catch(e){ return null; } })();
+  if(isIOS && !standalone && !dismissed){
+    $('installBtn').style.display='none';
+    $('installTxt').innerHTML = '<b>Add to your home screen:</b> tap the Share button, then "Add to Home Screen".';
+    $('install').classList.add('show');
+  }
+})();
+
+/* ============ THEME TOGGLE ============ */
+function applyTheme(t){
+  document.body.classList.toggle('light', t==='light');
+  $('themeToggle').textContent = t==='light' ? '☀' : '☾';
+  const m = document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute('content', t==='light' ? '#f3f3f6' : '#0d0d0d');
+}
+let theme = (()=>{ try{ return localStorage.getItem('zf_theme')||'dark'; }catch(e){ return 'dark'; } })();
+applyTheme(theme);
+$('themeToggle').addEventListener('click', ()=>{
+  theme = theme==='light' ? 'dark' : 'light';
+  try{ localStorage.setItem('zf_theme', theme); }catch(e){}
+  applyTheme(theme);
+});
+
+/* ============ PROTOCOL CARD ============ */
+let pcBuilt = false;
+function protocolInit(){
+  const form = $('pcCard');
+  if(!form || pcBuilt) return;
+  pcBuilt = true;
+  const FIELDS = [
+    { id:'wake', label:'My wake window', hint:'observed, not a target', type:'window' },
+    { id:'sleep', label:'My sleep window', hint:'when you actually sleep - observed', type:'window' },
+    { id:'caffeine', label:'My caffeine cutoff', hint:'aim for 8h before your sleep window', type:'text', ph:'e.g. 5:00 PM' },
+    { id:'morning', label:'My morning routine', hint:'first hour - light, phone-free, movement', type:'area', ph:'Light first. Phone-free 30-60 min. Some movement...' },
+    { id:'meal', label:'My last meal', hint:'dinner window + a backup snack', type:'area', ph:'Dinner window ___ to ___, plus a light backup snack.' },
+    { id:'winddown', label:'My wind-down window', hint:'where the day starts powering down', type:'window' },
+    { id:'screen', label:'My screen rule', hint:'no active screens after ___', type:'area', ph:'No active screens after ___. Passive only, brightness down.' },
+    { id:'breathing', label:'My breathing', hint:'when you use it', type:'area', ph:'When I reach for it - before sleep, stress, if I wake at night.' },
+    { id:'exercise', label:'My exercise window', hint:'what / when / how often', type:'area', ph:'Morning: ___. Midday: ___. Evening: ___.' },
+    { id:'worry', label:'My worry time', hint:'a daily time + a place for it', type:'area', ph:'Time + place. To-do list, then a brain dump on paper.' },
+    { id:'night', label:'My night protocol', hint:"if you can't fall asleep, or wake in the night", type:'area', ph:"Can't sleep: get up, leave the bedroom. No phone, no clock." },
+    { id:'reset', label:'My reset plan', hint:'after travel or a disruption', type:'area', ph:'Shift back gradually - an hour at a time. Walk more.' },
+    { id:'smoking', label:'My smoking rule', hint:'if applicable', type:'area', ph:'Last one ___ before bed. None for the first ___ after waking.' },
+    { id:'triggers', label:'My triggers + solutions', hint:'from your Block 2.4 map - the ones that still need a rule', type:'area', ph:'(1) Trigger -> solution. (2) Trigger -> solution.' },
+  ];
+  const DEMO_PC = {
+    wake:{from:'10:00 AM',to:'10:30 AM'}, sleep:{from:'1:00 AM',to:'2:00 AM'}, caffeine:'5:00 PM',
+    morning:"Curtains open everywhere for light. Phone-free 30-60 min. Lo-fi or classical on. Stretch, wash up, a few chores. A 15-min walk if the weather allows. No scrolling, no news until the window is up.",
+    meal:"Dinner window 8:00-10:00 PM - protein with rice or noodles. If hungry later: almonds, a light salad, jerky, or a glass of kefir.",
+    winddown:{from:'12:00 AM',to:'12:30 AM'},
+    screen:"No active screens after ~12:45 AM. Passive only: a show on the laptop, brightness way down, volume almost off, at the edge of the nightstand. Usually out within 5-10 minutes.",
+    breathing:"Trained it daily for weeks while building the system. Now it's a reflex - I use it when needed: stress, before a call, if I wake at night.",
+    exercise:"Morning (first 30-60 min): stretching. Midday: 30 squats, 30 pushups, 30 abs. Evening: a 20-30 min walk. Swimming in the morning when the season allows.",
+    worry:"11:30 PM, at my desk - work ends. Tomorrow's to-do list, then a brain dump on paper. Out of the head, onto the page.",
+    night:"Can't fall asleep (rare): get up, go sit in fresh air. If I wake up: usually back immediately. If not - bathroom, then fresh air. No phone. No clock.",
+    reset:"Drift 1-2h over a few days: shift back an hour at a time. Rough stretch: 30-min shifts, gradually. During any reset: walk more, longer evenings.",
+    smoking:"No smoking the first 30-60 min after waking. Last one at least 1.5h before bed - pushing toward 2-3h.",
+    triggers:"(1) Interrupted in work mode -> irritation. Fix: clear work hours + \"I'll call back when I'm free.\" (2) Work pile + family tasks -> a noisy head. Fix: write it down, rate the urgency, set a reminder.",
+  };
+  FIELDS.forEach((f,i)=>{
+    const line=document.createElement('div'); line.className='pc-line'; line.dataset.id=f.id;
+    const num=String(i+1).padStart(2,'0'); let fill;
+    if(f.type==='window') fill='<div class="pc-win"><input class="pc-cell" data-part="from" placeholder="from"><span class="to">to</span><input class="pc-cell" data-part="to" placeholder="to"></div>';
+    else if(f.type==='text') fill='<input class="pc-cell" placeholder="'+(f.ph||'')+'">';
+    else fill='<textarea class="pc-cell" rows="2" placeholder="'+(f.ph||'')+'"></textarea>';
+    line.innerHTML='<div class="pc-lh"><div class="pc-ln">'+num+'</div><div><label>'+f.label+'</label><span class="hint">'+f.hint+'</span></div></div><div>'+fill+'</div>';
+    form.appendChild(line);
+  });
+  const lines=[...form.querySelectorAll('.pc-line')];
+  function grow(t){ t.style.height='auto'; t.style.height=t.scrollHeight+'px'; }
+  function mark(l){ l.classList.toggle('filled', [...l.querySelectorAll('.pc-cell')].some(e=>e.value.trim()!=='')); }
+  form.addEventListener('input',e=>{ if(e.target.tagName==='TEXTAREA') grow(e.target); mark(e.target.closest('.pc-line')); });
+  function read(){ const d={}; FIELDS.forEach((f,i)=>{ const l=lines[i];
+    if(f.type==='window') d[f.id]={from:l.querySelector('[data-part="from"]').value,to:l.querySelector('[data-part="to"]').value};
+    else d[f.id]=l.querySelector('.pc-cell').value; }); return d; }
+  function writeData(d){ d=d||{}; FIELDS.forEach((f,i)=>{ const l=lines[i], v=d[f.id];
+    if(f.type==='window'){ l.querySelector('[data-part="from"]').value=(v&&v.from)||''; l.querySelector('[data-part="to"]').value=(v&&v.to)||''; }
+    else { const e=l.querySelector('.pc-cell'); e.value=v||''; if(e.tagName==='TEXTAREA') grow(e); } mark(l); }); }
+  DB.getProtocol().then(writeData).catch(()=>{});
+  const sv=$('pcSave');
+  sv.addEventListener('click', async ()=>{
+    try{ await DB.saveProtocol(read()); sv.classList.add('saved'); sv.textContent='Saved ✓'; }
+    catch(e){ sv.textContent='Could not save'; }
+    setTimeout(()=>{ sv.classList.remove('saved'); sv.textContent='Save my card'; }, 1600);
+  });
+  $('pcPrint').addEventListener('click',()=>{ form.querySelectorAll('textarea.pc-cell').forEach(grow);
+    document.body.classList.add('printing-pc'); window.print(); setTimeout(()=>document.body.classList.remove('printing-pc'),300); });
+  $('pcDemo').addEventListener('click',()=>{ writeData(DEMO_PC);
+    const b=$('pcDemo'); b.textContent="Loaded ✓"; setTimeout(()=>b.textContent="Load founder's example",1600); });
+  $('pcClear').addEventListener('click', async ()=>{ if(!confirm('Clear the whole card?')) return; writeData({}); try{ await DB.saveProtocol({}); }catch(e){} });
+}
+
+boot();
+</script>
+</body>
+</html>
