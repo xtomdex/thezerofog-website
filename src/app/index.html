@@ -50,6 +50,12 @@
   .tab{ flex:0 0 auto; text-align:center; background:none; border:none; color:var(--muted); font-family:inherit;
         font-size:13px; font-weight:600; padding:11px 11px 13px; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
   .tab.on{ color:var(--text); border-bottom-color:var(--purple); }
+  /* Bonuses tab: the "extra" - amber accent + sparkle, set apart from the 3 core tools */
+  .tab-bonus{ color:var(--orange); }
+  .tab-bonus .bstar{ font-size:11px; vertical-align:1px; }
+  .tab-bonus.on{ color:var(--orange); border-bottom-color:var(--orange); }
+  #view-bonuses{ padding:0; }
+  #bonusesFrame{ width:100%; height:calc(100vh - 112px); border:none; background:var(--bg); display:block; }
 
   .view{ display:none; }
   .view.on{ display:block; }
@@ -393,9 +399,8 @@
     <div class="tabs">
       <button class="tab on" data-view="diary">Sleep Diary</button>
       <button class="tab" data-view="assessment">Assessment</button>
-      <button class="tab" data-view="caffeine">Caffeine</button>
       <button class="tab" data-view="protocol">Protocol Card</button>
-      <button class="tab" data-view="guides">Guides</button>
+      <button class="tab tab-bonus" data-view="bonuses"><span class="bstar">&#10022;</span> Bonuses</button>
     </div>
   </div>
 
@@ -533,43 +538,6 @@
     </div>
   </div>
 
-  <!-- ============ CAFFEINE VIEW ============ -->
-  <div class="view" id="view-caffeine">
-    <div class="body">
-      <div class="section">
-        <div class="stitle">Your caffeine cutoff</div>
-        <div class="field">
-          <label>Your target bedtime</label>
-          <input type="time" id="caffBed">
-        </div>
-        <div class="live caff-out" id="caffOut"><p class="caff-hint">Enter your target bedtime to see your cutoff.</p></div>
-        <p class="caff-note" style="margin-top:12px">Caffeine has a half-life of 5-6 hours - half of your 2 PM coffee is still in you at 8 PM. Even when you fall asleep, it can cut your deep sleep by up to 20%. Stopping early enough keeps it out of your night.</p>
-      </div>
-
-      <div class="section">
-        <div class="stitle">What counts as caffeine</div>
-        <div class="field caff-table">
-          <div class="caff-row caff-head"><span>Source</span><span>Caffeine</span></div>
-          <div class="caff-row"><span>Espresso (1 shot)</span><span>63 mg</span></div>
-          <div class="caff-row"><span>Drip coffee (250 ml)</span><span>95 mg</span></div>
-          <div class="caff-row"><span>Black tea (250 ml)</span><span>47 mg</span></div>
-          <div class="caff-row"><span>Green tea (250 ml)</span><span>28 mg</span></div>
-          <div class="caff-row"><span>Energy drink (250 ml)</span><span>80 mg</span></div>
-          <div class="caff-row"><span>Cola (330 ml)</span><span>32 mg</span></div>
-          <div class="caff-row"><span>Dark chocolate (50 g)</span><span>25 mg</span></div>
-          <div class="caff-row"><span>Pre-workout</span><span>150-300 mg</span></div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="stitle">Everyone absorbs it differently</div>
-        <div class="field">
-          <p class="caff-note">About 15% of people are slow metabolizers - coffee at 3 PM and they're wired at midnight. About 10% are fast - espresso after dinner, no problem. The rest are in between. It's largely genetic, and you can get it tested if you want to know your type. If an 8-hour cutoff isn't enough for you, push it to 10-12 hours.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- ============ PROTOCOL CARD VIEW ============ -->
   <div class="view" id="view-protocol">
     <div class="pc-body">
@@ -593,29 +561,9 @@
     </div>
   </div>
 
-  <!-- ============ GUIDES VIEW ============ -->
-  <div class="view" id="view-guides">
-    <div class="g-body">
-      <div class="g-head">
-        <h2>Your guides</h2>
-        <p>Three bonus guides - read online or print. Each opens the full guide.</p>
-      </div>
-      <a class="gcard" href="/webinar-bonuses/?embed=1#caffeine" target="_blank" rel="noopener">
-        <div class="gic or"><svg viewBox="0 0 24 24"><path d="M4 8h12v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/><path d="M16 9h2a2 2 0 0 1 0 4h-2"/><path d="M7 3v2M10 3v2M13 3v2"/></svg></div>
-        <div class="gtx"><div class="gtt">Caffeine Blueprint</div><div class="gts">When to stop, how to cut back without the crash</div></div>
-        <span class="gchev">›</span>
-      </a>
-      <a class="gcard" href="/webinar-bonuses/?embed=1#bedroom" target="_blank" rel="noopener">
-        <div class="gic pk"><svg viewBox="0 0 24 24"><path d="M3 18v-5a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v5"/><path d="M3 18h18M6 10V7h12v3"/></svg></div>
-        <div class="gtx"><div class="gtt">Bedroom Tune-Up</div><div class="gts">Light, sound, temperature - the quick wins</div></div>
-        <span class="gchev">›</span>
-      </a>
-      <a class="gcard" href="/webinar-bonuses/?embed=1#mistakes" target="_blank" rel="noopener">
-        <div class="gic yl"><svg viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></svg></div>
-        <div class="gtx"><div class="gtt">9 Recovery Mistakes</div><div class="gts">Common moves that quietly keep you tired</div></div>
-        <span class="gchev">›</span>
-      </a>
-    </div>
+  <!-- ============ BONUSES VIEW (same-origin embed of /webinar-bonuses/) ============ -->
+  <div class="view" id="view-bonuses">
+    <iframe id="bonusesFrame" title="Your bonuses" loading="lazy"></iframe>
   </div>
 
   <footer class="app-footer">
@@ -966,25 +914,12 @@ document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () =>
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
   t.classList.add('on');
   $('view-'+t.dataset.view).classList.add('on');
+  if(t.dataset.view==='bonuses'){ const f=$('bonusesFrame'); if(f && !f.src) f.src='/webinar-bonuses/?embed=1'; }
   window.scrollTo(0,0);
 }));
 
-/* ============ CAFFEINE ============ */
+/* caffFmt: shared time formatter (also used by the diary/assessment diagnostic) */
 function caffFmt(mins){ mins=((mins%1440)+1440)%1440; let hh=Math.floor(mins/60), mm=mins%60; const ap=hh<12?'AM':'PM'; let h12=hh%12; if(h12===0)h12=12; return h12+':'+String(mm).padStart(2,'0')+' '+ap; }
-function caffCalc(){
-  const v=$('caffBed').value, out=$('caffOut');
-  if(!v){ out.innerHTML='<p class="caff-hint">Enter your target bedtime to see your cutoff.</p>'; return; }
-  const [h,m]=v.split(':').map(Number); const bed=h*60+m;
-  out.innerHTML =
-    '<div class="caff-grid">'+
-      '<div class="caff-cell"><div class="cl">Safe cutoff</div><div class="cv">'+caffFmt(bed-480)+'</div><div class="cs">- 8 hours before bed</div></div>'+
-      '<div class="caff-cell ideal"><div class="cl">Ideal cutoff</div><div class="cv">'+caffFmt(bed-600)+'</div><div class="cs">- 10 hours before bed</div></div>'+
-    '</div>'+
-    '<p class="caff-after">After this, switch to decaf or herbal - a last call, not a "never."</p>';
-  try{ localStorage.setItem('zf_caffeine_bedtime', v); }catch(e){}
-}
-$('caffBed').addEventListener('input', caffCalc);
-(function(){ try{ const v=localStorage.getItem('zf_caffeine_bedtime'); if(v){ $('caffBed').value=v; caffCalc(); } }catch(e){} })();
 
 /* ============ DIARY ============ */
 let cur = new Date(); cur.setHours(0,0,0,0);
