@@ -10,9 +10,12 @@
 <script>try{var s=localStorage.getItem('zf_theme');var l=s?s==='light':(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches);if(l)document.documentElement.classList.add('light');}catch(e){}</script>
 <script>try{if(/[?&]embed/.test(location.search))document.documentElement.classList.add('embed');}catch(e){}</script>
 <style>
-  /* embed mode: served inside the app shell - drop welcome modal + page-level footer chrome */
+  /* embed mode: served inside the /app/ shell - drop welcome modal, page-level footer
+     chrome, and the page's own theme toggle (the app owns the theme; same-origin so
+     zf_theme is already shared). The bonus switcher + print stay. */
   html.embed .welcome-overlay{ display:none !important; }
   html.embed .contact, html.embed .legal-foot{ display:none !important; }
+  html.embed #themeToggle{ display:none !important; }
   html.embed .page{ padding-top:0 !important; }
   @page { size: A4; margin: 0; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
