@@ -35,6 +35,26 @@
   html{scroll-behavior:smooth}
   body{ font-family:'Inter',sans-serif; background:#0d0d0d; color:var(--text); line-height:1.5; }
   .app{ max-width:480px; margin:0 auto; min-height:100vh; background:var(--bg); position:relative; }
+  /* ===== DESKTOP LAYOUT (>=860px). Below this = the stacked mobile column, untouched. ===== */
+  @media (min-width:860px){
+    .app{ max-width:1040px; }
+    /* Diary: 2-col field grid (main) + sticky summary/save sidebar (aside) */
+    .diary-grid{ display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:26px; align-items:start; }
+    .diary-aside{ position:sticky; top:100px; }
+    .diary-aside .live{ margin:0; }
+    .diary-aside .savewrap{ padding:14px 0 0; }
+    .diary-aside .save{ font-size:15px; padding:14px; }
+    .diary-main .section{ display:grid; grid-template-columns:1fr 1fr; grid-auto-flow:row dense; gap:10px; align-content:start; margin-bottom:6px; }
+    .diary-main .section .stitle{ grid-column:1 / -1; margin-bottom:2px; }
+    .diary-main .section .two{ grid-column:1 / -1; }
+    .diary-main .section .field{ margin-bottom:0; }
+    .diary-main .section .field:has(textarea){ grid-column:1 / -1; }
+    /* narrow half-width cards clip the long chip words in the "Yesterday" section (Magnesium/Afternoon) - size those to content + wrap. Short "Last night" chips keep filling the row. */
+    .diary-main .section.ctx .chips .chip{ flex:0 1 auto; padding-left:14px; padding-right:14px; }
+    /* INTERIM: Assessment + Protocol don't have a desktop layout yet - center them (readable, not stretched) until redesigned */
+    #view-assessment .a-wrap, #view-assessment .a-result{ max-width:760px; margin-left:auto; margin-right:auto; }
+    #view-protocol .pc-body{ max-width:760px; margin-left:auto; margin-right:auto; }
+  }
 
   /* ===== Top bar with tabs ===== */
   .top{ position:sticky; top:0; z-index:20; background:rgba(22,22,22,0.94); backdrop-filter:blur(10px);
@@ -61,13 +81,13 @@
   .view.on{ display:block; }
 
   /* ===== install hint ===== */
-  .install{ display:none; margin:14px 20px 0; background:rgba(189,147,249,0.10); border:1px solid rgba(189,147,249,0.3);
-            border-radius:12px; padding:12px 14px; font-size:12.5px; color:var(--muted); align-items:center; gap:10px; }
+  .install{ display:none; margin:10px 20px 0; background:rgba(189,147,249,0.10); border:1px solid rgba(189,147,249,0.3);
+            border-radius:10px; padding:7px 12px; font-size:12px; color:var(--muted); align-items:center; gap:10px; }
   .install.show{ display:flex; }
   .install b{ color:var(--text); }
-  .install button{ margin-left:auto; background:var(--purple); color:#1a1a1a; border:none; border-radius:9px;
-        font-family:inherit; font-weight:700; font-size:12.5px; padding:9px 14px; cursor:pointer; white-space:nowrap; }
-  .install .x{ background:none; color:var(--dim); padding:6px; font-size:16px; margin-left:6px; }
+  .install button{ margin-left:auto; background:var(--purple); color:#1a1a1a; border:none; border-radius:8px;
+        font-family:inherit; font-weight:700; font-size:12px; padding:6px 12px; cursor:pointer; white-space:nowrap; }
+  .install .x{ background:none; color:var(--dim); padding:4px; font-size:15px; margin-left:4px; line-height:1; }
 
   /* ===== DIARY ===== */
   .body{ padding:16px 20px 0; }
@@ -117,24 +137,6 @@
   .live .se-sub{ font-size:12px; color:var(--muted); margin-top:4px; }
   .live .se-bar{ height:7px; border-radius:5px; background:rgba(255,255,255,0.08); margin-top:10px; overflow:hidden; }
   .live .se-fill{ height:100%; width:0; transition:width .4s, background .4s; }
-
-  /* ===== CAFFEINE ===== */
-  .caff-out{ text-align:center; }
-  .caff-hint{ color:var(--muted); font-size:13.5px; margin:0; }
-  .caff-grid{ display:flex; gap:12px; }
-  .caff-cell{ flex:1; background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:14px 10px; }
-  .caff-cell.ideal{ border-color:rgba(80,250,123,0.4); }
-  .caff-cell .cl{ font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--dim); font-weight:700; }
-  .caff-cell .cv{ font-size:23px; font-weight:800; margin:4px 0 2px; }
-  .caff-cell.ideal .cv{ color:var(--green); }
-  .caff-cell .cs{ font-size:11px; color:var(--muted); }
-  .caff-after{ font-size:12.5px; color:var(--muted); margin:12px 0 0; }
-  .caff-note{ font-size:13px; color:var(--muted); line-height:1.65; margin:0; }
-  .caff-table{ padding:6px 2px; }
-  .caff-row{ display:flex; justify-content:space-between; gap:12px; padding:9px 14px; font-size:13.5px; border-bottom:1px solid var(--line); }
-  .caff-row:last-child{ border-bottom:none; }
-  .caff-row.caff-head{ color:var(--cyan); font-weight:700; font-size:10.5px; letter-spacing:1px; text-transform:uppercase; }
-  .caff-row span:last-child{ color:var(--text); font-weight:600; white-space:nowrap; }
 
   .savewrap{ padding:16px 20px calc(20px + env(safe-area-inset-bottom)); }
   .save{ width:100%; background:var(--purple); color:#1a1a1a; border:none; border-radius:13px; font-family:inherit;
@@ -346,23 +348,6 @@
   .pc-demo button:hover{ border-color:var(--purple); color:var(--purple); }
   .pc-demo .clear:hover{ border-color:#c0392b; color:#c0392b; }
 
-  /* ===== GUIDES HUB ===== */
-  .g-body{ padding:18px 20px 30px; }
-  .g-head h2{ font-size:21px; font-weight:800; letter-spacing:-0.3px; }
-  .g-head p{ font-size:13px; color:var(--muted); margin:6px 0 16px; }
-  .gcard{ display:flex; align-items:center; gap:13px; background:var(--panel); border:1px solid var(--line); border-radius:15px; padding:14px 15px; margin-bottom:10px; cursor:pointer; transition:border-color .15s; text-decoration:none; color:inherit; }
-  .gcard:hover{ border-color:rgba(189,147,249,0.4); }
-  .gic{ flex:0 0 42px; width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; }
-  .gic svg{ width:21px; height:21px; stroke-width:1.9; fill:none; stroke:currentColor; }
-  .gic.or{ background:rgba(255,184,108,0.16); color:var(--orange); }
-  .gic.pk{ background:rgba(255,121,198,0.15); color:var(--pink); }
-  .gic.yl{ background:rgba(241,250,140,0.16); color:var(--yellow); }
-  body.light .gic.yl{ color:#a16207; background:rgba(161,98,7,0.12); }
-  .gtx{ flex:1; min-width:0; }
-  .gtt{ font-size:15px; font-weight:700; }
-  .gts{ font-size:12px; color:var(--muted); margin-top:2px; }
-  .gchev{ flex:0 0 auto; color:var(--dim); font-size:19px; }
-
   /* print: isolate the Protocol Card to a clean light page */
   @media print{
     body.printing-pc{ background:#fff; }
@@ -423,6 +408,8 @@
         <button class="sumbtn" id="openSummary">📊 Summary</button>
       </div>
 
+      <div class="diary-grid">
+      <div class="diary-main">
       <div class="section">
         <div class="stitle">Last night</div>
         <div class="two">
@@ -491,7 +478,9 @@
         <div class="stitle">Notes <span style="color:var(--dim);font-weight:400;letter-spacing:0">- optional</span></div>
         <div class="field"><textarea id="notes" placeholder="Anything unusual - stress, travel, illness, late meal, sick kid..."></textarea></div>
       </div>
+      </div><!-- /diary-main -->
 
+      <aside class="diary-aside">
       <div class="live">
         <div class="se-top">
           <div><div class="se-lab">Sleep efficiency</div><div class="se-num" id="seNum">--<span>%</span></div></div>
@@ -500,8 +489,10 @@
         <div class="se-bar"><div class="se-fill" id="seFill"></div></div>
         <div class="se-sub" id="seMsg" style="margin-top:9px"></div>
       </div>
+      <div class="savewrap"><button class="save" id="save">Save today's entry</button></div>
+      </aside>
+      </div><!-- /diary-grid -->
     </div>
-    <div class="savewrap"><button class="save" id="save">Save today's entry</button></div>
     <!-- Manage my data — right to erasure (irreversible). -->
     <div class="manage-data">
       <button class="danger-link" id="deleteData">Delete my data</button>
@@ -1285,7 +1276,7 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catc
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e=>{
   e.preventDefault(); deferredPrompt = e;
-  $('installTxt').innerHTML = '<b>Add this to your home screen</b> - use it like an app, even offline.';
+  $('installTxt').innerHTML = '<b>Add to home screen</b> - use it like an app, offline.';
   $('installBtn').style.display=''; $('install').classList.add('show');
 });
 $('installBtn').addEventListener('click', async ()=>{
