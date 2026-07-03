@@ -1,0 +1,18 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="robots" content="noindex">
+<title>App mobile preview</title>
+<style>
+  html,body{margin:0;background:#0a0a0a;font-family:system-ui,sans-serif}
+  .wrap{display:flex;gap:30px;padding:24px;align-items:flex-start}
+  .device{width:390px;flex:0 0 auto}
+  .device .lab{color:#888;font-size:12px;margin:0 0 8px;font-weight:600}
+  .device iframe{width:390px;height:830px;border:1px solid #333;border-radius:22px;background:#141414;display:block}
+</style></head><body>
+<div class="wrap">
+  <div class="device"><p class="lab">iPhone 390 × 830 — /app/?demo</p>
+    <iframe id="fr"></iframe></div>
+</div>
+<script>
+  // cache-buster: always pull the freshest /app/ build
+  document.getElementById('fr').src = '/app/?demo&cb=' + Date.now();
+</script>
+</body></html>

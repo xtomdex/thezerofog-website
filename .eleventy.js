@@ -25,6 +25,10 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.ignores.add("src/app/**");
   eleventyConfig.addPassthroughCopy("src/app");
 
+  // Internal design prototypes (desktop sidebar app + mobile iframe preview), noindex, not linked anywhere
+  eleventyConfig.ignores.add("src/mockups/**");
+  eleventyConfig.addPassthroughCopy("src/mockups");
+
   // Downloadable course materials (PDFs) served verbatim
   eleventyConfig.addPassthroughCopy("src/downloads");
 
