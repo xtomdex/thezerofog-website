@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex">
 <title>Your ZeroFog Bonuses</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<script>try{var s=localStorage.getItem('zf_theme');var l=s?s==='light':(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches);if(l)document.documentElement.classList.add('light');}catch(e){}</script>
-<script>try{if(/[?&]embed/.test(location.search))document.documentElement.classList.add('embed');}catch(e){}</script>
+<script>try{var q=(location.search.match(/[?&]theme=(light|dark)/)||[])[1];var s=q||localStorage.getItem('zf_theme');var l=s?s==='light':(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches);if(l)document.documentElement.classList.add('light');}catch(e){}</script>
+<script>try{var _s=location.search; if(/[?&]embed/.test(_s))document.documentElement.classList.add('embed'); if(/[?&]nav=1/.test(_s))document.documentElement.classList.add('embed-nav');}catch(e){}</script>
 <style>
   /* embed mode: served inside the /app/ shell - drop welcome modal, page-level footer
      chrome, and the page's own theme toggle (the app owns the theme; same-origin so
@@ -19,6 +19,20 @@
   /* buyers already own the program - drop the self-upsell inside the app (kept on the public site) */
   html.embed .cta, html.embed .qr-only{ display:none !important; }
   html.embed .page{ padding-top:0 !important; }
+
+  /* ---- embed-NAV mode (mockup / future sidebar app: ?embed=1&nav=1) ----
+     Only when the HOST provides its own guide navigation + sizes the iframe to our
+     full content height. Plain ?embed=1 (current /app/, fixed-height iframe with its
+     OWN internal scroll + the toolbar switcher) must NOT get these rules. */
+  /* host sidebar switches guides -> hide our sticky switcher toolbar (buttons still click via JS) */
+  html.embed-nav .toolbar{ display:none !important; }
+  /* fill whatever width the host gives the iframe - no inner gutters */
+  html.embed-nav .page{ max-width:none !important; margin:0 !important; padding-left:30px !important; padding-right:30px !important; }
+  /* match the host app background exactly (its --bg, not this page's own panel shade) */
+  html.embed-nav{ --bg:#141414; }
+  html.embed-nav.light{ --bg:#eef0f3; }
+  /* host sizes the iframe to our full height -> no inner scrolling; the wheel scrolls the host */
+  html.embed-nav, html.embed-nav body{ overflow:hidden !important; }
   @page { size: A4; margin: 0; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -604,9 +618,15 @@
   var root=document.documentElement, btn=document.getElementById('themeToggle');
   function apply(t){ root.classList.toggle('light', t==='light'); btn.textContent = t==='light'?'☀':'☾';
     var m=document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute('content', t==='light'?'#ffffff':'#1a1a1a'); }
-  var theme; try{ theme=localStorage.getItem('zf_theme')||((window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark'); }catch(e){ theme='dark'; }
+  /* ?theme= wins: the embedding app passes its current theme explicitly, so the first
+     open matches even before zf_theme exists in localStorage */
+  var theme; try{ theme=(location.search.match(/[?&]theme=(light|dark)/)||[])[1]||localStorage.getItem('zf_theme')||((window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark'); }catch(e){ theme='dark'; }
   apply(theme);
   btn.addEventListener('click', function(){ theme=theme==='light'?'dark':'light'; try{localStorage.setItem('zf_theme',theme);}catch(e){} apply(theme); });
+  /* when embedded, the host app owns the theme toggle. It writes zf_theme, which fires a
+     storage event in THIS document (same-origin iframe) - re-apply so the guide re-themes
+     live instead of staying in the old theme until reload. */
+  window.addEventListener('storage', function(e){ if(e.key==='zf_theme' && e.newValue){ theme=e.newValue; apply(theme); } });
 })();
 document.getElementById('printBtn').addEventListener('click', function(){ window.print(); });
 
@@ -794,6 +814,25 @@ if(icsBtn) icsBtn.addEventListener('click', function(){
   setTimeout(function(){ URL.revokeObjectURL(a.href); },1000);
   status.textContent=n+' reminder'+(n>1?'s':'')+' downloaded.';
 });
+</script>
+
+<script>
+/* embed mode: report our content height to the app shell so it can size the iframe
+   without reaching into this document (Safari-safe) */
+(function(){
+  if(!document.documentElement.classList.contains('embed-nav')) return;
+  var last=0;
+  function report(){
+    try{
+      var h=document.body.scrollHeight;
+      if(h&&Math.abs(h-last)>2){ last=h; parent.postMessage({zfBonusH:h},'*'); }
+    }catch(e){}
+  }
+  window.addEventListener('load',report);
+  window.addEventListener('resize',report);
+  try{ new ResizeObserver(report).observe(document.body); }catch(e){ setInterval(report,600); }
+  setTimeout(report,300); setTimeout(report,1000); setTimeout(report,2500);
+})();
 </script>
 
 </body>

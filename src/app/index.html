@@ -76,6 +76,9 @@
   .tab-bonus.on{ color:var(--orange); border-bottom-color:var(--orange); }
   #view-bonuses{ padding:0; }
   #bonusesFrame{ width:100%; height:calc(100vh - 112px); border:none; background:var(--bg); display:block; }
+  /* while Bonuses is open the app shell must not scroll - otherwise iOS grabs the outer
+     page instead of the iframe content (double-scroll trap). JS sets the exact height. */
+  html.bonus-lock, body.bonus-lock{ overflow:hidden; height:100%; }
 
   .view{ display:none; }
   .view.on{ display:block; }
@@ -106,7 +109,11 @@
   .field > label{ display:block; font-size:14px; font-weight:600; margin-bottom:11px; }
   .field .hint{ font-weight:400; color:var(--dim); font-size:12px; }
   input[type=time]{ width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--text);
-        font-family:inherit; font-size:17px; font-weight:600; padding:11px 14px; border-radius:10px; }
+        font-family:inherit; font-size:17px; font-weight:600; padding:11px 14px; border-radius:10px;
+        /* iOS Safari: native time/date controls ignore box sizing and spill out of their cards
+           unless appearance is reset; the value pseudo re-left-aligns the centered text */
+        -webkit-appearance:none; appearance:none; min-height:45px; }
+  input[type=time]::-webkit-date-and-time-value, input[type=date]::-webkit-date-and-time-value{ text-align:left; }
   input[type=time]::-webkit-calendar-picker-indicator{ filter:invert(0.7); }
   .two{ display:flex; gap:10px; }
   .two .field{ flex:1; margin-bottom:10px; }
@@ -125,8 +132,8 @@
   .seg .s{ flex:1; text-align:center; background:var(--panel2); border:1px solid var(--line); color:var(--muted);
         padding:12px 4px 9px; border-radius:10px; cursor:pointer; font-size:12px; font-weight:600; }
   .seg .s b{ display:block; font-size:18px; margin-bottom:2px; color:var(--text); font-weight:700; }
-  .seg .s.on{ background:rgba(80,250,123,0.14); border-color:var(--green); }
-  .seg .s.on b{ color:var(--green); }
+  .seg .s.on{ background:rgba(189,147,249,0.16); border-color:var(--purple); }
+  .seg .s.on b{ color:var(--purple); }
 
   .live{ margin:18px 0 0; background:linear-gradient(180deg,var(--panel),#191919);
         border:1px solid rgba(189,147,249,0.25); border-radius:16px; padding:16px 18px; }
@@ -261,7 +268,8 @@
   .custom-range .cr{ flex:1; }
   .custom-range label{ font-size:11px; color:var(--dim); display:block; margin-bottom:4px; }
   .custom-range input[type=date]{ width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--text);
-        font-family:inherit; font-size:14px; padding:10px 12px; border-radius:10px; }
+        font-family:inherit; font-size:14px; padding:10px 12px; border-radius:10px;
+        -webkit-appearance:none; appearance:none; min-height:40px; }
   .custom-range input[type=date]::-webkit-calendar-picker-indicator{ filter:invert(0.7); }
   .sum-out .big{ text-align:center; padding:18px 0 10px; }
   .sum-out .big .n{ font-size:46px; font-weight:900; line-height:1; }
@@ -382,9 +390,9 @@
       </div>
     </div>
     <div class="tabs">
-      <button class="tab on" data-view="diary">Sleep Diary</button>
+      <button class="tab on" data-view="diary">Diary</button>
       <button class="tab" data-view="assessment">Assessment</button>
-      <button class="tab" data-view="protocol">Protocol Card</button>
+      <button class="tab" data-view="protocol">Protocol</button>
       <button class="tab tab-bonus" data-view="bonuses"><span class="bstar">&#10022;</span> Bonuses</button>
     </div>
   </div>
@@ -558,6 +566,7 @@
   </div>
 
   <footer class="app-footer">
+    <p id="iosInstallHint" style="display:none;margin-bottom:8px">&#128241; Add to your home screen - <a href="https://course.thezerofog.com/school/course/tzf-main/lecture/10231550">watch how</a></p>
     <p>&copy; 2026 The ZeroFog. All rights reserved.<br>
     <a href="/privacy/">Privacy</a> &middot;
     <a href="/terms/">Terms</a> &middot;
@@ -900,13 +909,25 @@ $('deleteData').addEventListener('click', async () => {
 });
 
 /* ============ TABS ============ */
+/* Bonuses view: lock the shell scroll and give the iframe the exact remaining viewport,
+   so the only scrollable surface is the bonus content itself (fixes iOS double-scroll). */
+function sizeBonusesFrame(){
+  const f=$('bonusesFrame');
+  if(!f || !document.body.classList.contains('bonus-lock')) return;
+  f.style.height = Math.max(200, window.innerHeight - f.getBoundingClientRect().top) + 'px';
+}
+window.addEventListener('resize', sizeBonusesFrame);
 document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
   t.classList.add('on');
   $('view-'+t.dataset.view).classList.add('on');
-  if(t.dataset.view==='bonuses'){ const f=$('bonusesFrame'); if(f && !f.src) f.src='/webinar-bonuses/?embed=1'; }
+  const bonuses = t.dataset.view==='bonuses';
+  if(bonuses){ const f=$('bonusesFrame'); if(f && !f.src) f.src='/webinar-bonuses/?embed=1&theme='+theme; }
+  document.documentElement.classList.toggle('bonus-lock', bonuses);
+  document.body.classList.toggle('bonus-lock', bonuses);
   window.scrollTo(0,0);
+  if(bonuses) sizeBonusesFrame();
 }));
 
 /* caffFmt: shared time formatter (also used by the diary/assessment diagnostic) */
@@ -961,10 +982,10 @@ function calc(){
   $('seNum').innerHTML=r.se+'<span>%</span>';
   $('seTib').textContent='time in bed '+fmt(r.tib); $('seTst').textContent='slept '+fmt(r.tst);
   const f=$('seFill'); f.style.width=Math.min(100,r.se)+'%';
-  f.style.background = r.se>=85?'var(--green)':r.se>=75?'var(--orange)':'var(--red)';
-  $('seMsg').innerHTML = r.se>=85 ? 'Healthy. <span style="color:var(--green)">85%+</span> is the target.' :
-    r.se>=75 ? 'Getting there. Aim for <span style="color:var(--orange)">85%+</span>.' :
-    'Below 75% means too much time in bed awake. The protocol fixes this.';
+  /* no day-grading here - a single night is data, not a verdict (orthosomnia risk).
+     Green/orange/red trend colors live in the Summary, where improvement over weeks is the story. */
+  f.style.background = 'var(--purple)';
+  $('seMsg').textContent = 'Your baseline is building - trends live in the Summary.';
 }
 
 $('save').addEventListener('click', async () => {
@@ -1192,11 +1213,13 @@ const SECTIONS = {
   B:{ cls:'sb sec-b', eyebrow:'Section B', name:'The Battery', sub:'How well is your recovery system charging?', max:15 },
   C:{ cls:'sc sec-c', eyebrow:'Section C', name:'The Off-Switch', sub:'Can your brain actually shut down?', max:18 },
 };
+// Score is HIGHER = BETTER (more points = healthier system). Bands keyed by the good
+// score (48 - raw disruption points), highest threshold first.
 const TOTAL_BANDS = [
-  { max:8,  color:'var(--green)',  label:'Mostly working',        desc:'Your system is mostly working. Fine-tuning will sharpen what is already there.' },
-  { max:18, color:'var(--yellow)', label:'Moderate disruption',   desc:'Moderate disruption. One or two systems need attention. This course will make a noticeable difference.' },
-  { max:30, color:'var(--orange)', label:'Significant disruption', desc:'Significant disruption. Multiple systems are out of sync. This is exactly what the protocol is built to fix.' },
-  { max:48, color:'var(--red)',    label:'Major disruption',      desc:'Major disruption. Your systems have been off for a while. The protocol works here too - it just means your starting point is lower, so the improvements will feel more dramatic.' },
+  { min:40, color:'var(--green)',  label:'Mostly working',        desc:'Your system is mostly working. Fine-tuning will sharpen what is already there.' },
+  { min:30, color:'var(--yellow)', label:'Moderate disruption',   desc:'Moderate disruption. One or two systems need attention. This course will make a noticeable difference.' },
+  { min:18, color:'var(--orange)', label:'Significant disruption', desc:'Significant disruption. Multiple systems are out of sync. This is exactly what the protocol is built to fix.' },
+  { min:0,  color:'var(--red)',    label:'Major disruption',      desc:'Major disruption. Your systems have been off for a while. The protocol works here too - it just means your starting point is lower, so the improvements will feel more dramatic.' },
 ];
 function sectionStatus(score){
   if(score<=3)  return { color:'var(--green)',  text:'This system is functioning. We will keep it that way.' };
@@ -1233,20 +1256,21 @@ $('asubmit').addEventListener('click', async ()=>{
   const rec = { taken_on: todayKey(), score_clock:sec.A, score_battery:sec.B, score_offswitch:sec.C, score_total:totalScore, answers };
   await DB.saveAssessment(rec);
 
-  const band=TOTAL_BANDS.find(b=>totalScore<=b.max);
+  const goodTotal = 48 - totalScore;   // flip to higher = better (more points = healthier)
+  const band=TOTAL_BANDS.find(b=>goodTotal>=b.min);
   $('aTotLabel').textContent = prior.length ? 'Your latest score' : 'Your baseline score';
-  $('aTotNum').innerHTML=totalScore+'<span>/ 48</span>';
+  $('aTotNum').innerHTML=goodTotal+'<span>/ 48</span>';
   const be=$('aBand'); be.textContent=band.label; be.style.color=band.color; be.style.background='rgba(255,255,255,0.06)'; be.style.border='1px solid '+band.color;
   $('aBandDesc').textContent=band.desc;
-  const mf=$('aMeter'); mf.style.background=band.color; setTimeout(()=>mf.style.width=(totalScore/48*100)+'%',60);
+  const mf=$('aMeter'); mf.style.background=band.color; setTimeout(()=>mf.style.width=(goodTotal/48*100)+'%',60);
 
   const order=['A','B','C']; let weakKey=order[0], weakPct=-1;
   order.forEach(k=>{ const p=sec[k]/SECTIONS[k].max; if(p>weakPct){weakPct=p;weakKey=k;} });
   const rows=$('aSys'); rows.innerHTML='';
-  order.forEach(k=>{ const S=SECTIONS[k], score=sec[k], st=sectionStatus(score), isWeak=(k===weakKey&&weakPct>0);
+  order.forEach(k=>{ const S=SECTIONS[k], raw=sec[k], good=S.max-raw, st=sectionStatus(raw), isWeak=(k===weakKey&&weakPct>0);
     const row=document.createElement('div'); row.className='sys '+S.cls.split(' ')[0]+(isWeak?' weak':'');
-    row.innerHTML=`<div class="sys-top"><div class="sys-name">${S.name}${isWeak?'<span class="tag">most disrupted</span>':''}</div><div class="sys-score">${score} / ${S.max}</div></div><div class="sys-bar"><div class="sf" style="background:${st.color}"></div></div><div class="sys-status">${st.text}</div>`;
-    rows.appendChild(row); setTimeout(()=>row.querySelector('.sf').style.width=(score/S.max*100)+'%',80);
+    row.innerHTML=`<div class="sys-top"><div class="sys-name">${S.name}${isWeak?'<span class="tag">most disrupted</span>':''}</div><div class="sys-score">${good} / ${S.max}</div></div><div class="sys-bar"><div class="sf" style="background:${st.color}"></div></div><div class="sys-status">${st.text}</div>`;
+    rows.appendChild(row); setTimeout(()=>row.querySelector('.sf').style.width=(good/S.max*100)+'%',80);
   });
 
   // baseline vs latest (computed on the fly from stored results)
@@ -1254,11 +1278,12 @@ $('asubmit').addEventListener('click', async ()=>{
   if(!prior.length){
     note.innerHTML=`Saved as your <span class="hl">Day 0 baseline</span> (${rec.taken_on}). Come back after about 4 weeks and retake - this page will show you the change.`;
   } else {
-    const base=prior[0]; const diff=base.score_total-totalScore;
-    let line = diff>0 ? `down <span class="up">${diff} points</span> - lower is better, your systems are settling`
-            : diff<0 ? `up <span class="down">${Math.abs(diff)} points</span> - worth checking which system slipped`
+    const base=prior[0];
+    const gBase=48-base.score_total, gToday=goodTotal, diff=gToday-gBase; // positive = improved (higher is better)
+    let line = diff>0 ? `up <span class="up">${diff} points</span> - higher is better, your systems are settling`
+            : diff<0 ? `down <span class="down">${Math.abs(diff)} points</span> - worth checking which system slipped`
             : `unchanged so far`;
-    note.innerHTML=`Baseline: <span class="hl">${base.score_total}/48</span> (${base.taken_on}) &nbsp;|&nbsp; Today: <span class="hl">${totalScore}/48</span> (${rec.taken_on})<br>That is ${line}.`;
+    note.innerHTML=`Baseline: <span class="hl">${gBase}/48</span> (${base.taken_on}) &nbsp;|&nbsp; Today: <span class="hl">${gToday}/48</span> (${rec.taken_on})<br>That is ${line}.`;
   }
   $('aprogress').style.display='none';
   $('aresult').classList.add('show');
@@ -1284,16 +1309,12 @@ $('installBtn').addEventListener('click', async ()=>{
   deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; $('install').classList.remove('show');
 });
 $('installX').addEventListener('click', ()=>{ $('install').classList.remove('show'); try{ localStorage.setItem('zf_install_dismissed','1'); }catch(e){} });
-// iOS has no install prompt - show manual hint
+// iOS has no install prompt and the manual steps don't fit a banner - keep the top clean
+// and show a quiet footer link to the install walkthrough video instead
 (function(){
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const standalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-  const dismissed = (()=>{ try{ return localStorage.getItem('zf_install_dismissed'); }catch(e){ return null; } })();
-  if(isIOS && !standalone && !dismissed){
-    $('installBtn').style.display='none';
-    $('installTxt').innerHTML = '<b>Add to your home screen:</b> tap the Share button, then "Add to Home Screen".';
-    $('install').classList.add('show');
-  }
+  if(isIOS && !standalone){ $('iosInstallHint').style.display=''; }
 })();
 
 /* ============ THEME TOGGLE ============ */
@@ -1302,7 +1323,9 @@ function applyTheme(t){
   $('themeToggle').textContent = t==='light' ? '☀' : '☾';
   const m = document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute('content', t==='light' ? '#f3f3f6' : '#0d0d0d');
 }
-let theme = (()=>{ try{ return localStorage.getItem('zf_theme')||'dark'; }catch(e){ return 'dark'; } })();
+/* default matches the rest of the site: saved choice first, else OS preference.
+   Keeps the first-ever open in sync with the embedded bonuses page. */
+let theme = (()=>{ try{ return localStorage.getItem('zf_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark'); }catch(e){ return 'dark'; } })();
 applyTheme(theme);
 $('themeToggle').addEventListener('click', ()=>{
   theme = theme==='light' ? 'dark' : 'light';
