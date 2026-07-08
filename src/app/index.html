@@ -35,27 +35,11 @@
   html{scroll-behavior:smooth}
   body{ font-family:'Inter',sans-serif; background:#0d0d0d; color:var(--text); line-height:1.5; }
   .app{ max-width:480px; margin:0 auto; min-height:100vh; background:var(--bg); position:relative; }
-  /* ===== DESKTOP LAYOUT (>=860px). Below this = the stacked mobile column, untouched. ===== */
-  @media (min-width:860px){
-    .app{ max-width:1040px; }
-    /* Diary: 2-col field grid (main) + sticky summary/save sidebar (aside) */
-    .diary-grid{ display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:26px; align-items:start; }
-    .diary-aside{ position:sticky; top:100px; }
-    .diary-aside .live{ margin:0; }
-    .diary-aside .savewrap{ padding:14px 0 0; }
-    .diary-aside .save{ font-size:15px; padding:14px; }
-    .diary-main .section{ display:grid; grid-template-columns:1fr 1fr; grid-auto-flow:row dense; gap:10px; align-content:start; margin-bottom:6px; }
-    .diary-main .section .stitle{ grid-column:1 / -1; margin-bottom:2px; }
-    .diary-main .section .two{ grid-column:1 / -1; }
-    .diary-main .section .field{ margin-bottom:0; }
-    .diary-main .section .field:has(textarea){ grid-column:1 / -1; }
-    /* narrow half-width cards clip the long chip words in the "Yesterday" section (Magnesium/Afternoon) - size those to content + wrap. Short "Last night" chips keep filling the row. */
-    .diary-main .section.ctx .chips .chip{ flex:0 1 auto; padding-left:14px; padding-right:14px; }
-    /* INTERIM: Assessment + Protocol don't have a desktop layout yet - center them (readable, not stretched) until redesigned */
-    #view-assessment .a-wrap, #view-assessment .a-result{ max-width:760px; margin-left:auto; margin-right:auto; }
-    #view-protocol .pc-body{ max-width:760px; margin-left:auto; margin-right:auto; }
-  }
-
+  /* mobile: desktop-only elements stay hidden */
+  .side{ display:none; }
+  .breaklink{ display:none; }
+  .dh-t{ display:none; }
+  .se-side{ text-align:right; }
   /* ===== Top bar with tabs ===== */
   .top{ position:sticky; top:0; z-index:20; background:rgba(22,22,22,0.94); backdrop-filter:blur(10px);
         border-bottom:1px solid var(--line); padding:14px 20px 0; padding-top:max(14px,env(safe-area-inset-top)); }
@@ -356,13 +340,165 @@
   .pc-demo button:hover{ border-color:var(--purple); color:var(--purple); }
   .pc-demo .clear:hover{ border-color:#c0392b; color:#c0392b; }
 
+  /* ===== SLEEP ASSISTANT (preview, reachable from the desktop sidebar) ===== */
+  .asst-wrap{ padding:20px 20px 0; }
+  .asst-hero{ text-align:center; margin-bottom:26px; }
+  .asst-badge{ display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase;
+        color:var(--cyan); background:rgba(139,233,253,.12); padding:6px 13px; border-radius:20px; margin-bottom:14px; }
+  .asst-hero h2{ font-size:30px; font-weight:800; letter-spacing:-.5px; margin-bottom:10px; }
+  .asst-hero h2 .a{ color:var(--purple); }
+  .asst-hero p{ font-size:14px; color:var(--muted); line-height:1.7; max-width:540px; margin:0 auto; }
+  .asst-hero p b{ color:var(--text); }
+  .asst-trust{ display:flex; flex-wrap:wrap; gap:9px; justify-content:center; margin-top:18px; }
+  .asst-trust span{ font-size:12px; font-weight:600; color:var(--muted); background:var(--panel); border:1px solid var(--line); padding:8px 13px; border-radius:20px; }
+  .chat{ display:flex; flex-direction:column; gap:12px; margin-bottom:16px; }
+  .msg{ max-width:80%; font-size:14px; line-height:1.55; padding:13px 16px; border-radius:16px; }
+  .msg.user{ align-self:flex-end; background:var(--purple); color:#151515; border-bottom-right-radius:5px; }
+  body.light .msg.user{ color:#fff; }
+  .msg.bot{ align-self:flex-start; background:var(--panel); border:1px solid var(--line); display:flex; gap:11px; border-bottom-left-radius:5px; }
+  .msg.bot .bot-ic{ width:24px; height:24px; border-radius:7px; background:rgba(139,233,253,.15); color:var(--cyan);
+        display:flex; align-items:center; justify-content:center; font-size:13px; flex:0 0 auto; }
+  .chat-input{ display:flex; gap:10px; opacity:.55; }
+  .chat-input input{ flex:1; background:var(--panel2); border:1px solid var(--line); color:var(--text); font-family:inherit; font-size:14px; padding:13px 15px; border-radius:12px; }
+  .chat-input button{ background:var(--purple); color:#1a1a1a; border:none; border-radius:12px; font-family:inherit; font-weight:700; font-size:14px; padding:13px 22px; }
+  body.light .chat-input button{ color:#fff; }
+  .asst-privacy{ font-size:12.5px; color:var(--muted); line-height:1.6; margin-top:16px; padding:13px 16px;
+        background:rgba(139,233,253,.07); border:1px solid rgba(139,233,253,.2); border-radius:12px; }
+  .asst-privacy b{ color:var(--text); }
+  .asst-note{ text-align:center; font-size:12px; color:var(--dim); margin-top:14px; }
+
+  /* ===== DESKTOP LAYOUT (>=860px): variant-A shell (sidebar + workspace).
+     Below this = the stacked mobile column, untouched. ===== */
+  @media (min-width:860px){
+    body{ background:var(--bg); }
+    .app{ max-width:none; display:grid; grid-template-columns:250px minmax(0,1fr); }
+    .top{ display:none; }
+    .install{ display:none !important; }
+    .mainwrap{ min-width:0; padding:30px 40px 70px; }
+
+    /* ---- sidebar ---- */
+    .side{ display:flex; flex-direction:column; position:sticky; top:0; height:100vh; padding:26px 18px;
+           border-right:1px solid var(--line); background:linear-gradient(180deg,var(--panel2),var(--bg)); }
+    .side .brand{ font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:700; padding:0 10px 4px; }
+    .side .brand .accent{ color:var(--purple); }
+    .brand-sub{ font-size:10.5px; letter-spacing:2.5px; text-transform:uppercase; color:var(--dim); padding:0 10px 26px; }
+    .beta{ letter-spacing:.5px; font-size:9px; font-weight:800; color:var(--orange); background:rgba(255,184,108,.16); padding:2px 6px; border-radius:5px; margin-left:3px; }
+    .snav{ display:flex; flex-direction:column; gap:3px; }
+    .navi{ display:flex; align-items:center; gap:13px; padding:12px; border-radius:11px; color:var(--muted);
+           font-size:14px; font-weight:500; cursor:pointer; transition:.15s; position:relative; }
+    .navi svg{ width:19px; height:19px; stroke:currentColor; fill:none; stroke-width:1.8; flex:0 0 auto; }
+    .navi:hover{ background:var(--panel); color:var(--text); }
+    .navi.on{ background:rgba(189,147,249,0.13); color:var(--text); font-weight:600; }
+    .navi.on::before{ content:""; position:absolute; left:-18px; top:9px; bottom:9px; width:3px; border-radius:0 3px 3px 0; background:var(--purple); }
+    .navi.bonus{ color:var(--orange); } .navi.bonus svg{ stroke:var(--orange); }
+    .navi.bonus.on{ background:rgba(255,184,108,.13); } .navi.bonus.on::before{ background:var(--orange); }
+    .nav-div{ height:1px; background:var(--line); margin:16px 12px; }
+    .navi .chev{ margin-left:auto; font-size:11px; transition:transform .2s; }
+    .navi.expanded .chev{ transform:rotate(180deg); }
+    .soon{ margin-left:auto; font-size:8.5px; font-weight:800; letter-spacing:.5px; color:var(--cyan); background:rgba(139,233,253,.15); padding:2px 6px; border-radius:5px; }
+    .subnav{ display:none; flex-direction:column; gap:2px; margin:3px 0 2px 34px; padding-left:10px; border-left:1px solid var(--line); }
+    .subnav.open{ display:flex; }
+    .subi{ padding:9px 11px; border-radius:9px; color:var(--muted); font-size:13px; font-weight:500; cursor:pointer; transition:.12s; }
+    .subi:hover{ color:var(--text); }
+    .subi.on{ color:var(--orange); font-weight:600; }
+    .side .grow{ flex:1; }
+    .acct-side{ visibility:hidden; display:flex; align-items:center; gap:11px; padding:11px 12px; border-radius:12px; background:var(--panel); border:1px solid var(--line); }
+    .ava{ width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,var(--purple),var(--pink));
+          display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; color:#151515; flex:0 0 auto; }
+    body.light .ava{ color:#fff; }
+    .acct-side .em{ min-width:0; font-size:12px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .acct-side .em b{ display:block; color:var(--text); font-size:12.5px; font-weight:600; }
+    .side-foot{ display:flex; flex-direction:column; gap:8px; margin-top:12px; padding:0 4px; }
+    .theme-toggle{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; background:var(--panel);
+          border:1px solid var(--line); color:var(--text); height:40px; padding:0 12px; border-radius:10px; cursor:pointer;
+          font-family:inherit; font-size:13px; font-weight:600; transition:border-color .15s; }
+    .theme-toggle:hover{ border-color:var(--purple); }
+    .side-foot .signout{ background:none; border:1px solid var(--line); color:var(--muted); font-family:inherit;
+          font-size:11.5px; font-weight:600; padding:8px; border-radius:9px; cursor:pointer; }
+    .side-foot .signout:hover{ color:var(--text); }
+    .side-collapse{ position:absolute; top:22px; right:12px; width:26px; height:26px; display:flex; align-items:center; justify-content:center;
+          background:var(--panel); border:1px solid var(--line); border-radius:8px; color:var(--muted); font-size:14px; line-height:1;
+          cursor:pointer; z-index:2; transition:.15s; }
+    .side-collapse:hover{ border-color:var(--purple); color:var(--text); }
+    .app.collapsed{ grid-template-columns:70px minmax(0,1fr); }
+    .app.collapsed .side{ padding:26px 0; }
+    .app.collapsed .brand, .app.collapsed .brand-sub{ display:none; }
+    .app.collapsed .side-collapse{ position:static; margin:0 auto 20px; }
+    .app.collapsed .snav{ padding:0 12px; }
+    .app.collapsed .navi{ justify-content:center; padding:12px 0; gap:0; }
+    .app.collapsed .navi .nlb{ display:none; }
+    .app.collapsed .navi .chev, .app.collapsed .navi .soon{ display:none; }
+    .app.collapsed .navi.on::before{ left:-12px; }
+    .app.collapsed .nav-div{ margin:14px 14px; }
+    .app.collapsed .subnav{ display:none !important; }
+    .app.collapsed .acct-side{ justify-content:center; padding:11px 0; margin:0 10px; }
+    .app.collapsed .acct-side .em{ display:none; }
+    .app.collapsed .side-foot{ padding:0 10px; }
+    .app.collapsed .theme-toggle{ padding:0; }
+    .app.collapsed .theme-toggle .lb, .app.collapsed .side-foot .signout{ display:none; }
+
+    /* ---- diary: header row (crumb + h1 + date nav) ---- */
+    .dhead{ display:flex; align-items:center; justify-content:space-between; gap:14px; max-width:960px; margin:0 auto 22px; }
+    .dh-t{ display:block; }
+    .dh-t .crumb{ font-size:11.5px; color:var(--dim); font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:4px; }
+    .dh-t h1{ font-size:24px; font-weight:800; letter-spacing:-.4px; line-height:1.2; }
+    .dpick{ margin-bottom:0; }
+    .sumbtn{ display:none; }
+    .body{ padding:0; }
+
+    /* ---- diary: 2-col field grid (main) + sticky rail (aside) ---- */
+    .diary-grid{ display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:30px; align-items:start; max-width:960px; margin:0 auto; }
+    .diary-aside{ position:sticky; top:30px; }
+    .diary-main .section{ display:grid; grid-template-columns:1fr 1fr; grid-auto-flow:row dense; gap:10px; align-content:start; margin-bottom:6px; }
+    .diary-main .section .stitle{ grid-column:1 / -1; margin-bottom:2px; }
+    .diary-main .section .two{ grid-column:1 / -1; }
+    .diary-main .section .field{ margin-bottom:0; }
+    .diary-main .section .field:has(textarea){ grid-column:1 / -1; }
+    /* narrow half-width cards clip the long chip words in the "Yesterday" section (Magnesium/Afternoon) - size those to content + wrap. Short "Last night" chips keep filling the row. */
+    .diary-main .section.ctx .chips .chip{ flex:0 1 auto; padding-left:14px; padding-right:14px; }
+
+    /* ---- diary: calm efficiency card (variant-A rail) ---- */
+    .diary-aside .live{ margin:0; background:var(--panel); border-color:var(--line); border-radius:18px; padding:24px 22px;
+          display:flex; flex-direction:column; text-align:center; }
+    .diary-aside .se-top{ display:contents; }
+    .diary-aside .se-top > div:first-child{ order:1; }
+    .diary-aside .se-lab{ font-size:10.5px; letter-spacing:1.4px; margin-bottom:14px; }
+    .diary-aside .se-num{ font-size:52px; font-weight:800; letter-spacing:-2px; line-height:1; }
+    .diary-aside .se-num span{ font-size:22px; color:var(--muted); }
+    .diary-aside #seMsg{ order:2; margin:8px 0 0 !important; }
+    .diary-aside .se-bar{ order:3; height:6px; margin:16px 0 14px; }
+    .diary-aside .se-side{ order:4; display:flex; justify-content:space-between; text-align:left; }
+    .diary-aside .breaklink{ order:5; display:block; width:100%; margin-top:16px; text-align:center; background:none;
+          border:1px solid var(--line); color:var(--text); font-family:inherit; font-size:13px; font-weight:600;
+          padding:11px; border-radius:11px; cursor:pointer; }
+    .diary-aside .breaklink:hover{ border-color:var(--purple); color:var(--purple); }
+    .diary-aside .savewrap{ padding:14px 0 0; }
+    .diary-aside .save{ font-size:15px; padding:14px; background:var(--green); color:#12261a; box-shadow:0 4px 16px rgba(80,250,123,0.15); }
+    .diary-aside .save.saved{ background:var(--purple); color:#1a1a1a; }
+    body.light .diary-aside .save{ color:#fff; }
+    .manage-data{ max-width:960px; margin-left:auto; margin-right:auto; }
+    .demo-bar{ max-width:960px; margin-left:auto; margin-right:auto; }
+
+    /* ---- centered narrow views (variant-A "calm") ---- */
+    #view-assessment .a-wrap, #view-assessment .a-result{ max-width:720px; margin-left:auto; margin-right:auto; padding-left:0; padding-right:0; }
+    #view-protocol .pc-body{ max-width:720px; margin-left:auto; margin-right:auto; padding-left:0; padding-right:0; }
+    .asst-wrap{ max-width:720px; margin:0 auto; padding:0; }
+
+    /* ---- bonuses: auto-height iframe inside the scrolling workspace ---- */
+    #view-bonuses{ max-width:960px; margin:0 auto; }
+    #bonusesFrame{ height:auto; min-height:70vh; border:1px solid var(--line); border-radius:16px; }
+
+    .sum-modal{ max-width:640px; }
+    .app-footer{ max-width:960px; margin:24px auto 0; }
+  }
+
   /* print: isolate the Protocol Card to a clean light page */
   @media print{
     body.printing-pc{ background:#fff; }
     body.printing-pc .top, body.printing-pc .install, body.printing-pc #authGate, body.printing-pc .app-footer,
     body.printing-pc .view:not(#view-protocol), body.printing-pc .pc-tips,
-    body.printing-pc .pc-actions, body.printing-pc .pc-demo{ display:none !important; }
-    body.printing-pc .app{ background:#fff; }
+    body.printing-pc .pc-actions, body.printing-pc .pc-demo, body.printing-pc .side{ display:none !important; }
+    body.printing-pc .app{ background:#fff; display:block; }
     body.printing-pc .pc-head h2, body.printing-pc .pc-head p{ color:#000; }
     body.printing-pc .pc-line{ border:1px solid #999; break-inside:avoid; margin-bottom:8px; }
     body.printing-pc .pc-ln{ background:none; border:1px solid #999; color:#000; }
@@ -378,6 +514,34 @@
 </head>
 <body>
 <div class="app">
+
+  <!-- ===== DESKTOP SIDEBAR (hidden under 860px; mobile keeps the top tab bar) ===== -->
+  <aside class="side">
+    <button class="side-collapse" id="sideCollapse" title="Collapse sidebar" aria-label="Collapse sidebar">&laquo;</button>
+    <div class="brand">The <span class="accent">ZeroFog</span></div>
+    <div class="brand-sub">Member App <span class="beta">Beta</span></div>
+    <nav class="snav">
+      <div class="navi on" data-view="diary" title="Sleep Diary"><svg viewBox="0 0 24 24"><path d="M3 4h18v16H3z"/><path d="M3 9h18"/><path d="M8 3v4"/></svg> <span class="nlb">Sleep Diary</span></div>
+      <div class="navi" data-view="assessment" title="Assessment"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> <span class="nlb">Assessment</span></div>
+      <div class="navi" data-view="protocol" title="Protocol Card"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg> <span class="nlb">Protocol Card</span></div>
+      <div class="navi" data-view="assistant" title="Sleep Assistant"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> <span class="nlb">Sleep Assistant</span> <span class="soon">Soon</span></div>
+      <div class="nav-div"></div>
+      <div class="navi bonus" data-view="bonuses" title="Bonuses"><svg viewBox="0 0 24 24"><path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3-5 3 1.5-6.2L4 9l5.8-.4z"/></svg> <span class="nlb">Bonuses</span> <span class="chev">&#9662;</span></div>
+      <div class="subnav" id="bonusSub">
+        <div class="subi" data-guide="caffeine">Caffeine Blueprint</div>
+        <div class="subi" data-guide="bedroom">Recovery Protocol</div>
+        <div class="subi" data-guide="mistakes">9 Recovery Mistakes</div>
+      </div>
+    </nav>
+    <div class="grow"></div>
+    <div class="acct-side"><div class="ava" id="sideAva"></div><div class="em"><b>Member</b><span id="acctEmail2"></span></div></div>
+    <div class="side-foot">
+      <button class="theme-toggle" id="themeToggle2" title="Switch light / dark" aria-label="Switch theme"><span class="ic">&#9788;</span><span class="lb">Light mode</span></button>
+      <button class="signout" id="signOut2">Sign out</button>
+    </div>
+  </aside>
+
+  <div class="mainwrap">
 
   <div class="top">
     <div class="barrow">
@@ -407,13 +571,16 @@
   <!-- ============ DIARY VIEW ============ -->
   <div class="view on" id="view-diary">
     <div class="body">
-      <div class="dpick">
-        <div class="nav">
-          <button id="prev">‹</button>
-          <div class="d" id="dlabel">Today</div>
-          <button id="next">›</button>
+      <div class="dhead">
+        <div class="dh-t"><div class="crumb">Sleep Diary</div><h1>Last night</h1></div>
+        <div class="dpick">
+          <div class="nav">
+            <button id="prev">‹</button>
+            <div class="d" id="dlabel">Today</div>
+            <button id="next">›</button>
+          </div>
+          <button class="sumbtn" id="openSummary">📊 Summary</button>
         </div>
-        <button class="sumbtn" id="openSummary">📊 Summary</button>
       </div>
 
       <div class="diary-grid">
@@ -492,10 +659,11 @@
       <div class="live">
         <div class="se-top">
           <div><div class="se-lab">Sleep efficiency</div><div class="se-num" id="seNum">--<span>%</span></div></div>
-          <div style="text-align:right"><div class="se-sub" id="seTib">time in bed --</div><div class="se-sub" id="seTst">slept --</div></div>
+          <div class="se-side"><div class="se-sub" id="seTib">time in bed --</div><div class="se-sub" id="seTst">slept --</div></div>
         </div>
         <div class="se-bar"><div class="se-fill" id="seFill"></div></div>
         <div class="se-sub" id="seMsg" style="margin-top:9px"></div>
+        <button class="breaklink" id="openSummary2">📊 See my breakdown</button>
       </div>
       <div class="savewrap"><button class="save" id="save">Save today's entry</button></div>
       </aside>
@@ -560,6 +728,27 @@
     </div>
   </div>
 
+  <!-- ============ SLEEP ASSISTANT VIEW (static preview; desktop sidebar only) ============ -->
+  <div class="view" id="view-assistant">
+    <div class="asst-wrap">
+      <div class="asst-hero">
+        <div class="asst-badge">&#10022; In development</div>
+        <h2>Meet your <span class="a">Sleep Assistant</span></h2>
+        <p>Not a generic chatbot. It's built on the course itself, on peer-reviewed sleep research, and on the clinical method the whole program follows - so the advice is real, not autocomplete. Ask it anything about your nights and it answers in plain language.</p>
+        <div class="asst-trust"><span>&#10003; Trained on the ZeroFog course</span><span>&#10003; Grounded in clinical research</span><span>&#128274; Private to you</span></div>
+      </div>
+      <div class="chat">
+        <div class="msg user">Why do I crash so hard 3-4 hours after I wake up?</div>
+        <div class="msg bot"><div class="bot-ic">&#10022;</div><div>Two things in your data line up with that mid-morning crash: your wake-up time has been drifting by ~90 min day to day, and there's little daylight in your first hour. Both keep your body clock from fully switching on. Want the 2-minute morning fix from Week 1?</div></div>
+        <div class="msg user">Yeah. And why did I wake up feeling unrested today?</div>
+        <div class="msg bot"><div class="bot-ic">&#10022;</div><div>Last night you logged a drink with dinner. Alcohol helps you fall asleep fast but cuts the deep, restorative stage in the second half - that's the "slept 8 hours, feel like 5" pattern. The Week 3 lesson has tonight's plan.</div></div>
+      </div>
+      <div class="chat-input"><input placeholder="Ask your assistant anything…" disabled><button disabled>Send</button></div>
+      <div class="asst-privacy">&#128274; <b>Private to you.</b> Your diary, assessment and conversations stay tied to your account - they're never shared, sold, or read by the ZeroFog team. The assistant uses them only to answer you.</div>
+      <div class="asst-note">Preview only - your assistant becomes available to members after launch.</div>
+    </div>
+  </div>
+
   <!-- ============ BONUSES VIEW (same-origin embed of /webinar-bonuses/) ============ -->
   <div class="view" id="view-bonuses">
     <iframe id="bonusesFrame" title="Your bonuses" loading="lazy"></iframe>
@@ -573,6 +762,8 @@
     <a href="/refunds/">Refunds</a> &middot;
     <a href="/disclaimer/">Disclaimer</a></p>
   </footer>
+
+  </div><!-- /mainwrap -->
 
 </div>
 
@@ -843,6 +1034,12 @@ function unlock(email){
   gate.classList.remove('show');
   $('acct').style.visibility = 'visible';
   $('acctEmail').textContent = email;
+  const em2=$('acctEmail2');
+  if(em2){
+    em2.textContent = email;
+    const ac=document.querySelector('.acct-side'); if(ac) ac.style.visibility='visible';
+    const av=$('sideAva'); if(av) av.textContent = (email||'?').charAt(0).toUpperCase();
+  }
   diaryInit();
   assessInit();
   protocolInit();
@@ -891,6 +1088,9 @@ $('backToEmail').addEventListener('click', () => {
 $('signOut').addEventListener('click', async () => {
   await DB.signOut(); location.reload();
 });
+$('signOut2').addEventListener('click', async () => {
+  await DB.signOut(); location.reload();
+});
 $('lockedSignOut').addEventListener('click', async () => {
   await DB.signOut(); location.reload();
 });
@@ -908,27 +1108,102 @@ $('deleteData').addEventListener('click', async () => {
   }
 });
 
-/* ============ TABS ============ */
-/* Bonuses view: lock the shell scroll and give the iframe the exact remaining viewport,
-   so the only scrollable surface is the bonus content itself (fixes iOS double-scroll). */
+/* ============ TABS / SIDEBAR NAV ============ */
+/* One switcher drives both the mobile top tabs and the desktop sidebar.
+   Bonuses runs in two modes:
+   - mobile  (<860px): ?embed=1  - shell scroll locked, iframe sized to the visible
+     viewport so the only scrollable surface is the bonus content (iOS double-scroll fix).
+   - desktop (>=860px): ?embed=1&nav=1 - the embed hides its own toolbar (the sidebar
+     subnav takes over), posts zfBonusH and the iframe grows to full content height. */
+function deskMode(){ return window.matchMedia('(min-width:860px)').matches; }
+let bonusesMode=null, bonusesStale=false, pendGuide=null;
+function loadBonuses(){
+  const f=$('bonusesFrame'); if(!f) return;
+  bonusesMode = deskMode() ? 'desk' : 'mob';
+  bonusesStale = false;
+  f.style.height='';
+  f.src='/webinar-bonuses/?embed=1'+(bonusesMode==='desk'?'&nav=1':'')+'&theme='+theme+'&t='+Date.now();
+}
 function sizeBonusesFrame(){
   const f=$('bonusesFrame');
   if(!f || !document.body.classList.contains('bonus-lock')) return;
   f.style.height = Math.max(200, window.innerHeight - f.getBoundingClientRect().top) + 'px';
 }
-window.addEventListener('resize', sizeBonusesFrame);
-document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+function switchView(name){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on', x.dataset.view===name));
+  document.querySelectorAll('.navi[data-view]').forEach(x=>x.classList.toggle('on', x.dataset.view===name));
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
-  t.classList.add('on');
-  $('view-'+t.dataset.view).classList.add('on');
-  const bonuses = t.dataset.view==='bonuses';
-  if(bonuses){ const f=$('bonusesFrame'); if(f && !f.src) f.src='/webinar-bonuses/?embed=1&theme='+theme; }
-  document.documentElement.classList.toggle('bonus-lock', bonuses);
-  document.body.classList.toggle('bonus-lock', bonuses);
+  const v=$('view-'+name); if(v) v.classList.add('on');
+  const bonuses = name==='bonuses';
+  if(bonuses){
+    const f=$('bonusesFrame'), want=deskMode()?'desk':'mob';
+    if(f && (!f.src || bonusesStale || bonusesMode!==want)) loadBonuses();
+  } else {
+    const sn=$('bonusSub'); if(sn) sn.classList.remove('open');
+    const bt=document.querySelector('.navi.bonus'); if(bt) bt.classList.remove('expanded');
+  }
+  const lock = bonuses && !deskMode();
+  document.documentElement.classList.toggle('bonus-lock', lock);
+  document.body.classList.toggle('bonus-lock', lock);
   window.scrollTo(0,0);
-  if(bonuses) sizeBonusesFrame();
+  if(lock) sizeBonusesFrame();
+}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click', ()=>switchView(t.dataset.view)));
+document.querySelectorAll('.navi[data-view]').forEach(n=>n.addEventListener('click', ()=>{
+  switchView(n.dataset.view);
+  if(n.dataset.view==='bonuses'){ const sn=$('bonusSub'); if(sn) sn.classList.add('open'); n.classList.add('expanded'); }
 }));
+/* sidebar subnav: drive the guide switcher inside the (same-origin) bonuses embed */
+function bframeGuide(g){
+  pendGuide=g;
+  try{
+    const btn=$('bonusesFrame').contentDocument.querySelector('.swtab[data-g="'+g+'"]');
+    if(btn){ btn.click(); pendGuide=null; }
+  }catch(e){}
+}
+document.querySelectorAll('.subi').forEach(s=>s.addEventListener('click', ()=>{
+  document.querySelectorAll('.subi').forEach(x=>x.classList.remove('on')); s.classList.add('on');
+  switchView('bonuses');
+  const sn=$('bonusSub'); if(sn) sn.classList.add('open');
+  const bt=document.querySelector('.navi.bonus'); if(bt){ bt.classList.add('expanded'); bt.classList.add('on'); }
+  bframeGuide(s.dataset.guide);
+}));
+$('bonusesFrame').addEventListener('load', ()=>{
+  if(!pendGuide) return;
+  const g=pendGuide;
+  setTimeout(()=>{ try{ const btn=$('bonusesFrame').contentDocument.querySelector('.swtab[data-g="'+g+'"]'); if(btn) btn.click(); }catch(e){} pendGuide=null; },80);
+});
+/* desktop embed posts its content height (embed-nav mode) */
+window.addEventListener('message', e=>{
+  const d=e.data;
+  if(d && d.zfBonusH>60 && bonusesMode==='desk'){ const f=$('bonusesFrame'); if(f) f.style.height=(d.zfBonusH+28)+'px'; }
+});
+/* resize across the 860px breakpoint while Bonuses is open: reload in the right mode */
+window.addEventListener('resize', ()=>{
+  sizeBonusesFrame();
+  const vb=$('view-bonuses');
+  if(vb && vb.classList.contains('on') && bonusesMode){
+    const want=deskMode()?'desk':'mob';
+    if(bonusesMode!==want){
+      loadBonuses();
+      const lock = want==='mob';
+      document.documentElement.classList.toggle('bonus-lock', lock);
+      document.body.classList.toggle('bonus-lock', lock);
+      if(lock) sizeBonusesFrame();
+    }
+  }
+});
+/* ============ DESKTOP SIDEBAR: collapse ============ */
+const appShell=document.querySelector('.app');
+function setSideCollapsed(on){
+  appShell.classList.toggle('collapsed', on);
+  const b=$('sideCollapse'); if(!b) return;
+  b.innerHTML = on ? '&raquo;' : '&laquo;';
+  b.title = on ? 'Expand sidebar' : 'Collapse sidebar';
+  try{ localStorage.setItem('zf_sidebar', on?'collapsed':'open'); }catch(e){}
+}
+$('sideCollapse').addEventListener('click', ()=>setSideCollapsed(!appShell.classList.contains('collapsed')));
+try{ if(localStorage.getItem('zf_sidebar')==='collapsed') setSideCollapsed(true); }catch(e){}
 
 /* caffFmt: shared time formatter (also used by the diary/assessment diagnostic) */
 function caffFmt(mins){ mins=((mins%1440)+1440)%1440; let hh=Math.floor(mins/60), mm=mins%60; const ap=hh<12?'AM':'PM'; let h12=hh%12; if(h12===0)h12=12; return h12+':'+String(mm).padStart(2,'0')+' '+ap; }
@@ -1057,6 +1332,7 @@ $('next').addEventListener('click',()=>{ const t=new Date(); t.setHours(0,0,0,0)
 const sumOverlay = $('summaryOverlay');
 let sumRange = '7';
 $('openSummary').addEventListener('click', ()=>{ sumOverlay.classList.add('show'); renderSummary(); });
+$('openSummary2').addEventListener('click', ()=>{ sumOverlay.classList.add('show'); renderSummary(); });
 $('closeSummary').addEventListener('click', ()=>{ sumOverlay.classList.remove('show'); });
 sumOverlay.addEventListener('click', e=>{ if(e.target===sumOverlay) sumOverlay.classList.remove('show'); });
 document.querySelectorAll('.preset').forEach(p=>p.addEventListener('click', ()=>{
@@ -1321,17 +1597,32 @@ $('installX').addEventListener('click', ()=>{ $('install').classList.remove('sho
 function applyTheme(t){
   document.body.classList.toggle('light', t==='light');
   $('themeToggle').textContent = t==='light' ? '☀' : '☾';
+  const t2=$('themeToggle2');
+  if(t2){
+    /* sidebar button shows the mode you'd switch TO (variant-A behavior) */
+    t2.querySelector('.ic').textContent = t==='light' ? '☾' : '☀';
+    t2.querySelector('.lb').textContent = t==='light' ? 'Dark mode' : 'Light mode';
+  }
   const m = document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute('content', t==='light' ? '#f3f3f6' : '#0d0d0d');
 }
 /* default matches the rest of the site: saved choice first, else OS preference.
    Keeps the first-ever open in sync with the embedded bonuses page. */
 let theme = (()=>{ try{ return localStorage.getItem('zf_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark'); }catch(e){ return 'dark'; } })();
 applyTheme(theme);
-$('themeToggle').addEventListener('click', ()=>{
+function toggleTheme(){
   theme = theme==='light' ? 'dark' : 'light';
   try{ localStorage.setItem('zf_theme', theme); }catch(e){}
   applyTheme(theme);
-});
+  /* the bonuses embed reads ?theme= at load - reload it now if visible, else on next open */
+  const f=$('bonusesFrame');
+  if(f && f.src){
+    bonusesStale = true;
+    const vb=$('view-bonuses');
+    if(vb && vb.classList.contains('on')) loadBonuses();
+  }
+}
+$('themeToggle').addEventListener('click', toggleTheme);
+$('themeToggle2').addEventListener('click', toggleTheme);
 
 /* ============ PROTOCOL CARD ============ */
 let pcBuilt = false;
