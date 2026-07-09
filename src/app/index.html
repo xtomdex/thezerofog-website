@@ -1344,14 +1344,14 @@ document.querySelectorAll('.preset').forEach(p=>p.addEventListener('click', ()=>
 ['rangeFrom','rangeTo'].forEach(id=>$(id).addEventListener('change', renderSummary));
 
 /* ---- Diagnostic: surface the biggest fixable lever, ranked by course order ----
-   Titles are the final, locked lesson names. url stays '' until lesson URLs are
-   collected from Systeme; lessonRef renders plain text until then (placeholder). */
+   Titles are the final, locked lesson names. URLs point to the Systeme lectures
+   (course.thezerofog.com); students hit the course login if not signed in. */
 const LESSONS = {
-  wake:  { n:'1.1', title:'The One Change That Fixes Everything Else', url:'' },
-  caff:  { n:'2.1', title:'Why Your Third Coffee Stopped Working',     url:'' },
-  alc:   { n:'3.1', title:"Why Your Last Meal Decides Tomorrow's Morning", url:'' },
-  bed:   { n:'4.1', title:'Your Bed Has One Job', url:'' },
-  night: { n:'4.2', title:"The Night Protocol: If You Wake Up or Can't Fall Asleep", url:'' },
+  wake:  { n:'1.1', title:'The One Change That Fixes Everything Else', url:'https://course.thezerofog.com/school/course/tzf-main/lecture/10243034' },
+  caff:  { n:'2.1', title:'Why Your Third Coffee Stopped Working',     url:'https://course.thezerofog.com/school/course/tzf-main/lecture/10243074' },
+  alc:   { n:'3.1', title:"Why Your Last Meal Decides Tomorrow's Morning", url:'https://course.thezerofog.com/school/course/tzf-main/lecture/10243078' },
+  bed:   { n:'4.1', title:'Your Bed Has One Job', url:'https://course.thezerofog.com/school/course/tzf-main/lecture/10243081' },
+  night: { n:'4.2', title:"The Night Protocol: If You Wake Up or Can't Fall Asleep", url:'https://course.thezerofog.com/school/course/tzf-main/lecture/10243083' },
 };
 function lessonRef(L, cls, full){
   const label = full ? ('Lesson '+L.n+' · '+L.title) : ('Lesson '+L.n);
