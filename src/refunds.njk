@@ -1,12 +1,12 @@
 ---
-title: "Refund Policy — The Zero Fog"
+title: "Refund Policy - The Zero Fog"
 permalink: /refunds/
 canonical: "https://thezerofog.com/refunds/"
 ---
 {% extends "layouts/base.njk" %}
 
 {% block head_extras %}
-<meta name="description" content="Refund Policy for The Zero Fog — 30-day conditional money-back guarantee, eligibility, and how to request a refund.">
+<meta name="description" content="Refund Policy for The Zero Fog - 30-day conditional money-back guarantee, eligibility, and how to request a refund.">
 {% endblock %}
 
 {% block page_css %}
@@ -23,7 +23,7 @@ canonical: "https://thezerofog.com/refunds/"
   <h1>Refund Policy</h1>
 
   <div class="legal-meta">
-    <p><strong>The ZeroFog</strong></p>
+    <p><strong>The Zero Fog</strong></p>
     <p>Website: {{ site.domain }}</p>
     <p>Effective Date: 2026-04-28</p>
     <p>Last Updated: 2026-04-28</p>
@@ -57,9 +57,9 @@ canonical: "https://thezerofog.com/refunds/"
   <h2>3. How to Request a Refund</h2>
   <p>To initiate a refund request:</p>
   <ol>
-    <li>Send an email to <a href="mailto:{{ site.email.refunds }}">{{ site.email.refunds }}</a> with the subject line "Refund Request — [Your Name]"</li>
+    <li>Send an email to <a href="mailto:{{ site.email.refunds }}">{{ site.email.refunds }}</a> with the subject line "Refund Request - [Your Name]"</li>
     <li>Include your full name and the email address used for purchase</li>
-    <li>Include your order number or Paddle transaction ID</li>
+    <li>Include your order number or the Stripe receipt number from your purchase confirmation email</li>
     <li>Attach your proof of implementation as described in Section 2.3</li>
     <li>Briefly describe what you found was not working or where you encountered difficulties</li>
   </ol>
@@ -73,7 +73,8 @@ canonical: "https://thezerofog.com/refunds/"
   <p>Upon receiving your refund request with all required documentation, our team will review your submission within <strong>5 business days</strong>. We may contact you for clarification or to offer additional support before processing the refund.</p>
 
   <h3>5.2 Approval and Processing</h3>
-  <p>If your refund request meets all eligibility criteria, we will initiate a full refund of the amount you paid. Because Paddle acts as the Merchant of Record, refunds are processed by Paddle in accordance with their procedures. The refund will be issued to the original payment method used for purchase. Processing times may vary depending on Paddle's processes and your payment provider (typically 5–10 business days).</p>
+  <!-- DIMA: Paddle -> Stripe (мы продавец, рефанды инициируем сами через Stripe). -->
+  <p>If your refund request meets all eligibility criteria, we will initiate a full refund of the amount you paid. Refunds are processed through Stripe, our payment processor, and issued to the original payment method used for purchase. Processing times may vary depending on your bank or payment provider (typically 5-10 business days).</p>
 
   <h2>6. What Happens After a Refund</h2>
   <p>Upon approval and processing of a refund:</p>
@@ -94,7 +95,7 @@ canonical: "https://thezerofog.com/refunds/"
 
   <h2>8. Disputes and Chargebacks</h2>
   <p>We strongly encourage you to contact us directly before initiating a chargeback or dispute with your bank or payment provider. We are committed to resolving issues fairly and promptly. Initiating a chargeback without first contacting us may result in permanent suspension from all of our Services.</p>
-  <p>Please note that because Paddle is the Merchant of Record, chargeback disputes are handled between your bank and Paddle. We cooperate fully with Paddle in resolving any such disputes.</p>
+  <p>Please note that chargeback disputes are handled through your bank and our payment processor (Stripe). We respond to and cooperate fully in resolving any such disputes.</p>
 
   <h2>9. Our Commitment</h2>
   <p>If your refund request is denied because the proof of implementation requirements were not met, but you are willing to continue the program, we may at our discretion extend your refund eligibility window by an additional 15 days to allow you more time to complete the required steps. This is offered as a good-faith effort to support your success.</p>
@@ -105,7 +106,7 @@ canonical: "https://thezerofog.com/refunds/"
     <strong>Email:</strong> <a href="mailto:{{ site.email.refunds }}">{{ site.email.refunds }}</a><br>
     <strong>Response time:</strong> We aim to respond to all refund-related inquiries within 2 business days.
   </p>
-  <p>For billing or payment method questions, you may also contact Paddle directly at <a href="https://www.paddle.com/support">https://www.paddle.com/support</a>.</p>
+  <p>For billing or payment method questions, contact us at <a href="mailto:{{ site.email.refunds }}">{{ site.email.refunds }}</a> - payment processing is handled by Stripe, but all customer support goes through us.</p>
 
 </article>
 

@@ -1,4 +1,4 @@
-/* The ZeroFog app - minimal offline shell cache */
+/* The Zero Fog app - minimal offline shell cache */
 const CACHE = 'zf-app-v1';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 

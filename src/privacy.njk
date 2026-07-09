@@ -1,12 +1,12 @@
 ---
-title: "Privacy Policy — The Zero Fog"
+title: "Privacy Policy - The Zero Fog"
 permalink: /privacy/
 canonical: "https://thezerofog.com/privacy/"
 ---
 {% extends "layouts/base.njk" %}
 
 {% block head_extras %}
-<meta name="description" content="Privacy Policy for The Zero Fog — how we collect, use, and protect your personal data.">
+<meta name="description" content="Privacy Policy for The Zero Fog - how we collect, use, and protect your personal data.">
 {% endblock %}
 
 {% block page_css %}
@@ -23,7 +23,7 @@ canonical: "https://thezerofog.com/privacy/"
   <h1>Privacy Policy</h1>
 
   <div class="legal-meta">
-    <p><strong>The ZeroFog</strong></p>
+    <p><strong>The Zero Fog</strong></p>
     <p>Website: {{ site.domain }}</p>
     <p>Effective Date: 2026-04-28</p>
     <p>Last Updated: 2026-04-28</p>
@@ -46,61 +46,62 @@ canonical: "https://thezerofog.com/privacy/"
 
   <h3>3.1 Data You Provide Directly</h3>
   <ul>
-    <li><strong>Email address</strong> — when you register for a webinar or subscribe to our newsletter through the Site</li>
-    <li><strong>Name</strong> — if you voluntarily provide it during webinar registration or within the webinar platform (EverWebinar)</li>
-    <li><strong>Name and email address</strong> — when you purchase the Course or create an account on Systeme.io</li>
-    <li><strong>Payment information</strong> — processed exclusively by Paddle as the Merchant of Record; we do not receive or store your credit card number, bank details, or other payment credentials</li>
-    <li><strong>Support communications</strong> — emails, messages, or other correspondence you send to us</li>
-    <li><strong>Refund request data</strong> — documentation you submit in connection with a refund request, such as screenshots or photographs of your Sleep Diary</li>
+    <li><strong>Email address</strong> - when you register for a webinar or subscribe to our newsletter through the Site</li>
+    <li><strong>Name</strong> - if you voluntarily provide it during webinar registration or within the webinar platform (EverWebinar)</li>
+    <li><strong>Name and email address</strong> - when you purchase the Course or create an account on Systeme.io</li>
+    <li><strong>Payment information</strong> - processed exclusively by Stripe, our payment processor; we do not receive or store your credit card number, bank details, or other payment credentials</li>
+    <li><strong>Support communications</strong> - emails, messages, or other correspondence you send to us</li>
+    <li><strong>Refund request data</strong> - documentation you submit in connection with a refund request, such as screenshots or photographs of your Sleep Diary</li>
   </ul>
 
   <h3>3.2 Data Collected Automatically</h3>
   <ul>
-    <li><strong>Device and browser information</strong> — IP address, browser type and version, operating system, device type</li>
-    <li><strong>Usage data</strong> — pages visited, time on page, click patterns, referring URL, exit pages</li>
-    <li><strong>Cookies and similar technologies</strong> — see Section 9 (Cookie Policy) below</li>
-    <li><strong>Advertising data</strong> — data collected by advertising platforms (Meta Pixel, Google Ads) when you interact with our ads or visit our Site after clicking an ad</li>
-    <li><strong>Lead tracking identifiers</strong> — we may assign a unique identifier to track your journey through our marketing funnel (from webinar registration through purchase) for the purposes of analytics and service improvement. This identifier is linked to your email address and is not shared with third parties beyond those listed in Section 6.</li>
+    <li><strong>Device and browser information</strong> - IP address, browser type and version, operating system, device type</li>
+    <li><strong>Usage data</strong> - pages visited, time on page, click patterns, referring URL, exit pages</li>
+    <li><strong>Cookies and similar technologies</strong> - see Section 9 (Cookie Policy) below</li>
+    <li><strong>Advertising data</strong> - data collected by advertising platforms (Meta Pixel, Google Ads) when you interact with our ads or visit our Site after clicking an ad</li>
+    <li><strong>Lead tracking identifiers</strong> - we may assign a unique identifier to track your journey through our marketing funnel (from webinar registration through purchase) for the purposes of analytics and service improvement. This identifier is linked to your email address and is not shared with third parties beyond those listed in Section 6.</li>
   </ul>
 
   <h3>3.3 Data from Third Parties</h3>
   <ul>
-    <li><strong>Payment data from Paddle</strong> — transaction confirmation, purchase amount, payment status, and country of purchase. Paddle acts as an independent data controller for payment data; see Paddle's Privacy Policy at <a href="https://www.paddle.com/legal/privacy">https://www.paddle.com/legal/privacy</a></li>
-    <li><strong>Advertising platforms</strong> — aggregated and anonymized campaign performance data from Meta and Google</li>
+    <!-- DIMA: Paddle -> Stripe по всему документу (реальный чекаут = Stripe). Проверь controller-формулировку. -->
+    <li><strong>Payment data from Stripe</strong> - transaction confirmation, purchase amount, payment status, and country of purchase. Stripe acts as an independent data controller for certain payment data it processes; see Stripe's Privacy Policy at <a href="https://stripe.com/privacy">https://stripe.com/privacy</a></li>
+    <li><strong>Advertising platforms</strong> - aggregated and anonymized campaign performance data from Meta and Google</li>
   </ul>
 
   <h2>4. How We Use Your Data</h2>
   <p>We use your personal data for the following purposes:</p>
   <ul>
-    <li><strong>To deliver the Services</strong> — register you for webinars (via EverWebinar), process your purchase (via Paddle), provide Course access (via Systeme.io), and send webinar links and reminders (via MailerLite)</li>
-    <li><strong>To communicate with you</strong> — send transactional emails (purchase confirmations, access credentials), webinar-related emails, and newsletter content you opted in to receive, all delivered through MailerLite</li>
-    <li><strong>To process refunds</strong> — evaluate refund requests according to our Refund Policy</li>
-    <li><strong>To improve our Services</strong> — analyze usage patterns, optimize the Site and Course content, conduct A/B testing, and analyze funnel performance using lead tracking identifiers</li>
-    <li><strong>To run advertising</strong> — use cookies and pixels for ad targeting, retargeting, conversion tracking, and audience building on Meta and Google platforms</li>
-    <li><strong>To comply with legal obligations</strong> — tax reporting, fraud prevention, responding to lawful requests</li>
-    <li><strong>To protect our rights</strong> — enforce our Terms of Service, prevent unauthorized access, protect intellectual property</li>
+    <li><strong>To deliver the Services</strong> - register you for webinars (via EverWebinar), process your purchase (via Stripe), provide Course access (via Systeme.io), and send webinar links and reminders (via MailerLite)</li>
+    <li><strong>To communicate with you</strong> - send transactional emails (purchase confirmations, access credentials), webinar-related emails, and newsletter content you opted in to receive, all delivered through MailerLite</li>
+    <li><strong>To process refunds</strong> - evaluate refund requests according to our Refund Policy</li>
+    <li><strong>To improve our Services</strong> - analyze usage patterns, optimize the Site and Course content, conduct A/B testing, and analyze funnel performance using lead tracking identifiers</li>
+    <li><strong>To run advertising</strong> - use cookies and pixels for ad targeting, retargeting, conversion tracking, and audience building on Meta and Google platforms</li>
+    <li><strong>To comply with legal obligations</strong> - tax reporting, fraud prevention, responding to lawful requests</li>
+    <li><strong>To protect our rights</strong> - enforce our Terms of Service, prevent unauthorized access, protect intellectual property</li>
   </ul>
 
   <h2>5. Legal Basis for Processing (GDPR)</h2>
   <p>Under GDPR, we process your personal data based on the following legal grounds:</p>
   <ul>
-    <li><strong>Contract performance</strong> (Art. 6(1)(b)) — processing necessary to deliver the webinar you registered for, the Course you purchased, provide account access, and communicate about your order</li>
-    <li><strong>Consent</strong> (Art. 6(1)(a)) — when you opt in to our newsletter or register for a webinar, you consent to receive email communications from us</li>
-    <li><strong>Legitimate interests</strong> (Art. 6(1)(f)) — website analytics, advertising (cookies and pixels), lead tracking, fraud prevention, service improvement, and direct marketing to existing customers (with opt-out)</li>
-    <li><strong>Legal obligation</strong> (Art. 6(1)(c)) — tax and financial reporting requirements</li>
+    <li><strong>Contract performance</strong> (Art. 6(1)(b)) - processing necessary to deliver the webinar you registered for, the Course you purchased, provide account access, and communicate about your order</li>
+    <li><strong>Consent</strong> (Art. 6(1)(a)) - when you opt in to our newsletter or register for a webinar, you consent to receive email communications from us</li>
+    <li><strong>Legitimate interests</strong> (Art. 6(1)(f)) - website analytics, advertising (cookies and pixels), lead tracking, fraud prevention, service improvement, and direct marketing to existing customers (with opt-out)</li>
+    <li><strong>Legal obligation</strong> (Art. 6(1)(c)) - tax and financial reporting requirements</li>
   </ul>
   <p>You may withdraw consent at any time without affecting the lawfulness of processing based on consent before its withdrawal.</p>
 
   <h2>6. Data Sharing and Disclosure</h2>
   <p>We do not sell your personal data to third parties. We may share your data with the following service providers, each acting as a data processor (unless otherwise noted):</p>
   <ul>
-    <li><strong>Paddle.com Market Ltd</strong> (Merchant of Record) — processes payments, collects taxes, issues invoices. Paddle acts as an <strong>independent data controller</strong> for payment transaction data. Paddle's Privacy Policy: <a href="https://www.paddle.com/legal/privacy">https://www.paddle.com/legal/privacy</a></li>
-    <li><strong>Systeme.io</strong> — hosts and delivers the Course content, manages student accounts and course progress. Systeme.io Terms: <a href="https://systeme.io/terms-and-conditions">https://systeme.io/terms-and-conditions</a></li>
-    <li><strong>MailerLite</strong> — manages our email marketing subscriber list and delivers email communications to our subscribers. MailerLite is a third-party provider which may process your data using industry standard technologies to help us monitor and improve our communications. MailerLite's Privacy Policy: <a href="https://www.mailerlite.com/legal/privacy-policy">https://www.mailerlite.com/legal/privacy-policy</a>. You can unsubscribe from our emails by clicking the unsubscribe link provided at the end of each message.</li>
-    <li><strong>EverWebinar</strong> (WebinarJam / Genesis Digital LLC) — hosts webinar presentations. Receives your email address (and name, if voluntarily provided) for webinar access and delivery.</li>
-    <li><strong>Google Analytics</strong> — website analytics. Data is collected in aggregated form.</li>
-    <li><strong>Meta (Facebook) and Google Ads</strong> — advertising platforms for ad delivery and performance measurement via pixels/tags</li>
-    <li><strong>Legal authorities</strong> — when required by law, court order, or to protect our legal rights</li>
+    <li><strong>Stripe</strong> (payment processor) - processes payments and issues receipts on our behalf. Stripe acts as an <strong>independent data controller</strong> for certain payment transaction data. Stripe's Privacy Policy: <a href="https://stripe.com/privacy">https://stripe.com/privacy</a></li>
+    <li><strong>Systeme.io</strong> - hosts and delivers the Course content, manages student accounts and course progress. Systeme.io Terms: <a href="https://systeme.io/terms-and-conditions">https://systeme.io/terms-and-conditions</a></li>
+    <li><strong>MailerLite</strong> - manages our email marketing subscriber list and delivers email communications to our subscribers. MailerLite is a third-party provider which may process your data using industry standard technologies to help us monitor and improve our communications. MailerLite's Privacy Policy: <a href="https://www.mailerlite.com/legal/privacy-policy">https://www.mailerlite.com/legal/privacy-policy</a>. You can unsubscribe from our emails by clicking the unsubscribe link provided at the end of each message.</li>
+    <li><strong>EverWebinar</strong> (WebinarJam / Genesis Digital LLC) - hosts webinar presentations. Receives your email address (and name, if voluntarily provided) for webinar access and delivery.</li>
+    <li><strong>Google Analytics</strong> - website analytics. Data is collected in aggregated form.</li>
+    <li><strong>Meta (Facebook) and Google Ads</strong> - advertising platforms for ad delivery and performance measurement via pixels/tags</li>
+    <li><strong>Legal authorities</strong> - when required by law, court order, or to protect our legal rights</li>
   </ul>
   <p>All third-party service providers are contractually obligated to process your data only as necessary to provide their services and in compliance with applicable data protection laws.</p>
 
@@ -116,13 +117,13 @@ canonical: "https://thezerofog.com/privacy/"
   <h2>8. Data Retention</h2>
   <p>We retain your personal data only for as long as necessary to fulfill the purposes for which it was collected:</p>
   <ul>
-    <li><strong>Account and Course data (on Systeme.io)</strong> — for the duration of your account plus 3 years, or as required by law</li>
-    <li><strong>Email subscriber data (in MailerLite)</strong> — until you unsubscribe, plus up to 30 days for processing</li>
-    <li><strong>Transaction records (from Paddle)</strong> — as required by applicable tax and commercial law (typically 5–10 years in the EU)</li>
-    <li><strong>Refund documentation</strong> — for 1 year after refund resolution</li>
-    <li><strong>Lead tracking data</strong> — for the duration of your engagement with the funnel plus 12 months</li>
-    <li><strong>Analytics data</strong> — in aggregated/anonymized form, retained indefinitely</li>
-    <li><strong>Advertising audience data</strong> — managed by Meta and Google per their respective policies</li>
+    <li><strong>Account and Course data (on Systeme.io)</strong> - for the duration of your account plus 3 years, or as required by law</li>
+    <li><strong>Email subscriber data (in MailerLite)</strong> - until you unsubscribe, plus up to 30 days for processing</li>
+    <li><strong>Transaction records (from Stripe)</strong> - as required by applicable tax and commercial law (typically 5-10 years in the EU)</li>
+    <li><strong>Refund documentation</strong> - for 1 year after refund resolution</li>
+    <li><strong>Lead tracking data</strong> - for the duration of your engagement with the funnel plus 12 months</li>
+    <li><strong>Analytics data</strong> - in aggregated/anonymized form, retained indefinitely</li>
+    <li><strong>Advertising audience data</strong> - managed by Meta and Google per their respective policies</li>
   </ul>
 
   <h2>9. Cookie Policy</h2>
@@ -131,9 +132,9 @@ canonical: "https://thezerofog.com/privacy/"
   <p>Cookies are small text files placed on your device when you visit a website. They help the site function, improve user experience, and provide information to website operators.</p>
 
   <h3>9.2 Cookies We Use</h3>
-  <p><strong>Strictly Necessary Cookies</strong> — Essential for the Site to function. These include session cookies, security cookies, and load-balancing cookies. They cannot be disabled.</p>
-  <p><strong>Analytics Cookies</strong> — We use Google Analytics to understand how visitors interact with the Site. These cookies collect information in an aggregated form, including the number of visitors, pages visited, and traffic sources.</p>
-  <p><strong>Marketing / Advertising Cookies</strong> — We use cookies from Meta (Facebook Pixel) and Google (Google Ads Tag) to deliver targeted ads, measure ad performance, and build retargeting audiences. These cookies may track your activity across other websites.</p>
+  <p><strong>Strictly Necessary Cookies</strong> - Essential for the Site to function. These include session cookies, security cookies, and load-balancing cookies. They cannot be disabled.</p>
+  <p><strong>Analytics Cookies</strong> - We use Google Analytics to understand how visitors interact with the Site. These cookies collect information in an aggregated form, including the number of visitors, pages visited, and traffic sources.</p>
+  <p><strong>Marketing / Advertising Cookies</strong> - We use cookies from Meta (Facebook Pixel) and Google (Google Ads Tag) to deliver targeted ads, measure ad performance, and build retargeting audiences. These cookies may track your activity across other websites.</p>
 
   <h3>9.3 Managing Cookies</h3>
   <p>You can control and delete cookies through your browser settings. Most browsers allow you to refuse cookies or alert you when a cookie is being sent. Note that disabling certain cookies may affect the functionality of the Site.</p>
@@ -145,24 +146,24 @@ canonical: "https://thezerofog.com/privacy/"
   <h3>10.1 Rights Under GDPR (EEA Residents)</h3>
   <p>If you are a resident of the European Economic Area, you have the right to:</p>
   <ul>
-    <li><strong>Access</strong> — request a copy of the personal data we hold about you</li>
-    <li><strong>Rectification</strong> — request correction of inaccurate or incomplete data</li>
-    <li><strong>Erasure</strong> — request deletion of your data ("right to be forgotten")</li>
-    <li><strong>Restriction</strong> — request restriction of processing in certain circumstances</li>
-    <li><strong>Data portability</strong> — receive your data in a structured, commonly used, machine-readable format</li>
-    <li><strong>Object</strong> — object to processing based on legitimate interests, including direct marketing</li>
-    <li><strong>Withdraw consent</strong> — withdraw previously given consent at any time</li>
+    <li><strong>Access</strong> - request a copy of the personal data we hold about you</li>
+    <li><strong>Rectification</strong> - request correction of inaccurate or incomplete data</li>
+    <li><strong>Erasure</strong> - request deletion of your data ("right to be forgotten")</li>
+    <li><strong>Restriction</strong> - request restriction of processing in certain circumstances</li>
+    <li><strong>Data portability</strong> - receive your data in a structured, commonly used, machine-readable format</li>
+    <li><strong>Object</strong> - object to processing based on legitimate interests, including direct marketing</li>
+    <li><strong>Withdraw consent</strong> - withdraw previously given consent at any time</li>
   </ul>
   <p>To exercise any of these rights, contact us at <a href="mailto:{{ site.email.privacy }}">{{ site.email.privacy }}</a>. We will respond within 30 days. You also have the right to lodge a complaint with your local data protection authority.</p>
 
   <h3>10.2 Rights Under CCPA/CPRA (California Residents)</h3>
   <p>If you are a California resident, you have the following rights under the CCPA/CPRA:</p>
   <ul>
-    <li><strong>Right to know</strong> — request disclosure of the categories and specific pieces of personal information we have collected</li>
-    <li><strong>Right to delete</strong> — request deletion of personal information we have collected</li>
-    <li><strong>Right to correct</strong> — request correction of inaccurate personal information</li>
-    <li><strong>Right to opt out of sale/sharing</strong> — see Section 11 below</li>
-    <li><strong>Right to non-discrimination</strong> — we will not discriminate against you for exercising your CCPA rights</li>
+    <li><strong>Right to know</strong> - request disclosure of the categories and specific pieces of personal information we have collected</li>
+    <li><strong>Right to delete</strong> - request deletion of personal information we have collected</li>
+    <li><strong>Right to correct</strong> - request correction of inaccurate personal information</li>
+    <li><strong>Right to opt out of sale/sharing</strong> - see Section 11 below</li>
+    <li><strong>Right to non-discrimination</strong> - we will not discriminate against you for exercising your CCPA rights</li>
   </ul>
   <p>We do not knowingly sell or share the personal information of consumers under 16 years of age.</p>
 

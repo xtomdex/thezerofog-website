@@ -1,12 +1,12 @@
 ---
-title: "Terms of Service — The Zero Fog"
+title: "Terms of Service - The Zero Fog"
 permalink: /terms/
 canonical: "https://thezerofog.com/terms/"
 ---
 {% extends "layouts/base.njk" %}
 
 {% block head_extras %}
-<meta name="description" content="Terms of Service for The Zero Fog — the rules that govern your use of our website, webinars, and Course.">
+<meta name="description" content="Terms of Service for The Zero Fog - the rules that govern your use of our website, webinars, and Course.">
 {% endblock %}
 
 {% block page_css %}
@@ -23,7 +23,7 @@ canonical: "https://thezerofog.com/terms/"
   <h1>Terms of Service</h1>
 
   <div class="legal-meta">
-    <p><strong>The ZeroFog</strong></p>
+    <p><strong>The Zero Fog</strong></p>
     <p>Website: {{ site.domain }}</p>
     <p>Effective Date: 2026-04-28</p>
     <p>Last Updated: 2026-04-28</p>
@@ -41,11 +41,12 @@ canonical: "https://thezerofog.com/terms/"
   <h2>2. Definitions</h2>
   <ul>
     <li><strong>"Content"</strong> means all text, images, video, audio, graphics, software, and other materials available through the Services.</li>
-    <li><strong>"Course"</strong> means the digital educational product titled "The ZeroFog (4-Week Protocol)" (or such other name as may be used), including all video lessons, worksheets, templates, tools, and supplemental materials.</li>
+    <li><strong>"Course"</strong> means the digital educational product titled "The Zero Fog (4-Week Protocol)" (or such other name as may be used), including all video lessons, worksheets, templates, tools, and supplemental materials.</li>
     <li><strong>"User," "you," or "your"</strong> means any individual who accesses or uses the Services.</li>
     <li><strong>"Webinar"</strong> means any live, simulated-live, or recorded presentation hosted by or on behalf of the Company through the EverWebinar platform.</li>
     <li><strong>"Newsletter"</strong> means email communications you receive after voluntarily providing your email address through the Site, delivered via MailerLite.</li>
-    <li><strong>"Merchant of Record"</strong> means Paddle.com Market Ltd ("Paddle"), which processes all payments and acts as the seller of record (see Section 5).</li>
+    <!-- DIMA: Paddle-as-MoR заменён на Stripe (реальный чекаут = Stripe, см. netlify/functions/create-checkout.js). Это отменяет апрельское решение "Paddle = MoR" - проверь, пожалуйста: (1) Stripe live keys в Netlify env, (2) кто собирает/платит sales tax / VAT - при Stripe это НАША обязанность (Stripe Tax включён?), (3) формулировки ниже. -->
+    <li><strong>"Payment Processor"</strong> means Stripe (Stripe, Inc. and its affiliates, including Stripe Payments Europe, Ltd.), which processes payments on our behalf (see Section 5).</li>
   </ul>
 
   <h2>3. Description of Services</h2>
@@ -70,19 +71,20 @@ canonical: "https://thezerofog.com/terms/"
 
   <h2>5. Payment Terms</h2>
 
-  <h3>5.1 Paddle as Merchant of Record</h3>
-  <p>Our order process is conducted by our online reseller <strong>Paddle.com Market Ltd</strong> ("Paddle"). <strong>Paddle is the Merchant of Record for all our orders.</strong> Paddle provides all customer service inquiries and handles returns.</p>
-  <p>This means that Paddle is the legal seller of the Course for the purposes of payment processing, tax collection, and invoicing. By purchasing the Course, you are entering into a purchase agreement with Paddle, subject to Paddle's Buyer Terms, available at <a href="https://www.paddle.com/legal/terms">https://www.paddle.com/legal/terms</a>.</p>
-  <p>Paddle handles all payment processing, sales tax / VAT collection and remittance, invoicing, and billing-related customer inquiries. You will receive a purchase receipt from Paddle.</p>
-  <p>The Company acts as the content provider and licensor. All questions related to Course content, access, and educational support should be directed to us. All questions related to billing, payment methods, receipts, and invoicing should be directed to Paddle.</p>
+  <h3>5.1 Payment Processing via Stripe</h3>
+  <!-- DIMA: вся секция переписана Paddle -> Stripe. При Stripe мы (entity) = продавец, Stripe = процессор. Покупатель платит НАМ, чек приходит от Stripe on our behalf. Проверь юридически, особенно tax-абзац. -->
+  <p>Payments for the Course are processed by <strong>Stripe</strong> (Stripe, Inc. and its affiliates, including Stripe Payments Europe, Ltd.). When you purchase the Course, you are entering into a purchase agreement with the Company; Stripe processes the payment on our behalf through its hosted checkout. Your use of the Stripe checkout is also subject to Stripe's terms and privacy policy, available at <a href="https://stripe.com/legal/consumer">https://stripe.com/legal/consumer</a> and <a href="https://stripe.com/privacy">https://stripe.com/privacy</a>.</p>
+  <p>Through the Stripe checkout, you may pay using credit or debit card and, where available, other payment methods supported by Stripe at the time of purchase (such as Apple Pay or Google Pay).</p>
+  <p>You will receive a purchase receipt by email, issued through Stripe on our behalf. We do not receive or store your full card number or other payment credentials; these are handled exclusively by Stripe.</p>
+  <p>All questions related to the Course - including content, access, billing, receipts, and refunds - should be directed to us at <a href="mailto:{{ site.email.support }}">{{ site.email.support }}</a>.</p>
 
   <h3>5.2 Pricing</h3>
-  <p>The price of the Course is the amount displayed on the sales page at the time of your purchase. Prices are listed in US Dollars (USD) and may be subject to applicable taxes depending on your location, as determined and collected by Paddle. We reserve the right to change pricing at any time; however, any price change will not affect purchases already completed.</p>
+  <p>The price of the Course is the amount displayed on the sales page at the time of your purchase. Prices are listed in US Dollars (USD) and may be subject to applicable taxes depending on your location, as calculated and collected at checkout. We reserve the right to change pricing at any time; however, any price change will not affect purchases already completed.</p>
   <p>From time to time, we may offer promotional discounts. If you purchase the Course at a discounted price, any applicable refund will be limited to the actual amount you paid, not the standard listed price.</p>
 
   <h2>6. Refund Policy</h2>
   <p>We offer a <strong>30-day conditional money-back guarantee</strong> from the date of purchase. Full details, including eligibility conditions and the refund request process, are set forth in our separate <strong><a href="/refunds/">Refund Policy</a></strong>, which is incorporated into these Terms by reference.</p>
-  <p>Refunds are processed by Paddle as the Merchant of Record. By purchasing the Course, you acknowledge that you have read and agree to the conditions of the Refund Policy prior to completing your purchase.</p>
+  <p>Approved refunds are issued by us through Stripe to the original payment method. By purchasing the Course, you acknowledge that you have read and agree to the conditions of the Refund Policy prior to completing your purchase.</p>
 
   <h2>7. Intellectual Property</h2>
 
@@ -134,7 +136,7 @@ canonical: "https://thezerofog.com/terms/"
   <p>You agree to indemnify, defend, and hold harmless the Company and its owners, partners, employees, and contractors from and against any claims, damages, losses, liabilities, costs, and expenses (including reasonable attorneys' fees) arising out of or related to your use of the Services, your violation of these Terms, or your violation of any rights of a third party.</p>
 
   <h2>13. Third-Party Services and Links</h2>
-  <p>The Services rely on and may contain links to third-party platforms and services, including but not limited to Paddle (payment processing), Systeme.io (course delivery), MailerLite (email communications), and EverWebinar (webinar hosting). We have no control over and assume no responsibility for the content, privacy policies, or practices of these third-party services. You acknowledge and agree that we shall not be responsible or liable for any damage or loss caused by the use of such third-party services.</p>
+  <p>The Services rely on and may contain links to third-party platforms and services, including but not limited to Stripe (payment processing), Systeme.io (course delivery), MailerLite (email communications), and EverWebinar (webinar hosting). We have no control over and assume no responsibility for the content, privacy policies, or practices of these third-party services. You acknowledge and agree that we shall not be responsible or liable for any damage or loss caused by the use of such third-party services.</p>
 
   <h2>14. Modifications to Terms</h2>
   <p>We reserve the right to modify these Terms at any time. If we make material changes, we will provide notice by posting the updated Terms on the Site with a revised "Last Updated" date. Your continued use of the Services after such changes constitutes your acceptance of the modified Terms. If you do not agree with the updated Terms, you must stop using the Services.</p>
@@ -162,7 +164,7 @@ canonical: "https://thezerofog.com/terms/"
     <strong>Entity:</strong> {{ site.legal.entity }}<br>
     <strong>Location:</strong> Barcelona, Spain
   </p>
-  <p>For billing, payment, receipt, or invoice inquiries, please contact Paddle directly at <a href="https://www.paddle.com/support">https://www.paddle.com/support</a>.</p>
+  <p>For billing, payment, receipt, or invoice inquiries, contact us at <a href="mailto:{{ site.email.support }}">{{ site.email.support }}</a>.</p>
 
 </article>
 

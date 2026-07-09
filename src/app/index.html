@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0d0d0d">
-<title>The ZeroFog - App</title>
+<title>The Zero Fog - App</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -271,7 +271,7 @@
   .nrow .nf{ height:100%; }
   .nrow .nv{ font-size:11px; font-weight:700; width:40px; text-align:right; }
 
-  /* summary diagnostic — fix-first + secondary flags */
+  /* summary diagnostic - fix-first + secondary flags */
   .sum-fix{ margin:16px 0 4px; padding:14px 15px; text-align:left; border-radius:12px;
         border:1px solid rgba(255,184,108,0.35); border-left:3px solid var(--orange); background:rgba(255,184,108,0.07); }
   .sum-fix .fl-lab{ font-size:10.5px; font-weight:800; letter-spacing:1.4px; text-transform:uppercase; color:var(--orange); margin-bottom:7px; }
@@ -305,7 +305,7 @@
   .consent{ display:flex; gap:8px; align-items:flex-start; font-size:13px; line-height:1.4; margin:10px 0; text-align:left; }
   .consent input{ margin-top:2px; flex:0 0 auto; }
   .locked-msg{ font-size:14px; line-height:1.5; margin:0 0 14px; }
-  /* Manage my data (deletion) — subtle, destructive. */
+  /* Manage my data (deletion) - subtle, destructive. */
   .manage-data{ text-align:center; margin:28px 0 8px; }
   .danger-link{ background:none; border:none; color:#c0392b; font-size:13px; text-decoration:underline; cursor:pointer; padding:4px; }
   .manage-err{ color:#c0392b; font-size:13px; margin-top:8px; min-height:1em; }
@@ -507,7 +507,7 @@
     body.printing-pc .pc-win .to{ color:#000; }
   }
 </style>
-<!-- Generated public Supabase config (window globals) — must load before the app script. -->
+<!-- Generated public Supabase config (window globals) - must load before the app script. -->
 <script src="/app/config.js"></script>
 <!-- Supabase JS client (UMD bundle exposes global `supabase` with createClient). -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -518,7 +518,7 @@
   <!-- ===== DESKTOP SIDEBAR (hidden under 860px; mobile keeps the top tab bar) ===== -->
   <aside class="side">
     <button class="side-collapse" id="sideCollapse" title="Collapse sidebar" aria-label="Collapse sidebar">&laquo;</button>
-    <div class="brand">The <span class="accent">ZeroFog</span></div>
+    <div class="brand">The <span class="accent">Zero Fog</span></div>
     <div class="brand-sub">Member App <span class="beta">Beta</span></div>
     <nav class="snav">
       <div class="navi on" data-view="diary" title="Sleep Diary"><svg viewBox="0 0 24 24"><path d="M3 4h18v16H3z"/><path d="M3 9h18"/><path d="M8 3v4"/></svg> <span class="nlb">Sleep Diary</span></div>
@@ -545,7 +545,7 @@
 
   <div class="top">
     <div class="barrow">
-      <div class="brand">The <span class="accent">ZeroFog</span></div>
+      <div class="brand">The <span class="accent">Zero Fog</span></div>
       <div style="display:flex;align-items:center;gap:14px">
         <button class="themebtn" id="themeToggle" title="Switch light / dark" aria-label="Switch theme">☾</button>
         <div class="acct" id="acct" style="visibility:hidden">
@@ -669,7 +669,7 @@
       </aside>
       </div><!-- /diary-grid -->
     </div>
-    <!-- Manage my data — right to erasure (irreversible). -->
+    <!-- Manage my data - right to erasure (irreversible). -->
     <div class="manage-data">
       <button class="danger-link" id="deleteData">Delete my data</button>
       <div class="manage-err" id="deleteErr"></div>
@@ -735,7 +735,7 @@
         <div class="asst-badge">&#10022; In development</div>
         <h2>Meet your <span class="a">Sleep Assistant</span></h2>
         <p>Not a generic chatbot. It's built on the course itself, on peer-reviewed sleep research, and on the clinical method the whole program follows - so the advice is real, not autocomplete. Ask it anything about your nights and it answers in plain language.</p>
-        <div class="asst-trust"><span>&#10003; Trained on the ZeroFog course</span><span>&#10003; Grounded in clinical research</span><span>&#128274; Private to you</span></div>
+        <div class="asst-trust"><span>&#10003; Trained on the Zero Fog course</span><span>&#10003; Grounded in clinical research</span><span>&#128274; Private to you</span></div>
       </div>
       <div class="chat">
         <div class="msg user">Why do I crash so hard 3-4 hours after I wake up?</div>
@@ -744,7 +744,7 @@
         <div class="msg bot"><div class="bot-ic">&#10022;</div><div>Last night you logged a drink with dinner. Alcohol helps you fall asleep fast but cuts the deep, restorative stage in the second half - that's the "slept 8 hours, feel like 5" pattern. The Week 3 lesson has tonight's plan.</div></div>
       </div>
       <div class="chat-input"><input placeholder="Ask your assistant anything…" disabled><button disabled>Send</button></div>
-      <div class="asst-privacy">&#128274; <b>Private to you.</b> Your diary, assessment and conversations stay tied to your account - they're never shared, sold, or read by the ZeroFog team. The assistant uses them only to answer you.</div>
+      <div class="asst-privacy">&#128274; <b>Private to you.</b> Your diary, assessment and conversations stay tied to your account - they're never shared, sold, or read by the Zero Fog team. The assistant uses them only to answer you.</div>
       <div class="asst-note">Preview only - your assistant becomes available to members after launch.</div>
     </div>
   </div>
@@ -756,7 +756,7 @@
 
   <footer class="app-footer">
     <p id="iosInstallHint" style="display:none;margin-bottom:8px">&#128241; Add to your home screen - <a href="https://course.thezerofog.com/school/course/tzf-main/lecture/10231550">watch how</a></p>
-    <p>&copy; 2026 The ZeroFog. All rights reserved.<br>
+    <p>&copy; 2026 The Zero Fog. All rights reserved.<br>
     <a href="/privacy/">Privacy</a> &middot;
     <a href="/terms/">Terms</a> &middot;
     <a href="/refunds/">Refunds</a> &middot;
@@ -860,7 +860,7 @@ const DB_SB = {
   },
 
   async sendCode(email){
-    // Email OTP (numeric code). Do NOT pass emailRedirectTo — its presence makes Supabase
+    // Email OTP (numeric code). Do NOT pass emailRedirectTo - its presence makes Supabase
     // send a magic link instead of a code, which breaks verifyOtp({type:'email'}).
     const { error } = await sb.auth.signInWithOtp({ email });
     if(error) throw error;
@@ -892,7 +892,7 @@ const DB_SB = {
 
   async recordConsent(version){
     // Best-effort: stamp consent on the user's own profile row IF it exists.
-    // A non-paid user has no profiles row yet (created at purchase), so update may affect 0 rows —
+    // A non-paid user has no profiles row yet (created at purchase), so update may affect 0 rows - 
     // that's fine; consent will be (re)stamped after they have a row. Do not throw on failure.
     try {
       await sb.from('profiles').update({
@@ -1096,7 +1096,7 @@ $('lockedSignOut').addEventListener('click', async () => {
 });
 $('deleteData').addEventListener('click', async () => {
   $('deleteErr').textContent = '';
-  // Deletion is irreversible — require explicit confirmation.
+  // Deletion is irreversible - require explicit confirmation.
   if(!window.confirm('Are you sure? This permanently deletes your sleep data and account. This cannot be undone.')) return;
   $('deleteData').disabled = true;
   try{
@@ -1111,9 +1111,9 @@ $('deleteData').addEventListener('click', async () => {
 /* ============ TABS / SIDEBAR NAV ============ */
 /* One switcher drives both the mobile top tabs and the desktop sidebar.
    Bonuses runs in two modes:
-   - mobile  (<860px): ?embed=1  - shell scroll locked, iframe sized to the visible
+  - mobile  (<860px): ?embed=1 - shell scroll locked, iframe sized to the visible
      viewport so the only scrollable surface is the bonus content (iOS double-scroll fix).
-   - desktop (>=860px): ?embed=1&nav=1 - the embed hides its own toolbar (the sidebar
+  - desktop (>=860px): ?embed=1&nav=1 - the embed hides its own toolbar (the sidebar
      subnav takes over), posts zfBonusH and the iframe grows to full content height. */
 function deskMode(){ return window.matchMedia('(min-width:860px)').matches; }
 let bonusesMode=null, bonusesStale=false, pendGuide=null;
@@ -1363,7 +1363,7 @@ function diagnose(rows){
   const N = rows.length;
   const flags = [];
 
-  // 1.1 — wake-time consistency (the anchor everything hangs on)
+  // 1.1 - wake-time consistency (the anchor everything hangs on)
   const wakes = rows.map(r=>toMin(r.finalWake)).filter(v=>v!=null);
   if(wakes.length>=3){
     const mn=Math.min(...wakes), mx=Math.max(...wakes), spread=mx-mn;
@@ -1373,7 +1373,7 @@ function diagnose(rows){
       L:LESSONS.wake });
   }
 
-  // 2.1 — caffeine inside the 8-hour cutoff (safe = bedtime minus 8h)
+  // 2.1 - caffeine inside the 8-hour cutoff (safe = bedtime minus 8h)
   let caffLate=0, caffElig=0;
   rows.forEach(r=>{
     const bed=toMin(r.intoBed), caff=(r.caffeine&&r.caffeine!=='none')?toMin(r.caffeine):null;
@@ -1385,14 +1385,14 @@ function diagnose(rows){
     short:'Caffeine after cutoff <b>'+caffLate+'/'+caffElig+'</b>.',
     L:LESSONS.caff });
 
-  // 3.1 — alcohol in the evening
+  // 3.1 - alcohol in the evening
   let alc=0; rows.forEach(r=>{ if(r.alcohol&&r.alcohol!=='none') alc++; });
   if(alc>=3) flags.push({ rank:2, sev:alc/N,
     txt:'Alcohol on <b>'+alc+' of '+N+'</b> nights. A nightcap speeds sleep onset but fragments the second half of the night.',
     short:'Alcohol <b>'+alc+'/'+N+'</b> nights.',
     L:LESSONS.alc });
 
-  // 4.2 — trouble falling or staying asleep
+  // 4.2 - trouble falling or staying asleep
   let slow=0, restless=0, affected=0;
   rows.forEach(r=>{ const sol=+r.sol||0, waso=+r.waso||0, wk=+r.wakings||0;
     const s=sol>=30, m=(waso>=30||wk>=3); if(s)slow++; if(m)restless++; if(s||m)affected++; });

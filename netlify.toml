@@ -21,15 +21,36 @@
 # this section in the Netlify processing order, so keeping both would shadow
 # these rules).
 
-# Legacy /social → new /waitlist URL
+# Legacy /social and retired /waitlist pages → home
+# (waitlist page removed 2026-07-09; sources archived in archive/waitlist-page/)
 [[redirects]]
   from = "/social"
-  to = "/waitlist/"
+  to = "/"
   status = 301
 
 [[redirects]]
   from = "/social/"
-  to = "/waitlist/"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/waitlist"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/waitlist/"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/waitlist-confirmed"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/waitlist-confirmed/"
+  to = "/"
   status = 301
 
 # Legacy singular /refund → /refunds (plural)
