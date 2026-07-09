@@ -59,6 +59,27 @@
   status = 301
   force = true
 
+# Retired bonus PDFs → webinar bonuses hub
+# (PDFs removed 2026-07-10; bonuses live at /webinar-bonuses/ and inside /app/.
+# Sleep-Diary-dark/light.pdf stay — they are course materials, not bonuses.)
+[[redirects]]
+  from = "/downloads/Caffeine-Blueprint.pdf"
+  to = "/webinar-bonuses/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/downloads/Recovery-Protocol.pdf"
+  to = "/webinar-bonuses/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/downloads/9-Recovery-Mistakes.pdf"
+  to = "/webinar-bonuses/"
+  status = 301
+  force = true
+
 # Legacy singular /refund → /refunds (plural)
 [[redirects]]
   from = "/refund"
