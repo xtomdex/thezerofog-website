@@ -49,13 +49,58 @@ h2 {
 .includes li:last-child { border-bottom: none; }
 .includes .check { color: var(--accent); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
 
+/* === TOOLKIT (app) === */
+.toolkit-list { list-style: none; padding: 0; margin: 24px 0 4px; }
+.toolkit-list li {
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+  font-size: 0.95rem; color: var(--text2); line-height: 1.6;
+}
+.toolkit-list li:last-child { border-bottom: none; }
+.toolkit-list b { color: var(--text); font-weight: 700; }
+
+.shot {
+  border: 1px solid var(--border-accent); border-radius: 12px;
+  overflow: hidden; background: var(--bg2);
+}
+.shot img { display: block; width: 100%; height: auto; }
+.shot--main { max-width: 520px; margin: 8px auto 4px; }
+.shot-row { display: flex; gap: 16px; align-items: flex-start; margin-top: 8px; }
+.shot--wide { flex: 1; min-width: 0; }
+.shot--phone { width: 26%; flex-shrink: 0; }
+
 /* === BONUS CARDS === */
 .bonus-card {
   background: var(--accent-dim); border: 1px solid var(--border-accent);
   border-radius: 12px; padding: 20px 24px; margin-bottom: 12px;
+  display: flex; gap: 22px; align-items: center;
 }
 .bonus-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
 .bonus-card p { font-size: 0.85rem; color: var(--text2); line-height: 1.5; }
+.bonus-body { flex: 1; min-width: 0; }
+
+.bonus-cover {
+  flex: 0 0 185px; align-self: stretch;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px 14px; display: flex; flex-direction: column; justify-content: center; gap: 8px;
+}
+.bc-chiprow { display: flex; flex-wrap: wrap; gap: 6px; }
+.bc-chip {
+  font-size: 0.6rem; font-weight: 600; color: var(--text2);
+  border: 1px solid var(--border); border-radius: 99px; padding: 3px 8px; white-space: nowrap;
+}
+.bc-readout { display: flex; flex-direction: column; margin-top: 4px; }
+.bc-readout-label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted); margin-bottom: 2px; }
+.bc-readout-val { font-size: 1.45rem; font-weight: 900; color: var(--accent); letter-spacing: -0.02em; line-height: 1; }
+.bc-task { display: flex; align-items: center; gap: 7px; font-size: 0.66rem; color: var(--text2); }
+.bc-box { width: 11px; height: 11px; border: 1px solid var(--border-accent); border-radius: 3px; flex-shrink: 0; }
+.bc-box--on { background: var(--accent); border-color: var(--accent); }
+.bc-due { margin-left: auto; color: var(--muted); font-size: 0.6rem; }
+.bc-calbtn {
+  margin-top: 7px; font-size: 0.6rem; font-weight: 700; color: var(--accent);
+  border: 1px solid var(--border-accent); border-radius: 8px; padding: 5px 8px; text-align: center; white-space: nowrap;
+}
+.bc-myth { font-size: 0.76rem; color: var(--muted); text-decoration: line-through; line-height: 1.45; }
+.bc-src { font-size: 0.62rem; font-weight: 600; color: var(--accent); }
 
 /* === PRICE === */
 .price-box {
@@ -84,6 +129,7 @@ h2 {
 }
 .guarantee h3 { font-size: 1rem; font-weight: 700; margin-bottom: 12px; }
 .guarantee p { font-size: 0.9rem; color: var(--text2); line-height: 1.6; }
+.guarantee .guarantee-sign { margin-top: 14px; font-size: 0.85rem; font-weight: 600; color: var(--text); }
 
 /* === ALTERNATIVES === */
 .alt-row {
@@ -101,4 +147,8 @@ h2 {
 @media (max-width: 640px) {
   .sales { padding: 60px 20px 32px; }
   .price-amount { font-size: 2.4rem; }
+  .shot-row { flex-direction: column; }
+  .shot--phone { width: 62%; margin: 0 auto; }
+  .bonus-card { flex-direction: column; align-items: stretch; }
+  .bonus-cover { flex-basis: auto; }
 }
