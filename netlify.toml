@@ -6,6 +6,13 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# Netlify asset optimization is buggy: it appended a corrupted, unscoped copy of
+# the trailing @media rules to sales.css (2026-07-09) and again to sales-3.css
+# (2026-07-11), breaking desktop layout. We don't use its bundling/minification,
+# so skip post-processing entirely — live files must be byte-identical to git.
+[build.processing]
+  skip_processing = true
+
 [[headers]]
   for = "/assets/*"
   [headers.values]
