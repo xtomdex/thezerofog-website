@@ -120,7 +120,8 @@ h2 {
   font-size: 1rem; color: var(--muted); text-decoration: line-through;
   margin-bottom: 16px;
 }
-.price-note { font-size: 0.85rem; color: var(--text2); margin-bottom: 24px; }
+.price-note { font-size: 0.85rem; color: var(--text2); margin-bottom: 16px; }
+.price-window { font-size: 0.8rem; color: var(--muted); line-height: 1.6; max-width: 400px; margin: 0 auto 24px; }
 
 /* === GUARANTEE === */
 .guarantee {
@@ -139,6 +140,13 @@ h2 {
 .alt-row:last-child { border-bottom: none; }
 .alt-name { font-size: 0.9rem; color: var(--text2); }
 .alt-price { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+
+/* === FAQ === */
+.faq-item { padding: 18px 0; border-bottom: 1px solid var(--border); }
+.faq-item:last-of-type { border-bottom: none; }
+.faq-item h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+.faq-item p { font-size: 0.9rem; color: var(--text2); line-height: 1.7; }
+.faq-item a { color: var(--accent); text-decoration: none; font-weight: 600; }
 
 /* === DIVIDER === */
 .divider { width: 48px; height: 1px; background: var(--border-accent); margin: 48px auto; }
