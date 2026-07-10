@@ -1,4 +1,15 @@
-/* v2026-07-11: content changed to force new hash - Netlify dedupes uploads by file hash and was re-serving stale corrupted artifacts for unchanged files */
+/* ============================================================================
+   NETLIFY CSS GUARD - DO NOT DELETE THIS COMMENT BLOCK
+   Netlify's pipeline pretty-prints CSS in place (comments stripped, one
+   property per line), then rewrites the original over it WITHOUT truncating.
+   If the raw file is shorter than its pretty-printed form, a corrupted tail
+   of unscoped rules is left appended and can break layout (sales.css
+   2026-07-09, sales-3/4/5.css 2026-07-11). This block keeps the raw file
+   longer than the pretty-printed version. After every deploy that touches
+   CSS: curl the live file and diff against dist - they must be identical.
+   Cache rule still applies: any change to this file requires renaming it
+   (assets are cached immutable for 1 year).
+   ========================================================================= */
 /* === SALES PAGE LAYOUT === */
 .sales { max-width: 680px; margin: 0 auto; padding: 80px 24px 40px; }
 
