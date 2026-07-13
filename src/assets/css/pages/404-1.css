@@ -1,0 +1,140 @@
+/* === THE ZERO FOG - 404 PAGE === */
+/* Tired fog-cloud character (coffee in hand) + centered message. Theme-aware via shared.css vars. */
+
+.nf-wrap {
+  min-height: calc(100vh - 120px);
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 96px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* --- Scene / character --- */
+
+.nf-scene { width: min(300px, 70vw); margin-bottom: 8px; }
+
+.nf-cloud { width: 100%; height: auto; overflow: visible; }
+
+.nf-body {
+  animation: nf-bob 4.5s ease-in-out infinite;
+  transform-origin: 130px 90px;
+}
+
+.nf-shape {
+  fill: var(--accent-dim);
+  stroke: var(--accent);
+  stroke-width: 3.5;
+}
+
+.nf-eye, .nf-mouth, .nf-arm {
+  stroke: var(--accent);
+  stroke-width: 3.5;
+  fill: none;
+}
+
+.nf-eyes {
+  animation: nf-blink 6s ease-in-out infinite;
+  transform-origin: 130px 84px;
+}
+
+.nf-mug rect, .nf-mug path {
+  stroke: var(--accent);
+  stroke-width: 3.5;
+  fill: var(--bg2);
+}
+
+.nf-steam {
+  fill: none !important;
+  stroke: var(--muted);
+  stroke-width: 2.5;
+  animation: nf-steam 2.6s ease-in-out infinite;
+}
+.nf-steam-2 { animation-delay: 1.3s; }
+
+.nf-wisp {
+  stroke: var(--muted);
+  stroke-width: 3;
+  opacity: 0.35;
+  animation: nf-drift 7s ease-in-out infinite;
+}
+.nf-wisp-2 { animation-delay: 1.6s; }
+.nf-wisp-3 { animation-delay: 3.1s; animation-duration: 8s; }
+.nf-wisp-4 { animation-delay: 4.4s; }
+
+@keyframes nf-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+@keyframes nf-blink {
+  0%, 91%, 100% { transform: scaleY(1); }
+  94%, 97% { transform: scaleY(0.25); }
+}
+
+@keyframes nf-steam {
+  0% { transform: translateY(0); opacity: 0; }
+  35% { opacity: 0.8; }
+  100% { transform: translateY(-9px); opacity: 0; }
+}
+
+@keyframes nf-drift {
+  0%, 100% { transform: translateX(0); opacity: 0.2; }
+  50% { transform: translateX(12px); opacity: 0.45; }
+}
+
+/* --- Text --- */
+
+.nf-code {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+
+.nf-headline {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(28px, 5.5vw, 42px);
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  line-height: 1.15;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.nf-sub {
+  font-size: 16.5px;
+  line-height: 1.65;
+  color: var(--text2);
+  max-width: 460px;
+  margin-bottom: 32px;
+}
+
+.nf-cta {
+  display: inline-block;
+  background: var(--cta);
+  color: var(--cta-text);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 14px 30px;
+  border-radius: 12px;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.nf-cta:hover { background: var(--cta-hover); transform: translateY(-1px); }
+
+@media (max-width: 600px) {
+  .nf-wrap { padding: 84px 20px 48px; }
+  .nf-sub { font-size: 15.5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nf-body, .nf-eyes, .nf-steam, .nf-wisp { animation: none; }
+}

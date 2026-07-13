@@ -1,0 +1,77 @@
+---
+title: "Page Not Found - The Zero Fog"
+permalink: /404.html
+eleventyExcludeFromCollections: true
+---
+{% extends "layouts/base.njk" %}
+
+{% block head_extras %}
+<meta name="robots" content="noindex">
+<meta name="description" content="This page doesn't exist - it's not your brain fog. Head back home.">
+{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="/assets/css/pages/404-1.css">
+{% endblock %}
+
+{% block content %}
+
+<a href="/" class="brand">The Zero Fog</a>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
+
+<main class="nf-wrap">
+
+  <div class="nf-scene" aria-hidden="true">
+    <svg class="nf-cloud" viewBox="0 0 260 180" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <!-- drifting fog wisps behind the character -->
+      <g class="nf-wisps">
+        <path class="nf-wisp nf-wisp-1" d="M10 60 H70" />
+        <path class="nf-wisp nf-wisp-2" d="M196 48 H250" />
+        <path class="nf-wisp nf-wisp-3" d="M18 128 H62" />
+        <path class="nf-wisp nf-wisp-4" d="M204 138 H252" />
+      </g>
+
+      <g class="nf-body">
+        <!-- cloud body -->
+        <path class="nf-shape" d="M74 118
+          a26 26 0 0 1 6 -51
+          a34 34 0 0 1 65 -14
+          a28 28 0 0 1 41 22
+          a22 22 0 0 1 -4 43
+          Z" />
+
+        <!-- sleepy eyes (droopy lids, occasional blink) -->
+        <g class="nf-eyes">
+          <path class="nf-eye nf-eye-l" d="M104 84 q7 7 14 0" />
+          <path class="nf-eye nf-eye-r" d="M142 84 q7 7 14 0" />
+        </g>
+
+        <!-- flat tired mouth -->
+        <path class="nf-mouth" d="M124 102 h13" />
+
+        <!-- stubby arm holding the mug -->
+        <path class="nf-arm" d="M172 106 q16 2 20 12" />
+
+        <!-- coffee mug -->
+        <g class="nf-mug">
+          <rect x="180" y="114" width="30" height="27" rx="6" />
+          <path d="M210 121 q12 3 0 14" />
+          <!-- steam -->
+          <path class="nf-steam nf-steam-1" d="M189 106 q3 -5 0 -10" />
+          <path class="nf-steam nf-steam-2" d="M200 106 q-3 -5 0 -10" />
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <p class="nf-code">404</p>
+
+  <h1 class="nf-headline">Relax - it's not your brain fog.</h1>
+
+  <p class="nf-sub">This page genuinely doesn't exist. Broken link, moved page, or it never was. You remembered everything right - this time, we're the ones lost in the fog.</p>
+
+  <a class="nf-cta" href="/">Take me home &rarr;</a>
+
+</main>
+
+{% endblock %}
