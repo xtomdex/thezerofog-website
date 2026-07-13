@@ -91,6 +91,21 @@
   figure img{width:100%;border-radius:12px;border:1px solid var(--line);display:block}
   figcaption{font-size:13px;color:var(--dim);text-align:center;margin-top:10px;font-style:italic}
 
+  /* exhaustion cycle - animated inline SVG replica of deck slide 16 (V1 ring canon).
+     Fixed dark palette on purpose: matches the other slide PNGs in both themes.
+     Pulses run along the arrows via stroke-dashoffset; .anim is added lazily by
+     an IntersectionObserver at the bottom of the page. */
+  .cycle-fig svg{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);display:block;background:#1a1a1a}
+  .cycle-runner{
+    fill:none;stroke:#d8beff;stroke-width:6;stroke-linecap:round;opacity:0;
+    stroke-dasharray:20 480;stroke-dashoffset:500;
+  }
+  .cycle-fig.anim .cycle-runner{opacity:.9;animation:zf-cycle-run 6s linear infinite;animation-delay:var(--d,0s)}
+  @keyframes zf-cycle-run{to{stroke-dashoffset:0}}
+  @media (prefers-reduced-motion: reduce){
+    .cycle-fig .cycle-runner{animation:none!important;opacity:0!important}
+  }
+
   /* callout / list cards */
   .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin:28px 0}
   .card.green{border-color:rgba(80,250,123,0.25)}
@@ -206,8 +221,109 @@
   <span class="kicker">The exhaustion cycle</span>
   <h2>It's not a bad week. It's a cycle - and it's getting stronger.</h2>
 
-  <figure>
-    <img src="img/slide-016.png" alt="The exhaustion cycle">
+  <!-- Animated replica of deck slide 16 (geometry: ring r=230 around 960,590; nodes at -90/-18/54/126/198 deg). Deck itself stays static - web page only. -->
+  <figure class="cycle-fig" id="cycleFig">
+    <svg viewBox="0 0 1920 1080" role="img" aria-label="The exhaustion cycle: low energy leads to more caffeine, then an afternoon crash, then you can't switch off at night and wake up drained - and the loop repeats" font-family="'Inter',sans-serif">
+      <defs>
+        <radialGradient id="zfCycGlow" cx="50%" cy="55%" r="55%">
+          <stop offset="0" stop-color="#bd93f9" stop-opacity="0.07"/>
+          <stop offset="1" stop-color="#bd93f9" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="zfCycCard" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#2a2830"/>
+          <stop offset="1" stop-color="#1e1d23"/>
+        </linearGradient>
+        <marker id="zfCycArr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 9 5 L 0 9 z" fill="#bd93f9" opacity="0.9"/>
+        </marker>
+      </defs>
+
+      <rect width="1920" height="1080" fill="#1a1a1a"/>
+      <rect width="1920" height="1080" fill="url(#zfCycGlow)"/>
+      <rect width="26" height="10" fill="#ff79c6"/>
+
+      <text x="78" y="48" font-size="20" font-weight="800" letter-spacing="8" fill="#bd93f9">THE CYCLE</text>
+      <text x="76" y="105" font-size="60" font-weight="900" letter-spacing="-1.5" fill="#f8f8f2">THE EXHAUSTION CYCLE</text>
+
+      <circle cx="960" cy="590" r="230" fill="none" stroke="rgba(189,147,249,0.14)" stroke-width="2.5"/>
+
+      <!-- arrows (static, exact deck look) -->
+      <g fill="none" stroke="#bd93f9" stroke-opacity="0.8" stroke-width="4">
+        <path d="M 1060.8 383.3 A 230 230 0 0 1 1125.4 430.2" marker-end="url(#zfCycArr)"/>
+        <path d="M 1187.8 622.0 A 230 230 0 0 1 1163.1 698.0" marker-end="url(#zfCycArr)"/>
+        <path d="M 999.9 816.5 A 230 230 0 0 1 920.1 816.5" marker-end="url(#zfCycArr)"/>
+        <path d="M 756.9 698.0 A 230 230 0 0 1 732.2 622.0" marker-end="url(#zfCycArr)"/>
+        <path d="M 794.6 430.2 A 230 230 0 0 1 859.2 383.3" marker-end="url(#zfCycArr)"/>
+      </g>
+
+      <!-- pulses running along the arrows (hidden until .anim; hidden for reduced motion) -->
+      <path class="cycle-runner" style="--d:0s"   pathLength="100" d="M 1060.8 383.3 A 230 230 0 0 1 1125.4 430.2"/>
+      <path class="cycle-runner" style="--d:1.2s" pathLength="100" d="M 1187.8 622.0 A 230 230 0 0 1 1163.1 698.0"/>
+      <path class="cycle-runner" style="--d:2.4s" pathLength="100" d="M 999.9 816.5 A 230 230 0 0 1 920.1 816.5"/>
+      <path class="cycle-runner" style="--d:3.6s" pathLength="100" d="M 756.9 698.0 A 230 230 0 0 1 732.2 622.0"/>
+      <path class="cycle-runner" style="--d:4.8s" pathLength="100" d="M 794.6 430.2 A 230 230 0 0 1 859.2 383.3"/>
+
+      <!-- center punchline -->
+      <text x="960" y="592" text-anchor="middle" font-size="64" font-weight="900" fill="#bd93f9">&#215;365</text>
+      <text x="960" y="634" text-anchor="middle" font-size="24" font-weight="600" fill="#8a8a93">every loop makes it stronger</text>
+
+      <!-- node: Low energy (top) -->
+      <g>
+        <rect x="875" y="305" width="170" height="110" rx="16" fill="url(#zfCycCard)" stroke="rgba(189,147,249,0.25)" stroke-width="2"/>
+        <g transform="translate(960,341) scale(1.6)" stroke="#bd93f9" stroke-width="2" fill="none">
+          <rect x="-6" y="-9" width="12" height="20" rx="2"/>
+          <rect x="-3" y="-12" width="6" height="3" rx="1" fill="#bd93f9" stroke="none"/>
+          <rect x="-3.5" y="4" width="7" height="4.5" fill="#bd93f9" stroke="none"/>
+        </g>
+        <text x="960" y="391" text-anchor="middle" font-size="24" font-weight="700" fill="#f8f8f2">Low energy</text>
+      </g>
+
+      <!-- node: More caffeine (upper right) -->
+      <g>
+        <rect x="1084" y="464" width="190" height="110" rx="16" fill="url(#zfCycCard)" stroke="rgba(189,147,249,0.25)" stroke-width="2"/>
+        <g transform="translate(1179,500) scale(1.6)" stroke="#bd93f9" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M -9 -10 H 6 V -2 A 7.5 7.5 0 0 1 -9 -2 Z"/>
+          <path d="M 6 -8 h 2 a 3.5 3.5 0 0 1 0 7 h -2"/>
+          <path d="M -11 9 H 8"/>
+        </g>
+        <text x="1179" y="550" text-anchor="middle" font-size="24" font-weight="700" fill="#f8f8f2">More caffeine</text>
+      </g>
+
+      <!-- node: Afternoon crash (lower right) -->
+      <g>
+        <rect x="985" y="721" width="220" height="110" rx="16" fill="url(#zfCycCard)" stroke="rgba(189,147,249,0.25)" stroke-width="2"/>
+        <g transform="translate(1095,757) scale(1.6)" stroke="#bd93f9" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M -11 -7 L -2 2 L 2 -2 L 11 7"/>
+          <path d="M 4 7 H 11 V 0"/>
+        </g>
+        <text x="1095" y="807" text-anchor="middle" font-size="24" font-weight="700" fill="#f8f8f2">Afternoon crash</text>
+      </g>
+
+      <!-- node: Can't switch off at night (lower left) -->
+      <g>
+        <rect x="720" y="708" width="210" height="136" rx="16" fill="url(#zfCycCard)" stroke="rgba(189,147,249,0.25)" stroke-width="2"/>
+        <g transform="translate(825,742) scale(1.6)" stroke="#bd93f9" stroke-width="2" fill="none" stroke-linecap="round">
+          <path d="M 0 -12 V -1"/>
+          <path d="M -5 -8.66 A 10 10 0 1 0 5 -8.66"/>
+        </g>
+        <text x="825" y="790" text-anchor="middle" font-size="24" font-weight="700" fill="#f8f8f2">Can't switch off</text>
+        <text x="825" y="822" text-anchor="middle" font-size="24" font-weight="700" fill="#f8f8f2">at night</text>
+      </g>
+
+      <!-- node: Wake up drained (upper left) -->
+      <g>
+        <rect x="666" y="451" width="150" height="136" rx="16" fill="url(#zfCycCard)" stroke="rgba(189,147,249,0.25)" stroke-width="2"/>
+        <g transform="translate(741,485) scale(1.6)" stroke="#bd93f9" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="0" cy="1" r="9"/>
+          <path d="M 0 -4 V 1 H 5"/>
+          <path d="M -7.5 -7.5 L -11 -4.5 M 7.5 -7.5 L 11 -4.5"/>
+        </g>
+        <text x="741" y="533" text-anchor="middle" font-size="24" font-weight="700" fill="#f8f8f2">Wake up</text>
+        <text x="741" y="565" text-anchor="middle" font-size="24" font-weight="700" fill="#f8f8f2">drained</text>
+      </g>
+
+      <text x="1888" y="1062" text-anchor="end" font-size="20" font-weight="600" fill="rgba(176,176,176,0.35)">The Zero Fog</text>
+    </svg>
     <figcaption>Low energy, more caffeine, afternoon crash, wired at night - and repeat.</figcaption>
   </figure>
 
@@ -626,6 +742,20 @@
 
 </div>
 <script src="/assets/js/shared.js" defer></script>
+
+<script>
+/* Exhaustion cycle: start the pulse animation only when the figure is on
+   screen, pause when it scrolls away. Without JS (or without IO) the figure
+   stays as the static deck slide. */
+(function(){
+  var fig = document.getElementById('cycleFig');
+  if (!fig) return;
+  if (!('IntersectionObserver' in window)) return;
+  new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ fig.classList.toggle('anim', e.isIntersecting); });
+  }, {threshold: 0.35}).observe(fig);
+})();
+</script>
 
 <script>
 /* Enroll buttons -> Stripe Checkout (same flow as /sales): create a Checkout
