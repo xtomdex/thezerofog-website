@@ -120,6 +120,9 @@
 
   hr.soft{border:none;border-top:1px solid var(--line);margin:46px 0}
 
+  .read-badge{display:inline-block;font-size:13.5px;font-weight:600;color:var(--muted);
+    border:1px solid var(--line);border-radius:999px;padding:6px 16px;margin-top:14px}
+
   .footer{text-align:center;margin:60px 0 40px;padding-top:24px;border-top:1px solid var(--line)}
   .footer p{font-size:12px;color:var(--dim);line-height:1.6}
   .footer a{color:var(--dim);text-decoration:none}.footer a:hover{color:var(--muted)}
@@ -134,7 +137,7 @@
 </head>
 <body>
 <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
-<!-- VISUALS: slide-number -> PNG filename mapping is best-effort (deck has 34b/86b, slide 45 missing, 100 silent). Spot-check each image matches its section before publishing. -->
+<!-- VISUALS: synced 2026-07-13 to the 103-slide deck numbering (slide-prototype/webinar-slides-png). Image filenames = canon slide numbers. -->
 
 <div class="wrap">
 
@@ -142,6 +145,7 @@
     <div class="eyebrow">The Zero Fog</div>
     <h1>Why You Lose 2-3 Sharp Hours Every Day - And How to Get Them Back</h1>
     <p class="sub">The written version of the workshop. Same content, same order - in long-form, at your pace.</p>
+    <p class="read-badge">About a 30-minute read</p>
   </header>
 
   <p class="lead">By the end of this, you'll understand why you lose two or three hours of sharp focus every single day.</p>
@@ -157,8 +161,8 @@
   <h2>Your morning. See if this sounds like you.</h2>
 
   <figure>
-    <img src="img/slide-009.png" alt="3 AM, wide awake, staring at the ceiling">
-    <figcaption>3 AM. Wide awake. Your brain just won't stop.</figcaption>
+    <img src="img/slide-009.png" alt="11 PM - exhausted but wired">
+    <figcaption>11 PM. Your body is done - your brain won't shut off. Then 3 AM: wide awake.</figcaption>
   </figure>
 
   <p>You don't set an alarm. Or maybe you do, and ignore it. You wake up at a different time every day - Monday at nine, Wednesday at eleven, Friday you don't even check. You slept seven hours. Maybe eight. And you feel like you slept two. Your body got the hours. But somehow, it didn't get the rest.</p>
@@ -273,9 +277,11 @@
 
   <p>Here's what I want you to see. You've been fixing the symptoms - productivity apps, focus hacks, morning routines. But none of that touches the cause. They're aimed at the wrong layer. I know, because I tried all of them.</p>
 
-  <p>I tried building the perfect morning routine. I watched Mark Wahlberg talk about his "4 AM Workout Club" - the guy went to bed at eight PM and woke up at four AM. Then YouTube exploded with people trying to copy that, like waking up at four AM is the secret to success. I tried Pomodoro. I tried Notion setups, task managers, to-do apps - and spent more time organizing my productivity system than actually being productive. Cold plunges at six AM. Magnesium, lion's mane, whatever the next guru was selling. Journaling every morning because that's what "high performers" do.</p>
+  <p>Maybe you even went further. Bloodwork - normal. Thyroid panel - normal. Vitamin D, B12, iron - all fine. Great news... that explains nothing. You're "healthy on paper" and still running on fumes.</p>
 
-  <p>I'm not saying all of that is garbage - some of it makes sense. But none of it moved the needle. Not for me, not for anyone I know. Right now I'm building this entire project - research, scripts, slides, everything - without any of it. No Pomodoro. No fancy task manager. No morning routine. Just a brain that actually works when I sit down.</p>
+  <p>I tried building the perfect morning routine. I watched Mark Wahlberg talk about his "4 AM Workout Club" - the guy went to bed at eight PM and woke up at four AM. Then YouTube exploded with people trying to copy that, like waking up at four AM is the secret to success. I tried Pomodoro. I tried Notion setups, task managers, to-do apps - and spent more time organizing my productivity system than actually being productive. I got sucked into the whole productivity porn rabbit hole. Cold plunges at six AM. Supplements - magnesium, probiotics, that green powder subscription every podcast swears by - whatever the next guru was selling. Journaling every morning because that's what "high performers" do. Cutting gluten. Cutting dairy. Keto, fasting windows - months of food experiments, because maybe the fog comes from your gut.</p>
+
+  <p>I'm not saying any of that is garbage - some of it makes sense. But none of it moved the needle. Not for me, not for anyone I know. Right now I'm building this entire project - research, scripts, slides, everything - without any of it. No Pomodoro. No fancy task manager. No morning routine. Just a brain that actually works when I sit down.</p>
 
   <p>Because the problem was never the tools. The problem was what was running underneath - the operating system. And that operating system runs on sleep.</p>
 
@@ -307,7 +313,7 @@
   <p>You finally get to bed at a decent hour, exhausted - and the second your head hits the pillow, you start solving every problem from the day. Emails, calls, decisions. You lie there for hours. <strong>That's the Off-Switch.</strong> Your brain learned that bed is where you work, not where you rest.</p>
 
   <figure>
-    <img src="img/slide-037.png" alt="The Clock, the Battery, and the Off-Switch">
+    <img src="img/slide-038.png" alt="The Clock, the Battery, and the Off-Switch">
     <figcaption>Three systems. Not five, not ten. Everything maps into one of these three.</figcaption>
   </figure>
 
@@ -320,9 +326,8 @@
   <h2>What Clock drift looks like in your week</h2>
 
   <figure>
-    <img src="img/slide-038.png" alt="Clock drift across the week">
-    <figcaption>Wake at ten, then noon, then nine - your body never knows what timezone it's in.</figcaption>
-    <!-- GIF-TODO: an animated version showing the wake-time bouncing across the week would land harder than the static slide. -->
+    <img src="img/slide-039.png" alt="Over 70 percent of people have social jetlag">
+    <figcaption>Over 70% of people live with social jetlag. If you work from home - it's every single day.</figcaption>
   </figure>
 
   <p>Ever tried to get real work done after a long flight? That feeling where you're staring at your screen but nothing's happening. You reread the same email three times. Someone asks a simple question and your brain just lags. You're technically awake, but you're running on autopilot, and everything takes twice as long. That's jetlag.</p>
@@ -330,9 +335,8 @@
   <p>There's a word for the version most people don't realize they have: social jetlag. Same thing - but you didn't fly anywhere. You go to bed at different times and wake up at different times, and your body reacts as if you crossed timezones. For most people it's weekdays versus weekends. But if you work from home, it's every single day. Monday you wake at ten. Wednesday at noon. Thursday at nine. Your body never knows what timezone it's in. And you're trying to do focused work in that state.</p>
 
   <figure>
-    <img src="img/slide-039.png" alt="In sync versus out of sync">
+    <img src="img/slide-040.png" alt="In sync versus out of sync">
     <figcaption>In sync: fall asleep fast, sleep deep, wake with energy. Out of sync: enough hours, zero rest.</figcaption>
-    <!-- GIF-TODO: a two-state in-sync vs out-of-sync animation would make the contrast visceral. -->
   </figure>
 
   <p>When all three are in sync, you fall asleep fast, sleep deep, and wake up with energy. When they're out of sync, you get enough hours but zero rest. Exhausted but wired. Brain fog all day. This is why you can sleep seven or eight hours and still feel terrible - still foggy by noon, still dragging, still wondering why everyone else seems to have more energy. The hours aren't the problem. The systems are.</p>
@@ -343,7 +347,7 @@
 
   <ul class="clean">
     <li><strong>Exercise without proper sleep</strong> doesn't build you up. Recent research suggests intense exercise on poor sleep can actually accelerate aging - your body never gets the repair cycle. Right ingredient, no cake.</li>
-    <li><strong>Eating healthy</strong> - but when you sleep poorly, your hunger hormone spikes and it gets easier to gain weight. And your prefrontal cortex isn't at full power, so controlling what you eat gets harder. Right ingredient, no cake.</li>
+    <li><strong>Eating healthy</strong> - but when you sleep poorly, your hunger hormone spikes and it gets easier to gain weight. So if you've been blaming food for the fog - you were close. But the dial that sets those hormones is the night before. And your prefrontal cortex isn't at full power, so controlling what you eat gets harder. Right ingredient, no cake.</li>
     <li><strong>Processing information</strong> - calls, decisions, research - but without proper sleep your brain can't sort through any of it. You work harder and think slower. Right ingredient, no cake.</li>
   </ul>
 
@@ -492,26 +496,44 @@
     </ul>
   </div>
 
+  <h2>One dashboard runs your whole protocol</h2>
+
+  <figure>
+    <img src="img/slide-083.png" alt="The Toolkit - your summary dashboard">
+  </figure>
+
+  <p>And everything you track lives in one place - your Toolkit. Not a folder of printables. A working dashboard. The diary takes two minutes each morning - and after a few nights it starts working for you: it reads your data, finds your biggest leak, and points you to the exact lesson that fixes it.</p>
+
+  <figure>
+    <img src="img/slide-084.png" alt="The Toolkit on your laptop and your phone">
+  </figure>
+
+  <p>It works on your laptop and on your phone - you add it to your home screen straight from the browser, no app store needed. Your assessment, your protocol card, your bonuses - all one tab away. Your data saves as you go.</p>
+
   <h2>Plus your bonuses for watching today</h2>
 
   <figure>
-    <img src="img/slide-083.png" alt="Your bonuses">
+    <img src="img/slide-085.png" alt="Your bonuses">
   </figure>
 
   <p>Remember the three tools I mentioned at the start? Here's why they matter more now that you've seen the system.</p>
 
   <ul class="clean">
-    <li><strong>Your Caffeine Blueprint</strong> - the personalized version of what we just covered. You saw how caffeine blocks your sleep pressure. This gives you your personal caffeine schedule.</li>
-    <li><strong>9 Recovery Mistakes</strong> - you saw today how most advice sounds logical but works against your biology. This breaks down nine more of those traps, so you stop falling for them.</li>
-    <li><strong>The Recovery Protocol</strong> - five changes to where your body actually recovers. The kind where one fix quietly improves everything else. You can start with any of them tonight.</li>
+    <li><strong>Your Caffeine Blueprint</strong> - the personalized version of what we just covered. You saw how caffeine blocks your sleep pressure. This is a calculator: your drink, your bedtime - your exact cutoff time.</li>
+    <li><strong>9 Recovery Mistakes</strong> - you saw today how most advice sounds logical but works against your biology. This breaks down nine more of those traps - each one debunked with the actual study.</li>
+    <li><strong>The Recovery Protocol</strong> - exact specs for the five things that decide how much repair your brain gets at night, plus a tracker that handles the upkeep for you.</li>
   </ul>
+
+  <p>These aren't PDFs - they're working tools. And you can start with any of them tonight.</p>
 
   <hr class="soft">
 
   <span class="kicker">Honest answers</span>
   <h2>"I've tried everything"</h2>
 
-  <p>I hear this a lot. But let's be real - most of what you tried was aimed at the wrong problem. More discipline. Better apps. Another morning routine. That was never going to work, because the root cause was somewhere else entirely. And even when it came to sleep, you tried pieces. Maybe melatonin. Maybe a tracker. Incomplete solutions - isolated tips that were never designed to work together. Never all three systems, in the right order. That's the difference.</p>
+  <p>I hear this a lot. But let's be real - most of what you tried was aimed at the wrong problem. More discipline. Better apps. Another morning routine. That was never going to work, because the root cause was somewhere else entirely.</p>
+
+  <p>And even when it came to sleep, you tried pieces. Maybe melatonin. Maybe a tracker. Maybe you even did a sleep study. Smart move - that's real medicine. It looks for specific problems: apnea, restless legs, things that need a doctor. If it finds one - you treat it, and that's the win. But a clean result doesn't end the story. The study measures your night - it doesn't rebuild the habits and timing that shape it. That part happens at home, in how you run your days. And that's the part nobody hands you a system for. Incomplete solutions - isolated tips that were never designed to work together. Never all three systems, in the right order. That's the difference.</p>
 
   <h2>"What if it doesn't work?"</h2>
 
@@ -533,7 +555,7 @@
     <div class="row us"><span class="n">The Zero Fog - the full four-week protocol</span><span class="v">$67</span></div>
   </div>
 
-  <p>And remember - you're already paying for this problem. The productivity apps. The courses. The supplements, the extra coffees just to function. For a lot of people that adds up to somewhere between three hundred and two thousand dollars a year - all of it spent upgrading the stereo in a car with a broken engine. What if you just fixed the engine?</p>
+  <p>And remember - you're already paying for this problem. The productivity apps. The courses. The supplements, the greens subscription, the extra coffees just to function. For a lot of people that adds up to somewhere between three hundred and two thousand dollars a year - all of it spent upgrading the stereo in a car with a broken engine. What if you just fixed the engine?</p>
 
   <div class="offer">
     <div class="terms">The Zero Fog - one-time payment, lifetime access</div>
@@ -551,7 +573,7 @@
   <p>Think about it. Not just in hours - in real money. Lost clients. Missed deadlines. Projects you couldn't finish. Remember: forty to sixty lost hours every month. Whatever your hour is worth, multiply it by forty. That's what you're losing every month. Plus the opportunities you didn't have the energy to take. Whatever that number is - and only you know it - this costs a fraction of one month of it. And that's before you count every app subscription, every course, every tool you bought hoping it would help. This fixes what those couldn't.</p>
 
   <figure>
-    <img src="img/slide-091.png" alt="30-day sleep-or-refund guarantee">
+    <img src="img/slide-094.png" alt="30-day sleep-or-refund guarantee">
   </figure>
 
   <h2>The guarantee</h2>
@@ -570,6 +592,7 @@
       <li>Your personal protocol card</li>
       <li>Action cards, one per lesson</li>
       <li>The week-by-week protocol guide</li>
+      <li>Your Toolkit - all of it in one dashboard, on your laptop and your phone</li>
       <li>A thirty-day money-back guarantee</li>
       <li>Plus the bonuses: 9 Recovery Mistakes, Your Caffeine Blueprint, and The Recovery Protocol</li>
     </ul>
