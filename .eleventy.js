@@ -21,6 +21,9 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.ignores.add("src/webinar-bonuses/**");
   eleventyConfig.addPassthroughCopy("src/webinar-bonuses");
 
+  // Shared no-build JS modules (e.g. recovery tracker) served verbatim at /shared/*
+  eleventyConfig.addPassthroughCopy("src/shared");
+
   // Combined /app (Sleep Diary + Assessment, auth + PWA, self-contained, served verbatim)
   eleventyConfig.ignores.add("src/app/**");
   eleventyConfig.addPassthroughCopy("src/app");
