@@ -5,3 +5,4 @@ node_modules/
 .env
 .netlify/
 deno.lock
+.DS_Store
