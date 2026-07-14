@@ -300,6 +300,4 @@ body {
   /* covers stay 3-up on phones - stacking them would make each one huge */
   .bonus-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .bonus-name { font-size: 0.68rem; }
-  .bonus-card { flex-direction: row; justify-content: flex-start; padding: 12px 14px; gap: 12px; }
-  .bonus-name { font-size: 0.85rem; }
 }
