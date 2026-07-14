@@ -58,14 +58,181 @@
   .tab-bonus{ color:var(--orange); }
   .tab-bonus .bstar{ font-size:11px; vertical-align:1px; }
   .tab-bonus.on{ color:var(--orange); border-bottom-color:var(--orange); }
-  #view-bonuses{ padding:0; }
-  #bonusesFrame{ width:100%; height:calc(100vh - 112px); border:none; background:var(--bg); display:block; }
-  /* while Bonuses is open the app shell must not scroll - otherwise iOS grabs the outer
-     page instead of the iframe content (double-scroll trap). JS sets the exact height. */
-  html.bonus-lock, body.bonus-lock{ overflow:hidden; height:100%; }
+  #view-bonuses{ padding:0 20px 40px; }
 
   .view{ display:none; }
   .view.on{ display:block; }
+
+  /* ===== Bonuses guides — native, duplicated from /webinar-bonuses =====
+     Scoped under #view-bonuses so the guides' generic class names (.section,
+     .tip, .footer, .badge, .accent …) never collide with the app's own styles.
+     --pink/--red/--muted/--text/--bg/--panel/--panel2/--line/--dim already match
+     the app palette; alias only the three the source guide needs on top. */
+  #view-bonuses{ --p:var(--purple); --c:var(--cyan); --line2:rgba(255,255,255,0.05); }
+  body.light #view-bonuses{ --line2:rgba(0,0,0,0.05); }
+
+  /* mobile in-view guide switcher (desktop drives guides from the sidebar subnav) */
+  .bonus-switch{ display:inline-flex; gap:4px; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:4px; margin:22px 0; }
+  .bsw{ border:none; background:transparent; color:var(--muted); font-family:inherit; font-size:13px; font-weight:600; padding:9px 16px; border-radius:9px; cursor:pointer; transition:color .15s; white-space:nowrap; }
+  .bsw:hover{ color:var(--text); }
+  .bsw.on{ background:var(--purple); color:#fff; }
+
+  .bguide{ display:none; }
+  .bguide.on{ display:block; }
+
+  #view-bonuses .tbtn { display:inline-flex; align-items:center; gap:7px; background:var(--panel); border:1px solid var(--line); color:var(--text);
+    font-family:inherit; font-size:13px; font-weight:600; padding:9px 15px; border-radius:10px; cursor:pointer; transition:border-color .15s,color .15s; }
+  #view-bonuses .tbtn:hover { border-color:var(--p); color:var(--p); }
+  #view-bonuses .tbtn.primary { background:var(--p); color:#fff; border-color:var(--p); }
+  #view-bonuses .tbtn.primary:hover { opacity:.9; color:#fff; }
+
+  #view-bonuses .bridge { background:linear-gradient(160deg, rgba(189,147,249,0.12), rgba(189,147,249,0.03));
+    border:1px solid rgba(189,147,249,0.30); border-radius:14px; padding:20px 24px; margin:26px 0 8px; }
+  #view-bonuses .bridge p { font-size:14.5px; color:var(--text); line-height:1.65; }
+  #view-bonuses .bridge .lead { color:var(--p); font-weight:700; }
+
+  #view-bonuses .header { text-align:center; margin:30px 0 44px; padding-bottom:34px; border-bottom:1px solid var(--line); }
+  #view-bonuses .badge { display:inline-block; background:rgba(189,147,249,0.12); color:var(--p); font-size:11px; font-weight:600;
+    letter-spacing:2px; text-transform:uppercase; padding:6px 16px; border-radius:20px; border:1px solid rgba(189,147,249,0.25); margin-bottom:20px; }
+  #view-bonuses h1 { font-size:34px; font-weight:900; margin-bottom:14px; letter-spacing:-0.5px; }
+  #view-bonuses h1 .accent { color:var(--p); }
+  #view-bonuses .subtitle { font-size:16px; color:var(--muted); max-width:560px; margin:0 auto; line-height:1.7; }
+
+  #view-bonuses .section { margin-bottom:42px; }
+  #view-bonuses .section-title { display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+  #view-bonuses .section-num { display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px;
+    background:var(--p); color:#fff; font-size:14px; font-weight:800; border-radius:8px; flex:0 0 auto; }
+  #view-bonuses .section-label { font-size:17px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; }
+  #view-bonuses .sct { font-size:13px; font-weight:700; color:var(--c); letter-spacing:1.5px; text-transform:uppercase;
+    margin-bottom:14px; padding-bottom:9px; border-bottom:1px solid rgba(139,233,253,0.18); }
+  #view-bonuses .section p { font-size:14.5px; color:var(--muted); line-height:1.75; margin-bottom:11px; }
+  #view-bonuses .section p .hl { color:var(--pink); font-weight:600; }
+
+  #view-bonuses .tip { margin-bottom:18px; padding-left:42px; }
+  #view-bonuses .tip-name { font-size:15px; font-weight:700; color:var(--c); margin-bottom:4px; }
+  #view-bonuses .tip-text { font-size:14px; color:var(--muted); line-height:1.75; }
+  #view-bonuses .tip-text .hl { color:var(--pink); font-weight:600; }
+  #view-bonuses .blist { list-style:none; margin:8px 0 0; padding:0; }
+  #view-bonuses .blist li { font-size:14px; color:var(--muted); line-height:1.7; padding:3px 0 3px 18px; position:relative; }
+  #view-bonuses .blist li::before { content:''; position:absolute; left:2px; top:13px; width:5px; height:5px; border-radius:50%; background:var(--p); }
+  #view-bonuses .blist li b { color:var(--text); font-weight:600; }
+
+  #view-bonuses .divider { width:48px; height:1px; background:rgba(189,147,249,0.25); margin:44px auto; }
+  #view-bonuses .footer { text-align:center; padding-top:26px; margin-top:8px; border-top:1px solid var(--line); }
+  #view-bonuses .footer p { font-size:11px; color:var(--dim); line-height:1.6; }
+
+  #view-bonuses table.ref { width:100%; border-collapse:separate; border-spacing:0; border-radius:10px; overflow:hidden; border:1px solid var(--line); }
+  #view-bonuses table.ref thead th { background:var(--panel); color:var(--p); font-size:11px; font-weight:700; letter-spacing:1.1px;
+    text-transform:uppercase; padding:13px 16px; text-align:left; border-bottom:1px solid var(--line); }
+  #view-bonuses table.ref tbody td { padding:11px 16px; font-size:14px; color:var(--text); border-bottom:1px solid var(--line2); background:var(--bg); }
+  #view-bonuses table.ref tbody tr:last-child td { border-bottom:none; }
+
+  #view-bonuses .formula { background:var(--panel); border:1px solid rgba(189,147,249,0.18); border-radius:12px; padding:24px 28px; }
+  #view-bonuses .formula p { color:var(--text); margin-bottom:16px; }
+
+  /* caffeine calculator */
+  #view-bonuses .caff-in { margin-bottom:18px; }
+  #view-bonuses .caff-in label { display:block; font-size:12.5px; color:var(--muted); margin-bottom:6px; }
+  #view-bonuses .caff-in input[type=time] { background:var(--panel2); border:1px solid var(--line); color:var(--text); font-family:inherit;
+    font-size:16px; padding:10px 12px; border-radius:10px; width:160px; }
+  body:not(.light) #view-bonuses .caff-in input[type=time]::-webkit-calendar-picker-indicator { filter:invert(.8); }
+  #view-bonuses .caff-in input[type=text] { width:100%; max-width:380px; background:var(--panel2); border:1px solid var(--line); color:var(--text);
+    font-family:inherit; font-size:15px; padding:10px 12px; border-radius:10px; }
+  #view-bonuses .caff-sug { position:absolute; left:0; top:100%; margin-top:5px; width:100%; max-width:380px; background:var(--panel);
+    border:1px solid var(--line); border-radius:10px; overflow:hidden; z-index:5; display:none; box-shadow:0 8px 24px rgba(0,0,0,0.25); }
+  #view-bonuses .caff-sug.show { display:block; }
+  #view-bonuses .caff-sug button { display:flex; justify-content:space-between; align-items:center; width:100%; background:none; border:none;
+    color:var(--text); font-family:inherit; font-size:13.5px; text-align:left; padding:10px 13px; cursor:pointer; border-bottom:1px solid var(--line2); }
+  #view-bonuses .caff-sug button:last-child { border-bottom:none; }
+  #view-bonuses .caff-sug button:hover { background:rgba(189,147,249,0.14); }
+  #view-bonuses .caff-sug button .mg { color:var(--dim); font-size:12px; }
+  #view-bonuses .caff-chips { display:flex; flex-wrap:wrap; gap:7px; margin:12px 0 0; }
+  #view-bonuses .caff-chip { background:var(--panel2); border:1px solid var(--line); color:var(--muted); font-family:inherit; font-size:12.5px;
+    padding:6px 12px; border-radius:20px; cursor:pointer; transition:border-color .15s,color .15s; }
+  #view-bonuses .caff-chip:hover { border-color:var(--p); color:var(--p); }
+  #view-bonuses .caff-result { margin-top:16px; }
+  #view-bonuses .caff-result .rcard { background:var(--panel2); border:1px solid var(--line); border-left:3px solid var(--p); border-radius:12px; padding:16px 18px; }
+  #view-bonuses .caff-result .rdrink { font-size:13px; color:var(--dim); margin-bottom:4px; }
+  #view-bonuses .caff-result .rtime { font-size:22px; font-weight:800; color:var(--p); }
+  #view-bonuses .caff-result .rcard.rlow { border-left-color:var(--c); }
+  #view-bonuses .caff-result .rcard.rlow .rtime { color:var(--c); font-size:18px; }
+  #view-bonuses .caff-result .rsub { font-size:13px; color:var(--muted); margin-top:7px; line-height:1.55; }
+
+  #view-bonuses .disclaimer { margin-top:26px; padding:14px 0 0; border-top:1px solid var(--line); }
+  #view-bonuses .disclaimer p { font-size:11px; color:var(--dim); line-height:1.6; margin:0; }
+  #view-bonuses .disclaimer a { color:var(--p); text-decoration:none; }
+  #view-bonuses .disclaimer a:hover { text-decoration:underline; }
+
+  #view-bonuses .tips-list { list-style:none; padding:0; }
+  #view-bonuses .tips-list li { font-size:14.5px; color:var(--muted); line-height:1.75; margin-bottom:14px; padding-left:22px; position:relative; }
+  #view-bonuses .tips-list li::before { content:''; position:absolute; left:0; top:10px; width:6px; height:6px; border-radius:50%; background:var(--p); }
+  #view-bonuses .tips-list li strong { color:var(--pink); font-weight:600; }
+
+  /* maintenance tracker */
+  #view-bonuses .block-head { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+  #view-bonuses .block-mark { width:30px; height:4px; border-radius:3px; background:var(--p); flex:0 0 auto; }
+  #view-bonuses .block-title { font-size:17px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; }
+  #view-bonuses .block-sub { font-size:13.5px; color:var(--muted); margin:0 0 20px 42px; line-height:1.6; }
+  #view-bonuses .unit { border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:14px; }
+  #view-bonuses .unit-head { display:flex; align-items:center; gap:12px; margin-bottom:10px; padding-bottom:10px; border-bottom:1px solid var(--line2); }
+  #view-bonuses .unit-name { font-size:15px; font-weight:700; color:var(--text); }
+  #view-bonuses .unit-label { flex:1; max-width:200px; background:var(--panel2); border:1px solid var(--line); color:var(--text);
+    font-family:inherit; font-size:12.5px; padding:5px 9px; border-radius:7px; }
+  #view-bonuses .unit-del { background:none; border:none; color:var(--dim); font-size:12px; cursor:pointer; text-decoration:underline; }
+  #view-bonuses .unit-del:hover { color:var(--red); }
+  #view-bonuses .task { display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:7px 0; }
+  #view-bonuses .task-name { flex:1 1 180px; font-size:13.5px; color:var(--muted); }
+  #view-bonuses .freq { display:inline-block; font-size:10.5px; font-weight:600; letter-spacing:0.4px; padding:3px 9px; border-radius:11px; white-space:nowrap; }
+  #view-bonuses .freq-weekly { background:rgba(139,233,253,0.15); color:var(--c); }
+  #view-bonuses .freq-monthly { background:rgba(189,147,249,0.15); color:var(--p); }
+  #view-bonuses .freq-quarterly { background:rgba(255,121,198,0.14); color:var(--pink); }
+  #view-bonuses .freq-yearly { background:rgba(255,255,255,0.07); color:var(--muted); }
+  body.light #view-bonuses .freq-yearly { background:rgba(0,0,0,0.05); }
+  #view-bonuses .freq-replace { background:rgba(255,85,85,0.13); color:var(--red); }
+  #view-bonuses .task input[type=date] { background:var(--panel2); border:1px solid var(--line); color:var(--text); font-family:inherit;
+    font-size:12.5px; padding:6px 8px; border-radius:7px; width:150px; }
+  body:not(.light) #view-bonuses .task input[type=date]::-webkit-calendar-picker-indicator { filter:invert(.8); }
+  #view-bonuses .task .next { font-size:12.5px; font-weight:700; color:var(--c); white-space:nowrap; }
+  #view-bonuses .task .next.due { color:var(--red); }
+  #view-bonuses .task .next .m { color:var(--dim); font-weight:400; }
+  #view-bonuses .addbtn { background:none; border:1px dashed var(--line); color:var(--p); font-family:inherit; font-size:12.5px; font-weight:600;
+    padding:8px 14px; border-radius:9px; cursor:pointer; margin-bottom:18px; }
+  #view-bonuses .addbtn:hover { border-color:var(--p); }
+  #view-bonuses .cal-row { display:flex; align-items:center; gap:12px; margin:6px 0 0; flex-wrap:wrap; }
+  #view-bonuses .cal-note { font-size:12px; color:var(--dim); }
+  #view-bonuses #calStatus { font-size:12.5px; color:var(--c); }
+
+  /* myths */
+  #view-bonuses .myth { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--p);
+    border-radius:12px; padding:18px 20px; margin-bottom:14px; }
+  #view-bonuses .myth-top { display:flex; align-items:baseline; gap:13px; margin-bottom:8px; }
+  #view-bonuses .myth-num { font-size:15px; font-weight:800; color:#fff; background:var(--p); width:26px; height:26px; border-radius:7px;
+    display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  #view-bonuses .myth-claim { font-size:16px; font-weight:700; color:var(--pink); line-height:1.35; }
+  #view-bonuses .myth-real { font-size:14px; color:var(--muted); line-height:1.7; padding-left:39px; }
+  #view-bonuses .myth-real b { color:var(--text); font-weight:600; }
+  #view-bonuses .callout { background:var(--panel); border:1px solid rgba(189,147,249,0.15); border-radius:12px; padding:22px 26px; margin-bottom:36px; }
+  #view-bonuses .callout p { font-size:14.5px; color:var(--muted); line-height:1.75; }
+  #view-bonuses .callout strong { color:var(--c); font-weight:600; }
+  #view-bonuses .myth-src { margin:9px 0 0 39px; }
+  #view-bonuses .myth-src a { font-size:11.5px; color:var(--dim); text-decoration:none; }
+  #view-bonuses .myth-src a:hover { color:var(--p); text-decoration:underline; }
+  #view-bonuses .research { margin-top:28px; padding-top:16px; border-top:1px solid var(--line2); }
+  #view-bonuses .research .rh { font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--dim); margin-bottom:9px; }
+  #view-bonuses .research a { display:block; font-size:12.5px; color:var(--c); text-decoration:none; margin-bottom:6px; }
+  #view-bonuses .research a:hover { text-decoration:underline; }
+
+  #view-bonuses .quick-win { display:flex; gap:16px; margin-bottom:18px; padding-left:42px; }
+  #view-bonuses .win-num { flex:0 0 32px; height:32px; background:rgba(189,147,249,0.15); color:var(--p); font-size:14px; font-weight:700;
+    border-radius:50%; display:flex; align-items:center; justify-content:center; }
+  #view-bonuses .win-text { flex:1; font-size:14px; color:var(--muted); line-height:1.75; }
+  #view-bonuses .win-text strong { color:var(--pink); font-weight:600; }
+
+  @media (max-width:600px){
+    #view-bonuses .tip,#view-bonuses .quick-win,#view-bonuses .block-sub,#view-bonuses .cal-row { padding-left:0; margin-left:0; }
+    #view-bonuses .myth-real { padding-left:0; }
+    #view-bonuses .myth-src { margin-left:0; }
+  }
 
   /* ===== install hint ===== */
   .install{ display:none; margin:10px 20px 0; background:rgba(189,147,249,0.10); border:1px solid rgba(189,147,249,0.3);
@@ -484,9 +651,10 @@
     #view-protocol .pc-body{ max-width:720px; margin-left:auto; margin-right:auto; padding-left:0; padding-right:0; }
     .asst-wrap{ max-width:720px; margin:0 auto; padding:0; }
 
-    /* ---- bonuses: auto-height iframe inside the scrolling workspace ---- */
+    /* ---- bonuses: native guides in the scrolling workspace ---- */
     #view-bonuses{ max-width:960px; margin:0 auto; }
-    #bonusesFrame{ height:auto; min-height:70vh; border:1px solid var(--line); border-radius:16px; }
+    /* desktop drives guides from the sidebar subnav — hide the in-view switcher */
+    .bonus-switch{ display:none; }
 
     .sum-modal{ max-width:640px; }
     .app-footer{ max-width:960px; margin:24px auto 0; }
@@ -511,6 +679,8 @@
 <script src="/app/config.js"></script>
 <!-- Supabase JS client (UMD bundle exposes global `supabase` with createClient). -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Shared Recovery tracker module (browser-global window.ZFRecoveryTracker); same file as /webinar-bonuses. -->
+<script src="/shared/recovery-tracker.js"></script>
 </head>
 <body>
 <div class="app">
@@ -749,9 +919,259 @@
     </div>
   </div>
 
-  <!-- ============ BONUSES VIEW (same-origin embed of /webinar-bonuses/) ============ -->
+  <!-- ============ BONUSES VIEW (native guides, duplicated from /webinar-bonuses/) ============ -->
   <div class="view" id="view-bonuses">
-    <iframe id="bonusesFrame" title="Your bonuses" loading="lazy"></iframe>
+
+    <!-- mobile guide switcher (hidden on desktop, where the sidebar subnav drives it) -->
+    <div class="bonus-switch" id="bonusSwitch">
+      <button class="bsw on" data-guide="caffeine">Caffeine</button>
+      <button class="bsw" data-guide="bedroom">Recovery</button>
+      <button class="bsw" data-guide="mistakes">9 Mistakes</button>
+    </div>
+
+    <!-- ---------------- CAFFEINE ---------------- -->
+    <section class="bguide on" id="bg-caffeine">
+      <div class="bridge"><p><span class="lead">You came to fix the crashes, not your coffee.</span> But the afternoon wall and the wired-but-tired nights often trace back to one thing: when your last cup lands. Caffeine is still in your system long after you stop feeling it. Here is your exact cutoff.</p></div>
+
+      <div class="header">
+        <div class="badge">The Zero Fog - Bonus</div>
+        <h1>Your <span class="accent">Caffeine</span> Blueprint</h1>
+        <p class="subtitle">Stop guessing when to stop - know your exact cutoff so caffeine works for your focus, not against it</p>
+      </div>
+
+      <div class="section">
+        <div class="sct">The Science (30 Seconds)</div>
+        <p>Caffeine has a half-life of 5-6 hours. Half the caffeine from your 2 PM coffee is still in your system at 8 PM. A quarter is still there at 2 AM.</p>
+        <p>You might fall asleep - but caffeine <span class="hl">reduces deep sleep by up to 20%</span>, even when you don't feel it.</p>
+        <p>After about two weeks of daily use, caffeine mostly stops giving energy - it just keeps withdrawal away.</p>
+        <p>Dose matters as much as timing. A standard cup of drip coffee is about <span class="hl">95 mg</span>, an espresso shot about <span class="hl">63 mg</span>, a strong pre-workout <span class="hl">200 mg</span> or more. The bigger the dose, the longer your body needs to clear it - so the calculator below sets your cutoff for what you're actually drinking.</p>
+      </div>
+
+      <div class="section">
+        <div class="sct">Your Cutoff Calculator</div>
+        <div class="formula">
+          <p>Enter your bedtime, then pick or type what you're drinking. The stronger the dose, the earlier you should stop.</p>
+          <div class="caff-in"><label>My target bedtime</label><input type="time" id="caffBed"></div>
+          <div class="caff-in" style="position:relative">
+            <label>What are you having?</label>
+            <input type="text" id="caffDrink" placeholder="Type a drink - coffee, cappuccino, tea, energy drink, or mg" autocomplete="off">
+            <div class="caff-sug" id="caffSug"></div>
+          </div>
+          <div class="caff-chips" id="caffChips"></div>
+          <div class="caff-result" id="caffResult"></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="sct">What Counts as Caffeine</div>
+        <table class="ref">
+          <thead><tr><th>Source</th><th>Caffeine</th><th>Equivalent</th></tr></thead>
+          <tbody>
+            <tr><td>Espresso (1 shot)</td><td>63 mg</td><td>1 unit</td></tr>
+            <tr><td>Drip coffee (250 ml)</td><td>95 mg</td><td>1.5 units</td></tr>
+            <tr><td>Black tea (250 ml)</td><td>47 mg</td><td>0.75 units</td></tr>
+            <tr><td>Green tea (250 ml)</td><td>28 mg</td><td>0.5 units</td></tr>
+            <tr><td>Cola (330 ml)</td><td>32 mg</td><td>0.5 units</td></tr>
+            <tr><td>Energy drink (250 ml)</td><td>80 mg</td><td>1.25 units</td></tr>
+            <tr><td>Dark chocolate (50 g)</td><td>25 mg</td><td>0.4 units</td></tr>
+            <tr><td>Pre-workout supplement</td><td>150-300 mg</td><td>2-5 units</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section">
+        <div class="sct">Practical Tips</div>
+        <ul class="tips-list">
+          <li><strong>Time it, don't quit it.</strong> Drink coffee in the morning - it works with your natural cortisol peak. After your cutoff, switch to decaf or herbal tea.</li>
+          <li><strong>Hidden sources add up.</strong> Dark chocolate, green tea, pre-workout. Check the table above.</li>
+          <li><strong>Know your type.</strong> Some people clear caffeine slowly (a 3 PM coffee wrecks their night), others barely notice it. This is largely genetic. If an 8-hour cutoff isn't enough, push it to 10-12 hours.</li>
+          <li><strong>Full reset.</strong> Cut back by one cup every three days for two weeks. After that, one cup hits like it used to.</li>
+        </ul>
+        <div class="research">
+          <div class="rh">The research behind this</div>
+          <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3805807/" target="_blank" rel="noopener noreferrer">Drake et al., J. Clinical Sleep Medicine - caffeine 6 hours before bed cuts total sleep &rarr;</a>
+        </div>
+      </div>
+
+      <div class="disclaimer"><p>This material is for education, not medical advice - it doesn't diagnose or treat any condition. If sleep problems persist, or you have symptoms that concern you, talk with a qualified healthcare professional. Read our full <a href="/disclaimer/" target="_blank" rel="noopener noreferrer">disclaimer</a>.</p></div>
+
+      <div class="footer"><p>This bonus is part of The Zero Fog. Based on clinical sleep medicine and peer-reviewed sleep research.</p></div>
+    </section>
+
+    <!-- ---------------- RECOVERY (bedroom) ---------------- -->
+    <section class="bguide" id="bg-bedroom">
+      <div class="bridge"><p><span class="lead">You came for sharper days, not bedding tips.</span> Here is the link the productivity world skips: your brain does its repair work while you sleep, and the room you sleep in decides how much of that repair actually happens. Dial in these five things and you stop leaking recovery every night.</p></div>
+
+      <div class="header">
+        <div class="badge">The Zero Fog - Bonus</div>
+        <h1>The <span class="accent">Recovery</span> Protocol</h1>
+        <p class="subtitle">5 changes to your bedroom that let your brain actually recover - plus a maintenance tracker so it stays that way</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span class="section-num">1</span><span class="section-label">Your Bed</span></div>
+        <div class="tip">
+          <div class="tip-name">The Foundation</div>
+          <p class="tip-text">A bed frame with flexible wooden slats outperforms solid boards. The slats flex with your body and extend the life of your mattress. Minimum size for two people: 63x79 in (160x200 cm).</p>
+        </div>
+        <div class="tip">
+          <div class="tip-name">Your Mattress</div>
+          <p class="tip-text">The top comfort layer should follow your contours. Pick firmness by your weight:</p>
+          <ul class="blist">
+            <li><b>Under 130 lb (60 kg)</b> - soft</li>
+            <li><b>130-200 lb (60-90 kg)</b> - medium</li>
+            <li><b>Over 200 lb (90 kg)</b> - firm</li>
+            <li>Try before you buy - lie down in the store for 10-15 minutes</li>
+          </ul>
+        </div>
+        <div class="tip">
+          <div class="tip-name">Your Pillow</div>
+          <p class="tip-text">Height depends on how you sleep:</p>
+          <ul class="blist">
+            <li><b>Side sleeper</b> - 4-5.5 in (10-14 cm), fills the gap between shoulder and head</li>
+            <li><b>Back sleeper</b> - 3-4 in (8-10 cm)</li>
+            <li><b>Stomach sleeper</b> - 2.5-3 in (6-8 cm), or no pillow at all</li>
+            <li><b>Fold test</b> - fold it in half; if it stays folded, it's dead, replace it</li>
+          </ul>
+        </div>
+        <div class="tip">
+          <div class="tip-name">Blanket and Bedding</div>
+          <p class="tip-text">Match your blanket to the season and room temperature. If you sleep with a partner who runs hot or cold differently, use two separate blankets. Natural fabrics only: cotton, linen, bamboo. Synthetics trap heat and moisture.</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span class="section-num">2</span><span class="section-label">Your Atmosphere</span></div>
+        <div class="tip">
+          <div class="tip-name">Temperature</div>
+          <p class="tip-text">Optimal: 65-72 F (18-22 C). Not "as cold as possible" - comfortable cool. Your body needs to drop its core temperature to fall asleep. Too hot prevents this; too cold makes you tense up.</p>
+        </div>
+        <div class="tip">
+          <div class="tip-name">Humidity</div>
+          <p class="tip-text">Target: 50-60%. In winter, heated homes often drop below 30%. Dry air irritates your throat, dries out your nasal passages, and disrupts sleep. Solution: an ultrasonic humidifier.</p>
+        </div>
+        <div class="tip">
+          <div class="tip-name">Fresh Air</div>
+          <p class="tip-text">Ventilate your bedroom before sleep. If outside noise or cold rules out an open window, consider a ventilation system with filters.</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span class="section-num">3</span><span class="section-label">Light Control</span></div>
+        <div class="tip">
+          <div class="tip-name">At Night - Total Darkness</div>
+          <p class="tip-text">Even small amounts of light suppress melatonin. Install blackout curtains (95%+). Cover LED standby lights with tape. If blackout curtains aren't possible, use a quality sleep mask.</p>
+        </div>
+        <div class="tip">
+          <div class="tip-name">In the Evening - Warm Light Only</div>
+          <p class="tip-text">After sunset, switch to warm bulbs: 1700-3200K. Daylight-style bulbs at 5500K read as "noon" to your brain and keep you alert. This alone can delay when you fall asleep.</p>
+        </div>
+        <div class="tip">
+          <div class="tip-name">Screens - Set and Forget</div>
+          <p class="tip-text">Enable Night Shift on iPhone/Mac, Night Light on Windows/Android. Set it to activate at sunset. Takes 30 seconds to configure, works every night automatically.</p>
+        </div>
+        <div class="tip">
+          <div class="tip-name">In the Morning - Bright Light</div>
+          <p class="tip-text">Open your curtains immediately. Bright morning light resets your circadian clock. In winter, consider a dawn simulator alarm or a light therapy lamp.</p>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section">
+        <div class="section-title"><span class="section-num">4</span><span class="section-label">Sound Control</span></div>
+        <div class="tip">
+          <p class="tip-text">Your brain processes sound even during sleep. "Meaningful" sounds (speech, TV, notifications) trigger alertness. "Meaningless" sounds (rain, wind, white noise) mask the meaningful ones. A white noise machine or app runs at 24-25 dB. Earplugs - wax or silicone, not foam. If your partner snores (50+ dB), combine earplugs with white noise.</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span class="section-num">5</span><span class="section-label">Dust and Allergens</span></div>
+        <div class="tip">
+          <p class="tip-text">Dust mites trigger allergic reactions that disrupt sleep - congestion, sneezing, itchy eyes. Even without diagnosed allergies, reducing dust improves air quality and sleep. Remove carpets, open bookshelves, decorative pillows, stuffed animals. Move plants out (they release CO2 at night). Keep only: bed, two nightstands, one closed wardrobe. Fewer knick-knacks also means less to dust - a near-empty bedroom is simply faster to keep clean and fresh. <span class="hl">Your bedroom is for sleep and intimacy. Not work. Not storage. Not entertainment.</span></p>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section">
+        <div class="block-head"><span class="block-mark"></span><span class="block-title">Maintenance Tracker</span></div>
+        <p class="block-sub">Fill in the date each item was bought or last cleaned - the next due date fills itself. Have more than one set? Hit "Add another" and label them. It saves on this device, prints with your dates, and sends the reminders to your calendar. Hand the printed sheet to whoever keeps the room.</p>
+        <div id="tracker"></div>
+        <div class="cal-row">
+          <button class="tbtn primary" id="icsBtn">📅 Add reminders to calendar</button>
+          <span class="cal-note">Downloads an .ics file - opens in Apple Calendar, Google Calendar, Outlook.</span>
+          <span id="calStatus"></span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section">
+        <div class="block-head"><span class="block-mark"></span><span class="block-title">Tonight's Quick Wins</span></div>
+        <div class="quick-win"><div class="win-num">1</div><div class="win-text"><strong>Light check.</strong> Walk through your bedroom at night with all lights off. See any light? LED standby dots, streetlight through curtains, charger glow? Cover or block them.</div></div>
+        <div class="quick-win"><div class="win-num">2</div><div class="win-text"><strong>Temperature check.</strong> Set your thermostat to 68 F (20 C) for tonight. No thermostat? Crack a window 15 minutes before bed.</div></div>
+        <div class="quick-win"><div class="win-num">3</div><div class="win-text"><strong>Phone out.</strong> Move your phone to the other side of the room - or better, outside the bedroom entirely. Get a simple alarm clock.</div></div>
+        <div class="research">
+          <div class="rh">The research behind this</div>
+          <a href="https://www.sleepfoundation.org/bedroom-environment/best-temperature-for-sleep" target="_blank" rel="noopener noreferrer">Sleep Foundation - the best bedroom temperature for sleep &rarr;</a>
+          <a href="https://www.health.harvard.edu/healthy-aging-and-longevity/blue-light-has-a-dark-side" target="_blank" rel="noopener noreferrer">Harvard Health - light at night suppresses melatonin &rarr;</a>
+        </div>
+      </div>
+
+      <div class="disclaimer"><p>This material is for education, not medical advice - it doesn't diagnose or treat any condition. If sleep problems persist, or you have symptoms that concern you, talk with a qualified healthcare professional. Read our full <a href="/disclaimer/" target="_blank" rel="noopener noreferrer">disclaimer</a>.</p></div>
+
+      <div class="footer"><p>This bonus is part of The Zero Fog. Based on clinical sleep medicine and environmental sleep research.</p></div>
+    </section>
+
+    <!-- ---------------- 9 MISTAKES ---------------- -->
+    <section class="bguide" id="bg-mistakes">
+      <div class="bridge"><p><span class="lead">You came to fix the fog and the energy crashes.</span> Most of what you have been told about "fixing your energy" is wrong - and the wrong moves quietly cost you the exact recovery your focus runs on. Here are nine of them.</p></div>
+
+      <div class="header">
+        <div class="badge">The Zero Fog - Bonus</div>
+        <h1><span class="accent">9</span> Recovery Mistakes</h1>
+        <p class="subtitle">Nine things you do for energy that sound logical but work against your biology</p>
+      </div>
+
+      <div class="myth"><div class="myth-top"><span class="myth-num">1</span><span class="myth-claim">"You need exactly 8 hours."</span></div>
+        <p class="myth-real">The genetic range runs from about 6 to 9 hours. Under 6 impairs how you think; chronically over 9 is linked to its own health issues. <b>Your number is personal - find it, don't copy it.</b></p><div class="myth-src"><a href="https://www.sleepfoundation.org/how-sleep-works/how-much-sleep-do-we-really-need" target="_blank" rel="noopener noreferrer">Source: Sleep Foundation &rarr;</a></div></div>
+
+      <div class="myth"><div class="myth-top"><span class="myth-num">2</span><span class="myth-claim">"Sleep before midnight counts double."</span></div>
+        <p class="myth-real">Deep sleep happens in the first 3-4 hours of the night regardless of the clock. <b>A consistent schedule matters more than the hour you fall asleep.</b></p><div class="myth-src"><a href="https://www.sleepfoundation.org/stages-of-sleep/slow-wave-sleep" target="_blank" rel="noopener noreferrer">Source: Sleep Foundation &rarr;</a></div></div>
+
+      <div class="myth"><div class="myth-top"><span class="myth-num">3</span><span class="myth-claim">"You can catch up on weekends."</span></div>
+        <p class="myth-real">Sleeping in shifts your body clock by 2-4 hours (social jet lag) - so Monday feels like a flight across time zones. <b>The feeling of being caught up comes back; the underlying deficit doesn't fully.</b></p><div class="myth-src"><a href="https://academic.oup.com/sleep/article/43/10/zsaa076/5825065" target="_blank" rel="noopener noreferrer">Source: Journal SLEEP (Oxford) &rarr;</a></div></div>
+
+      <div class="myth"><div class="myth-top"><span class="myth-num">4</span><span class="myth-claim">"A nightcap helps you sleep."</span></div>
+        <p class="myth-real">Alcohol sedates you faster, yes. But as your body breaks it down, it fragments the second half of the night and suppresses REM - the phase that handles memory and emotion. <b>You sleep, but you don't recover.</b></p><div class="myth-src"><a href="https://www.sleepfoundation.org/nutrition/alcohol-and-sleep" target="_blank" rel="noopener noreferrer">Source: Sleep Foundation &rarr;</a></div></div>
+
+      <div class="myth"><div class="myth-top"><span class="myth-num">5</span><span class="myth-claim">"Sleeping pills fix insomnia."</span></div>
+        <p class="myth-real">Pills mostly help you fall asleep. They don't fix the cause, they change sleep architecture, and tolerance builds. <b>Used short-term they have a place; as a long-term fix they don't.</b></p><div class="myth-src"><a href="https://aasm.org/combination-treatment-chronic-insomnia-guideline/" target="_blank" rel="noopener noreferrer">Source: Am. Academy of Sleep Medicine &rarr;</a></div></div>
+
+      <div class="divider"></div>
+
+      <div class="myth"><div class="myth-top"><span class="myth-num">6</span><span class="myth-claim">"I'm fine on 5 hours - I'm built different."</span></div>
+        <p class="myth-real">Research on chronic sleep restriction shows people running on under 6 hours stop noticing their own decline. <b>You feel fine. Your reaction time, decisions, and memory disagree.</b> (True short sleepers exist, but they're rare - far rarer than people who think they are one.)</p><div class="myth-src"><a href="https://pubmed.ncbi.nlm.nih.gov/12683469/" target="_blank" rel="noopener noreferrer">Source: Van Dongen et al., 2003 (PubMed) &rarr;</a></div></div>
+
+      <div class="myth"><div class="myth-top"><span class="myth-num">7</span><span class="myth-claim">"Counting sheep works."</span></div>
+        <p class="myth-real">Picturing sheep is too visual - it engages your brain instead of calming it. What works is something monotonous: <b>counting backward from 300 by 3s.</b> Boring enough to crowd out thinking.</p><div class="myth-src"><a href="https://pubmed.ncbi.nlm.nih.gov/11863237/" target="_blank" rel="noopener noreferrer">Source: Harvey &amp; Payne, 2002 (PubMed) &rarr;</a></div></div>
+
+      <div class="myth"><div class="myth-top"><span class="myth-num">8</span><span class="myth-claim">"Night owls are just lazy."</span></div>
+        <p class="myth-real">Chronotype is largely genetic, not a character flaw. Forcing a true owl onto a lark's schedule doesn't build discipline - <b>it builds sleep debt.</b> Work with your type where you can.</p><div class="myth-src"><a href="https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006125" target="_blank" rel="noopener noreferrer">Source: PLOS Genetics &rarr;</a></div></div>
+
+      <div class="myth"><div class="myth-top"><span class="myth-num">9</span><span class="myth-claim">"Snoring is harmless."</span></div>
+        <p class="myth-real">Loud, regular snoring can be a sign of sleep apnea - your airway briefly collapses through the night and your brain gets less oxygen each time. It's common and very treatable. <b>If you snore heavily or wake up tired no matter how long you slept, it's worth getting checked.</b></p><div class="myth-src"><a href="https://www.sleepfoundation.org/sleep-apnea/is-it-snoring-or-sleep-apnea" target="_blank" rel="noopener noreferrer">Source: Sleep Foundation &rarr;</a></div></div>
+
+      <div class="divider"></div>
+
+      <div class="callout"><p><strong>The pattern:</strong> most sleep myths sound logical but work against your biology. The fix is rarely willpower - it's understanding how your body actually works, then aligning with it.</p></div>
+
+      <div class="disclaimer"><p>This material is for education, not medical advice - it doesn't diagnose or treat any condition. Loud, regular snoring or pauses in breathing can signal a treatable medical condition - if that's you, or sleep problems persist, talk with a qualified healthcare professional. Read our full <a href="/disclaimer/" target="_blank" rel="noopener noreferrer">disclaimer</a>.</p></div>
+
+      <div class="footer"><p>This bonus is part of The Zero Fog. Based on clinical sleep medicine and peer-reviewed sleep research.</p></div>
+    </section>
+
   </div>
 
   <footer class="app-footer">
@@ -1110,89 +1530,77 @@ $('deleteData').addEventListener('click', async () => {
 
 /* ============ TABS / SIDEBAR NAV ============ */
 /* One switcher drives both the mobile top tabs and the desktop sidebar.
-   Bonuses runs in two modes:
-  - mobile  (<860px): ?embed=1 - shell scroll locked, iframe sized to the visible
-     viewport so the only scrollable surface is the bonus content (iOS double-scroll fix).
-  - desktop (>=860px): ?embed=1&nav=1 - the embed hides its own toolbar (the sidebar
-     subnav takes over), posts zfBonusH and the iframe grows to full content height. */
-function deskMode(){ return window.matchMedia('(min-width:860px)').matches; }
-let bonusesMode=null, bonusesStale=false, pendGuide=null;
-function loadBonuses(){
-  const f=$('bonusesFrame'); if(!f) return;
-  bonusesMode = deskMode() ? 'desk' : 'mob';
-  bonusesStale = false;
-  f.style.height='';
-  f.src='/webinar-bonuses/?embed=1'+(bonusesMode==='desk'?'&nav=1':'')+'&theme='+theme+'&t='+Date.now();
+   Bonuses now renders three native guide sub-views (caffeine / bedroom / mistakes)
+   in #view-bonuses - no iframe. The desktop sidebar subnav and the mobile in-view
+   .bonus-switch both call showGuide(); the guides are lazily built on first open. */
+const BONUS_GUIDES = { caffeine:'bg-caffeine', bedroom:'bg-bedroom', mistakes:'bg-mistakes' };
+let currentGuide = 'caffeine';
+function showGuide(g){
+  if(!BONUS_GUIDES[g]) g='caffeine';
+  currentGuide = g;
+  Object.keys(BONUS_GUIDES).forEach(k=>{ const el=$(BONUS_GUIDES[k]); if(el) el.classList.toggle('on', k===g); });
+  /* keep both switchers (desktop sidebar .subi + mobile .bsw) in sync */
+  document.querySelectorAll('.subi').forEach(x=>x.classList.toggle('on', x.dataset.guide===g));
+  document.querySelectorAll('.bsw').forEach(x=>x.classList.toggle('on', x.dataset.guide===g));
 }
-function sizeBonusesFrame(){
-  const f=$('bonusesFrame');
-  if(!f || !document.body.classList.contains('bonus-lock')) return;
-  f.style.height = Math.max(200, window.innerHeight - f.getBoundingClientRect().top) + 'px';
+let bonusesBuilt = false;
+function bonusesInit(){
+  if(bonusesBuilt) return;
+  bonusesBuilt = true;
+  recoveryInit();   // shared tracker module + localStorage adapter
 }
 function switchView(name){
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on', x.dataset.view===name));
   document.querySelectorAll('.navi[data-view]').forEach(x=>x.classList.toggle('on', x.dataset.view===name));
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
   const v=$('view-'+name); if(v) v.classList.add('on');
-  const bonuses = name==='bonuses';
-  if(bonuses){
-    const f=$('bonusesFrame'), want=deskMode()?'desk':'mob';
-    if(f && (!f.src || bonusesStale || bonusesMode!==want)) loadBonuses();
+  if(name==='bonuses'){
+    bonusesInit();
+    showGuide(currentGuide);
   } else {
     const sn=$('bonusSub'); if(sn) sn.classList.remove('open');
     const bt=document.querySelector('.navi.bonus'); if(bt) bt.classList.remove('expanded');
   }
-  const lock = bonuses && !deskMode();
-  document.documentElement.classList.toggle('bonus-lock', lock);
-  document.body.classList.toggle('bonus-lock', lock);
   window.scrollTo(0,0);
-  if(lock) sizeBonusesFrame();
 }
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click', ()=>switchView(t.dataset.view)));
 document.querySelectorAll('.navi[data-view]').forEach(n=>n.addEventListener('click', ()=>{
   switchView(n.dataset.view);
   if(n.dataset.view==='bonuses'){ const sn=$('bonusSub'); if(sn) sn.classList.add('open'); n.classList.add('expanded'); }
 }));
-/* sidebar subnav: drive the guide switcher inside the (same-origin) bonuses embed */
-function bframeGuide(g){
-  pendGuide=g;
-  try{
-    const btn=$('bonusesFrame').contentDocument.querySelector('.swtab[data-g="'+g+'"]');
-    if(btn){ btn.click(); pendGuide=null; }
-  }catch(e){}
-}
+/* desktop sidebar subnav: pick a guide (opens Bonuses if not already there) */
 document.querySelectorAll('.subi').forEach(s=>s.addEventListener('click', ()=>{
-  document.querySelectorAll('.subi').forEach(x=>x.classList.remove('on')); s.classList.add('on');
+  currentGuide = s.dataset.guide;
   switchView('bonuses');
   const sn=$('bonusSub'); if(sn) sn.classList.add('open');
   const bt=document.querySelector('.navi.bonus'); if(bt){ bt.classList.add('expanded'); bt.classList.add('on'); }
-  bframeGuide(s.dataset.guide);
 }));
-$('bonusesFrame').addEventListener('load', ()=>{
-  if(!pendGuide) return;
-  const g=pendGuide;
-  setTimeout(()=>{ try{ const btn=$('bonusesFrame').contentDocument.querySelector('.swtab[data-g="'+g+'"]'); if(btn) btn.click(); }catch(e){} pendGuide=null; },80);
-});
-/* desktop embed posts its content height (embed-nav mode) */
-window.addEventListener('message', e=>{
-  const d=e.data;
-  if(d && d.zfBonusH>60 && bonusesMode==='desk'){ const f=$('bonusesFrame'); if(f) f.style.height=(d.zfBonusH+28)+'px'; }
-});
-/* resize across the 860px breakpoint while Bonuses is open: reload in the right mode */
-window.addEventListener('resize', ()=>{
-  sizeBonusesFrame();
-  const vb=$('view-bonuses');
-  if(vb && vb.classList.contains('on') && bonusesMode){
-    const want=deskMode()?'desk':'mob';
-    if(bonusesMode!==want){
-      loadBonuses();
-      const lock = want==='mob';
-      document.documentElement.classList.toggle('bonus-lock', lock);
-      document.body.classList.toggle('bonus-lock', lock);
-      if(lock) sizeBonusesFrame();
-    }
-  }
-});
+/* mobile in-view switcher */
+document.querySelectorAll('.bsw').forEach(b=>b.addEventListener('click', ()=>showGuide(b.dataset.guide)));
+
+/* ---- Recovery tracker: shared module + localStorage adapter ----
+   Byte-compatible with /webinar-bonuses (same zf_recovery_units / zf_recovery_dates
+   keys, same seed-if-absent, same getState/setState). Stage 3 swaps this adapter
+   for a Supabase one; the shared module stays untouched. */
+let recoveryBuilt = false;
+function recoveryInit(){
+  if(recoveryBuilt) return;
+  if(!window.ZFRecoveryTracker || !$('tracker')) return;
+  recoveryBuilt = true;
+  const U_KEY='zf_recovery_units', D_KEY='zf_recovery_dates';
+  function load(k,def){ try{ return JSON.parse(localStorage.getItem(k))||def; }catch(e){ return def; } }
+  function save(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+  const store = {
+    getState:function(){
+      let units=load(U_KEY,null);
+      if(!units){ units=window.ZFRecoveryTracker.defaultUnits(); save(U_KEY,units); }
+      const dates=load(D_KEY,{});
+      return { units:units, dates:dates };
+    },
+    setState:function(state){ save(U_KEY, state.units); save(D_KEY, state.dates); }
+  };
+  window.ZFRecoveryTracker.init({ store:store, trackerEl:'#tracker', icsButtonEl:'#icsBtn', statusEl:'#calStatus' });
+}
 /* ============ DESKTOP SIDEBAR: collapse ============ */
 const appShell=document.querySelector('.app');
 function setSideCollapsed(on){
@@ -1605,21 +2013,13 @@ function applyTheme(t){
   }
   const m = document.querySelector('meta[name=theme-color]'); if(m) m.setAttribute('content', t==='light' ? '#f3f3f6' : '#0d0d0d');
 }
-/* default matches the rest of the site: saved choice first, else OS preference.
-   Keeps the first-ever open in sync with the embedded bonuses page. */
+/* default matches the rest of the site: saved choice first, else OS preference. */
 let theme = (()=>{ try{ return localStorage.getItem('zf_theme') || ((window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark'); }catch(e){ return 'dark'; } })();
 applyTheme(theme);
 function toggleTheme(){
   theme = theme==='light' ? 'dark' : 'light';
   try{ localStorage.setItem('zf_theme', theme); }catch(e){}
   applyTheme(theme);
-  /* the bonuses embed reads ?theme= at load - reload it now if visible, else on next open */
-  const f=$('bonusesFrame');
-  if(f && f.src){
-    bonusesStale = true;
-    const vb=$('view-bonuses');
-    if(vb && vb.classList.contains('on')) loadBonuses();
-  }
 }
 $('themeToggle').addEventListener('click', toggleTheme);
 $('themeToggle2').addEventListener('click', toggleTheme);
