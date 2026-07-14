@@ -1,3 +1,5 @@
+/* v2026-07-14: renamed from welcome.css with content changes (IRON redesign: video
+   slot, statement note) - rename + content change defeat Netlify's hash dedupe */
 /* === THANK-YOU (post-purchase) === */
 
 .checkmark {
@@ -16,6 +18,32 @@ h1 {
 .subtitle {
   font-size: 1.05rem; color: var(--text2); margin-bottom: 48px;
   line-height: 1.7; max-width: 520px; text-align: center;
+}
+
+/* === WELCOME VIDEO (placeholder until the real embed lands) === */
+.welcome-video {
+  width: 100%; max-width: 540px;
+  margin-bottom: 48px;
+}
+.welcome-video-placeholder {
+  aspect-ratio: 16 / 9;
+  background: var(--glass);
+  border: 1px dashed var(--border-accent);
+  border-radius: 12px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px;
+}
+.welcome-video-play {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--accent-dim); border: 1px solid var(--border-accent);
+  color: var(--accent); font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  padding-left: 4px;
+}
+.welcome-video-placeholder p {
+  font-size: 0.8rem; color: var(--muted);
+  letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600;
 }
 
 /* === STEPS === */
@@ -39,6 +67,21 @@ h1 {
 .step-text { font-size: 0.92rem; color: var(--text2); line-height: 1.65; }
 .step-text strong { color: var(--text); }
 .accent-name { color: var(--accent); font-weight: 600; }
+.accent-link { color: var(--accent); text-decoration: none; font-weight: 600; }
+.accent-link:hover { text-decoration: underline; }
+
+/* === BANK STATEMENT NOTE (IRON: recognizable descriptor prevents chargebacks) === */
+.statement-note {
+  width: 100%; max-width: 540px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 24px;
+  margin-bottom: 40px;
+  text-align: center;
+}
+.statement-note p { font-size: 0.88rem; color: var(--text2); line-height: 1.65; }
+.statement-note strong { color: var(--text); font-weight: 800; letter-spacing: 0.04em; }
 
 /* === EXPECTATIONS BOX === */
 .expectations {
