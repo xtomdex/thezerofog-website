@@ -87,6 +87,15 @@
      unchanged; the adapter owns its own error handling. */
   function persist(){ try{ return Promise.resolve(store.setState({ units: units, dates: dates })); }catch(e){ return Promise.resolve(); } }
 
+  /* Debounced persist for label typing. The in-memory label is updated synchronously on
+     every keystroke (see the .unit-label handler), so state / render / .ics stay accurate;
+     only the write is coalesced to a single call 600 ms after the user stops typing. Because
+     persist() saves the whole { units, dates }, one shared timer is correct — never per-field.
+     By product decision there is no blur/unload flush: a label lost within 600 ms of the last
+     keystroke on close/navigation is acceptable. */
+  var labelTimer;
+  function persistLabelDebounced(){ clearTimeout(labelTimer); labelTimer = setTimeout(persist, 600); }
+
   function render(){
     if(!host) return;
     var html='';
@@ -118,7 +127,7 @@
     });
     host.querySelectorAll('.unit-label').forEach(function(inp){
       inp.addEventListener('input', function(){ var id=this.getAttribute('data-uid');
-        var u=units.filter(function(x){return x.id===id;})[0]; if(u){ u.label=this.value; persist(); } });
+        var u=units.filter(function(x){return x.id===id;})[0]; if(u){ u.label=this.value; persistLabelDebounced(); } });
     });
     host.querySelectorAll('.addbtn').forEach(function(b){
       b.addEventListener('click', function(){ var key=this.getAttribute('data-add');
