@@ -1,3 +1,5 @@
+/* v2026-07-14: renamed from welcome.css with content changes (IRON redesign: video
+   slot, statement note) - rename + content change defeat Netlify's hash dedupe */
 /* === THANK-YOU (post-purchase) === */
 
 .checkmark {
@@ -18,6 +20,19 @@ h1 {
   line-height: 1.7; max-width: 520px; text-align: center;
 }
 
+/* === WELCOME VIDEO === */
+.welcome-video {
+  width: 100%; max-width: 540px;
+  margin-bottom: 48px;
+}
+.welcome-video video {
+  display: block; width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  border: 1px solid var(--border-accent);
+  background: #0d0d0d;
+}
+
 /* === STEPS === */
 .next-steps { text-align: left; width: 100%; max-width: 540px; margin-bottom: 40px; }
 .next-steps-heading {
@@ -27,8 +42,19 @@ h1 {
 }
 .step {
   display: flex; align-items: flex-start; gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
+.step-body { flex: 1; }
+.step-title {
+  font-size: 0.98rem; font-weight: 700; color: var(--text);
+  margin-bottom: 6px; line-height: 1.4;
+}
+.step-sub {
+  font-size: 0.82rem; color: var(--muted);
+  line-height: 1.6; margin-top: 6px;
+}
+/* light theme: #888 on #fafafa is too faint for body-size text */
+html:not(.dark) .step-sub { color: #5f5f5f; }
 .step-num {
   width: 30px; height: 30px; border-radius: 50%;
   background: var(--accent-dim); border: 1px solid var(--border-accent);
@@ -37,8 +63,24 @@ h1 {
   flex-shrink: 0;
 }
 .step-text { font-size: 0.92rem; color: var(--text2); line-height: 1.65; }
+.step-body .step-text { margin-bottom: 4px; }
 .step-text strong { color: var(--text); }
 .accent-name { color: var(--accent); font-weight: 600; }
+.accent-link { color: var(--accent); text-decoration: none; font-weight: 600; }
+.accent-link:hover { text-decoration: underline; }
+
+/* === BANK STATEMENT NOTE (IRON: recognizable descriptor prevents chargebacks) === */
+.statement-note {
+  width: 100%; max-width: 540px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 24px;
+  margin-bottom: 40px;
+  text-align: center;
+}
+.statement-note p { font-size: 0.88rem; color: var(--text2); line-height: 1.65; }
+.statement-note strong { color: var(--text); font-weight: 800; letter-spacing: 0.04em; }
 
 /* === EXPECTATIONS BOX === */
 .expectations {
@@ -46,19 +88,29 @@ h1 {
   border-left: 3px solid var(--accent);
   background: var(--glass);
   border-radius: 0 8px 8px 0;
-  padding: 22px 26px;
+  padding: 24px 28px 10px;
   margin-bottom: 32px;
+  text-align: left;
 }
 .expectations h3 {
   font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase;
-  color: var(--accent); font-weight: 700; margin-bottom: 14px;
+  color: var(--accent); font-weight: 700; margin-bottom: 6px;
+  text-align: center;
 }
-.expectations p {
+.exp-row {
+  display: grid;
+  grid-template-columns: 108px 1fr;
+  gap: 18px;
+  padding: 16px 0;
+}
+.exp-row + .exp-row { border-top: 1px solid var(--border); }
+.exp-label {
+  font-size: 0.88rem; font-weight: 700; color: var(--text);
+  line-height: 1.6;
+}
+.exp-text {
   font-size: 0.88rem; color: var(--text2); line-height: 1.7;
-  margin-bottom: 10px;
 }
-.expectations p:last-child { margin-bottom: 0; }
-.expectations strong { color: var(--text); }
 
 /* === SUPPORT BOX === */
 .support-box {
@@ -79,4 +131,5 @@ h1 {
 /* === MOBILE === */
 @media (max-width: 640px) {
   .checkmark { width: 64px; height: 64px; font-size: 32px; margin-bottom: 24px; }
+  .exp-row { grid-template-columns: 1fr; gap: 4px; padding: 14px 0; }
 }
