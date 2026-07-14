@@ -1548,6 +1548,7 @@ function bonusesInit(){
   if(bonusesBuilt) return;
   bonusesBuilt = true;
   recoveryInit();   // shared tracker module + localStorage adapter
+  caffeineInit();   // caffeine cutoff calculator
 }
 function switchView(name){
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on', x.dataset.view===name));
@@ -1600,6 +1601,68 @@ function recoveryInit(){
     setState:function(state){ save(U_KEY, state.units); save(D_KEY, state.dates); }
   };
   window.ZFRecoveryTracker.init({ store:store, trackerEl:'#tracker', icsButtonEl:'#icsBtn', statusEl:'#calStatus' });
+}
+
+/* ---- Caffeine cutoff calculator (dose-aware) ----
+   Duplicated verbatim from /webinar-bonuses (accepted tech debt). Cutoff = time
+   for the dose to decay (half-life ~5.5h) to a small residual (~35 mg), calibrated
+   so a standard drip coffee (95 mg) lands at ~8h. The bedtime convenience field
+   stays on localStorage (zf_caffeine_bedtime) - never routed to Supabase. */
+let caffeineBuilt = false;
+function caffeineInit(){
+  if(caffeineBuilt) return;
+  var bedEl=document.getElementById('caffBed'); if(!bedEl) return;
+  caffeineBuilt = true;
+  var drinkEl=document.getElementById('caffDrink'), sugEl=document.getElementById('caffSug'),
+      chipsEl=document.getElementById('caffChips'), resEl=document.getElementById('caffResult');
+  var HALF=5.5, R=35, selMg=null, selName='';
+  var DRINKS=[
+    {n:'Drip coffee (8 oz)',mg:95}, {n:'Instant coffee (8 oz)',mg:62}, {n:'Decaf coffee (8 oz)',mg:3},
+    {n:'Espresso (1 shot)',mg:63}, {n:'Double espresso (2 shots)',mg:126}, {n:'Cappuccino (1 shot)',mg:63},
+    {n:'Latte (1 shot)',mg:63}, {n:'Latte (2 shots)',mg:126}, {n:'Flat white (2 shots)',mg:130},
+    {n:'Americano (2 shots)',mg:125}, {n:'Cold brew (16 oz)',mg:200}, {n:'Black tea (8 oz)',mg:47},
+    {n:'Green tea (8 oz)',mg:28}, {n:'Matcha (8 oz)',mg:70}, {n:'Chai latte',mg:50}, {n:'Yerba mate (8 oz)',mg:85},
+    {n:'Cola (12 oz)',mg:32}, {n:'Diet cola (12 oz)',mg:46}, {n:'Mountain Dew (12 oz)',mg:54},
+    {n:'Energy drink (8 oz)',mg:80}, {n:'Large energy drink (16 oz)',mg:160}, {n:'Energy shot (2 oz)',mg:200},
+    {n:'Pre-workout (1 scoop)',mg:200}, {n:'Dark chocolate (1.5 oz)',mg:25}, {n:'Milk chocolate (1.5 oz)',mg:9},
+    {n:'Caffeine pill',mg:100}
+  ];
+  var QUICK=['Drip coffee (8 oz)','Espresso (1 shot)','Cappuccino (1 shot)','Black tea (8 oz)','Green tea (8 oz)','Energy drink (8 oz)'];
+  function fmt(mins){ mins=((mins%1440)+1440)%1440; var hh=Math.floor(mins/60),mm=mins%60,ap=hh<12?'AM':'PM',h=hh%12; if(h===0)h=12; return h+':'+String(mm).padStart(2,'0')+' '+ap; }
+  function bedMins(){ var v=bedEl.value; if(!v) return null; var p=v.split(':'); return (+p[0])*60+(+p[1]); }
+  function compute(){
+    if(selMg==null){ resEl.innerHTML=''; return; }
+    var bed=bedMins();
+    if(bed==null){ resEl.innerHTML='<div class="rcard"><div class="rsub">Enter your bedtime above to see your cutoff.</div></div>'; return; }
+    var hours=HALF*Math.log(selMg/R)/Math.log(2);
+    if(hours<0.5){
+      resEl.innerHTML='<div class="rcard rlow"><div class="rdrink">'+selName+' - about '+selMg+' mg</div><div class="rtime">Low dose</div><div class="rsub">Timing barely matters for this one. Still skip it in the last 2-3 hours before bed.</div></div>';
+      return;
+    }
+    var rh=Math.round(hours*2)/2, cutoff=bed-rh*60;
+    resEl.innerHTML='<div class="rcard"><div class="rdrink">'+selName+' - about '+selMg+' mg</div><div class="rtime">Stop by '+fmt(cutoff)+'</div><div class="rsub">About '+rh+' hours before bed. At '+selMg+' mg it takes that long to clear to a small, sleep-safe amount.</div></div>';
+  }
+  function pick(name,mg){ selName=name; selMg=mg; drinkEl.value=name; sugEl.classList.remove('show'); compute(); }
+  function parseCustom(s){ var m=s.match(/(\d+)\s*mg/i)||s.match(/^\s*(\d+)\s*$/); return m?parseInt(m[1],10):null; }
+  function renderSug(q){
+    q=(q||'').trim().toLowerCase();
+    if(!q){ sugEl.classList.remove('show'); return; }
+    var cm=parseCustom(q), html='';
+    var matches=DRINKS.filter(function(d){ return d.n.toLowerCase().indexOf(q)>=0; }).slice(0,6);
+    if(cm!=null) html+='<button data-n="Custom ('+cm+' mg)" data-mg="'+cm+'">Use '+cm+' mg<span class="mg">custom</span></button>';
+    matches.forEach(function(d){ html+='<button data-n="'+d.n.replace(/"/g,'&quot;')+'" data-mg="'+d.mg+'">'+d.n+'<span class="mg">~'+d.mg+' mg</span></button>'; });
+    if(!html){ sugEl.classList.remove('show'); return; }
+    sugEl.innerHTML=html; sugEl.classList.add('show');
+    sugEl.querySelectorAll('button').forEach(function(b){ b.addEventListener('click',function(){ pick(this.getAttribute('data-n'),+this.getAttribute('data-mg')); }); });
+  }
+  drinkEl.addEventListener('input', function(){ selMg=null; renderSug(this.value); });
+  drinkEl.addEventListener('focus', function(){ if(this.value) renderSug(this.value); });
+  document.addEventListener('click', function(e){ if(!sugEl.contains(e.target) && e.target!==drinkEl) sugEl.classList.remove('show'); });
+  bedEl.addEventListener('input', function(){ try{ localStorage.setItem('zf_caffeine_bedtime', this.value); }catch(e){} compute(); });
+  QUICK.forEach(function(name){ var d=DRINKS.filter(function(x){return x.n===name;})[0]; if(!d) return;
+    var b=document.createElement('button'); b.className='caff-chip'; b.type='button'; b.textContent=name.replace(/ \(.*\)/,'');
+    b.addEventListener('click', function(){ pick(d.n,d.mg); }); chipsEl.appendChild(b); });
+  try{ var s=localStorage.getItem('zf_caffeine_bedtime'); if(s){ bedEl.value=s; } }catch(e){}
 }
 /* ============ DESKTOP SIDEBAR: collapse ============ */
 const appShell=document.querySelector('.app');
