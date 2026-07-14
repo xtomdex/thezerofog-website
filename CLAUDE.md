@@ -203,4 +203,8 @@ Claude reads the `.md`, locates the matching block in the `.njk`, and applies th
 - **Stripe** — checkout on sales page (integration planned, not yet implemented)
 - **MailerLite** — email sequences via Make.com
 - **Systeme.io** — LMS (course delivery)
+
+## Database (Supabase)
+
+Database schema changes follow `docs/supabase-migration-protocol.md` — migrations live in `supabase/migrations/` (single source of truth); contributors/agents write DRAFT migrations under `supabase/drafts/`, never run `supabase db push`, and never edit applied migrations.
  

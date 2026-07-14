@@ -1,21 +1,27 @@
 # Supabase setup — manual dashboard steps
 
 These are the one-time steps a human performs in the Supabase dashboard. The
-SQL itself lives in [`schema.sql`](./schema.sql); everything below is the manual
-configuration around it.
+database structure itself lives in [`migrations/`](./migrations/) and is applied
+with `supabase db push`; everything below is the manual dashboard configuration
+around it.
 
 ## 1. Create a Supabase project
 
 Free tier is sufficient for now (500 MB database, 50k monthly active users).
 
-## 2. Run the schema
+## 2. Apply the database structure
 
-Open **Database → SQL Editor**, paste the full contents of
-[`schema.sql`](./schema.sql), and run it. It is ordered to run top-to-bottom
-without errors (extensions → tables → helper function → enable RLS → policies).
+The schema is managed as Supabase CLI migrations in [`migrations/`](./migrations/).
+Apply them to the linked project with:
 
-This creates `profiles`, `diary_entries`, `assessments`, the `is_paid_user()`
-helper, and all RLS policies.
+```
+supabase db push
+```
+
+The baseline migration creates `profiles`, `diary_entries`, `assessments`, the
+`is_paid_user()` helper, the `rls_auto_enable` event trigger, and all RLS policies;
+later migrations add `protocol_cards` and `recovery_protocol_cards`. Migrations are
+applied by whoever owns DB pushes — do not paste SQL into the SQL Editor by hand.
 
 ## 3. Enable email OTP as a numeric code (critical — not the default)
 
