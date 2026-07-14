@@ -10,7 +10,7 @@ permalink: /confirmation/
 {% endblock %}
 
 {% block page_css %}
-<link rel="stylesheet" href="/assets/css/pages/confirmation-2.css">
+<link rel="stylesheet" href="/assets/css/pages/confirmation-3.css">
 {% endblock %}
 
 {% block content %}
@@ -30,12 +30,19 @@ permalink: /confirmation/
 
   <div class="device-msg hidden" id="deviceDesktop">
     <p class="device-title">You're on a desktop - perfect.</p>
-    <p class="device-text">Add the webinar to your calendar now and join from this same computer when it's time. The join link is in the email we just sent.</p>
+    <p class="device-text">Add the webinar to your calendar now. The join link is in the email we just sent - open it on any desktop when it's time.</p>
   </div>
 
   <div class="device-msg hidden" id="deviceMobile">
     <p class="device-title">You're on mobile - the webinar link is in your email.</p>
     <p class="device-text">For the best experience, join from a desktop or laptop when it starts. You'll see the slides, demos, and Q&amp;A in full.</p>
+  </div>
+
+  <!-- Calendar buttons: revealed by JS only when EverWebinar passes a usable
+       event date (wj_event_ts / wj_next_event_*). Hidden on direct visits. -->
+  <div class="cal-btns hidden" id="calBtns">
+    <a class="cal-btn" id="calGoogle" href="#" target="_blank" rel="noopener">Add to Google Calendar</a>
+    <a class="cal-btn" id="calIcs" href="#" download="the-zero-fog-training.ics">Apple / Outlook (.ics)</a>
   </div>
 
   <div class="divider"></div>
@@ -73,19 +80,19 @@ permalink: /confirmation/
   <div class="bullets-section">
     <p class="bullets-heading">Attend, and you'll also get:</p>
 
-    <div class="bullet">
-      <span class="bullet-check">&#10003;</span>
-      <p class="bullet-text"><strong class="accent-name">Your Caffeine Blueprint</strong></p>
-    </div>
-
-    <div class="bullet">
-      <span class="bullet-check">&#10003;</span>
-      <p class="bullet-text"><strong class="accent-name">9 Recovery Mistakes</strong></p>
-    </div>
-
-    <div class="bullet">
-      <span class="bullet-check">&#10003;</span>
-      <p class="bullet-text"><strong class="accent-name">The Recovery Protocol</strong></p>
+    <div class="bonus-grid">
+      <div class="bonus-card">
+        <img class="bonus-cover" src="/assets/img/bonus-cover-01-caffeine.png" alt="Your Caffeine Blueprint - cutoff calculator" width="480" height="640" loading="lazy">
+        <span class="bonus-name">Your Caffeine Blueprint</span>
+      </div>
+      <div class="bonus-card">
+        <img class="bonus-cover" src="/assets/img/bonus-cover-03-mistakes.png" alt="9 Recovery Mistakes - myths debunked" width="480" height="640" loading="lazy">
+        <span class="bonus-name">9 Recovery Mistakes</span>
+      </div>
+      <div class="bonus-card">
+        <img class="bonus-cover" src="/assets/img/bonus-cover-02-recovery.png" alt="The Recovery Protocol - five changes" width="480" height="640" loading="lazy">
+        <span class="bonus-name">The Recovery Protocol</span>
+      </div>
     </div>
 
     <p class="bonus-note">Delivered to your inbox right after you watch.</p>
@@ -109,5 +116,5 @@ permalink: /confirmation/
 {% endblock %}
 
 {% block page_scripts %}
-<script src="/assets/js/pages/confirmation.js" defer></script>
+<script src="/assets/js/pages/confirmation-2.js" defer></script>
 {% endblock %}
