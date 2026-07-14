@@ -1607,12 +1607,31 @@ function recoveryInit(){
   if(recoveryBuilt) return;
   if(!window.ZFRecoveryTracker || !$('tracker')) return;
   recoveryBuilt = true;
+  // One-time migration shim: /webinar-bonuses (same origin) stores recovery data
+  // under these keys. This is the ONLY place in /app that reads them directly — a
+  // pre-purchase import so buyers don't retype what they filled on the free page.
+  function importLocalRecovery(){
+    try{
+      const units = JSON.parse(localStorage.getItem('zf_recovery_units') || 'null');
+      if(!units || !units.length) return null;   // no meaningful free-page data
+      let dates = {};
+      try{ dates = JSON.parse(localStorage.getItem('zf_recovery_dates') || '{}') || {}; }catch(e){}
+      return { units: units, dates: dates };
+    }catch(e){ return null; }
+  }
   const store = {
     getState: async function(){
       const saved = await DB.getRecovery();
-      // no row yet → seed defaults, persist nothing until a real edit (matches free page)
-      if(!saved) return { units: window.ZFRecoveryTracker.defaultUnits(), dates: {} };
-      return { units: saved.units || window.ZFRecoveryTracker.defaultUnits(), dates: saved.dates || {} };
+      // Cloud wins: if a row exists, use it and ignore localStorage entirely (no merge).
+      if(saved) return { units: saved.units || window.ZFRecoveryTracker.defaultUnits(), dates: saved.dates || {} };
+      // No cloud row yet. Import pre-purchase free-page data once, if any. We save it
+      // back immediately, so the next load takes the cloud path — effectively one-time.
+      if(!PREVIEW){
+        const imported = importLocalRecovery();
+        if(imported){ await DB.saveRecovery(imported); return imported; }
+      }
+      // Nothing to import → seed defaults; persist nothing until a real edit (matches free page).
+      return { units: window.ZFRecoveryTracker.defaultUnits(), dates: {} };
     },
     setState: function(state){ return DB.saveRecovery({ units: state.units, dates: state.dates }); }
   };
