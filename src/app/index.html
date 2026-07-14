@@ -1329,6 +1329,7 @@ const DB_SB = {
     await sb.from('diary_entries').delete().eq('user_id', this._userId);
     await sb.from('assessments').delete().eq('user_id', this._userId);
     await sb.from('protocol_cards').delete().eq('user_id', this._userId);
+    await sb.from('recovery_protocol_cards').delete().eq('user_id', this._userId);
 
     // Layer 2 (server): delete the auth user (+ cascade profile) via the function,
     // authenticated with the current session's access token.
@@ -1408,6 +1409,20 @@ const DB_SB = {
     if(error) throw error;
     return data ? (data.data || {}) : {};
   },
+
+  // ---- Recovery tracker: singleton row per user; { units, dates } in jsonb `data` ----
+  async saveRecovery(data){
+    const row = { user_id: this._userId, data, updated_at: new Date().toISOString() };
+    const { error } = await sb.from('recovery_protocol_cards').upsert(row, { onConflict: 'user_id' });
+    if(error) throw error;
+  },
+
+  async getRecovery(){
+    const { data, error } = await sb.from('recovery_protocol_cards')
+      .select('data').eq('user_id', this._userId).maybeSingle();
+    if(error) throw error;
+    return data ? (data.data || null) : null;   // null = no row yet (import logic depends on it)
+  },
 };
 
 /* ---- PREVIEW data layer: localStorage only, never touches Supabase. ----
@@ -1418,13 +1433,14 @@ const DB_LOCAL = {
   _diaryKey(){ return 'zf_demo_diary'; },
   _assessKey(){ return 'zf_demo_assess'; },
   _protoKey(){ return 'zf_demo_protocol'; },
+  _recoveryKey(){ return 'zf_demo_recovery'; },
   async currentUser(){ return { email: this._email, id: 'demo' }; },
   async sendCode(){ return {}; },
   async verifyCode(){ return { email: this._email, id: 'demo' }; },
   async signOut(){ /* noop in preview */ },
   async isPaid(){ return true; },
   async recordConsent(){ /* noop */ },
-  async deleteAccount(){ localStorage.removeItem(this._diaryKey()); localStorage.removeItem(this._assessKey()); localStorage.removeItem(this._protoKey()); },
+  async deleteAccount(){ localStorage.removeItem(this._diaryKey()); localStorage.removeItem(this._assessKey()); localStorage.removeItem(this._protoKey()); localStorage.removeItem(this._recoveryKey()); },
   _allDiary(){ try{ return JSON.parse(localStorage.getItem(this._diaryKey()))||{}; }catch(e){ return {}; } },
   async saveDiary(entry){ const all=this._allDiary(); all[entry.entry_date]=entry; localStorage.setItem(this._diaryKey(), JSON.stringify(all)); },
   async getDiary(dateStr){ return this._allDiary()[dateStr] || null; },
@@ -1433,6 +1449,8 @@ const DB_LOCAL = {
   async getAssessments(){ try{ return (JSON.parse(localStorage.getItem(this._assessKey()))||[]).sort((a,b)=>a.taken_on<b.taken_on?-1:1); }catch(e){ return []; } },
   async saveProtocol(data){ localStorage.setItem(this._protoKey(), JSON.stringify(data)); },
   async getProtocol(){ try{ return JSON.parse(localStorage.getItem(this._protoKey()))||{}; }catch(e){ return {}; } },
+  async saveRecovery(data){ localStorage.setItem(this._recoveryKey(), JSON.stringify(data)); },
+  async getRecovery(){ try{ return JSON.parse(localStorage.getItem(this._recoveryKey()))||null; }catch(e){ return null; } },
 };
 
 // The rest of the app calls DB.* and never knows which backend it is.
@@ -1579,26 +1597,24 @@ document.querySelectorAll('.subi').forEach(s=>s.addEventListener('click', ()=>{
 /* mobile in-view switcher */
 document.querySelectorAll('.bsw').forEach(b=>b.addEventListener('click', ()=>showGuide(b.dataset.guide)));
 
-/* ---- Recovery tracker: shared module + localStorage adapter ----
-   Byte-compatible with /webinar-bonuses (same zf_recovery_units / zf_recovery_dates
-   keys, same seed-if-absent, same getState/setState). Stage 3 swaps this adapter
-   for a Supabase one; the shared module stays untouched. */
+/* ---- Recovery tracker: shared module bridged to the app DB layer ----
+   The shared module is adapter-agnostic; here we hand it a store that delegates
+   to DB (DB_SB → Supabase table recovery_protocol_cards, or DB_LOCAL under
+   ?demo=1). State is a single { units, dates } object, mirroring protocol_cards.
+   The module already awaits store calls, so async Supabase works unchanged. */
 let recoveryBuilt = false;
 function recoveryInit(){
   if(recoveryBuilt) return;
   if(!window.ZFRecoveryTracker || !$('tracker')) return;
   recoveryBuilt = true;
-  const U_KEY='zf_recovery_units', D_KEY='zf_recovery_dates';
-  function load(k,def){ try{ return JSON.parse(localStorage.getItem(k))||def; }catch(e){ return def; } }
-  function save(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
   const store = {
-    getState:function(){
-      let units=load(U_KEY,null);
-      if(!units){ units=window.ZFRecoveryTracker.defaultUnits(); save(U_KEY,units); }
-      const dates=load(D_KEY,{});
-      return { units:units, dates:dates };
+    getState: async function(){
+      const saved = await DB.getRecovery();
+      // no row yet → seed defaults, persist nothing until a real edit (matches free page)
+      if(!saved) return { units: window.ZFRecoveryTracker.defaultUnits(), dates: {} };
+      return { units: saved.units || window.ZFRecoveryTracker.defaultUnits(), dates: saved.dates || {} };
     },
-    setState:function(state){ save(U_KEY, state.units); save(D_KEY, state.dates); }
+    setState: function(state){ return DB.saveRecovery({ units: state.units, dates: state.dates }); }
   };
   window.ZFRecoveryTracker.init({ store:store, trackerEl:'#tracker', icsButtonEl:'#icsBtn', statusEl:'#calStatus' });
 }
