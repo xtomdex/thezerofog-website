@@ -1,4 +1,5 @@
-/* v2026-07-11: content changed to force new hash - Netlify dedupes uploads by file hash and was re-serving stale corrupted artifacts for unchanged files */
+/* v2026-07-14: renamed from replay-2.css with content changes (branded poster
+   placeholder) - rename + content change defeat Netlify's hash dedupe */
 .replay { max-width: 800px; margin: 0 auto; padding: 80px 24px 40px; }
 
 h1 { font-family: 'Inter', sans-serif; font-size: clamp(1.9rem, 3.8vw, 2.6rem); font-weight: 900; letter-spacing: -0.02em; margin-bottom: 12px; text-align: center; }
@@ -20,21 +21,27 @@ h1 { font-family: 'Inter', sans-serif; font-size: clamp(1.9rem, 3.8vw, 2.6rem); 
   font-variant-numeric: tabular-nums; color: var(--text);
 }
 
-/* Video embed placeholder */
+/* Video embed placeholder: branded poster (intro H wordmark frame) until the
+   webinar recording is embedded. Poster keeps its own dark art in both themes. */
 .video-wrapper {
   width: 100%; aspect-ratio: 16/9;
-  background: var(--bg2); border: 1px solid var(--border);
+  background: #0d0d0d url('/assets/img/replay-poster.jpg') center/cover no-repeat;
+  border: 1px solid var(--border-accent);
   border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
   margin-bottom: 40px; overflow: hidden;
 }
-.video-placeholder {
-  text-align: center; color: var(--muted);
-}
+/* push the play button below the wordmark baked into the poster */
+.video-placeholder { text-align: center; transform: translateY(88%); }
 .video-placeholder .play-icon {
-  font-size: 3rem; margin-bottom: 12px; opacity: 0.3;
+  width: 72px; height: 72px; border-radius: 50%;
+  background: rgba(13,13,13,0.55);
+  border: 1px solid rgba(189,147,249,0.5);
+  color: #d9c4ff; font-size: 24px;
+  display: flex; align-items: center; justify-content: center;
+  padding-left: 5px;
+  backdrop-filter: blur(4px);
 }
-.video-placeholder p { font-size: 0.85rem; }
 
 /* CTA below video */
 .replay-cta {
