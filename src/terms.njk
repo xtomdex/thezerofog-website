@@ -45,7 +45,7 @@ canonical: "https://thezerofog.com/terms/"
     <li><strong>"User," "you," or "your"</strong> means any individual who accesses or uses the Services.</li>
     <li><strong>"Webinar"</strong> means any live, simulated-live, or recorded presentation hosted by or on behalf of the Company through the EverWebinar platform.</li>
     <li><strong>"Newsletter"</strong> means email communications you receive after voluntarily providing your email address through the Site, delivered via MailerLite.</li>
-    <!-- DIMA: Paddle-as-MoR заменён на Stripe (реальный чекаут = Stripe, см. netlify/functions/create-checkout.js). Это отменяет апрельское решение "Paddle = MoR" - проверь, пожалуйста: (1) Stripe live keys в Netlify env, (2) кто собирает/платит sales tax / VAT - при Stripe это НАША обязанность (Stripe Tax включён?), (3) формулировки ниже. -->
+    {# DIMA: Paddle-as-MoR заменён на Stripe (реальный чекаут = Stripe, см. netlify/functions/create-checkout.js). Это отменяет апрельское решение "Paddle = MoR" - проверь, пожалуйста: (1) Stripe live keys в Netlify env, (2) кто собирает/платит sales tax / VAT - при Stripe это НАША обязанность (Stripe Tax включён?), (3) формулировки ниже. #}
     <li><strong>"Payment Processor"</strong> means Stripe (Stripe, Inc. and its affiliates, including Stripe Payments Europe, Ltd.), which processes payments on our behalf (see Section 5).</li>
   </ul>
 
@@ -72,7 +72,7 @@ canonical: "https://thezerofog.com/terms/"
   <h2>5. Payment Terms</h2>
 
   <h3>5.1 Payment Processing via Stripe</h3>
-  <!-- DIMA: вся секция переписана Paddle -> Stripe. При Stripe мы (entity) = продавец, Stripe = процессор. Покупатель платит НАМ, чек приходит от Stripe on our behalf. Проверь юридически, особенно tax-абзац. -->
+  {# DIMA: вся секция переписана Paddle -> Stripe. При Stripe мы (entity) = продавец, Stripe = процессор. Покупатель платит НАМ, чек приходит от Stripe on our behalf. Проверь юридически, особенно tax-абзац. #}
   <p>Payments for the Course are processed by <strong>Stripe</strong> (Stripe, Inc. and its affiliates, including Stripe Payments Europe, Ltd.). When you purchase the Course, you are entering into a purchase agreement with the Company; Stripe processes the payment on our behalf through its hosted checkout. Your use of the Stripe checkout is also subject to Stripe's terms and privacy policy, available at <a href="https://stripe.com/legal/consumer">https://stripe.com/legal/consumer</a> and <a href="https://stripe.com/privacy">https://stripe.com/privacy</a>.</p>
   <p>Through the Stripe checkout, you may pay using credit or debit card and, where available, other payment methods supported by Stripe at the time of purchase (such as Apple Pay or Google Pay).</p>
   <p>You will receive a purchase receipt by email, issued through Stripe on our behalf. We do not receive or store your full card number or other payment credentials; these are handled exclusively by Stripe.</p>
