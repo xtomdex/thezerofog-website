@@ -88,19 +88,29 @@ html:not(.dark) .step-sub { color: #5f5f5f; }
   border-left: 3px solid var(--accent);
   background: var(--glass);
   border-radius: 0 8px 8px 0;
-  padding: 22px 26px;
+  padding: 24px 28px 10px;
   margin-bottom: 32px;
+  text-align: left;
 }
 .expectations h3 {
   font-size: 0.7rem; letter-spacing: 0.25em; text-transform: uppercase;
-  color: var(--accent); font-weight: 700; margin-bottom: 14px;
+  color: var(--accent); font-weight: 700; margin-bottom: 6px;
+  text-align: center;
 }
-.expectations p {
+.exp-row {
+  display: grid;
+  grid-template-columns: 108px 1fr;
+  gap: 18px;
+  padding: 16px 0;
+}
+.exp-row + .exp-row { border-top: 1px solid var(--border); }
+.exp-label {
+  font-size: 0.88rem; font-weight: 700; color: var(--text);
+  line-height: 1.6;
+}
+.exp-text {
   font-size: 0.88rem; color: var(--text2); line-height: 1.7;
-  margin-bottom: 10px;
 }
-.expectations p:last-child { margin-bottom: 0; }
-.expectations strong { color: var(--text); }
 
 /* === SUPPORT BOX === */
 .support-box {
@@ -121,4 +131,5 @@ html:not(.dark) .step-sub { color: #5f5f5f; }
 /* === MOBILE === */
 @media (max-width: 640px) {
   .checkmark { width: 64px; height: 64px; font-size: 32px; margin-bottom: 24px; }
+  .exp-row { grid-template-columns: 1fr; gap: 4px; padding: 14px 0; }
 }
