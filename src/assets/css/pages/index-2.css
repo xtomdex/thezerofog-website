@@ -1,3 +1,15 @@
+/* ============================================================================
+   NETLIFY CSS GUARD - DO NOT DELETE THIS COMMENT BLOCK
+   Netlify's pipeline pretty-prints CSS in place (comments stripped, one
+   property per line), then rewrites the original over it WITHOUT truncating.
+   If the raw file is shorter than its pretty-printed form, a corrupted tail
+   of unscoped rules is left appended and can break layout (sales.css
+   2026-07-09, sales-3/4/5.css 2026-07-11). This block keeps the raw file
+   longer than the pretty-printed version. After every deploy that touches
+   CSS: curl the live file and diff against dist - they must be identical.
+   Cache rule still applies: any change to this file requires renaming it
+   (assets are cached immutable for 1 year).
+   ========================================================================= */
 /* === RESET === */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -230,30 +242,32 @@ body {
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
+/* block, not flex: a flex column collapses the cover's width:100% before the
+   image loads, so the card would jump on slow connections */
 .bonus-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 16px 12px;
-  background: var(--glass);
+  display: block;
+  transition: transform 0.2s;
+  text-align: center;
+}
+.bonus-card:hover { transform: translateY(-2px); }
+.bonus-card:hover .bonus-cover { border-color: var(--accent); }
+/* Covers are dark-on-dark by design (pre-reveal art, no sleep imagery). They keep
+   their own background in both themes - only the frame reacts to hover. */
+.bonus-cover {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
   border: 1px solid var(--border-accent);
   border-radius: 10px;
-  text-align: center;
-  transition: border-color 0.2s, transform 0.2s;
-}
-.bonus-card:hover {
-  border-color: var(--accent);
-  transform: translateY(-2px);
-}
-.bonus-icon {
-  color: var(--accent);
-  font-size: 1.2rem;
-  line-height: 1;
+  transition: border-color 0.2s;
 }
 .bonus-name {
+  display: block;
+  margin-top: 10px;
   color: var(--text);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.01em;
   line-height: 1.3;
@@ -283,7 +297,9 @@ body {
   .cta-btn { font-size: 0.9rem; padding: 16px 20px; }
   .bullet-text { font-size: 0.85rem; }
   .brand { display: none; }
-  .bonus-grid { grid-template-columns: 1fr; gap: 8px; }
+  /* covers stay 3-up on phones - stacking them would make each one huge */
+  .bonus-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .bonus-name { font-size: 0.68rem; }
   .bonus-card { flex-direction: row; justify-content: flex-start; padding: 12px 14px; gap: 12px; }
   .bonus-name { font-size: 0.85rem; }
 }
