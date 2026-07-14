@@ -15,6 +15,36 @@ const corsHeaders = {
 
 const STRIPE_CHECKOUT_ENDPOINT = 'https://api.stripe.com/v1/checkout/sessions';
 
+// EU consumer-rights waiver (Art. 16(m), Directive 2011/83/EU): the buyer must
+// actively consent to immediate delivery of digital content, waiving the 14-day
+// withdrawal right. Requires the Terms of Service URL to be set in the Stripe
+// Dashboard (Settings -> Business -> Public details); until it is set, Stripe
+// rejects sessions with consent_collection, so we retry without it (see below).
+// [attorney] exact waiver wording is on the review checklist.
+const TOS_CONSENT_MESSAGE =
+  'I request immediate access to the digital content and acknowledge that I ' +
+  'thereby lose my EU 14-day right of withdrawal. This does not affect the ' +
+  '30-day guarantee described in the [Refund Policy](https://thezerofog.com/refunds/).';
+
+function buildSessionParams(priceId, baseUrl, withTosConsent) {
+  // Stripe expects bracket notation for nested and array params. URLSearchParams
+  // encodes the literal {CHECKOUT_SESSION_ID} template braces as %7B...%7D,
+  // which Stripe accepts and replaces server-side.
+  const params = new URLSearchParams();
+  params.set('mode', 'payment');
+  params.set('line_items[0][price]', priceId);
+  params.set('line_items[0][quantity]', '1');
+  params.set('success_url', `${baseUrl}/welcome/?session_id={CHECKOUT_SESSION_ID}`);
+  params.set('cancel_url', `${baseUrl}/sales/`);
+  // Extensible metadata — a later task can add lead_id/source without restructuring.
+  params.set('metadata[source]', 'sales_page');
+  if (withTosConsent) {
+    params.set('consent_collection[terms_of_service]', 'required');
+    params.set('custom_text[terms_of_service_acceptance][message]', TOS_CONSENT_MESSAGE);
+  }
+  return params;
+}
+
 export default async function handler(req) {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -50,28 +80,32 @@ export default async function handler(req) {
   const baseUrl = siteUrl.replace(/\/$/, '');
 
   try {
-    // Build the form-encoded body. Stripe expects bracket notation for nested
-    // and array params. URLSearchParams encodes the literal {CHECKOUT_SESSION_ID}
-    // template braces as %7B...%7D, which Stripe accepts and replaces server-side.
-    const params = new URLSearchParams();
-    params.set('mode', 'payment');
-    params.set('line_items[0][price]', priceId);
-    params.set('line_items[0][quantity]', '1');
-    params.set('success_url', `${baseUrl}/welcome/?session_id={CHECKOUT_SESSION_ID}`);
-    params.set('cancel_url', `${baseUrl}/sales/`);
-    // Extensible metadata — a later task can add lead_id/source without restructuring.
-    params.set('metadata[source]', 'sales_page');
-
-    const stripeRes = await fetch(STRIPE_CHECKOUT_ENDPOINT, {
+    let stripeRes = await fetch(STRIPE_CHECKOUT_ENDPOINT, {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + secretKey,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: params.toString(),
+      body: buildSessionParams(priceId, baseUrl, true).toString(),
     });
 
-    const session = await stripeRes.json();
+    let session = await stripeRes.json();
+
+    // consent_collection fails until the ToS URL is configured in the Stripe
+    // Dashboard. Keep checkout alive: retry once without the consent block and
+    // log loudly so the missing dashboard setting gets fixed.
+    if ((!stripeRes.ok || session.error) && /terms of service/i.test(session.error?.message || '')) {
+      console.error('EU ToS consent rejected by Stripe (is the Terms of Service URL set in Dashboard -> Settings -> Business?). Retrying WITHOUT the withdrawal-right waiver:', session.error?.message);
+      stripeRes = await fetch(STRIPE_CHECKOUT_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + secretKey,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: buildSessionParams(priceId, baseUrl, false).toString(),
+      });
+      session = await stripeRes.json();
+    }
 
     // Non-2xx or a Stripe error payload → log detail server-side, return a
     // generic message to the client (never leak Stripe internals).
