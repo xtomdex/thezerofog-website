@@ -115,17 +115,18 @@
   ul.clean li::before{content:"";position:absolute;left:4px;top:15px;width:7px;height:7px;border-radius:50%;background:var(--purple)}
   ul.check li::before{content:"\2713";color:var(--green);background:none;left:0;top:6px;width:auto;height:auto;font-weight:700}
 
-  /* offer */
+  /* offer - price mirrors the deck price slides (Inter 900, purple), CTA = funnel-standard button (shared.css .cta-btn family) */
   .offer{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid rgba(189,147,249,0.3);border-radius:18px;padding:34px 28px;margin:40px 0;text-align:center}
-  .offer .price{font-family:'Cormorant Garamond',serif;font-size:62px;font-weight:700;line-height:1;margin:6px 0}
-  .offer .price small{font-size:20px;color:var(--dim)}
+  .offer .price{font-family:'Inter',sans-serif;font-size:54px;font-weight:900;letter-spacing:-0.02em;color:var(--purple);line-height:1;margin:8px 0}
+  .offer .price small{font-size:24px;font-weight:800;color:var(--purple);opacity:.85}
   .offer .terms{font-size:15px;color:var(--muted);margin-bottom:8px}
   .cta{
-    display:inline-block;background:var(--purple);color:var(--btn-text);font-weight:700;font-size:17px;
-    padding:16px 40px;border-radius:12px;text-decoration:none;margin:18px 0 8px;transition:opacity .2s,transform .1s;
+    display:inline-block;background:var(--green);color:var(--btn-text);font-weight:700;font-size:16px;
+    font-family:'Inter',sans-serif;text-transform:uppercase;letter-spacing:0.15em;
+    padding:18px 48px;border-radius:10px;text-decoration:none;margin:18px 0 8px;transition:all .2s;
   }
-  .cta:hover{opacity:.92}
-  .cta:active{transform:translateY(1px)}
+  .cta:hover{opacity:.92;transform:translateY(-1px)}
+  .cta:active{transform:translateY(0)}
   .guar{font-size:14px;color:var(--dim);margin-top:6px}
 
   .compare{display:flex;flex-direction:column;gap:10px;margin:22px 0;text-align:left}
@@ -462,7 +463,7 @@
   <p>Think of it like baking a cake. You have all the right ingredients - but you forgot the main one and mixed the rest in the wrong order. No cake.</p>
 
   <ul class="clean">
-    <li><strong>Exercise without proper sleep</strong> doesn't build you up. Recent research suggests intense exercise on poor sleep can actually accelerate aging - your body never gets the repair cycle. Right ingredient, no cake.</li>
+    <li><strong>Exercise without proper sleep</strong> doesn't build you up. Training is the damage - the rebuilding happens at night. And research links poor sleep to weaker cellular repair and faster biological aging. Your body never gets the repair cycle. Right ingredient, no cake.</li>
     <li><strong>Eating healthy</strong> - but when you sleep poorly, your hunger hormone spikes and it gets easier to gain weight. So if you've been blaming food for the fog - you were close. But the dial that sets those hormones is the night before. And your prefrontal cortex isn't at full power, so controlling what you eat gets harder. Right ingredient, no cake.</li>
     <li><strong>Processing information</strong> - calls, decisions, research - but without proper sleep your brain can't sort through any of it. You work harder and think slower. Right ingredient, no cake.</li>
   </ul>
@@ -512,7 +513,7 @@
     </ul>
   </div>
 
-  <p>These are based on clinical research. Individual timelines vary - but most people who follow the protocol consistently see changes within this window.</p>
+  <p>These are based on clinical research. Individual timelines vary - but many people who follow the protocol consistently see changes within this window.</p>
 
   <p>Now you know why your brain has been running at sixty percent: three systems out of sync. And why no productivity hack or coffee fix ever solved it: an incomplete approach. Let's talk about what the fix actually looks like.</p>
 
@@ -737,7 +738,7 @@
 
   <div class="footer">
     <p>The Zero Fog &nbsp;|&nbsp; This is an educational program for improving sleep and daytime performance. It is not a medical diagnosis or a substitute for professional advice. If you have diagnosed clinical insomnia or untreated sleep apnea, please consult a specialist.</p>
-    <p>&copy; 2026 The Zero Fog. All rights reserved. &nbsp;|&nbsp; <a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Refunds</a> &middot; <a href="/disclaimer/">Disclaimer</a></p>
+    <p>&copy; 2026 The Zero Fog. All rights reserved. &nbsp;|&nbsp; <a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Refunds</a> &middot; <a href="/disclaimer/">Disclaimer</a> &middot; <a href="/contact/">Contact</a></p>
   </div>
 
 </div>
