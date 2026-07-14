@@ -1,0 +1,49 @@
+---
+title: "Contact - The Zero Fog"
+permalink: /contact/
+canonical: "https://thezerofog.com/contact/"
+---
+{% extends "layouts/base.njk" %}
+
+{% block head_extras %}
+<meta name="description" content="How to reach The Zero Fog team - support, refunds, privacy and copyright contacts.">
+{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="/assets/css/pages/legal.css">
+{% endblock %}
+
+{% block content %}
+
+<a href="/" class="brand">The Zero Fog</a>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
+
+<article class="legal-page">
+
+  <h1>Contact</h1>
+
+  <div class="legal-meta">
+    <p><strong>The Zero Fog</strong> &middot; thezerofog.com</p>
+  </div>
+
+  <p>The fastest way to reach us is email. Every message goes to a real person on the team, and we aim to respond within 2 business days.</p>
+
+  <h2>Support</h2>
+  <p>Questions about the course, your order, account access, or anything technical:</p>
+  <p><strong>Email:</strong> <a href="mailto:{{ site.email.support }}">{{ site.email.support }}</a></p>
+
+  <h2>Refunds</h2>
+  <p>To request a refund or ask about eligibility, see our <a href="/refunds/">Refund Policy</a> for the steps and timelines, then write to:</p>
+  <p><strong>Email:</strong> <a href="mailto:{{ site.email.refunds }}">{{ site.email.refunds }}</a></p>
+
+  <h2>Privacy &amp; data requests</h2>
+  <p>To exercise your privacy rights - including access, correction, or deletion of your personal data - see our <a href="/privacy/">Privacy Policy</a> or write directly to:</p>
+  <p><strong>Email:</strong> <a href="mailto:{{ site.email.privacy }}">{{ site.email.privacy }}</a></p>
+
+  <h2>Copyright</h2>
+  <p>For copyright notices and takedown requests:</p>
+  <p><strong>Email:</strong> <a href="mailto:{{ site.email.copyright }}">{{ site.email.copyright }}</a></p>
+
+</article>
+
+{% endblock %}
