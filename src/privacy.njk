@@ -34,13 +34,9 @@ canonical: "https://thezerofog.com/privacy/"
   <p>We are committed to protecting your privacy and processing your personal data in compliance with the General Data Protection Regulation (EU) 2016/679 ("GDPR"), the California Consumer Privacy Act ("CCPA") as amended by the California Privacy Rights Act ("CPRA"), the CAN-SPAM Act, and other applicable data protection laws.</p>
 
   <h2>2. Data Controller</h2>
-  <p>For the purposes of GDPR, the data controller is:</p>
-  <p>
-    <strong>Entity:</strong> {{ site.legal.entity }}<br>
-    <strong>Registration:</strong> Registered as autónomo in Spain<br>
-    <strong>Location:</strong> Barcelona, Spain<br>
-    <strong>Email:</strong> <a href="mailto:{{ site.email.privacy }}">{{ site.email.privacy }}</a>
-  </p>
+  {% set identityEmail = site.email.privacy %}
+  {% set identityHeading = "For the purposes of GDPR, the data controller is:" %}
+  {% include "partials/legal-identity.njk" %}
 
   <h2>3. Data We Collect</h2>
 
@@ -196,12 +192,9 @@ canonical: "https://thezerofog.com/privacy/"
   <p>We may update this Privacy Policy from time to time. When we make material changes, we will post the revised policy on the Site with an updated "Last Updated" date. We encourage you to review this policy periodically. Your continued use of the Services after changes are posted constitutes your acceptance of the updated policy.</p>
 
   <h2>16. Contact Us</h2>
-  <p>For questions, requests, or complaints regarding this Privacy Policy or the processing of your personal data, please contact:</p>
-  <p>
-    <strong>Email:</strong> <a href="mailto:{{ site.email.privacy }}">{{ site.email.privacy }}</a><br>
-    <strong>Entity:</strong> {{ site.legal.entity }}<br>
-    <strong>Location:</strong> Barcelona, Spain
-  </p>
+  {% set identityEmail = site.email.privacy %}
+  {% set identityHeading = "For questions, requests, or complaints regarding this Privacy Policy or the processing of your personal data, please contact:" %}
+  {% include "partials/legal-identity.njk" %}
   <p>For EU data protection inquiries, you may also contact your local supervisory authority. For Spain: Agencia Española de Protección de Datos (AEPD), <a href="https://www.aepd.es">https://www.aepd.es</a>.</p>
 
 </article>
