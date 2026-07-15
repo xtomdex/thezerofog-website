@@ -748,14 +748,15 @@
      banner markup is inlined (keep in sync with
      src/_includes/partials/cookie-banner.njk) and tracking config comes from the
      generated /zf-env.js instead of pixel-meta.njk. -->
-<link rel="stylesheet" href="/assets/css/cookie-consent-2.css">
+<link rel="stylesheet" href="/assets/css/cookie-consent-3.css">
 <div id="zf-cookie-banner" role="dialog" aria-label="Cookie consent">
+  <button type="button" class="zf-cb-close" aria-label="Close" onclick="zfDismissBanner()">&times;</button>
   <div class="zf-cb-inner">
     <div class="zf-cb-text zf-v-optin">
-      <strong>We use cookies.</strong> Essential cookies keep this site working. With your consent we also use analytics and advertising cookies (PostHog, Google Analytics, Meta Pixel, Google Ads) to improve our service and run ads. See our <a href="/privacy/">Privacy Policy</a> for details.
+      <strong>We use cookies.</strong> Essential cookies keep this site working. With your consent we also use analytics and advertising cookies. Details in our <a href="/privacy/">Privacy Policy</a>.
     </div>
     <div class="zf-cb-text zf-v-optout">
-      <strong>We use cookies.</strong> Essential cookies keep this site working. We also use analytics and advertising cookies (PostHog, Google Analytics, Meta Pixel, Google Ads) to improve our service and run ads. You can opt out anytime. See our <a href="/privacy/">Privacy Policy</a> for details.
+      <strong>We use cookies</strong> for analytics and advertising. You can opt out anytime. Details in our <a href="/privacy/">Privacy Policy</a>.
     </div>
     <div class="zf-cb-actions zf-v-optin">
       <button type="button" class="zf-cb-btn-essential" onclick="zfSetConsent('essential')">Essential Only</button>
@@ -768,7 +769,7 @@
   </div>
 </div>
 <script src="/zf-env.js"></script>
-<script src="/assets/js/cookie-consent-3.js" defer></script>
+<script src="/assets/js/cookie-consent-4.js" defer></script>
 
 <script src="/assets/js/shared.js" defer></script>
 
