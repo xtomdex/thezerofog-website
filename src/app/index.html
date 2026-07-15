@@ -1199,10 +1199,12 @@
       <label class="consent">
         <input type="checkbox" id="consentChk">
         <span>
-          <!-- TODO: final consent copy to be confirmed by Dima/Kirill. Must name that this stores
-               sensitive sleep/lifestyle (health-related) data, state the purpose, and link privacy. -->
-          I agree that my sleep and lifestyle entries will be stored to provide this app, as described
-          in the <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.
+          <!-- Final copy confirmed by CEO 2026-07-15 (variant B, PIA Condition 2): names the
+               health-related data category explicitly for GDPR Art. 9 explicit consent. -->
+          I agree that my sleep and lifestyle entries (health-related data such as sleep patterns
+          and self-assessment scores) will be stored to provide this app, as described in the
+          <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>. I can delete all
+          my data anytime.
         </span>
       </label>
       <button class="mbtn" id="sendCode">Send my code</button>
@@ -1266,7 +1268,7 @@ const sb = (SB_URL && SB_KEY) ? supabase.createClient(SB_URL, SB_KEY) : null;
 const PREVIEW = new URLSearchParams(location.search).has('demo');
 
 // Version of the health-data consent copy the user agreed to (bump when copy changes).
-const CONSENT_VERSION = 'v1';
+const CONSENT_VERSION = 'v2-2026-07-15'; // v2: names health-related data category (Art. 9 explicit consent)
 
 const DB_SB = {
   _userId: null,
