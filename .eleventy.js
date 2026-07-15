@@ -79,6 +79,24 @@ module.exports = function (eleventyConfig) {
       `window.ZF_SUPABASE_ANON_KEY = ${JSON.stringify(anonKey)};\n`;
 
     fs.writeFileSync(path.join(outDir, "config.js"), contents);
+
+    // dist/zf-env.js — tracking config for passthrough pages (/webinar-text/),
+    // which can't read env via the pixel-meta.njk partial. Same globals, same
+    // consent gate (cookie-consent-2.js loads nothing before consent === 'all').
+    // Lives at the site root, NOT under /assets/ — /assets/* is cached immutable
+    // for a year, and this file's contents change with env, not with a rename.
+    const pixelId = process.env.META_PIXEL_ID || "";
+    const posthogKey = process.env.PUBLIC_POSTHOG_KEY || "";
+    const posthogHost = process.env.PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
+    const envContents =
+      "// GENERATED at build time from env — do not edit.\n" +
+      "// Public, non-secret tracking config. Trackers are consent-gated in cookie-consent-2.js.\n" +
+      (pixelId ? `window.ZF_META_PIXEL_ID = ${JSON.stringify(pixelId)};\n` : "") +
+      (posthogKey
+        ? `window.ZF_POSTHOG_KEY = ${JSON.stringify(posthogKey)};\n` +
+          `window.ZF_POSTHOG_HOST = ${JSON.stringify(posthogHost)};\n`
+        : "");
+    fs.writeFileSync(path.join(__dirname, "dist", "zf-env.js"), envContents);
   });
 
   // HTML minification in production
