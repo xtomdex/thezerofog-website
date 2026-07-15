@@ -28,6 +28,16 @@ canonical: "https://thezerofog.com/contact/"
 
   <p>The fastest way to reach us is email. Every message goes to a real person on the team, and we aim to respond within 2 business days.</p>
 
+  {% if site.legal.address.isSet %}
+  <h2>Postal address</h2>
+  <p>
+    {{ site.legal.address.line1 }}<br>
+    {% if site.legal.address.line2 %}{{ site.legal.address.line2 }}<br>{% endif %}
+    {{ site.legal.address.postalCode }} {{ site.legal.address.city }}<br>
+    {{ site.legal.address.country }}
+  </p>
+  {% endif %}
+
   <h2>Support</h2>
   <p>Questions about the course, your order, account access, or anything technical:</p>
   <p><strong>Email:</strong> <a href="mailto:{{ site.email.support }}">{{ site.email.support }}</a></p>

@@ -111,11 +111,10 @@ canonical: "https://thezerofog.com/refunds/"
   <p>This waiver does not reduce your protection under this policy: our contractual 30-day money-back guarantee (unconditional for the first 7 days, diary-based from day 8 to day 30) remains fully available to all customers, including EU/EEA consumers, and is broader than the statutory withdrawal right it replaces.</p>
 
   <h2>11. Contact Us</h2>
-  <p>For refund-related questions or to submit a refund request, contact us at:</p>
-  <p>
-    <strong>Email:</strong> <a href="mailto:{{ site.email.refunds }}">{{ site.email.refunds }}</a><br>
-    <strong>Response time:</strong> We aim to respond to all refund-related inquiries within 2 business days.
-  </p>
+  {% set identityEmail = site.email.refunds %}
+  {% set identityHeading = "For refund-related questions or to submit a refund request, contact us at:" %}
+  {% include "partials/legal-identity.njk" %}
+  <p><strong>Response time:</strong> We aim to respond to all refund-related inquiries within 2 business days.</p>
   <p>For billing or payment method questions, contact us at <a href="mailto:{{ site.email.refunds }}">{{ site.email.refunds }}</a> - payment processing is handled by Stripe, but all customer support goes through us.</p>
 
 </article>

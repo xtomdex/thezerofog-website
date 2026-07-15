@@ -35,7 +35,7 @@ canonical: "https://thezerofog.com/terms/"
 
   <h2>1. Introduction and Acceptance</h2>
   <p>These Terms of Service ("Terms") govern your access to and use of the website {{ site.domain }} (the "Site"), all related services, content, webinars, email communications, and digital products (collectively, the "Services") provided by or on behalf of {{ site.legal.entity }} ("we," "us," "our," or the "Company").</p>
-  <p>The Company is registered as autónomo in Spain, with its principal place of business in Barcelona, Spain. Contact details are provided in Section 19 of these Terms.</p>
+  <p>The Company is registered as autónomo in Spain, with its principal place of business at {% if site.legal.address.isSet %}{{ site.legal.address.oneLine }}{% else %}Barcelona, Spain{% endif %}. Contact details are provided in Section 19 of these Terms.</p>
   <p>By accessing or using any part of the Services, you represent that you are at least 18 years of age, have the legal capacity to enter into a binding agreement, and agree to be bound by these Terms and our Privacy Policy, Refund Policy, and Medical &amp; Wellness Disclaimer, which are incorporated herein by reference.</p>
 
   <h2>2. Definitions</h2>
@@ -161,13 +161,9 @@ canonical: "https://thezerofog.com/terms/"
   <p>These Terms, together with the Privacy Policy, Refund Policy, and Medical &amp; Wellness Disclaimer, constitute the entire agreement between you and the Company regarding the use of the Services and supersede all prior agreements and understandings.</p>
 
   <h2>19. Contact Information</h2>
-  <p>If you have any questions about these Terms, please contact us at:</p>
-  <p>
-    <strong>Email:</strong> <a href="mailto:{{ site.email.support }}">{{ site.email.support }}</a><br>
-    <strong>Website:</strong> {{ site.domain }}<br>
-    <strong>Entity:</strong> {{ site.legal.entity }}<br>
-    <strong>Location:</strong> Barcelona, Spain
-  </p>
+  {% set identityEmail = site.email.support %}
+  {% set identityHeading = "If you have any questions about these Terms, please contact us at:" %}
+  {% include "partials/legal-identity.njk" %}
   <p>For billing, payment, receipt, or invoice inquiries, contact us at <a href="mailto:{{ site.email.support }}">{{ site.email.support }}</a>.</p>
 
 </article>

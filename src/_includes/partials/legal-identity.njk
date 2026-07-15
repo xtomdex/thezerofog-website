@@ -1,0 +1,25 @@
+{# Canonical provider-identity block. Single source of truth for how the
+   provider's legal identity is presented across all legal pages (LSSI-CE
+   Art. 10, GDPR Art. 13). Add a field here and it propagates everywhere.
+
+   Accepts:
+   - identityEmail   — mailto address to show. Default: site.email.support.
+   - identityHeading — optional lead-in paragraph rendered above the block.
+                       Default: none (no lead-in).
+
+   Missing values are intentionally OMITTED, never defaulted:
+   - Tax ID line renders only when site.legal.taxId is non-empty.
+   - Address line renders only when site.legal.address.isSet — a missing
+     address must be visibly missing, never faked as "Barcelona, Spain". #}
+{% set identityEmail = identityEmail or site.email.support %}
+{% if identityHeading %}
+  <p>{{ identityHeading }}</p>
+{% endif %}
+<p>
+  <strong>Entity:</strong> {{ site.legal.entity }}<br>
+  {% if site.legal.taxId %}<strong>Tax ID (NIF):</strong> {{ site.legal.taxId }}<br>{% endif %}
+  <strong>Registered as:</strong> autónomo in Spain<br>
+  {% if site.legal.address.isSet %}<strong>Address:</strong> {{ site.legal.address.oneLine }}<br>{% endif %}
+  <strong>Email:</strong> <a href="mailto:{{ identityEmail }}">{{ identityEmail }}</a><br>
+  <strong>Website:</strong> {{ site.domain }}
+</p>
