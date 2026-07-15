@@ -16,6 +16,13 @@
  * keeps not loading, opt-out keeps running. Opt-out banner also auto-hides
  * on first real scroll (it is a notice, not a consent gate); footer
  * "Cookie Settings" reopens it anytime.
+ * v5 (2026-07-15): consent stored in a Domain=.thezerofog.com cookie (1y,
+ * SameSite=Lax, Secure) so subdomains (course.thezerofog.com) can read the
+ * choice too. localStorage kept as write-through fallback + one-time
+ * migration source for visitors who chose under v1-v4. The consent cookie
+ * itself is strictly-necessary (stores the choice) - no consent needed to
+ * set it. Domain attribute is only used on *.thezerofog.com hosts so local
+ * dev keeps working.
  * -------------------------------------------------------------------------*/
 
 // ZeroFog Cookie Consent - storage key 'zf_cookies_consent' = 'all' | 'essential'
@@ -31,6 +38,33 @@
   var STORAGE_KEY = 'zf_cookies_consent';
   var REGIME_CACHE_KEY = 'zf_cookies_regime';
   var DISMISS_KEY = 'zf_cookies_dismissed';
+
+  // Consent choice lives in a domain-wide cookie so course.thezerofog.com
+  // (Systeme, different origin - localStorage does NOT cross) sees it too.
+  function readConsentCookie() {
+    var m = document.cookie.match(/(?:^|;\s*)zf_cookies_consent=(all|essential)(?:;|$)/);
+    return m ? m[1] : null;
+  }
+
+  function writeConsentCookie(value) {
+    try {
+      var attrs = '; Path=/; Max-Age=31536000; SameSite=Lax';
+      if (/(^|\.)thezerofog\.com$/.test(location.hostname)) {
+        attrs += '; Domain=.thezerofog.com; Secure';
+      }
+      document.cookie = 'zf_cookies_consent=' + value + attrs;
+    } catch (e) {}
+  }
+
+  // Cookie first (domain-wide truth), localStorage as fallback for choices
+  // made under v1-v4 - migrated into the cookie on first read.
+  function readStoredConsent() {
+    var v = readConsentCookie();
+    if (v) return v;
+    try { v = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+    if (v === 'all' || v === 'essential') { writeConsentCookie(v); return v; }
+    return null;
+  }
   var banner = document.getElementById('zf-cookie-banner');
 
   // GDPR-family jurisdictions -> opt-in regime. EU-27 + EEA (IS, LI, NO) +
@@ -199,9 +233,8 @@
     return OPT_IN_COUNTRIES.indexOf(country) !== -1 ? 'optin' : 'optout';
   }
 
-  // Read stored consent.
-  var consent = null;
-  try { consent = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+  // Read stored consent (cookie-first, with localStorage migration).
+  var consent = readStoredConsent();
 
   if (consent === 'all') {
     // Returning visitor who already consented -> load, no banner.
@@ -223,6 +256,7 @@
 
   // Public API
   window.zfSetConsent = function(value) {
+    writeConsentCookie(value);
     try { localStorage.setItem(STORAGE_KEY, value); } catch (e) {}
     hide();
     if (value === 'all') loadTrackers();
@@ -239,6 +273,13 @@
   };
 
   window.zfClearConsent = function() {
+    try {
+      var attrs = '; Path=/; Max-Age=0; SameSite=Lax';
+      document.cookie = 'zf_cookies_consent=' + attrs;
+      if (/(^|\.)thezerofog\.com$/.test(location.hostname)) {
+        document.cookie = 'zf_cookies_consent=' + attrs + '; Domain=.thezerofog.com; Secure';
+      }
+    } catch (e) {}
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
     window.zfShowCookieBanner();
   };
