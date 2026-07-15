@@ -1,6 +1,11 @@
-{# Meta Pixel ID handoff to client JS. Outputs nothing when no ID is configured,
-   keeping the site fully pixel-free. This only exposes the ID - the pixel itself
-   loads in cookie-consent.js and ONLY after marketing consent ('all'). #}
+{# Tracking-config handoff to client JS (Meta Pixel + PostHog). Outputs nothing
+   when nothing is configured, keeping the site fully tracker-free. This only
+   exposes public IDs - the trackers themselves load in cookie-consent-2.js and
+   ONLY after consent ('all'). Passthrough pages (e.g. /webinar-text/) get the
+   same globals from the generated /zf-env.js instead (see .eleventy.js). #}
 {% if env.meta_pixel_id %}
 <script>window.ZF_META_PIXEL_ID = "{{ env.meta_pixel_id }}";</script>
+{% endif %}
+{% if env.posthog_key %}
+<script>window.ZF_POSTHOG_KEY = "{{ env.posthog_key }}"; window.ZF_POSTHOG_HOST = "{{ env.posthog_host }}";</script>
 {% endif %}
