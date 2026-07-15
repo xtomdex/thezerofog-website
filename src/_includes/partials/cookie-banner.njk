@@ -1,12 +1,23 @@
+{# Cookie banner with two regime variants; cookie-consent-3.js picks one via
+   zf-mode-optin / zf-mode-optout on the banner element (decided by /geo):
+   - opt-in (EU/EEA/UK/CH or unknown): consent wording, nothing loads before Accept All.
+   - opt-out (elsewhere, incl. US/CCPA): notice wording, trackers already loaded, one-click opt out.
+   Keep this markup in sync with the inlined banner in src/webinar-text/index.html (passthrough page). #}
 <div id="zf-cookie-banner" role="dialog" aria-label="Cookie consent">
   <div class="zf-cb-inner">
-    <div class="zf-cb-text">
-      {# Keep this copy in sync with the inlined banner in src/webinar-text/index.html (passthrough page). #}
-      <strong>We use cookies.</strong> Essential cookies keep this site working. We also use analytics and advertising cookies (PostHog, Google Analytics, Meta Pixel, Google Ads) to improve our service and run ads. See our <a href="/privacy/">Privacy Policy</a> for details.
+    <div class="zf-cb-text zf-v-optin">
+      <strong>We use cookies.</strong> Essential cookies keep this site working. With your consent we also use analytics and advertising cookies (PostHog, Google Analytics, Meta Pixel, Google Ads) to improve our service and run ads. See our <a href="/privacy/">Privacy Policy</a> for details.
     </div>
-    <div class="zf-cb-actions">
+    <div class="zf-cb-text zf-v-optout">
+      <strong>We use cookies.</strong> Essential cookies keep this site working. We also use analytics and advertising cookies (PostHog, Google Analytics, Meta Pixel, Google Ads) to improve our service and run ads. You can opt out anytime. See our <a href="/privacy/">Privacy Policy</a> for details.
+    </div>
+    <div class="zf-cb-actions zf-v-optin">
       <button type="button" class="zf-cb-btn-essential" onclick="zfSetConsent('essential')">Essential Only</button>
       <button type="button" class="zf-cb-btn-accept" onclick="zfSetConsent('all')">Accept All</button>
+    </div>
+    <div class="zf-cb-actions zf-v-optout">
+      <button type="button" class="zf-cb-btn-essential" onclick="zfSetConsent('essential')">Opt out</button>
+      <button type="button" class="zf-cb-btn-accept" onclick="zfSetConsent('all')">OK</button>
     </div>
   </div>
 </div>

@@ -1,0 +1,91 @@
+/* NETLIFY CSS GUARD - DO NOT DELETE -----------------------------------------
+ * This comment block intentionally pads the raw file so that it stays longer
+ * than any pretty-printed variant Netlify's asset pipeline may produce. The
+ * upload pipeline has been observed to pretty-print CSS (LightningCSS style:
+ * comments stripped, one declaration per line) and then overwrite the result
+ * with the original WITHOUT truncating - which corrupts the tail of any file
+ * whose original is shorter than the pretty version, leaving unscoped rule
+ * fragments after the final @media block and breaking desktop layout. Netlify
+ * also dedupes uploads by file sha, so this file must never be renamed
+ * without content changes (and vice versa). Verification after each deploy:
+ * curl the live URL and diff against the dist copy - byte-identical or a
+ * balanced pretty-printed version are both fine, a corrupted tail is not.
+ * See memory: css-cache-and-netlify-processing.
+ * v2 (2026-07-15): renamed from cookie-consent.css when the geo-split consent
+ * regimes landed - two banner variants (opt-in / opt-out) toggled via
+ * zf-mode-* classes, and the decline button restyled as a quiet text link
+ * (still one click - equal EASE is the legal requirement, equal PROMINENCE
+ * is not; hiding decline behind extra layers is what regulators fine).
+ * --------------------------------------------------------------------------*/
+
+/* ZeroFog Cookie Consent Banner */
+#zf-cookie-banner {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 9999;
+  background: #1a1a1a;
+  border-top: 1px solid rgba(189, 147, 249, 0.25);
+  color: #b0b0b0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.85rem; line-height: 1.6;
+  padding: 18px 24px;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.4);
+  transform: translateY(100%);
+  transition: transform 0.35s ease;
+  display: none;
+}
+#zf-cookie-banner.zf-show { display: block; transform: translateY(0); }
+
+#zf-cookie-banner .zf-cb-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+}
+#zf-cookie-banner .zf-cb-text { flex: 1 1 auto; min-width: 240px; }
+#zf-cookie-banner .zf-cb-text strong { color: #f8f8f2; }
+#zf-cookie-banner .zf-cb-text a { color: #bd93f9; text-decoration: underline; }
+
+#zf-cookie-banner .zf-cb-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+
+/* Regime variants: only the active mode's text + actions are visible.
+   No mode class = nothing visible (the banner is only shown after JS sets one). */
+#zf-cookie-banner .zf-v-optin, #zf-cookie-banner .zf-v-optout { display: none; }
+#zf-cookie-banner.zf-mode-optin .zf-cb-text.zf-v-optin { display: block; }
+#zf-cookie-banner.zf-mode-optin .zf-cb-actions.zf-v-optin { display: flex; }
+#zf-cookie-banner.zf-mode-optout .zf-cb-text.zf-v-optout { display: block; }
+#zf-cookie-banner.zf-mode-optout .zf-cb-actions.zf-v-optout { display: flex; }
+
+#zf-cookie-banner button {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem; font-weight: 600; letter-spacing: 0.02em;
+  padding: 10px 18px; border-radius: 6px; border: none;
+  cursor: pointer; transition: all 0.2s ease;
+}
+#zf-cookie-banner .zf-cb-btn-accept { background: #50fa7b; color: #1a1a1a; }
+#zf-cookie-banner .zf-cb-btn-accept:hover { background: #3de06a; }
+/* Decline: quiet text-link style. Deliberately less prominent than Accept,
+   but SAME single click - never hidden behind a second layer. */
+#zf-cookie-banner .zf-cb-btn-essential {
+  background: transparent; color: #8f8f8f; border: none;
+  text-decoration: underline; text-underline-offset: 3px;
+  padding: 10px 10px; font-weight: 500;
+}
+#zf-cookie-banner .zf-cb-btn-essential:hover { color: #f8f8f2; }
+
+/* Light theme */
+html:not(.dark) #zf-cookie-banner {
+  background: #ffffff;
+  border-top-color: rgba(124, 92, 191, 0.3);
+  color: #444444;
+}
+html:not(.dark) #zf-cookie-banner .zf-cb-text strong { color: #1a1a1a; }
+html:not(.dark) #zf-cookie-banner .zf-cb-text a { color: #7c5cbf; }
+html:not(.dark) #zf-cookie-banner .zf-cb-btn-accept { background: #2ecc71; color: #ffffff; }
+html:not(.dark) #zf-cookie-banner .zf-cb-btn-accept:hover { background: #27ae60; }
+html:not(.dark) #zf-cookie-banner .zf-cb-btn-essential { color: #777777; }
+html:not(.dark) #zf-cookie-banner .zf-cb-btn-essential:hover { color: #1a1a1a; }
+
+/* Mobile */
+@media (max-width: 640px) {
+  #zf-cookie-banner { padding: 14px 16px; font-size: 0.78rem; }
+  #zf-cookie-banner .zf-cb-inner { gap: 14px; }
+  #zf-cookie-banner .zf-cb-actions { width: 100%; justify-content: stretch; }
+  #zf-cookie-banner button { flex: 1 1 50%; padding: 12px 14px; }
+}
