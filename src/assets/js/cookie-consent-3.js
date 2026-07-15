@@ -6,26 +6,46 @@
  * whose original is shorter than the pretty version. Netlify also dedupes
  * uploads by file sha, so this file must never be renamed without content
  * changes (and vice versa). See memory: css-cache-and-netlify-processing.
- * File renamed from cookie-consent.js -> cookie-consent-2.js on 2026-07-15
- * when the PostHog analytics loader was added below the consent logic.
+ * v3 (2026-07-15): geo-split consent regimes. EU/EEA/UK/CH = opt-in (nothing
+ * loads before "Accept All"); everywhere else = opt-out (trackers load by
+ * default, one-click "Opt out"). Decision + rationale: memory file
+ * project_cookie_consent_policy.md - reject stays ONE CLICK in both regimes,
+ * no dark patterns (AEPD/CNIL fine exactly that; AEPD is our home regulator).
  * -------------------------------------------------------------------------*/
 
-// ZeroFog Cookie Consent Banner - storage key 'zf_cookies_consent' = 'all' | 'essential'
-// Also the single consent-gated loader for ALL tracking: Meta Pixel (marketing)
-// and PostHog (analytics + session replay). Nothing loads before consent === 'all'.
+// ZeroFog Cookie Consent - storage key 'zf_cookies_consent' = 'all' | 'essential'
+// Single consent-gated loader for ALL tracking: Meta Pixel (marketing) and
+// PostHog (analytics + session replay).
+//
+// Consent regimes (decided by /geo edge function, cached per browser session):
+//   opt-in  (EU/EEA/UK/CH or unknown): load NOTHING until "Accept All".
+//   opt-out (everywhere else):         load immediately, banner offers opt out.
+// A stored choice always wins over the regime - both regimes write the same
+// 'all' / 'essential' value and are respected on every later visit.
 (function() {
   var STORAGE_KEY = 'zf_cookies_consent';
+  var REGIME_CACHE_KEY = 'zf_cookies_regime';
   var banner = document.getElementById('zf-cookie-banner');
+
+  // GDPR-family jurisdictions -> opt-in regime. EU-27 + EEA (IS, LI, NO) +
+  // UK (UK GDPR) + CH (revFADP). Everything else (incl. our US target market,
+  // where CCPA is an opt-OUT regime) gets the opt-out banner.
+  var OPT_IN_COUNTRIES = ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR',
+    'DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK',
+    'SI','ES','SE','IS','LI','NO','GB','CH'];
 
   function show() { if (banner) banner.classList.add('zf-show'); }
   function hide() { if (banner) banner.classList.remove('zf-show'); }
 
-  // Load marketing pixels (Meta Pixel). Called ONLY when consent === 'all'.
-  // Idempotent and inert when no pixel ID is configured.
+  function setMode(mode) {
+    if (!banner) return;
+    banner.classList.remove('zf-mode-optin', 'zf-mode-optout');
+    banner.classList.add(mode === 'optout' ? 'zf-mode-optout' : 'zf-mode-optin');
+  }
+
+  // Load marketing pixels (Meta Pixel). Idempotent, inert when no ID configured.
   function loadMarketingPixels() {
-    // No pixel ID configured → nothing to load (site stays pixel-free).
     if (!window.ZF_META_PIXEL_ID) return;
-    // Already loaded → never inject twice.
     if (window.zfPixelLoaded) return;
 
     // Standard Meta Pixel bootstrap.
@@ -43,9 +63,7 @@
     window.zfPixelLoaded = true;
   }
 
-  // Load PostHog (analytics + session replay). Called ONLY when consent === 'all'.
-  // Idempotent and inert when no key is configured (site stays analytics-free).
-  // We load array.js explicitly and init on load - no minified stub to maintain.
+  // Load PostHog (analytics + session replay). Idempotent, inert when no key.
   function loadPostHog() {
     if (!window.ZF_POSTHOG_KEY) return;
     if (window.zfPosthogLoaded) return;
@@ -83,6 +101,22 @@
     loadPostHog();
   }
 
+  // Best-effort stop for the opt-out path: trackers may already be running in
+  // this session (opt-out regime loads them before the choice). Stops capture
+  // and recording immediately; the stored 'essential' keeps every future page
+  // load tracker-free.
+  function stopTrackers() {
+    try {
+      if (window.posthog && window.posthog.opt_out_capturing) {
+        window.posthog.opt_out_capturing();
+        if (window.posthog.stopSessionRecording) window.posthog.stopSessionRecording();
+      }
+    } catch (e) {}
+    try {
+      if (window.fbq) fbq('consent', 'revoke');
+    } catch (e) {}
+  }
+
   // Safe capture: no-ops until PostHog is consented + loaded.
   function zfCapture(name, props) {
     if (window.posthog && window.posthog.capture) {
@@ -116,30 +150,64 @@
     }
   }, true);
 
+  // Resolve the consent regime: 'optin' | 'optout'.
+  // Order: ?zfgeo=XX test override -> sessionStorage cache -> /geo edge lookup.
+  // Any failure or unknown country falls back to 'optin' (the safe regime).
+  function resolveRegime(cb) {
+    var m = location.search.match(/[?&]zfgeo=([A-Za-z]{2})/);
+    if (m) { cb(regimeFor(m[1].toUpperCase())); return; }
+
+    var cached = null;
+    try { cached = sessionStorage.getItem(REGIME_CACHE_KEY); } catch (e) {}
+    if (cached === 'optin' || cached === 'optout') { cb(cached); return; }
+
+    fetch('/geo').then(function(r) { return r.json(); }).then(function(data) {
+      var regime = regimeFor(data && data.country);
+      try { sessionStorage.setItem(REGIME_CACHE_KEY, regime); } catch (e) {}
+      cb(regime);
+    }).catch(function() { cb('optin'); });
+  }
+
+  function regimeFor(country) {
+    if (!country) return 'optin';
+    return OPT_IN_COUNTRIES.indexOf(country) !== -1 ? 'optin' : 'optout';
+  }
+
   // Read stored consent.
   var consent = null;
   try { consent = localStorage.getItem(STORAGE_KEY); } catch (e) {}
 
-  // First visit (no choice yet) → show banner, load nothing.
-  if (!consent) {
-    setTimeout(show, 600);
-  } else if (consent === 'all') {
-    // Returning visitor who already consented → load now.
+  if (consent === 'all') {
+    // Returning visitor who already consented -> load, no banner.
     loadTrackers();
+  } else if (consent === 'essential') {
+    // Returning visitor who declined -> nothing, no banner.
+  } else {
+    // First visit: regime decides whether trackers wait for consent.
+    resolveRegime(function(regime) {
+      setMode(regime);
+      if (regime === 'optout') loadTrackers();
+      setTimeout(show, 600);
+    });
   }
 
   // Public API
   window.zfSetConsent = function(value) {
     try { localStorage.setItem(STORAGE_KEY, value); } catch (e) {}
     hide();
-    // Retroactive load in the same session (no reload needed) when consent is granted.
     if (value === 'all') loadTrackers();
+    if (value === 'essential') stopTrackers();
   };
 
-  window.zfShowCookieBanner = function() { show(); };
+  window.zfShowCookieBanner = function() {
+    resolveRegime(function(regime) {
+      setMode(regime);
+      show();
+    });
+  };
 
   window.zfClearConsent = function() {
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
-    show();
+    window.zfShowCookieBanner();
   };
 })();

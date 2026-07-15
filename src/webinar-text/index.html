@@ -738,7 +738,7 @@
 
   <div class="footer">
     <p>The Zero Fog &nbsp;|&nbsp; This is an educational program for improving sleep and daytime performance. It is not a medical diagnosis or a substitute for professional advice. If you have diagnosed clinical insomnia or untreated sleep apnea, please consult a specialist.</p>
-    <p>&copy; 2026 The Zero Fog. All rights reserved. &nbsp;|&nbsp; <a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Refunds</a> &middot; <a href="/disclaimer/">Disclaimer</a> &middot; <a href="/contact/">Contact</a></p>
+    <p>&copy; 2026 The Zero Fog. All rights reserved. &nbsp;|&nbsp; <a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Refunds</a> &middot; <a href="/disclaimer/">Disclaimer</a> &middot; <a href="/contact/">Contact</a> &middot; <a href="#" onclick="zfShowCookieBanner(); return false;">Cookie Settings</a></p>
   </div>
 
 </div>
@@ -748,20 +748,27 @@
      banner markup is inlined (keep in sync with
      src/_includes/partials/cookie-banner.njk) and tracking config comes from the
      generated /zf-env.js instead of pixel-meta.njk. -->
-<link rel="stylesheet" href="/assets/css/cookie-consent.css">
+<link rel="stylesheet" href="/assets/css/cookie-consent-2.css">
 <div id="zf-cookie-banner" role="dialog" aria-label="Cookie consent">
   <div class="zf-cb-inner">
-    <div class="zf-cb-text">
-      <strong>We use cookies.</strong> Essential cookies keep this site working. We also use analytics and advertising cookies (PostHog, Google Analytics, Meta Pixel, Google Ads) to improve our service and run ads. See our <a href="/privacy/">Privacy Policy</a> for details.
+    <div class="zf-cb-text zf-v-optin">
+      <strong>We use cookies.</strong> Essential cookies keep this site working. With your consent we also use analytics and advertising cookies (PostHog, Google Analytics, Meta Pixel, Google Ads) to improve our service and run ads. See our <a href="/privacy/">Privacy Policy</a> for details.
     </div>
-    <div class="zf-cb-actions">
+    <div class="zf-cb-text zf-v-optout">
+      <strong>We use cookies.</strong> Essential cookies keep this site working. We also use analytics and advertising cookies (PostHog, Google Analytics, Meta Pixel, Google Ads) to improve our service and run ads. You can opt out anytime. See our <a href="/privacy/">Privacy Policy</a> for details.
+    </div>
+    <div class="zf-cb-actions zf-v-optin">
       <button type="button" class="zf-cb-btn-essential" onclick="zfSetConsent('essential')">Essential Only</button>
       <button type="button" class="zf-cb-btn-accept" onclick="zfSetConsent('all')">Accept All</button>
+    </div>
+    <div class="zf-cb-actions zf-v-optout">
+      <button type="button" class="zf-cb-btn-essential" onclick="zfSetConsent('essential')">Opt out</button>
+      <button type="button" class="zf-cb-btn-accept" onclick="zfSetConsent('all')">OK</button>
     </div>
   </div>
 </div>
 <script src="/zf-env.js"></script>
-<script src="/assets/js/cookie-consent-2.js" defer></script>
+<script src="/assets/js/cookie-consent-3.js" defer></script>
 
 <script src="/assets/js/shared.js" defer></script>
 
