@@ -11,6 +11,11 @@
  * default, one-click "Opt out"). Decision + rationale: memory file
  * project_cookie_consent_policy.md - reject stays ONE CLICK in both regimes,
  * no dark patterns (AEPD/CNIL fine exactly that; AEPD is our home regulator).
+ * v4 (2026-07-15): dismiss UX. Prominent X = close without choosing (per
+ * session, sessionStorage) - closing is NOT consent and NOT refusal: opt-in
+ * keeps not loading, opt-out keeps running. Opt-out banner also auto-hides
+ * on first real scroll (it is a notice, not a consent gate); footer
+ * "Cookie Settings" reopens it anytime.
  * -------------------------------------------------------------------------*/
 
 // ZeroFog Cookie Consent - storage key 'zf_cookies_consent' = 'all' | 'essential'
@@ -25,6 +30,7 @@
 (function() {
   var STORAGE_KEY = 'zf_cookies_consent';
   var REGIME_CACHE_KEY = 'zf_cookies_regime';
+  var DISMISS_KEY = 'zf_cookies_dismissed';
   var banner = document.getElementById('zf-cookie-banner');
 
   // GDPR-family jurisdictions -> opt-in regime. EU-27 + EEA (IS, LI, NO) +
@@ -36,6 +42,26 @@
 
   function show() { if (banner) banner.classList.add('zf-show'); }
   function hide() { if (banner) banner.classList.remove('zf-show'); }
+
+  // Close without choosing: remembered for this browser session only. Not
+  // consent and not refusal - opt-in stays untracked, opt-out stays tracked.
+  function dismiss() {
+    try { sessionStorage.setItem(DISMISS_KEY, '1'); } catch (e) {}
+    hide();
+  }
+
+  // Opt-out regime only: the banner is a notice, not a consent gate - tuck it
+  // away once the visitor starts reading (first real scroll).
+  function armScrollHide() {
+    var startY = window.scrollY;
+    function onScroll() {
+      if (Math.abs(window.scrollY - startY) > 200) {
+        window.removeEventListener('scroll', onScroll);
+        if (banner && banner.classList.contains('zf-show')) dismiss();
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
 
   function setMode(mode) {
     if (!banner) return;
@@ -185,9 +211,13 @@
   } else {
     // First visit: regime decides whether trackers wait for consent.
     resolveRegime(function(regime) {
-      setMode(regime);
       if (regime === 'optout') loadTrackers();
+      var dismissed = null;
+      try { dismissed = sessionStorage.getItem(DISMISS_KEY); } catch (e) {}
+      if (dismissed) return; // closed via X or scroll earlier this session
+      setMode(regime);
       setTimeout(show, 600);
+      if (regime === 'optout') armScrollHide();
     });
   }
 
@@ -198,6 +228,8 @@
     if (value === 'all') loadTrackers();
     if (value === 'essential') stopTrackers();
   };
+
+  window.zfDismissBanner = function() { dismiss(); };
 
   window.zfShowCookieBanner = function() {
     resolveRegime(function(regime) {
