@@ -1878,7 +1878,7 @@ document.querySelectorAll('.preset').forEach(p=>p.addEventListener('click', ()=>
 }));
 ['rangeFrom','rangeTo'].forEach(id=>$(id).addEventListener('change', renderSummary));
 
-/* ---- Diagnostic: surface the biggest fixable lever, ranked by course order ----
+/* ---- Diagnostic: surface the biggest leak (webinar term), ranked by course order ----
    Titles are the final, locked lesson names. URLs point to the Systeme lectures
    (course.thezerofog.com); students hit the course login if not signed in. */
 const LESSONS = {
@@ -1946,9 +1946,9 @@ function diagnose(rows){
   return { ok:false, fix:flags[0], others:flags.slice(1,3) };
 }
 function diagnosticHtml(rows){
-  if(rows.length<4) return '<div class="sum-gate">Log at least 4 nights to see your biggest lever to fix first.</div>';
+  if(rows.length<4) return '<div class="sum-gate">Log at least 4 nights to see your biggest leak to fix first.</div>';
   const d = diagnose(rows);
-  if(d.ok) return '<div class="sum-ok">No major leverage points here - your inputs look solid. Keep logging to hold the trend.</div>';
+  if(d.ok) return '<div class="sum-ok">No major leaks here - your inputs look solid. Keep logging to hold the trend.</div>';
   let h = '<div class="sum-fix"><div class="fl-lab">⚑ Fix this first</div><div class="fl-txt">'+d.fix.txt+'</div>'+lessonRef(d.fix.L,'sum-lesson',true)+'</div>';
   if(d.others.length){
     const hard = d.others.some(f=>f.sev>=0.5);
