@@ -496,17 +496,24 @@
   .pc-cell:focus{ outline:none; border-color:rgba(189,147,249,0.5); }
   textarea.pc-cell{ resize:none; overflow:hidden; min-height:44px; line-height:1.5; }
   .pc-win{ display:flex; align-items:center; gap:9px; } .pc-win .pc-cell{ flex:1; } .pc-win .to{ font-size:12px; color:var(--dim); font-weight:600; }
-  /* row-based list editor for long fields: Enter = new item, purple dash markers appear at 2+ rows,
-     a row ending with ":" renders as a section label */
-  .pc-list{ background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:5px 12px; }
-  .pc-list:focus-within{ border-color:rgba(189,147,249,0.5); }
-  .pc-item{ display:flex; gap:9px; align-items:flex-start; }
-  .pc-item .mk{ display:none; color:var(--purple); font-weight:800; line-height:1.5; padding:5px 0; user-select:none; }
-  .pc-list.multi .pc-item:not(.head) .mk{ display:block; }
-  .pc-item .pc-cell{ flex:1; background:none; border:none; border-radius:0; padding:5px 0; min-height:0; }
+  /* row-based list editor for long fields: every entry is its own row box.
+     Enter or "+ Add a line" = new row; x removes a row; a row ending with ":" becomes a section label */
+  .pc-list{ display:flex; flex-direction:column; gap:7px; }
+  .pc-item{ position:relative; display:flex; align-items:flex-start; background:var(--panel2);
+        border:1px solid var(--line); border-radius:9px; padding:4px 30px 4px 12px; }
+  .pc-item:focus-within{ border-color:rgba(189,147,249,0.5); }
+  .pc-list.multi .pc-item:not(.head){ border-left:3px solid rgba(189,147,249,0.4); padding-left:11px; }
+  .pc-item .pc-cell{ flex:1; background:none; border:none; border-radius:0; padding:6px 0; min-height:0; }
   .pc-item textarea.pc-cell{ min-height:0; }
-  .pc-item.head .pc-cell{ font-weight:700; color:var(--muted); }
-  .pc-list.multi .pc-item.head:not(:first-child) .pc-cell{ padding-top:12px; }
+  .pc-item.head{ background:none; border:none; padding:6px 2px 0; }
+  .pc-item.head .pc-cell{ font-size:11px; font-weight:800; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); padding:2px 0; }
+  .pc-x{ position:absolute; top:5px; right:6px; display:none; background:none; border:none; color:var(--dim);
+        font-size:15px; line-height:1; padding:4px; cursor:pointer; font-family:inherit; }
+  .pc-x:hover{ color:var(--red); }
+  .pc-item:focus-within .pc-x, .pc-item:hover .pc-x{ display:block; }
+  .pc-add{ background:none; border:1px dashed var(--line); border-radius:9px; color:var(--dim); font-family:inherit;
+        font-size:12px; font-weight:600; padding:7px 12px; text-align:left; cursor:pointer; }
+  .pc-add:hover{ color:var(--purple); border-color:rgba(189,147,249,0.4); }
   .pc-actions{ display:flex; gap:10px; margin-top:16px; }
   .pc-save{ flex:1; background:var(--purple); color:#1a1a1a; border:none; border-radius:11px; font-family:inherit; font-size:15px; font-weight:700; padding:13px; cursor:pointer; }
   body.light .pc-save{ color:#fff; }
@@ -684,10 +691,12 @@
     body.printing-pc .pc-lh label{ color:#000; } body.printing-pc .pc-lh .hint{ color:#444; }
     body.printing-pc .pc-cell{ background:none; border:none; border-bottom:1px solid #ccc; border-radius:0; color:#000; overflow:visible; }
     body.printing-pc .pc-win .to{ color:#000; }
-    body.printing-pc .pc-list{ background:none; border:none; padding:0; }
-    body.printing-pc .pc-item .mk{ color:#000; }
+    body.printing-pc .pc-list{ gap:0; }
+    body.printing-pc .pc-item{ background:none; border:none; border-bottom:1px solid #ddd; border-radius:0; padding:2px 0; }
+    body.printing-pc .pc-item.head{ border-bottom:none; padding-top:6px; }
     body.printing-pc .pc-item .pc-cell{ border-bottom:none; color:#000; }
     body.printing-pc .pc-item.head .pc-cell{ color:#000; }
+    body.printing-pc .pc-add, body.printing-pc .pc-x{ display:none !important; }
   }
 </style>
 <!-- Generated public Supabase config (window globals) - must load before the app script. -->
@@ -2192,10 +2201,11 @@ function protocolInit(){
   function grow(t){ t.style.height='auto'; if(t.scrollHeight) t.style.height=t.scrollHeight+'px'; }
   window.pcRegrow=()=>form.querySelectorAll('textarea.pc-cell').forEach(grow);
   function mark(l){ l.classList.toggle('filled', [...l.querySelectorAll('.pc-cell')].some(e=>e.value.trim()!=='')); }
-  /* ---- list editor: one .pc-item per row, Enter adds a row, Backspace at row start merges up ---- */
+  /* ---- list editor: one .pc-item row box per entry; Enter or "+ Add a line" adds, x removes,
+          Backspace at row start merges up ---- */
   function makeItem(txt){
     const it=document.createElement('div'); it.className='pc-item';
-    it.innerHTML='<span class="mk">-</span><textarea class="pc-cell" rows="1"></textarea>';
+    it.innerHTML='<textarea class="pc-cell" rows="1"></textarea><button class="pc-x" type="button" tabindex="-1" aria-label="Remove line">×</button>';
     it.querySelector('textarea').value=txt||'';
     return it;
   }
@@ -2211,6 +2221,9 @@ function protocolInit(){
     const rows=String(str||'').split('\n').map(s=>s.replace(/^-\s+/,'')).filter(s=>s.trim()!=='');
     if(!rows.length){ const it=makeItem(''); it.querySelector('textarea').placeholder=ph||''; list.appendChild(it); }
     else rows.forEach(r=>list.appendChild(makeItem(r)));
+    const add=document.createElement('button');
+    add.className='pc-add'; add.type='button'; add.textContent='+ Add a line';
+    list.appendChild(add);
     refreshList(list);
   }
   function getList(l){
@@ -2234,12 +2247,24 @@ function protocolInit(){
       refreshList(list); mark(t.closest('.pc-line'));
       const nt=ni.querySelector('textarea'); nt.focus(); nt.selectionStart=nt.selectionEnd=0;
     } else if(e.key==='Backspace' && t.selectionStart===0 && t.selectionEnd===0){
-      const prev=it.previousElementSibling; if(!prev) return;
+      const prev=it.previousElementSibling; if(!prev||!prev.classList.contains('pc-item')) return;
       e.preventDefault();
       const pt=prev.querySelector('textarea'), plen=pt.value.length;
       pt.value+=t.value; it.remove();
       refreshList(list); mark(pt.closest('.pc-line'));
       pt.focus(); pt.selectionStart=pt.selectionEnd=plen;
+    }
+  });
+  form.addEventListener('click',e=>{
+    const list=e.target.closest('.pc-list'); if(!list) return;
+    if(e.target.classList.contains('pc-add')){
+      const it=makeItem(''); list.insertBefore(it, e.target);
+      refreshList(list); it.querySelector('textarea').focus();
+    } else if(e.target.classList.contains('pc-x')){
+      const it=e.target.closest('.pc-item'), line=it.closest('.pc-line');
+      if(list.querySelectorAll('.pc-item').length===1) it.querySelector('textarea').value='';
+      else it.remove();
+      refreshList(list); mark(line);
     }
   });
   function read(){ const d={}; FIELDS.forEach((f,i)=>{ const l=lines[i];
