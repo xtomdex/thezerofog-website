@@ -135,7 +135,6 @@
   #view-bonuses .caff-in label { display:block; font-size:12.5px; color:var(--muted); margin-bottom:6px; }
   #view-bonuses .caff-in input[type=time] { background:var(--panel2); border:1px solid var(--line); color:var(--text); font-family:inherit;
     font-size:16px; padding:10px 12px; border-radius:10px; width:160px; }
-  body:not(.light) #view-bonuses .caff-in input[type=time]::-webkit-calendar-picker-indicator { filter:invert(.8); }
   #view-bonuses .caff-in input[type=text] { width:100%; max-width:380px; background:var(--panel2); border:1px solid var(--line); color:var(--text);
     font-family:inherit; font-size:15px; padding:10px 12px; border-radius:10px; }
   #view-bonuses .caff-sug { position:absolute; left:0; top:100%; margin-top:5px; width:100%; max-width:380px; background:var(--panel);
@@ -191,7 +190,6 @@
   #view-bonuses .freq-replace { background:rgba(255,85,85,0.13); color:var(--red); }
   #view-bonuses .task input[type=date] { background:var(--panel2); border:1px solid var(--line); color:var(--text); font-family:inherit;
     font-size:12.5px; padding:6px 8px; border-radius:7px; width:150px; }
-  body:not(.light) #view-bonuses .task input[type=date]::-webkit-calendar-picker-indicator { filter:invert(.8); }
   #view-bonuses .task .next { font-size:12.5px; font-weight:700; color:var(--c); white-space:nowrap; }
   #view-bonuses .task .next.due { color:var(--red); }
   #view-bonuses .task .next .m { color:var(--dim); font-weight:400; }
@@ -265,7 +263,10 @@
            unless appearance is reset; the value pseudo re-left-aligns the centered text */
         -webkit-appearance:none; appearance:none; min-height:45px; }
   input[type=time]::-webkit-date-and-time-value, input[type=date]::-webkit-date-and-time-value{ text-align:left; }
-  input[type=time]::-webkit-calendar-picker-indicator{ filter:invert(0.7); }
+  /* native picker popups (Chrome) follow color-scheme - keep them matching the app theme;
+     color-scheme also renders the picker icon in the right color, so no invert filters needed */
+  input[type=time], input[type=date]{ color-scheme:dark; }
+  body.light input[type=time], body.light input[type=date]{ color-scheme:light; }
   .two{ display:flex; gap:10px; }
   .two .field{ flex:1; margin-bottom:10px; }
   textarea{ width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--text);
@@ -421,7 +422,6 @@
   .custom-range input[type=date]{ width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--text);
         font-family:inherit; font-size:14px; padding:10px 12px; border-radius:10px;
         -webkit-appearance:none; appearance:none; min-height:40px; }
-  .custom-range input[type=date]::-webkit-calendar-picker-indicator{ filter:invert(0.7); }
   .sum-out .big{ text-align:center; padding:18px 0 10px; }
   .sum-out .big .n{ font-size:46px; font-weight:900; line-height:1; }
   .sum-out .big .n span{ font-size:18px; color:var(--dim); }
@@ -496,6 +496,17 @@
   .pc-cell:focus{ outline:none; border-color:rgba(189,147,249,0.5); }
   textarea.pc-cell{ resize:none; overflow:hidden; min-height:44px; line-height:1.5; }
   .pc-win{ display:flex; align-items:center; gap:9px; } .pc-win .pc-cell{ flex:1; } .pc-win .to{ font-size:12px; color:var(--dim); font-weight:600; }
+  /* row-based list editor for long fields: Enter = new item, purple dash markers appear at 2+ rows,
+     a row ending with ":" renders as a section label */
+  .pc-list{ background:var(--panel2); border:1px solid var(--line); border-radius:9px; padding:5px 12px; }
+  .pc-list:focus-within{ border-color:rgba(189,147,249,0.5); }
+  .pc-item{ display:flex; gap:9px; align-items:flex-start; }
+  .pc-item .mk{ display:none; color:var(--purple); font-weight:800; line-height:1.5; padding:5px 0; user-select:none; }
+  .pc-list.multi .pc-item:not(.head) .mk{ display:block; }
+  .pc-item .pc-cell{ flex:1; background:none; border:none; border-radius:0; padding:5px 0; min-height:0; }
+  .pc-item textarea.pc-cell{ min-height:0; }
+  .pc-item.head .pc-cell{ font-weight:700; color:var(--muted); }
+  .pc-list.multi .pc-item.head:not(:first-child) .pc-cell{ padding-top:12px; }
   .pc-actions{ display:flex; gap:10px; margin-top:16px; }
   .pc-save{ flex:1; background:var(--purple); color:#1a1a1a; border:none; border-radius:11px; font-family:inherit; font-size:15px; font-weight:700; padding:13px; cursor:pointer; }
   body.light .pc-save{ color:#fff; }
@@ -673,6 +684,10 @@
     body.printing-pc .pc-lh label{ color:#000; } body.printing-pc .pc-lh .hint{ color:#444; }
     body.printing-pc .pc-cell{ background:none; border:none; border-bottom:1px solid #ccc; border-radius:0; color:#000; overflow:visible; }
     body.printing-pc .pc-win .to{ color:#000; }
+    body.printing-pc .pc-list{ background:none; border:none; padding:0; }
+    body.printing-pc .pc-item .mk{ color:#000; }
+    body.printing-pc .pc-item .pc-cell{ border-bottom:none; color:#000; }
+    body.printing-pc .pc-item.head .pc-cell{ color:#000; }
   }
 </style>
 <!-- Generated public Supabase config (window globals) - must load before the app script. -->
@@ -1578,6 +1593,9 @@ function switchView(name){
   if(name==='bonuses'){
     bonusesInit();
     showGuide(currentGuide);
+  } else if(name==='protocol'){
+    /* textareas sized while the view was display:none collapse to 0 - re-measure now that it's visible */
+    if(window.pcRegrow) window.pcRegrow();
   } else {
     const sn=$('bonusSub'); if(sn) sn.classList.remove('open');
     const bt=document.querySelector('.navi.bonus'); if(bt) bt.classList.remove('expanded');
@@ -2147,38 +2165,98 @@ function protocolInit(){
     { id:'triggers', label:'My triggers + solutions', hint:'from your Block 2.4 map - the ones that still need a rule', type:'area', ph:'(1) Trigger -> solution. (2) Trigger -> solution.' },
   ];
   const DEMO_PC = {
-    wake:{from:'10:00 AM',to:'10:30 AM'}, sleep:{from:'1:00 AM',to:'2:00 AM'}, caffeine:'5:00 PM',
-    morning:"Curtains open everywhere for light. Phone-free 30-60 min. Lo-fi or classical on. Stretch, wash up, a few chores. A 15-min walk if the weather allows. No scrolling, no news until the window is up.",
-    meal:"Dinner window 8:00-10:00 PM - protein with rice or noodles. If hungry later: almonds, a light salad, jerky, or a glass of kefir.",
-    winddown:{from:'12:00 AM',to:'12:30 AM'},
-    screen:"No active screens after ~12:45 AM. Passive only: a show on the laptop, brightness way down, volume almost off, at the edge of the nightstand. Usually out within 5-10 minutes.",
-    breathing:"Trained it daily for weeks while building the system. Now it's a reflex - I use it when needed: stress, before a call, if I wake at night.",
-    exercise:"Morning (first 30-60 min): stretching. Midday: 30 squats, 30 pushups, 30 abs. Evening: a 20-30 min walk. Swimming in the morning when the season allows.",
-    worry:"11:30 PM, at my desk - work ends. Tomorrow's to-do list, then a brain dump on paper. Out of the head, onto the page.",
-    night:"Can't fall asleep (rare): get up, go sit in fresh air. If I wake up: usually back immediately. If not - bathroom, then fresh air. No phone. No clock.",
-    reset:"Drift 1-2h over a few days: shift back an hour at a time. Rough stretch: 30-min shifts, gradually. During any reset: walk more, longer evenings.",
-    smoking:"No smoking the first 30-60 min after waking. Last one at least 1.5h before bed - pushing toward 2-3h.",
-    triggers:"(1) Interrupted in work mode -> irritation. Fix: clear work hours + \"I'll call back when I'm free.\" (2) Work pile + family tasks -> a noisy head. Fix: write it down, rate the urgency, set a reminder.",
+    wake:{from:'08:45',to:'09:30'}, sleep:{from:'00:00',to:'01:00'},
+    caffeine:"Last coffee lands 3:30-4:30 PM. After that I switch to fruit or herbal teas.",
+    morning:"Every morning, whatever the day:\n- Phone-free for the first 30-60 min\n- Curtains open everywhere for light\n- Light stretch, a couple of minutes (sometimes a short breathing session)\n- Lo-fi on in the background, wash up\nThen one of two tracks, depending on the day:\n- Home: vacuum, fresh water + food for the cats, laundry, dishwasher, breakfast\n- Sea: swim 30-45 min, then breakfast and the vacuum back home",
+    meal:"Dinner window 8:00-9:00 PM. If hungry later - a light snack up to 11:30 PM: ayran, a small handful of nuts, protein milk, a couple of kiwis, or homemade fruit ice cream (just blended banana + kiwi or banana + strawberry, nothing else in it).",
+    winddown:{from:'23:30',to:'00:00'},
+    screen:"No active screens after 11:30 PM - the phone goes on the charger. Passive only after that: a series or a movie on the computer or TV.",
+    breathing:"- Before sleep, if the day was heavy or emotional\n- During any stressful situation\n- Sometimes in the morning: as practice, and for a smooth entry into the day",
+    exercise:"- Gym in the first half of the day - main window 12:00-2:00 PM\n- Fallback: 4:00-5:00 PM\n- Evening slot 6:30-8:00 PM - extremely rare",
+    worry:"9:30-10:00 PM - to-do list for tomorrow, brain dump, planning, analysis.",
+    night:"- Get up. No phone, don't check the time\n- Balcony: just sit or lie back in the fresh air\n- Or a book, time with the cats, the armchair in the living room\n- The one rule: don't stay in bed",
+    reset:"- Drifted more than an hour: shift back 30 min a day. Less than an hour: fix it in one go\n- Underslept from an early start: no sleeping in, no napping it back - live the day as planned, bed slightly earlier\n- Flight with a big time difference: start shifting at home in advance - one hour of difference, one day\n- Nap: 20-25 min, timer on, no later than 5:00 PM. After: a walk or the balcony + a quick stretch\n- Slept under 5 hours: coffee nap - a coffee, lie down for 25 min, then a few squats, push-ups, a stretch",
+    smoking:"- Morning: no smoking for the first 30-45 min after waking\n- Evening: last cigarette 1.5-2 hours before bed",
+    triggers:"- Interrupted deep in work mode -> irritation. Rule: clear work hours + \"I'll call you back when I'm free.\"\n- Work piling up + family adds more -> noisy head. Rule: write it down, rate the urgency, set a reminder.\n- Irritation or a small anxiety wave mid-work -> 20-30 min pause: phone away, jazz or silence, breathing to cool down. A cold drink on the balcony. If it really boils over: push-ups or the punching bag.",
   };
   FIELDS.forEach((f,i)=>{
     const line=document.createElement('div'); line.className='pc-line'; line.dataset.id=f.id;
     const num=String(i+1).padStart(2,'0'); let fill;
-    if(f.type==='window') fill='<div class="pc-win"><input class="pc-cell" data-part="from" placeholder="from"><span class="to">to</span><input class="pc-cell" data-part="to" placeholder="to"></div>';
+    if(f.type==='window') fill='<div class="pc-win"><input type="time" class="pc-cell" data-part="from"><span class="to">to</span><input type="time" class="pc-cell" data-part="to"></div>';
     else if(f.type==='text') fill='<input class="pc-cell" placeholder="'+(f.ph||'')+'">';
-    else fill='<textarea class="pc-cell" rows="2" placeholder="'+(f.ph||'')+'"></textarea>';
+    else fill='<div class="pc-list"></div>';
     line.innerHTML='<div class="pc-lh"><div class="pc-ln">'+num+'</div><div><label>'+f.label+'</label><span class="hint">'+f.hint+'</span></div></div><div>'+fill+'</div>';
     form.appendChild(line);
   });
   const lines=[...form.querySelectorAll('.pc-line')];
-  function grow(t){ t.style.height='auto'; t.style.height=t.scrollHeight+'px'; }
+  function grow(t){ t.style.height='auto'; if(t.scrollHeight) t.style.height=t.scrollHeight+'px'; }
+  window.pcRegrow=()=>form.querySelectorAll('textarea.pc-cell').forEach(grow);
   function mark(l){ l.classList.toggle('filled', [...l.querySelectorAll('.pc-cell')].some(e=>e.value.trim()!=='')); }
-  form.addEventListener('input',e=>{ if(e.target.tagName==='TEXTAREA') grow(e.target); mark(e.target.closest('.pc-line')); });
+  /* ---- list editor: one .pc-item per row, Enter adds a row, Backspace at row start merges up ---- */
+  function makeItem(txt){
+    const it=document.createElement('div'); it.className='pc-item';
+    it.innerHTML='<span class="mk">-</span><textarea class="pc-cell" rows="1"></textarea>';
+    it.querySelector('textarea').value=txt||'';
+    return it;
+  }
+  function isHead(v){ v=v.trimEnd(); return /:$/.test(v) && v.trim().length>1; }
+  function refreshList(list){
+    const items=[...list.querySelectorAll('.pc-item')];
+    items.forEach(it=>{ const t=it.querySelector('textarea');
+      it.classList.toggle('head', isHead(t.value)); grow(t); });
+    list.classList.toggle('multi', items.length>1);
+  }
+  function setList(l, str, ph){
+    const list=l.querySelector('.pc-list'); list.innerHTML='';
+    const rows=String(str||'').split('\n').map(s=>s.replace(/^-\s+/,'')).filter(s=>s.trim()!=='');
+    if(!rows.length){ const it=makeItem(''); it.querySelector('textarea').placeholder=ph||''; list.appendChild(it); }
+    else rows.forEach(r=>list.appendChild(makeItem(r)));
+    refreshList(list);
+  }
+  function getList(l){
+    const vals=[...l.querySelectorAll('.pc-item textarea')].map(t=>t.value.replace(/\s+$/,'')).filter(v=>v.trim()!=='');
+    if(!vals.length) return '';
+    if(vals.length===1) return vals[0];
+    return vals.map(v=> isHead(v) ? v : '- '+v).join('\n');
+  }
+  form.addEventListener('input',e=>{
+    if(e.target.tagName==='TEXTAREA'){ const li=e.target.closest('.pc-list'); if(li) refreshList(li); else grow(e.target); }
+    mark(e.target.closest('.pc-line'));
+  });
+  form.addEventListener('keydown',e=>{
+    const t=e.target; if(t.tagName!=='TEXTAREA'||!t.closest('.pc-item')) return;
+    const it=t.closest('.pc-item'), list=it.parentElement;
+    if(e.key==='Enter'){
+      e.preventDefault();
+      const tail=t.value.slice(t.selectionEnd);
+      t.value=t.value.slice(0,t.selectionStart);
+      const ni=makeItem(tail); it.after(ni);
+      refreshList(list); mark(t.closest('.pc-line'));
+      const nt=ni.querySelector('textarea'); nt.focus(); nt.selectionStart=nt.selectionEnd=0;
+    } else if(e.key==='Backspace' && t.selectionStart===0 && t.selectionEnd===0){
+      const prev=it.previousElementSibling; if(!prev) return;
+      e.preventDefault();
+      const pt=prev.querySelector('textarea'), plen=pt.value.length;
+      pt.value+=t.value; it.remove();
+      refreshList(list); mark(pt.closest('.pc-line'));
+      pt.focus(); pt.selectionStart=pt.selectionEnd=plen;
+    }
+  });
   function read(){ const d={}; FIELDS.forEach((f,i)=>{ const l=lines[i];
     if(f.type==='window') d[f.id]={from:l.querySelector('[data-part="from"]').value,to:l.querySelector('[data-part="to"]').value};
-    else d[f.id]=l.querySelector('.pc-cell').value; }); return d; }
+    else if(f.type==='text') d[f.id]=l.querySelector('.pc-cell').value;
+    else d[f.id]=getList(l); }); return d; }
+  /* older saves stored windows as "10:00 AM" text; native time inputs need 24h "HH:MM" */
+  function to24(v){ v=String(v||'').trim(); if(!v) return '';
+    if(/^\d{2}:\d{2}$/.test(v)) return v;
+    const m=v.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/i); if(!m) return '';
+    let h=+m[1]; const mi=m[2]||'00', ap=m[3]&&m[3].toUpperCase();
+    if(ap==='PM'&&h<12)h+=12; if(ap==='AM'&&h===12)h=0;
+    return (h>23||+mi>59) ? '' : String(h).padStart(2,'0')+':'+mi; }
   function writeData(d){ d=d||{}; FIELDS.forEach((f,i)=>{ const l=lines[i], v=d[f.id];
-    if(f.type==='window'){ l.querySelector('[data-part="from"]').value=(v&&v.from)||''; l.querySelector('[data-part="to"]').value=(v&&v.to)||''; }
-    else { const e=l.querySelector('.pc-cell'); e.value=v||''; if(e.tagName==='TEXTAREA') grow(e); } mark(l); }); }
+    if(f.type==='window'){ l.querySelector('[data-part="from"]').value=to24(v&&v.from); l.querySelector('[data-part="to"]').value=to24(v&&v.to); }
+    else if(f.type==='text'){ l.querySelector('.pc-cell').value=v||''; }
+    else setList(l, v, f.ph); mark(l); }); }
   DB.getProtocol().then(writeData).catch(()=>{});
   const sv=$('pcSave');
   sv.addEventListener('click', async ()=>{
