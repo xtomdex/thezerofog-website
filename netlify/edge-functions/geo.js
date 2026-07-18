@@ -3,7 +3,7 @@
 // (cookie-consent-5.js) maps it to a consent regime; an empty/unknown country is
 // treated as EU there (safe default: opt-in). Response is never cached - the CDN
 // would otherwise serve one visitor's country to another.
-// CORS: the Systeme course portal (course.thezerofog.com) runs the same regime
+// CORS: the Systeme course portal (platform.thezerofog.com) runs the same regime
 // split for its consent-gated PostHog snippet and has no /geo of its own.
 export default (request, context) => {
   const country = context.geo?.country?.code || "";
@@ -11,7 +11,7 @@ export default (request, context) => {
     headers: {
       "content-type": "application/json",
       "cache-control": "no-store",
-      "access-control-allow-origin": "https://course.thezerofog.com",
+      "access-control-allow-origin": "https://platform.thezerofog.com",
     },
   });
 };
