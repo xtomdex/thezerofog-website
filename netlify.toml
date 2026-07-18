@@ -28,6 +28,20 @@
 # this section in the Netlify processing order, so keeping both would shadow
 # these rules).
 
+# Marketing short-link → Systeme.io course on platform. subdomain
+# (LMS URL can't be shortened natively)
+[[redirects]]
+  from = "/course"
+  to = "https://platform.thezerofog.com/school/course/tzf-main"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/course/"
+  to = "https://platform.thezerofog.com/school/course/tzf-main"
+  status = 301
+  force = true
+
 # Legacy /social and retired /waitlist pages → home
 # (waitlist page removed 2026-07-09; sources archived in archive/waitlist-page/)
 [[redirects]]
