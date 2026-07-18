@@ -1199,7 +1199,7 @@
   </div>
 
   <footer class="app-footer">
-    <p id="iosInstallHint" style="display:none;margin-bottom:8px">&#128241; Add to your home screen - <a href="https://course.thezerofog.com/school/course/tzf-main/lecture/10231550">watch how</a></p>
+    <p id="iosInstallHint" style="display:none;margin-bottom:8px">&#128241; Add to your home screen - <a href="https://platform.thezerofog.com/school/course/tzf-main/lecture/10231550">watch how</a></p>
     <p>&copy; 2026 The Zero Fog. All rights reserved.<br>
     <a href="/privacy/">Privacy</a> &middot;
     <a href="/terms/">Terms</a> &middot;
@@ -1880,13 +1880,13 @@ document.querySelectorAll('.preset').forEach(p=>p.addEventListener('click', ()=>
 
 /* ---- Diagnostic: surface the biggest leak (webinar term), ranked by course order ----
    Titles are the final, locked lesson names. URLs point to the Systeme lectures
-   (course.thezerofog.com); students hit the course login if not signed in. */
+   (platform.thezerofog.com); students hit the course login if not signed in. */
 const LESSONS = {
-  wake:  { n:'1.1', title:'The One Change That Fixes Everything Else', url:'https://course.thezerofog.com/school/course/tzf-main/lecture/10243034' },
-  caff:  { n:'2.1', title:'Why Your Third Coffee Stopped Working',     url:'https://course.thezerofog.com/school/course/tzf-main/lecture/10243074' },
-  alc:   { n:'3.1', title:"Why Your Last Meal Decides Tomorrow's Morning", url:'https://course.thezerofog.com/school/course/tzf-main/lecture/10243078' },
-  bed:   { n:'4.1', title:'Your Bed Has One Job', url:'https://course.thezerofog.com/school/course/tzf-main/lecture/10243081' },
-  night: { n:'4.2', title:"The Night Protocol: If You Wake Up or Can't Fall Asleep", url:'https://course.thezerofog.com/school/course/tzf-main/lecture/10243083' },
+  wake:  { n:'1.1', title:'The One Change That Fixes Everything Else', url:'https://platform.thezerofog.com/school/course/tzf-main/lecture/10243034' },
+  caff:  { n:'2.1', title:'Why Your Third Coffee Stopped Working',     url:'https://platform.thezerofog.com/school/course/tzf-main/lecture/10243074' },
+  alc:   { n:'3.1', title:"Why Your Last Meal Decides Tomorrow's Morning", url:'https://platform.thezerofog.com/school/course/tzf-main/lecture/10243078' },
+  bed:   { n:'4.1', title:'Your Bed Has One Job', url:'https://platform.thezerofog.com/school/course/tzf-main/lecture/10243081' },
+  night: { n:'4.2', title:"The Night Protocol: If You Wake Up or Can't Fall Asleep", url:'https://platform.thezerofog.com/school/course/tzf-main/lecture/10243083' },
 };
 function lessonRef(L, cls, full){
   const label = full ? ('Lesson '+L.n+' · '+L.title) : ('Lesson '+L.n);
