@@ -31,12 +31,18 @@ permalink: /welcome/
        Captions shifted by the intro length. Files renamed -2 to bust any cached
        copy of the old version. Source recording:
        /Users/Cyrill/AI SANDBOX/My Course Voiceover (descript) V1/ #}
-  <div class="welcome-video">
-    <video controls playsinline preload="metadata"
+  {# Autoplay cascade (browser policy): try with sound -> if blocked, start muted
+       with captions + "Tap for sound" pill (restarts from 0 unmuted) -> if even
+       muted autoplay is blocked, fall back to poster + controls. nodownload only
+       hides the UI item - the file itself stays a public URL. #}
+  <div class="welcome-video" style="position:relative">
+    <video id="welcomeVid" controls playsinline preload="auto"
+           controlslist="nodownload" disablepictureinpicture
            poster="/assets/video/welcome-video-poster.jpg">
       <source src="/assets/video/welcome-video-2.mp4" type="video/mp4">
       <track kind="captions" src="/assets/video/welcome-video-2.vtt" srclang="en" label="English">
     </video>
+    <button id="vidUnmute" style="display:none;position:absolute;left:50%;bottom:52px;transform:translateX(-50%);align-items:center;gap:7px;background:rgba(13,13,13,0.85);color:#fff;border:1px solid rgba(255,255,255,0.35);border-radius:999px;padding:9px 18px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;backdrop-filter:blur(4px)">&#128266; Tap for sound</button>
   </div>
 
   <div class="next-steps">
@@ -99,4 +105,47 @@ permalink: /welcome/
 
 </section>
 
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+(function () {
+  var v = document.getElementById('welcomeVid');
+  var btn = document.getElementById('vidUnmute');
+  if (!v || !btn) return;
+
+  v.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+  function captions(on) {
+    var t = v.textTracks && v.textTracks[0];
+    if (t) t.mode = on ? 'showing' : 'disabled';
+  }
+
+  var attempt = v.play();
+  if (attempt && attempt.catch) {
+    attempt.catch(function () {
+      // Sound blocked by autoplay policy: start muted with captions instead.
+      v.muted = true;
+      captions(true);
+      var muted = v.play();
+      if (muted && muted.then) {
+        muted.then(function () { btn.style.display = 'inline-flex'; })
+             .catch(function () { v.muted = false; captions(false); }); // fully blocked: poster + controls
+      }
+    });
+  }
+
+  btn.addEventListener('click', function () {
+    v.muted = false;
+    v.currentTime = 0;
+    captions(false);
+    btn.style.display = 'none';
+    v.play();
+  });
+
+  v.addEventListener('play', function () {
+    if (!v.muted) btn.style.display = 'none';
+  });
+})();
+</script>
 {% endblock %}
