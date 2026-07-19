@@ -135,12 +135,25 @@ permalink: /welcome/
     });
   }
 
-  btn.addEventListener('click', function () {
+  function unmuteFromStart() {
     v.muted = false;
     v.currentTime = 0;
     captions(false);
     btn.style.display = 'none';
-    v.play();
+    var p = v.play();
+    if (p && p.catch) p.catch(function () {});
+    // The click's default play/pause toggle may pause the video after our
+    // handler runs - undo it so unmuting never leaves the video stopped.
+    setTimeout(function () { if (v.paused) v.play(); }, 60);
+  }
+
+  btn.addEventListener('click', unmuteFromStart);
+
+  // Any click on the (still muted) video itself also unmutes - not just the pill.
+  v.addEventListener('click', function (e) {
+    if (!v.muted) return;
+    e.preventDefault();
+    unmuteFromStart();
   });
 
   v.addEventListener('play', function () {
