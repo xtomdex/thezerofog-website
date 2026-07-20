@@ -28,6 +28,17 @@ permalink: /confirmation/
 
   <p class="reg-details hidden" id="regDetails">We sent it to <strong id="regEmail"></strong>.</p>
 
+  {# TEMPORARY (2026-07-20): direct watch button while the webinar lives on our
+     own /webinar/ page. REMOVE this whole block when EverWebinar goes live -
+     the email flow below is the permanent path. Inline styles on purpose:
+     avoids touching confirmation-3.css (cache-rename rule) for a throwaway block. #}
+  <div style="text-align:center;margin:28px 0 8px;">
+    <a href="/webinar/" style="display:inline-block;background:var(--accent);color:#0d0d0d;font-weight:800;font-size:1rem;padding:16px 32px;border-radius:10px;text-decoration:none;letter-spacing:-0.01em;">Watch the Free Training Now</a>
+    <p style="font-size:0.8rem;color:var(--text2);margin-top:10px;">It's ready right now - no need to wait for the email.</p>
+  </div>
+
+
+
   <div class="device-msg hidden" id="deviceDesktop">
     <p class="device-title">You're on a desktop - perfect.</p>
     <p class="device-text">Add the webinar to your calendar now. The join link is in the email we just sent - open it on your computer when it's time.</p>

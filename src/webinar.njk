@@ -1,0 +1,66 @@
+---
+title: "Free Training - The Zero Fog"
+permalink: /webinar/
+---
+{% extends "layouts/base.njk" %}
+
+{# TEMPORARY PAGE (2026-07-20): hosts the recorded webinar on our own domain
+   until EverWebinar is purchased and configured. Lets us walk the full funnel
+   (landing -> confirmation -> webinar -> sales) end to end with all elements.
+   When EverWebinar goes live: remove this page (301 /webinar/ -> /) and remove
+   the TEMPORARY watch button on /confirmation/.
+   Copy: headline, CTA block and disclaimer reused VERBATIM from replay.njk
+   (same promise, straight line). Styles reused from replay-3.css. #}
+
+{% block head_extras %}
+<meta name="robots" content="noindex">
+{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="/assets/css/pages/replay-3.css">
+{% endblock %}
+
+{% block content %}
+
+<a href="/" class="brand">The Zero Fog</a>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
+
+<div class="replay">
+
+  <p style="font-size:0.65rem;letter-spacing:0.5em;text-transform:uppercase;color:var(--accent);font-weight:800;opacity:0.8;text-align:center;margin-bottom:16px;">Free Training</p>
+
+  <h1>The 4-Week Process That Cleared My Brain Fog And Got My Sharp Hours Back</h1>
+  <p class="subtitle">Watch the full training below.</p>
+
+  {# Video: branded poster placeholder until the YouTube ID is inserted.
+     When the edited webinar is uploaded (YouTube, unlisted):
+     1) delete the .video-placeholder div below,
+     2) uncomment the iframe and replace VIDEO_ID with the real YouTube ID. #}
+  <div class="video-wrapper" id="videoContainer">
+    <div class="video-placeholder">
+      <div class="play-icon">&#9654;</div>
+    </div>
+    {#
+    <iframe
+      src="https://www.youtube-nocookie.com/embed/VIDEO_ID?rel=0"
+      title="The Zero Fog - Free Training"
+      style="width:100%;height:100%;border:0;"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen></iframe>
+    #}
+  </div>
+
+  <!-- CTA -->
+  <div class="replay-cta">
+    <h2>Ready to reset all three systems?</h2>
+    <p>The founding member price won't last. Lock in $67 before it goes back to $167.</p>
+    <p class="price">$67</p>
+    <p class="price-sub">One-time payment. Lifetime access. 30-day guarantee.</p>
+    <a href="/sales#enroll" class="cta-btn">Get The Protocol</a>
+  </div>
+
+  <p class="disclaimer">This is an educational program, not medical treatment. Results vary.</p>
+
+</div>
+
+{% endblock %}
