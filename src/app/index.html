@@ -1882,14 +1882,14 @@ document.querySelectorAll('.preset').forEach(p=>p.addEventListener('click', ()=>
    Titles are the final, locked lesson names. URLs point to the Systeme lectures
    (platform.thezerofog.com); students hit the course login if not signed in. */
 const LESSONS = {
-  wake:  { n:'1.1', title:'The One Change That Fixes Everything Else', url:'https://platform.thezerofog.com/school/course/tzf-main/lecture/10243034' },
-  caff:  { n:'2.1', title:'Why Your Third Coffee Stopped Working',     url:'https://platform.thezerofog.com/school/course/tzf-main/lecture/10243074' },
-  alc:   { n:'3.1', title:"Why Your Last Meal Decides Tomorrow's Morning", url:'https://platform.thezerofog.com/school/course/tzf-main/lecture/10243078' },
-  bed:   { n:'4.1', title:'Your Bed Has One Job', url:'https://platform.thezerofog.com/school/course/tzf-main/lecture/10243081' },
-  night: { n:'4.2', title:"The Night Protocol: If You Wake Up or Can't Fall Asleep", url:'https://platform.thezerofog.com/school/course/tzf-main/lecture/10243083' },
+  wake:  { title:'The One Change That Fixes Everything Else', url:'https://platform.thezerofog.com/school/course/tzf-main/lecture/10243034' },
+  caff:  { title:'Why Your Third Coffee Stopped Working',     url:'https://platform.thezerofog.com/school/course/tzf-main/lecture/10243074' },
+  alc:   { title:"Why Your Last Meal Decides Tomorrow's Morning", url:'https://platform.thezerofog.com/school/course/tzf-main/lecture/10243078' },
+  bed:   { title:'Your Bed Has One Job', url:'https://platform.thezerofog.com/school/course/tzf-main/lecture/10243081' },
+  night: { title:"The Night Protocol: If You Wake Up or Can't Fall Asleep", url:'https://platform.thezerofog.com/school/course/tzf-main/lecture/10243083' },
 };
-function lessonRef(L, cls, full){
-  const label = full ? ('Lesson '+L.n+' · '+L.title) : ('Lesson '+L.n);
+function lessonRef(L, cls){
+  const label = L.title;
   return L.url
     ? '<a class="'+cls+'" target="_blank" rel="noopener noreferrer" href="'+L.url+'">'+label+' →</a>'
     : '<span class="'+cls+'">'+label+'</span>';
@@ -1949,11 +1949,11 @@ function diagnosticHtml(rows){
   if(rows.length<4) return '<div class="sum-gate">Log at least 4 nights to see your biggest leak to fix first.</div>';
   const d = diagnose(rows);
   if(d.ok) return '<div class="sum-ok">No major leaks here - your inputs look solid. Keep logging to hold the trend.</div>';
-  let h = '<div class="sum-fix"><div class="fl-lab">⚑ Fix this first</div><div class="fl-txt">'+d.fix.txt+'</div>'+lessonRef(d.fix.L,'sum-lesson',true)+'</div>';
+  let h = '<div class="sum-fix"><div class="fl-lab">⚑ Fix this first</div><div class="fl-txt">'+d.fix.txt+'</div>'+lessonRef(d.fix.L,'sum-lesson')+'</div>';
   if(d.others.length){
     const hard = d.others.some(f=>f.sev>=0.5);
     h += '<div class="sum-flags'+(hard?' hard':'')+'"><div class="ff-lab">'+(hard?'Also hitting your sleep hard':'Also worth a look')+'</div>';
-    d.others.forEach(f=>{ h += '<div class="ff-item"><div class="ff-t">'+f.short+' · '+lessonRef(f.L,'ff-l',false)+'</div></div>'; });
+    d.others.forEach(f=>{ h += '<div class="ff-item"><div class="ff-t">'+f.short+' · '+lessonRef(f.L,'ff-l')+'</div></div>'; });
     h += '</div>';
   }
   return h;
@@ -2171,7 +2171,7 @@ function protocolInit(){
     { id:'night', label:'My night protocol', hint:"if you can't fall asleep, or wake in the night", type:'area', ph:"Can't sleep: get up, leave the bedroom. No phone, no clock." },
     { id:'reset', label:'My reset plan', hint:'after travel or a disruption', type:'area', ph:'Shift back gradually - an hour at a time. Walk more.' },
     { id:'smoking', label:'My smoking rule', hint:'if applicable', type:'area', ph:'Last one ___ before bed. None for the first ___ after waking.' },
-    { id:'triggers', label:'My triggers + solutions', hint:'from your Lesson 2.5 trigger map - the ones that still need a rule', type:'area', ph:'(1) Trigger -> solution. (2) Trigger -> solution.' },
+    { id:'triggers', label:'My triggers + solutions', hint:'from your trigger map - the ones that still need a rule', type:'area', ph:'(1) Trigger -> solution. (2) Trigger -> solution.' },
   ];
   const DEMO_PC = {
     wake:{from:'08:45',to:'09:30'}, sleep:{from:'00:00',to:'01:00'},
