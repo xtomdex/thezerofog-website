@@ -29,10 +29,10 @@ You saw how caffeine blocks your sleep pressure - hiding the signal that tells y
 
 [Download Your Caffeine Blueprint]
 
-**9 Recovery Mistakes**
+**10 Recovery Mistakes**
 During the training you saw how most energy advice sounds logical but works against your biology. This guide breaks down 9 more of those traps - the ones most people fall into without realizing. Each one comes with what actually works instead.
 
-[Download 9 Recovery Mistakes]
+[Download 10 Recovery Mistakes]
 
 **The Recovery Protocol**
 Your environment shapes your sleep more than you think. These are 5 practical changes - the kind where one fix quietly improves everything else. You can start with any of them tonight.

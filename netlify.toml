@@ -28,6 +28,23 @@
 # this section in the Netlify processing order, so keeping both would shadow
 # these rules).
 
+# Single stable checkout entry point used by EVERY sales email CTA and by ads.
+# Emails point at /enroll/ forever; when the founding window closes, or if the
+# checkout mechanism changes, only these two rules move - not 8 emails, the sales
+# page and any live campaign. Currently: the sales page anchor that opens the
+# Stripe Checkout session (create-checkout function).
+[[redirects]]
+  from = "/enroll"
+  to = "/sales/#enroll"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/enroll/"
+  to = "/sales/#enroll"
+  status = 302
+  force = true
+
 # Marketing short-link → Systeme.io course on platform. subdomain
 # (LMS URL can't be shortened natively)
 [[redirects]]

@@ -63,6 +63,255 @@
   .view{ display:none; }
   .view.on{ display:block; }
 
+  /* ===== three waves: the guide as actions ===== */
+  #view-bonuses .waves { margin:6px 0 34px; }
+  #view-bonuses .waves-lede { font-size:15.5px; line-height:1.6; margin:0 0 4px; color:var(--muted); }
+  #view-bonuses .waves-lede b { color:var(--text); }
+  #view-bonuses .waves-count { display:flex; align-items:center; gap:11px; margin:14px 0 18px; font-size:12.5px; color:var(--muted); }
+  #view-bonuses .wv-track { flex:0 1 180px; height:5px; background:rgba(255,255,255,0.07); border-radius:3px; overflow:hidden; }
+  #view-bonuses .wv-bar { display:block; height:100%; width:0; background:var(--c); transition:width .25s; }
+  #view-bonuses .wv-msg { color:var(--c); }
+  #view-bonuses .wave { margin-bottom:22px; }
+  #view-bonuses .wave-head { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  #view-bonuses .wave-n { font-size:10.5px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; padding:3px 9px; border-radius:11px; }
+  #view-bonuses .w1 .wave-n { background:rgba(139,233,253,0.16); color:var(--c); }
+  #view-bonuses .w2 .wave-n { background:rgba(189,147,249,0.16); color:var(--p); }
+  #view-bonuses .w3 .wave-n { background:rgba(255,255,255,0.07); color:var(--muted); }
+  #view-bonuses .wave-t { font-size:16px; font-weight:700; }
+  #view-bonuses .wave-s { color:var(--dim); font-size:12.5px; margin:2px 0 9px; }
+  #view-bonuses .wave-acts { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:2px 16px; }
+  #view-bonuses .w1 .wave-acts { border-left:3px solid var(--c); }
+  #view-bonuses .w2 .wave-acts { border-left:3px solid var(--p); }
+  #view-bonuses .w3 .wave-acts { border-left:3px solid rgba(255,255,255,0.15); }
+  #view-bonuses .wv-act { display:flex; gap:12px; align-items:flex-start; padding:12px 0; border-bottom:1px solid var(--line2); }
+  #view-bonuses .wave-acts .wv-act:last-child { border-bottom:none; }
+  #view-bonuses .wv-box { width:19px; height:19px; flex:none; margin-top:2px; border:1.5px solid var(--line);
+    border-radius:5px; background:rgba(255,255,255,0.03); cursor:pointer; position:relative; padding:0; font-family:inherit; }
+  #view-bonuses .wv-box:hover { border-color:var(--c); }
+  #view-bonuses .wv-act.done .wv-box { background:var(--c); border-color:var(--c); }
+  #view-bonuses .wv-act.done .wv-box::after { content:""; position:absolute; left:5px; top:1px; width:5px; height:10px;
+    border:solid #101010; border-width:0 2px 2px 0; transform:rotate(45deg); }
+  #view-bonuses .wv-body { flex:1; min-width:0; }
+  #view-bonuses .wv-t { font-size:14.5px; font-weight:600; line-height:1.4; }
+  #view-bonuses .wv-act.done .wv-t { color:var(--dim); text-decoration:line-through; }
+  #view-bonuses .wv-d { color:var(--muted); font-size:13px; margin-top:2px; }
+  #view-bonuses .wv-meta { display:flex; gap:9px; align-items:center; margin-top:6px; flex-wrap:wrap; }
+  #view-bonuses .wv-cost { font-size:10px; font-weight:700; letter-spacing:.4px; padding:2px 8px; border-radius:10px;
+    background:rgba(80,250,123,0.13); color:#50fa7b; }
+  #view-bonuses .wv-cost.paid { background:rgba(255,121,198,0.13); color:var(--pink); }
+  #view-bonuses .wv-time { font-size:11.5px; color:var(--dim); }
+  #view-bonuses .wv-why { font-size:11.5px; color:var(--p); text-decoration:none; border-bottom:1px dotted rgba(189,147,249,.4); }
+  #view-bonuses .wv-why:hover { color:var(--c); border-color:var(--c); }
+  #view-bonuses .waves-after { color:var(--dim); font-size:13px; margin:18px 0 0; }
+  #view-bonuses .section[id^="sec-"] { scroll-margin-top:18px; }
+  /* Reference sections collapse. The actions above are the guide; this is the
+     library behind them, and five screens of library after a two-screen guide
+     reads as homework. Uses the same <details> as the evidence folds rather than
+     introducing another disclosure pattern. */
+  /* Closed, these are a table of contents — the 42px section rhythm is for open
+     prose and turns five titles into five screens of air. */
+  #view-bonuses details.ref { border-bottom:1px solid var(--line2); padding-bottom:0; margin-bottom:0; }
+  #view-bonuses details.ref > summary { list-style:none; cursor:pointer; padding:14px 0; }
+  #view-bonuses details.ref > summary.section-title { margin-bottom:0; }
+  #view-bonuses details.ref[open] > summary.section-title { margin-bottom:8px; }
+  /* The answer, visible without opening anything. Hidden once the section is open,
+     where the full text says the same thing properly. */
+  #view-bonuses details.ref > summary { flex-wrap:wrap; }
+  /* order:2 keeps the gist below the title row, so the "why" control stays up on
+     the title line where it is visible instead of being pushed under the text. */
+  #view-bonuses .ref-gist { order:2; flex-basis:100%; font-size:12.5px; color:var(--muted);
+    margin:6px 0 0 42px; line-height:1.55; font-weight:400; text-transform:none; letter-spacing:0; }
+  #view-bonuses details.ref[open] .ref-gist { display:none; }
+  /* One press for anyone who does want to read the reference end to end. */
+  #view-bonuses .ref-all { background:none; border:1px solid var(--line); color:var(--muted);
+    border-radius:8px; padding:5px 12px; font-size:12px; font-weight:600; cursor:pointer;
+    font-family:inherit; margin:14px 0 0; }
+  #view-bonuses .ref-all:hover { color:var(--p); border-color:var(--p); }
+  #view-bonuses details.ref > summary::-webkit-details-marker { display:none; }
+  /* A bare "+" at the far edge did not read as "there is more here", especially
+     once the gist line pushed it onto a row of its own. A word does. */
+  #view-bonuses details.ref > summary::after { content:'why  +'; margin-left:auto; order:1;
+    color:var(--dim); font-size:11.5px; font-weight:600; letter-spacing:.4px; text-transform:none;
+    border:1px solid var(--line); border-radius:8px; padding:4px 10px; white-space:nowrap; }
+  #view-bonuses details.ref[open] > summary::after { content:'close  \2212'; }
+  #view-bonuses details.ref > summary:hover { color:var(--text); }
+  #view-bonuses details.ref > summary:hover::after { color:var(--p); border-color:var(--p); }
+  #view-bonuses details.ref[open] { padding-bottom:18px; }
+  #view-bonuses .wv-act { scroll-margin-top:30vh; }
+  .wv-back { position:fixed; right:20px; bottom:20px; z-index:40; background:var(--purple); color:#fff;
+    border:none; border-radius:11px; padding:11px 16px; font-size:13.5px; font-weight:700;
+    font-family:inherit; cursor:pointer; box-shadow:0 6px 20px rgba(0,0,0,.35); }
+  .wv-back:hover { opacity:.92; }
+  .wv-back[hidden] { display:none; }
+  @media (max-width:900px){ .wv-back { right:14px; bottom:14px; padding:10px 14px; font-size:13px; } }
+  @media print { .wv-back { display:none !important; } }
+  @media print { #view-bonuses .waves-count { display:none !important; } }
+
+  /* ===== maintenance tracker: age questions + care list ===== */
+  #view-bonuses .rt-block { margin-top:14px; }
+  #view-bonuses .rt-care { margin-top:30px; }
+  #view-bonuses .rt-head { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  #view-bonuses .rt-title { font-size:15.5px; font-weight:700; }
+  #view-bonuses .rt-prog { font-size:12px; color:var(--dim); }
+  #view-bonuses .rt-sub { font-size:13px; color:var(--muted); margin:4px 0 12px; line-height:1.6; }
+  #view-bonuses .rt-item { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:2px 15px; margin-bottom:8px; }
+  #view-bonuses .rt-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:11px 0; }
+  #view-bonuses .rt-name { font-weight:600; font-size:14px; min-width:128px; display:flex; align-items:center; gap:8px; }
+  #view-bonuses .rt-label { background:rgba(255,255,255,0.04); border:1px solid var(--line); color:var(--text);
+    border-radius:7px; padding:3px 7px; font-size:11.5px; width:104px; font-family:inherit; }
+  #view-bonuses .rt-chips { display:flex; gap:6px; flex-wrap:wrap; flex:1; }
+  #view-bonuses .rt-chip { background:rgba(255,255,255,0.05); border:1px solid var(--line); color:var(--muted);
+    border-radius:8px; padding:5px 11px; font-size:12.5px; font-weight:600; cursor:pointer;
+    font-family:inherit; white-space:nowrap; }
+  #view-bonuses .rt-chip:hover { color:var(--text); }
+  #view-bonuses .rt-chip.on { background:var(--p); border-color:var(--p); color:#fff; }
+  #view-bonuses .rt-verdict { font-size:12.5px; font-weight:600; color:var(--dim); min-width:160px; text-align:right; }
+  #view-bonuses .rt-verdict.ok { color:var(--c); }
+  #view-bonuses .rt-verdict.soon { color:var(--pink); }
+  #view-bonuses .rt-verdict.now { color:var(--red); }
+  #view-bonuses .rt-test { font-size:12.5px; color:var(--muted); padding:0 0 11px 2px; }
+  #view-bonuses .rt-del { background:none; border:none; color:var(--dim); font-size:17px; cursor:pointer;
+    line-height:1; padding:0 2px; font-family:inherit; }
+  #view-bonuses .rt-del:hover { color:var(--red); }
+  #view-bonuses .rt-add { background:none; border:1px dashed var(--line); color:var(--dim); border-radius:8px;
+    padding:4px 10px; font-size:11.5px; margin:0 0 14px; cursor:pointer; font-family:inherit; }
+  #view-bonuses .rt-add:hover { color:var(--p); border-color:var(--p); }
+  #view-bonuses .rt-cal1 { background:rgba(255,255,255,0.05); border:1px solid var(--line); border-radius:8px;
+    padding:3px 8px; font-size:13px; cursor:pointer; font-family:inherit; line-height:1.3; }
+  #view-bonuses .rt-cal1:hover { border-color:var(--p); }
+  #view-bonuses .rt-when { display:flex; align-items:center; gap:7px; flex-wrap:wrap; padding:0 0 11px 2px; }
+  #view-bonuses .rt-when-q { font-size:12.5px; color:var(--muted); }
+  #view-bonuses .rt-w { background:rgba(255,255,255,0.05); border:1px solid var(--line); color:var(--muted);
+    border-radius:8px; padding:4px 11px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; }
+  #view-bonuses .rt-w:hover { background:var(--p); border-color:var(--p); color:#fff; }
+  #view-bonuses .rt-wdate { background:rgba(255,255,255,0.04); border:1px solid var(--line); color:var(--text);
+    border-radius:8px; padding:3px 8px; font-size:12px; font-family:inherit; }
+  #view-bonuses .rt-care-row .rt-next { font-size:11.5px; color:var(--c); white-space:nowrap; }
+  #view-bonuses .rt-did { background:rgba(255,255,255,0.05); border:1px solid var(--line); color:var(--muted);
+    border-radius:8px; padding:4px 10px; font-size:11.5px; font-weight:600; cursor:pointer;
+    font-family:inherit; white-space:nowrap; }
+  #view-bonuses .rt-did:hover { color:var(--text); border-color:var(--p); }
+  #view-bonuses .rt-did.again { font-size:11px; opacity:.75; }
+  #view-bonuses .rt-care-row.set .rt-act { color:var(--text); }
+  @media (max-width:600px){
+  #view-bonuses .rt-care-row { flex-wrap:wrap; }
+  #view-bonuses .rt-next, .rt-did { margin-top:4px; }
+  }
+  #view-bonuses .rt-care-row { display:flex; align-items:baseline; gap:12px; padding:10px 0; border-bottom:1px solid var(--line2); }
+  #view-bonuses .rt-care-row:last-child { border-bottom:none; }
+  #view-bonuses .rt-act { flex:1; font-size:14px; }
+  #view-bonuses .rt-act small { display:block; color:var(--dim); font-size:12px; margin-top:2px; }
+  @media (max-width:600px){
+  #view-bonuses .rt-verdict { min-width:0; text-align:left; width:100%; }
+  #view-bonuses .rt-name { min-width:0; width:100%; }
+  }
+
+  /* ===== FREE mode: upsell banner + locked nav markers =====
+     A locked door sells nothing, so the paid tools stay visible and usable on
+     local data. This banner says what the visitor is looking at and what the
+     course adds. Hidden entirely for signed-in buyers. */
+  .upsell{ margin:0 20px 18px; border:1px solid var(--line); border-radius:14px;
+    background:linear-gradient(160deg, rgba(189,147,249,0.14), rgba(189,147,249,0.03)); }
+  .upsell[hidden]{ display:none; }
+  .up-body{ padding:16px 18px; }
+  .up-title{ font-size:15px; font-weight:700; margin-bottom:5px; }
+  .up-text{ font-size:13.5px; line-height:1.6; color:var(--muted); margin:0 0 12px; }
+  .up-btn{ display:inline-block; background:var(--purple); color:#fff; text-decoration:none;
+    border-radius:9px; padding:9px 16px; font-size:13.5px; font-weight:700; }
+  .up-btn:hover{ opacity:.9; }
+  .up-link{ background:none; border:none; color:var(--muted); font-size:13px; font-family:inherit;
+    cursor:pointer; text-decoration:underline; margin-left:12px; padding:9px 0; }
+  .up-link:hover{ color:var(--text); }
+  .navi.locked .nlb::after, .tab.locked::after{ content:"\00a0\1F512"; font-size:11px; opacity:.65; }
+  /* Nothing to sign out of when nobody is signed in. */
+  body.free .signout{ display:none; }
+
+  /* ===== FREE previews: show the shape, withhold the substance =====
+     Assessment — take it, see your score. The per-system breakdown and the note
+     that says what to do about it are the part the course pays for.
+     Protocol — read-only, pre-filled with the founder's example. The first two
+     lines are legible so it is obvious what a filled card looks like; the rest
+     is blurred, which also makes the depth visible. */
+  body.free #view-assessment .sysrows,
+  body.free #view-assessment .a-note{
+    filter:blur(6px); pointer-events:none; user-select:none; }
+  body.free #view-protocol #pcCard{ pointer-events:none; }
+  body.free #view-protocol #pcCard .pc-line:nth-of-type(n+3){
+    filter:blur(5px); user-select:none; }
+  body.free #view-protocol .pc-actions,
+  body.free #view-protocol .pc-demo{ display:none; }
+  .free-veil{ position:relative; margin:14px 0 0; padding:13px 16px; border-radius:12px;
+    border:1px solid var(--line); background:var(--panel); font-size:13.5px; color:var(--muted); }
+  .free-veil b{ color:var(--text); display:block; margin-bottom:3px; font-size:14px; }
+  .free-veil a{ color:var(--purple); font-weight:700; text-decoration:none; }
+  .free-veil a:hover{ text-decoration:underline; }
+  body:not(.free) .free-veil{ display:none; }
+  @media print { .free-veil{ display:none !important; } }
+
+  /* Bonus CTA: FREE visitors only. Buyers already own the program, so selling it
+     to them inside their own app is noise. Hidden by default, shown under .free. */
+  #view-bonuses .cta{ display:none; }
+  body.free #view-bonuses .cta{ display:block; margin-top:34px; padding:22px 24px;
+    border:1px solid rgba(189,147,249,0.35); border-radius:14px;
+    background:linear-gradient(160deg, rgba(189,147,249,0.12), rgba(189,147,249,0.03)); }
+  #view-bonuses .cta-h{ font-size:17px; font-weight:800; margin-bottom:6px; }
+  #view-bonuses .cta p{ font-size:13.5px; color:var(--muted); line-height:1.6; margin-bottom:16px; }
+  #view-bonuses .cta-btn{ display:inline-block; background:var(--purple); color:#fff; text-decoration:none;
+    font-weight:700; font-size:14px; padding:12px 22px; border-radius:11px; }
+  #view-bonuses .cta-btn:hover{ opacity:.9; color:#fff; }
+  /* Screen: never. Print: always, buyers included — the sheet gets handed around,
+     and whoever picks it up should have a way to find the program. */
+  .qr-print{ display:none; }
+  @media print { .upsell{ display:none !important; } }
+
+  /* ===== print a bonus guide =====
+     Ported from the retired /webinar-bonuses page, which is where these guides
+     used to be printable. Same idea as .printing-pc above: a body class set by the
+     print button, so printing from any other view is unaffected. Prints the OPEN
+     guide only, on a light palette, with the interactive chrome stripped. */
+  .bonus-print{ display:inline-flex; align-items:center; gap:7px; margin-left:auto;
+    background:var(--panel); border:1px solid var(--line); color:var(--text);
+    border-radius:9px; padding:7px 13px; font-size:12.5px; font-weight:600;
+    font-family:inherit; cursor:pointer; }
+  .bonus-print:hover{ border-color:var(--purple); color:var(--purple); }
+  @media print{
+    body.printing-bonus{ background:#fff; }
+    body.printing-bonus .top, body.printing-bonus .side, body.printing-bonus .install,
+    body.printing-bonus #authGate, body.printing-bonus .app-footer, body.printing-bonus .upsell,
+    body.printing-bonus .view:not(#view-bonuses), body.printing-bonus .bonus-switch,
+    body.printing-bonus .bonus-print, body.printing-bonus .cal-row, body.printing-bonus .addbtn,
+    body.printing-bonus .unit-del, body.printing-bonus .print-hide, body.printing-bonus .cta-btn,
+    body.printing-bonus .caff-sug, body.printing-bonus .caff-chips,
+    body.printing-bonus .bridge{ display:none !important; }
+    body.printing-bonus .app{ background:#fff; display:block; }
+    body.printing-bonus .bguide:not(.on){ display:none !important; }
+    body.printing-bonus #view-bonuses{ --p:#5b21b6; --c:#0e6b80; --pink:#b81d6a; --red:#c0392b;
+      --line:rgba(0,0,0,0.18); --line2:rgba(0,0,0,0.10); color:#000; padding:0; }
+    body.printing-bonus #view-bonuses .tip-text, body.printing-bonus #view-bonuses p,
+    body.printing-bonus #view-bonuses li{ color:#222; }
+    body.printing-bonus #view-bonuses .unit-label{ border:none; }
+    body.printing-bonus #view-bonuses .myth-verdict{ color:#000; }
+    body.printing-bonus #view-bonuses .spec-do{ color:#000; }
+    body.printing-bonus #view-bonuses .task input[type=date]{ border:none; border-bottom:1px solid #999;
+      border-radius:0; background:transparent; }
+    body.printing-bonus #view-bonuses .section, body.printing-bonus #view-bonuses .unit,
+    body.printing-bonus #view-bonuses .myth, body.printing-bonus #view-bonuses .quick-win,
+    body.printing-bonus #view-bonuses .spec, body.printing-bonus #view-bonuses .cta{ break-inside:avoid; }
+    /* folds are force-opened by the beforeprint handler; drop the control chrome so
+       the PDF reads as one continuous document */
+    body.printing-bonus #view-bonuses .tip-more > summary{ border:none; background:none; padding:0; }
+    body.printing-bonus #view-bonuses .tip-more .tm-act{ display:none !important; }
+    body.printing-bonus #view-bonuses .tip-more .tm-body{ border-left:none; padding-left:0; margin-top:11px; }
+    /* CTA text prints for FREE readers only; the QR prints for everyone. */
+    body.printing-bonus:not(.free) #view-bonuses .cta{ display:none !important; }
+    body.printing-bonus #view-bonuses .qr-print{ display:flex !important; align-items:center; gap:16px;
+      margin-top:16px; break-inside:avoid; }
+    body.printing-bonus #view-bonuses .qr-box{ background:#fff; padding:7px; border:1px solid #ccc;
+      border-radius:8px; width:104px; height:104px; flex:0 0 auto; }
+    body.printing-bonus #view-bonuses .qr-box img{ width:100%; height:100%; display:block; }
+    body.printing-bonus #view-bonuses .qr-cap{ font-size:12px; color:#333; line-height:1.5; }
+  }
+
   /* ===== Bonuses guides — native, duplicated from /webinar-bonuses =====
      Scoped under #view-bonuses so the guides' generic class names (.section,
      .tip, .footer, .badge, .accent …) never collide with the app's own styles.
@@ -108,14 +357,27 @@
   #view-bonuses .section p { font-size:14.5px; color:var(--muted); line-height:1.75; margin-bottom:11px; }
   #view-bonuses .section p .hl { color:var(--pink); font-weight:600; }
 
-  #view-bonuses .tip { margin-bottom:18px; padding-left:42px; }
-  #view-bonuses .tip-name { font-size:15px; font-weight:700; color:var(--c); margin-bottom:4px; }
   #view-bonuses .tip-text { font-size:14px; color:var(--muted); line-height:1.75; }
   #view-bonuses .tip-text .hl { color:var(--pink); font-weight:600; }
+  /* Reference sections are a spec sheet, not an article: the number and the action stay
+     visible, every word of the reasoning sits behind the fold. */
+  #view-bonuses .spec { padding:13px 0 13px 42px; border-top:1px solid var(--line2); }
+  #view-bonuses .spec:first-of-type { border-top:none; padding-top:2px; }
+  #view-bonuses .spec-top { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  /* The row label is navigation, the value is the answer. Only the answer gets a hue. */
+  #view-bonuses .spec-k { font-size:15px; font-weight:700; color:var(--text); }
+  #view-bonuses .spec-v { font-size:15px; font-weight:700; color:var(--pink); }
+  #view-bonuses .spec-do { font-size:14.5px; color:var(--text); line-height:1.6; margin-top:4px; }
+  #view-bonuses .spec > .tip-more { margin-top:8px; }
+  #view-bonuses .blist + .spec-do { margin-top:10px; }
+  #view-bonuses .spec-note { font-size:13px; color:var(--dim); margin:12px 0 0 42px; }
   #view-bonuses .blist { list-style:none; margin:8px 0 0; padding:0; }
   #view-bonuses .blist li { font-size:14px; color:var(--muted); line-height:1.7; padding:3px 0 3px 18px; position:relative; }
   #view-bonuses .blist li::before { content:''; position:absolute; left:2px; top:13px; width:5px; height:5px; border-radius:50%; background:var(--p); }
   #view-bonuses .blist li b { color:var(--text); font-weight:600; }
+  /* a paragraph that follows a list is a new thought, not its last bullet */
+  #view-bonuses .blist + .tip-text { margin-top:11px; }
+  #view-bonuses .blist + .tip-more { margin-top:13px; }
 
   #view-bonuses .divider { width:48px; height:1px; background:rgba(189,147,249,0.25); margin:44px auto; }
   #view-bonuses .footer { text-align:center; padding-top:26px; margin-top:8px; border-top:1px solid var(--line); }
@@ -166,6 +428,25 @@
   #view-bonuses .tips-list li { font-size:14.5px; color:var(--muted); line-height:1.75; margin-bottom:14px; padding-left:22px; position:relative; }
   #view-bonuses .tips-list li::before { content:''; position:absolute; left:0; top:10px; width:6px; height:6px; border-radius:50%; background:var(--p); }
   #view-bonuses .tips-list li strong { color:var(--pink); font-weight:600; }
+/* ===== morning light: ranked cards, best first ===== */
+    border-radius:12px; padding:15px 14px 14px; background:var(--panel2); break-inside:avoid; }
+    display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800;
+    color:var(--bg); background:var(--cc,var(--p)); box-shadow:0 0 0 3px var(--bg); }
+    white-space:nowrap; color:var(--cc,var(--p)); background:color-mix(in srgb, var(--cc,var(--p)) 13%, transparent);
+    border:1px solid color-mix(in srgb, var(--cc,var(--p)) 28%, transparent); padding:3px 9px; border-radius:20px; }
+    border-top:1px solid var(--line2); }
+  #view-bonuses .myth-real + .myth-real { margin-top:11px; }
+  #view-bonuses .myth > .tip-more { margin-left:39px; }
+  @media (max-width:600px){ #view-bonuses .myth > .tip-more { margin-left:0; } }
+
+  /* ===== loudness chart: rising bars, dB below, earplugs above ===== */
+    gap:8px; height:26px; padding:0 10px; border-radius:7px; font-size:11.5px; font-weight:700; letter-spacing:0.2px;
+    color:var(--pc); background:color-mix(in srgb, var(--pc) 14%, transparent);
+    border:1px solid color-mix(in srgb, var(--pc) 32%, transparent); }
+    border-top:1px solid var(--line); }
+    text-transform:uppercase; color:var(--pink); white-space:nowrap; }
+  @media (max-width:600px){
+  }
 
   /* maintenance tracker */
   #view-bonuses .block-head { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
@@ -206,7 +487,12 @@
   #view-bonuses .myth-top { display:flex; align-items:baseline; gap:13px; margin-bottom:8px; }
   #view-bonuses .myth-num { font-size:15px; font-weight:800; color:#fff; background:var(--p); width:26px; height:26px; border-radius:7px;
     display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; }
-  #view-bonuses .myth-claim { font-size:16px; font-weight:700; color:var(--pink); line-height:1.35; }
+  /* The claim is the lie: it must be identifiable, never the loudest thing in the block.
+     The verdict carries the answer and is the largest text in the myth. */
+  /* Pink means "the answer" everywhere else in the app, so the false claim must not wear it. */
+  #view-bonuses .myth-claim { font-size:14px; font-weight:600; color:var(--muted); line-height:1.4; }
+  #view-bonuses .myth-verdict { font-size:17px; font-weight:600; color:var(--text); line-height:1.45;
+    padding-left:39px; margin-bottom:11px; }
   #view-bonuses .myth-real { font-size:14px; color:var(--muted); line-height:1.7; padding-left:39px; }
   #view-bonuses .myth-real b { color:var(--text); font-weight:600; }
   #view-bonuses .callout { background:var(--panel); border:1px solid rgba(189,147,249,0.15); border-radius:12px; padding:22px 26px; margin-bottom:36px; }
@@ -227,8 +513,10 @@
   #view-bonuses .win-text strong { color:var(--pink); font-weight:600; }
 
   @media (max-width:600px){
-    #view-bonuses .tip,#view-bonuses .quick-win,#view-bonuses .block-sub,#view-bonuses .cal-row { padding-left:0; margin-left:0; }
-    #view-bonuses .myth-real { padding-left:0; }
+    #view-bonuses .quick-win,#view-bonuses .block-sub,#view-bonuses .cal-row { padding-left:0; margin-left:0; }
+    #view-bonuses .spec { padding-left:0; }
+    #view-bonuses .spec-note { margin-left:0; }
+    #view-bonuses .myth-real, #view-bonuses .myth-verdict { padding-left:0; }
     #view-bonuses .myth-src { margin-left:0; }
   }
 
@@ -724,7 +1012,7 @@
       <div class="subnav" id="bonusSub">
         <div class="subi" data-guide="caffeine">Caffeine Blueprint</div>
         <div class="subi" data-guide="bedroom">Recovery Protocol</div>
-        <div class="subi" data-guide="mistakes">9 Recovery Mistakes</div>
+        <div class="subi" data-guide="mistakes">10 Recovery Mistakes</div>
       </div>
     </nav>
     <div class="grow"></div>
@@ -760,6 +1048,23 @@
     <span id="installTxt"></span>
     <button id="installBtn">Install</button>
     <button class="x" id="installX">×</button>
+  </div>
+
+  <!-- Return button for the bedroom guide. The reference sections sit below the
+       actions, so a reader who follows a "why - X" link lands a long way down;
+       without this they have to scroll back by hand. It returns to the exact
+       action they left from, not just to the top. -->
+  <button type="button" class="wv-back" id="wvBack" hidden>&#8593; Back to what I was doing</button>
+
+  <!-- Upsell banner for FREE mode. Moved to the top of whichever paid view is open
+       (see switchView). Copy is draft - it goes through the IRON pass before launch. -->
+  <div class="upsell" id="upsell" hidden>
+    <div class="up-body">
+      <div class="up-title">This one comes with the course</div>
+      <p class="up-text" id="upText">Have a look around - everything works, and what you type stays on this device. The part that makes it work is the method behind it, and that lives in the program.</p>
+      <a class="up-btn" href="/sales/">See the full program</a>
+      <button class="up-link" id="upSignIn">Already bought? Sign in</button>
+    </div>
   </div>
 
   <!-- ============ DIARY VIEW ============ -->
@@ -894,6 +1199,7 @@
         <div class="meter"><div class="mf" id="aMeter"></div></div>
       </div>
       <div class="sysrows"><h3>Your three systems</h3><div id="aSys"></div></div>
+      <div class="free-veil"><b>Your score is the easy half.</b>The breakdown above splits it across the three systems that produce it, and says which one to fix first - that reading is what the program does with the number. <a href="/sales/">See the full program</a></div>
       <div class="a-note" id="aNote"></div>
       <div class="a-actions"><button type="button" class="btn" id="aRetake">Retake</button></div>
     </div>
@@ -915,6 +1221,7 @@
         <button class="pc-save" id="pcSave">Save my card</button>
         <button class="pc-ghost" id="pcPrint">Print / Save as PDF</button>
       </div>
+      <div class="free-veil"><b>This is the founder's card, not yours.</b>Yours gets built week by week as the program works out your own windows. Read-only here so you can see the shape of a finished one. <a href="/sales/">See the full program</a></div>
       <div class="pc-demo">
         <button id="pcDemo">Load founder's example</button>
         <button class="clear" id="pcClear">Clear card</button>
@@ -950,31 +1257,42 @@
     <div class="bonus-switch" id="bonusSwitch">
       <button class="bsw on" data-guide="caffeine">Caffeine</button>
       <button class="bsw" data-guide="bedroom">Recovery</button>
-      <button class="bsw" data-guide="mistakes">9 Mistakes</button>
+      <button class="bsw" data-guide="mistakes">10 Mistakes</button>
+      <button class="bonus-print" id="bonusPrint">&#10515; Print / Save PDF</button>
     </div>
 
     <!-- ---------------- CAFFEINE ---------------- -->
     <section class="bguide on" id="bg-caffeine">
-      <div class="bridge"><p><span class="lead">You came to fix the crashes, not your coffee.</span> But the afternoon wall and the wired-but-tired nights often trace back to one thing: when your last cup lands. Caffeine is still in your system long after you stop feeling it. Here is your exact cutoff.</p></div>
+      <div class="bridge"><p><span class="lead">You came to fix the crashes, not your coffee.</span> But the afternoon wall and the wired-but-tired nights often trace back to one thing: when your last cup lands. Caffeine is still in your system long after you stop feeling it. Here is your window.</p></div>
 
       <div class="header">
         <div class="badge">The Zero Fog - Bonus</div>
         <h1>Your <span class="accent">Caffeine</span> Blueprint</h1>
-        <p class="subtitle">Stop guessing when to stop - know your exact cutoff so caffeine works for your focus, not against it</p>
+        <p class="subtitle">Stop guessing when to stop - find your own window so caffeine works for your focus, not against it</p>
       </div>
 
       <div class="section">
         <div class="sct">The Science (30 Seconds)</div>
-        <p>Caffeine has a half-life of 5-6 hours. Half the caffeine from your 2 PM coffee is still in your system at 8 PM. A quarter is still there at 2 AM.</p>
-        <p>You might fall asleep - but caffeine <span class="hl">reduces deep sleep by up to 20%</span>, even when you don't feel it.</p>
-        <p>After about two weeks of daily use, caffeine mostly stops giving energy - it just keeps withdrawal away.</p>
-        <p>Dose matters as much as timing. A standard cup of drip coffee is about <span class="hl">95 mg</span>, an espresso shot about <span class="hl">63 mg</span>, a strong pre-workout <span class="hl">200 mg</span> or more. The bigger the dose, the longer your body needs to clear it - so the calculator below sets your cutoff for what you're actually drinking.</p>
+        <p>Caffeine takes about 5 hours to drop by half. Half of a 2 PM coffee is still in you at 7 PM, a quarter of it at midnight. But 5 hours is only the average - some people clear it <span class="hl">five or six times faster</span> than others. Same cup, same hour: one person is clean by evening, the next carries a third of it into bed. That is why the calculator below gives you a window, not a line.</p>
+        <p>You can fall asleep fine and still lose the deep part of the night. A typical adult night holds only <span class="hl">80-100 minutes</span> of deep sleep. An ordinary late coffee costs around 11 minutes of it - about <span class="hl">12%</span>. A 400 mg dose - four coffees, or one scoop of strong pre-workout - costs around 30 minutes, about <span class="hl">33%</span> of the night's supply. For scale: people over 60 usually get under 20 minutes of deep sleep a night in total.</p>
+        <p>How much matters as much as when, and "a cup of coffee" is not an amount: the same 8 oz of brewed coffee runs anywhere from <span class="hl">95 to 200 mg</span>. The bigger the dose, the longer your body needs - so the calculator works from what you are actually drinking.</p>
+
+        <details class="tip-more">
+          <summary><span class="tm-q">What losing deep sleep actually costs - and why you won't feel it</span><span class="tm-act"></span></summary>
+          <div class="tm-body">
+            <p class="tip-text">Researchers took nine healthy young adults and used quiet sounds to nudge them out of deep sleep and into light sleep. Nobody was woken. <b>Not a single minute came off their total sleep or their dreaming sleep.</b> Same hours in bed, same hours asleep. Just shallower. After three nights, their bodies had become about 25% worse at handling sugar - down to the level found in people at high risk of type 2 diabetes. That is roughly what you would get from carrying an extra 18-29 lb (8-13 kg). The calm-down side of their nervous system dropped about 15% - that is the part your ring reads when it scores your recovery. The balance tipped roughly 14% toward the stressed side.</p>
+            <p class="tip-text">One more thing worth knowing about daily use. After weeks of it, most of what your morning cup does is bring you back to normal rather than lift you above it. You are not getting a boost. You are climbing out of the hole the last one dug.</p>
+            <p class="tip-text">The more deep sleep they lost, the bigger the hit. It scaled. That is why smaller losses still matter - there is no free amount you get to give away.</p>
+            <p class="tip-text">And that is exactly why it goes unnoticed. Nothing about those nights felt bad - same hours in bed, same hours asleep, nobody woken. What moved, moved in the blood work and in the heart rate, and neither of those has a feeling attached to it. <b>"I feel fine" isn't a lie, and it isn't denial.</b> It's just not the instrument that reads this one.</p>
+            <p class="tip-src"><a href="https://www.pnas.org/doi/10.1073/pnas.0706446105" target="_blank" rel="noopener">Tasali et al., 2008 - Slow-wave sleep and the risk of type 2 diabetes in humans (PNAS)</a></p>
+          </div>
+        </details>
       </div>
 
       <div class="section">
         <div class="sct">Your Cutoff Calculator</div>
         <div class="formula">
-          <p>Enter your bedtime, then pick or type what you're drinking. The stronger the dose, the earlier you should stop.</p>
+          <p>Enter your bedtime, then pick or type what you're drinking. You get a window, not a deadline - because a window is what the research gives. The later edge is where a careful trial found no measurable effect at that amount; the earlier edge is what the wider body of research points to.</p>
           <div class="caff-in"><label>My target bedtime</label><input type="time" id="caffBed"></div>
           <div class="caff-in" style="position:relative">
             <label>What are you having?</label>
@@ -983,6 +1301,7 @@
           </div>
           <div class="caff-chips" id="caffChips"></div>
           <div class="caff-result" id="caffResult"></div>
+          <p style="margin-top:14px">Two things genuinely move your window, and neither one is age or sex. <b>Birth control pills slow caffeine down inside you</b> - sit closer to the earlier edge. <b>Smoking speeds it up</b> - the later edge is more likely to hold for you.</p>
         </div>
       </div>
 
@@ -997,7 +1316,7 @@
             <tr><td>Green tea (250 ml)</td><td>28 mg</td><td>0.5 units</td></tr>
             <tr><td>Cola (330 ml)</td><td>32 mg</td><td>0.5 units</td></tr>
             <tr><td>Energy drink (250 ml)</td><td>80 mg</td><td>1.25 units</td></tr>
-            <tr><td>Dark chocolate (50 g)</td><td>25 mg</td><td>0.4 units</td></tr>
+            <tr><td>Dark chocolate (50 g)</td><td>40 mg</td><td>0.6 units</td></tr>
             <tr><td>Pre-workout supplement</td><td>150-300 mg</td><td>2-5 units</td></tr>
           </tbody>
         </table>
@@ -1006,25 +1325,35 @@
       <div class="section">
         <div class="sct">Practical Tips</div>
         <ul class="tips-list">
-          <li><strong>Time it, don't quit it.</strong> Drink coffee in the morning - it works with your natural cortisol peak. After your cutoff, switch to decaf or herbal tea.</li>
+          <li><strong>Time it, don't quit it.</strong> Push your caffeine into the morning - that is the only way a big dose has time to clear. After your window closes, decaf or herbal tea.</li>
           <li><strong>Hidden sources add up.</strong> Dark chocolate, green tea, pre-workout. Check the table above.</li>
-          <li><strong>Know your type.</strong> Some people clear caffeine slowly (a 3 PM coffee wrecks their night), others barely notice it. This is largely genetic. If an 8-hour cutoff isn't enough, push it to 10-12 hours.</li>
-          <li><strong>Full reset.</strong> Cut back by one cup every three days for two weeks. After that, one cup hits like it used to.</li>
+          <li><strong>Find your own edge.</strong> Start at the earlier edge of your window for a week, then move later until you notice a cost. That is your number, and nobody else's works for you.</li>
+          <li><strong>Full reset.</strong> If caffeine has stopped doing anything for you, step down slowly: one cup fewer every three days, over about two weeks. Tolerance does fade.</li>
         </ul>
         <div class="research">
           <div class="rh">The research behind this</div>
-          <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3805807/" target="_blank" rel="noopener noreferrer">Drake et al., J. Clinical Sleep Medicine - caffeine 6 hours before bed cuts total sleep &rarr;</a>
+          <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11985402/" target="_blank" rel="noopener noreferrer">Gardiner et al., SLEEP 2024 - dose and timing: 100 mg at 4 hours was clean, 400 mg at 12 hours was not &rarr;</a>
+          <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3805807/" target="_blank" rel="noopener noreferrer">Drake et al., J. Clinical Sleep Medicine - 400 mg six hours before bed cut total sleep by about an hour &rarr;</a>
         </div>
       </div>
 
+      <div class="cta">
+        <div class="cta-h">Want your sharp hours back for good?</div>
+        <p>These bonuses are real wins on their own. The full 4-week ZeroFog program is the system that turns them into clear, productive days - without willpower or a rigid schedule.</p>
+        <a class="cta-btn" href="/sales/">See the full program &rarr;</a>
+      </div>
+      <div class="qr-print">
+        <div class="qr-box"><img src="/assets/img/qr-sales.svg" alt="QR code linking to thezerofog.com/sales"></div>
+        <div class="qr-cap">Scan for the full program<br>thezerofog.com/sales</div>
+      </div>
       <div class="disclaimer"><p>This material is for education, not medical advice - it doesn't diagnose or treat any condition. If sleep problems persist, or you have symptoms that concern you, talk with a qualified healthcare professional. Read our full <a href="/disclaimer/" target="_blank" rel="noopener noreferrer">disclaimer</a>.</p></div>
 
       <div class="footer"><p>This bonus is part of The Zero Fog. Based on clinical sleep medicine and peer-reviewed sleep research.</p></div>
-    </section>
+  </section>
 
     <!-- ---------------- RECOVERY (bedroom) ---------------- -->
     <section class="bguide" id="bg-bedroom">
-      <div class="bridge"><p><span class="lead">You came for sharper days, not bedding tips.</span> Here is the link the productivity world skips: your brain does its repair work while you sleep, and the room you sleep in decides how much of that repair actually happens. Dial in these five things and you stop leaking recovery every night.</p></div>
+      <div class="bridge"><p><span class="lead">You came for sharper days, not bedding tips.</span> Here is the link the productivity world skips: your brain does its repair work while you sleep, and the room you sleep in decides how much of that repair actually happens. Fix these five things and you stop losing recovery every night.</p></div>
 
       <div class="header">
         <div class="badge">The Zero Fog - Bonus</div>
@@ -1032,95 +1361,123 @@
         <p class="subtitle">5 changes to your bedroom that let your brain actually recover - plus a maintenance tracker so it stays that way</p>
       </div>
 
-      <div class="section">
-        <div class="section-title"><span class="section-num">1</span><span class="section-label">Your Bed</span></div>
-        <div class="tip">
-          <div class="tip-name">The Foundation</div>
-          <p class="tip-text">A bed frame with flexible wooden slats outperforms solid boards. The slats flex with your body and extend the life of your mattress. Minimum size for two people: 63x79 in (160x200 cm).</p>
+      <!-- ===== Three waves: the guide as actions, sorted by how much you have left
+           in the tank rather than by what they cost. Wave 1 is doable tired and
+           standing up; wave 3 needs energy or money. The five sections below stay
+           as the reference - this is what to DO, they are why. Draft copy: the IRON
+           pass rewrites it before launch. -->
+      <div class="waves">
+        <p class="waves-lede"><b>Five things decide it: cool, dark, quiet, fresh, dry.</b> The first four cost nothing and you can do them before bed tonight.</p>
+        <div class="waves-count"><span id="wvCount">0 of 10 done</span><span class="wv-track"><span class="wv-bar" id="wvBar"></span></span><span class="wv-msg" id="wvMsg"></span></div>
+
+        <div class="wave w1">
+          <div class="wave-head"><span class="wave-n">Wave 1</span><span class="wave-t">Tonight, before you lie down</span></div>
+          <p class="wave-s">Nothing to buy. Ten minutes standing up.</p>
+          <div class="wave-acts">
+            <div class="wv-act" data-wv="cool">
+              <button type="button" class="wv-box" aria-label="Mark done"></button>
+              <div class="wv-body">
+                <div class="wv-t">Get the room cool</div>
+                <div class="wv-d">Aim for 65-75 F (18-24 C) - air conditioner in summer, an open window the rest of the year. Start it half an hour before bed, not at bedtime.</div>
+                <div class="wv-meta"><span class="wv-cost">free</span><span class="wv-time">1 min</span><a class="wv-why" href="#sec-air">why - Air</a></div>
+              </div>
+            </div>
+            <div class="wv-act" data-wv="dark">
+              <button type="button" class="wv-box" aria-label="Mark done"></button>
+              <div class="wv-body">
+                <div class="wv-t">Walk the room in the dark</div>
+                <div class="wv-d">Every dot you can still see - standby LED, charger, streetlight edge - cover it.</div>
+                <div class="wv-meta"><span class="wv-cost">free</span><span class="wv-time">3 min</span><a class="wv-why" href="#sec-light">why - Light</a></div>
+              </div>
+            </div>
+            <div class="wv-act" data-wv="phone">
+              <button type="button" class="wv-box" aria-label="Mark done"></button>
+              <div class="wv-body">
+                <div class="wv-t">Take the phone out</div>
+                <div class="wv-d">Other side of the room, or outside the door.</div>
+                <div class="wv-meta"><span class="wv-cost">free</span><span class="wv-time">30 sec</span><a class="wv-why" href="#sec-light">why - Light</a></div>
+              </div>
+            </div>
+            <div class="wv-act" data-wv="floor">
+              <button type="button" class="wv-box" aria-label="Mark done"></button>
+              <div class="wv-body">
+                <div class="wv-t">Clear the floor of dust traps</div>
+                <div class="wv-d">The rug you never clean, the pile on the chair. Out of the room tonight.</div>
+                <div class="wv-meta"><span class="wv-cost">free</span><span class="wv-time">5 min</span><a class="wv-why" href="#sec-dust">why - Dust</a></div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="tip">
-          <div class="tip-name">Your Mattress</div>
-          <p class="tip-text">The top comfort layer should follow your contours. Pick firmness by your weight:</p>
-          <ul class="blist">
-            <li><b>Under 130 lb (60 kg)</b> - soft</li>
-            <li><b>130-200 lb (60-90 kg)</b> - medium</li>
-            <li><b>Over 200 lb (90 kg)</b> - firm</li>
-            <li>Try before you buy - lie down in the store for 10-15 minutes</li>
-          </ul>
+
+        <div class="wave w2">
+          <div class="wave-head"><span class="wave-n">Wave 2</span><span class="wave-t">This week, when you have half an hour</span></div>
+          <p class="wave-s">Daylight helps. Still almost nothing to spend.</p>
+          <div class="wave-acts">
+            <div class="wv-act" data-wv="bedding">
+              <button type="button" class="wv-box" aria-label="Mark done"></button>
+              <div class="wv-body">
+                <div class="wv-t">Change the bedding - and find out how old it is</div>
+                <div class="wv-d">The tracker below tells you what is already past its life.</div>
+                <div class="wv-meta"><span class="wv-cost">free</span><span class="wv-time">20 min</span><a class="wv-why" href="#sec-bed">why - Bed</a></div>
+              </div>
+            </div>
+            <div class="wv-act" data-wv="surfaces">
+              <button type="button" class="wv-box" aria-label="Mark done"></button>
+              <div class="wv-body">
+                <div class="wv-t">Clear the surfaces</div>
+                <div class="wv-d">A bedroom is for sleep. Not work, not storage, not entertainment.</div>
+                <div class="wv-meta"><span class="wv-cost">free</span><span class="wv-time">30 min</span><a class="wv-why" href="#sec-dust">why - Dust</a></div>
+              </div>
+            </div>
+            <div class="wv-act" data-wv="order">
+              <button type="button" class="wv-box" aria-label="Mark done"></button>
+              <div class="wv-body">
+                <div class="wv-t">Order whatever your room is short of</div>
+                <div class="wv-d">Earplugs if the street is loud, a mask if light leaks in, a CO2 and humidity monitor if you would rather see your numbers than guess them. Two minutes to order, here tomorrow.</div>
+                <div class="wv-meta"><span class="wv-cost paid">$5-70</span><span class="wv-time">2 min</span><a class="wv-why" href="#sec-sound">why - Sound</a></div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="tip">
-          <div class="tip-name">Your Pillow</div>
-          <p class="tip-text">Height depends on how you sleep:</p>
-          <ul class="blist">
-            <li><b>Side sleeper</b> - 4-5.5 in (10-14 cm), fills the gap between shoulder and head</li>
-            <li><b>Back sleeper</b> - 3-4 in (8-10 cm)</li>
-            <li><b>Stomach sleeper</b> - 2.5-3 in (6-8 cm), or no pillow at all</li>
-            <li><b>Fold test</b> - fold it in half; if it stays folded, it's dead, replace it</li>
-          </ul>
+
+        <div class="wave w3">
+          <div class="wave-head"><span class="wave-n">Wave 3</span><span class="wave-t">When you have the energy, or the budget</span></div>
+          <p class="wave-s">The slow ones. They matter, they just do not have to be first.</p>
+          <div class="wave-acts">
+            <div class="wv-act" data-wv="curtains">
+              <button type="button" class="wv-box" aria-label="Mark done"></button>
+              <div class="wv-body">
+                <div class="wv-t">Deal with the curtains</div>
+                <div class="wv-d">Wash what you have. Light still leaking at the edges? Blackout.</div>
+                <div class="wv-meta"><span class="wv-cost paid">$30-90</span><span class="wv-time">an afternoon</span><a class="wv-why" href="#sec-light">why - Light</a></div>
+              </div>
+            </div>
+            <div class="wv-act" data-wv="bed">
+              <button type="button" class="wv-box" aria-label="Mark done"></button>
+              <div class="wv-body">
+                <div class="wv-t">Mattress and pillow, by age</div>
+                <div class="wv-d">The slowest payoff - which is exactly why it is last, not first.</div>
+                <div class="wv-meta"><span class="wv-cost paid">varies</span><span class="wv-time">weeks</span><a class="wv-why" href="#sec-bed">why - Bed</a></div>
+              </div>
+            </div>
+            <div class="wv-act" data-wv="tracker">
+              <button type="button" class="wv-box" aria-label="Mark done"></button>
+              <div class="wv-body">
+                <div class="wv-t">Set the tracker once</div>
+                <div class="wv-d">One tap per item, one button, and the room maintains itself.</div>
+                <div class="wv-meta"><span class="wv-cost">free</span><span class="wv-time">1 min</span><a class="wv-why" href="#sec-tracker">why - Tracker</a></div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="tip">
-          <div class="tip-name">Blanket and Bedding</div>
-          <p class="tip-text">Match your blanket to the season and room temperature. If you sleep with a partner who runs hot or cold differently, use two separate blankets. Natural fabrics only: cotton, linen, bamboo. Synthetics trap heat and moisture.</p>
-        </div>
+
+        <p class="waves-after">That is the whole guide as actions. Set the tracker below, and everything after it is the reference - what each number is, why it is that number, and the research behind it. Every action links to its own section, and a button brings you back.</p>
+        <button type="button" class="ref-all" id="refAll">Open all five</button>
       </div>
 
-      <div class="section">
-        <div class="section-title"><span class="section-num">2</span><span class="section-label">Your Atmosphere</span></div>
-        <div class="tip">
-          <div class="tip-name">Temperature</div>
-          <p class="tip-text">Optimal: 65-72 F (18-22 C). Not "as cold as possible" - comfortable cool. Your body needs to drop its core temperature to fall asleep. Too hot prevents this; too cold makes you tense up.</p>
-        </div>
-        <div class="tip">
-          <div class="tip-name">Humidity</div>
-          <p class="tip-text">Target: 50-60%. In winter, heated homes often drop below 30%. Dry air irritates your throat, dries out your nasal passages, and disrupts sleep. Solution: an ultrasonic humidifier.</p>
-        </div>
-        <div class="tip">
-          <div class="tip-name">Fresh Air</div>
-          <p class="tip-text">Ventilate your bedroom before sleep. If outside noise or cold rules out an open window, consider a ventilation system with filters.</p>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="section-num">3</span><span class="section-label">Light Control</span></div>
-        <div class="tip">
-          <div class="tip-name">At Night - Total Darkness</div>
-          <p class="tip-text">Even small amounts of light suppress melatonin. Install blackout curtains (95%+). Cover LED standby lights with tape. If blackout curtains aren't possible, use a quality sleep mask.</p>
-        </div>
-        <div class="tip">
-          <div class="tip-name">In the Evening - Warm Light Only</div>
-          <p class="tip-text">After sunset, switch to warm bulbs: 1700-3200K. Daylight-style bulbs at 5500K read as "noon" to your brain and keep you alert. This alone can delay when you fall asleep.</p>
-        </div>
-        <div class="tip">
-          <div class="tip-name">Screens - Set and Forget</div>
-          <p class="tip-text">Enable Night Shift on iPhone/Mac, Night Light on Windows/Android. Set it to activate at sunset. Takes 30 seconds to configure, works every night automatically.</p>
-        </div>
-        <div class="tip">
-          <div class="tip-name">In the Morning - Bright Light</div>
-          <p class="tip-text">Open your curtains immediately. Bright morning light resets your circadian clock. In winter, consider a dawn simulator alarm or a light therapy lamp.</p>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="section">
-        <div class="section-title"><span class="section-num">4</span><span class="section-label">Sound Control</span></div>
-        <div class="tip">
-          <p class="tip-text">Your brain processes sound even during sleep. "Meaningful" sounds (speech, TV, notifications) trigger alertness. "Meaningless" sounds (rain, wind, white noise) mask the meaningful ones. A white noise machine or app runs at 24-25 dB. Earplugs - wax or silicone, not foam. If your partner snores (50+ dB), combine earplugs with white noise.</p>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="section-num">5</span><span class="section-label">Dust and Allergens</span></div>
-        <div class="tip">
-          <p class="tip-text">Dust mites trigger allergic reactions that disrupt sleep - congestion, sneezing, itchy eyes. Even without diagnosed allergies, reducing dust improves air quality and sleep. Remove carpets, open bookshelves, decorative pillows, stuffed animals. Move plants out (they release CO2 at night). Keep only: bed, two nightstands, one closed wardrobe. Fewer knick-knacks also means less to dust - a near-empty bedroom is simply faster to keep clean and fresh. <span class="hl">Your bedroom is for sleep and intimacy. Not work. Not storage. Not entertainment.</span></p>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="section">
+      <div class="section" id="sec-tracker">
         <div class="block-head"><span class="block-mark"></span><span class="block-title">Maintenance Tracker</span></div>
-        <p class="block-sub">Fill in the date each item was bought or last cleaned - the next due date fills itself. Have more than one set? Hit "Add another" and label them. It saves to your account, prints with your dates, and sends the reminders to your calendar. Hand the printed sheet to whoever keeps the room.</p>
+        <p class="block-sub">One tap per item, and the button at the bottom puts the whole thing in your calendar. More than one set - yours, the kids, the guest room? Add it and give it a name. It saves to your account, prints, and works for whoever keeps the room.</p>
         <div id="tracker"></div>
         <div class="cal-row">
           <button class="tbtn primary" id="icsBtn">📅 Add reminders to calendar</button>
@@ -1129,72 +1486,379 @@
         </div>
       </div>
 
+      <details class="section ref" id="sec-air">
+        <summary class="section-title"><span class="section-num">1</span><span class="section-label">Air</span><span class="ref-gist">65-75 F (18-24 C) &middot; humidity 40-50% &middot; CO2 under 1,000 ppm</span></summary>
+        <div class="spec">
+          <div class="spec-top"><span class="spec-k">Temperature</span><span class="spec-v">65-75 F (18-24 C)</span></div>
+          <div class="spec-do">Cool, not cold. Socks if your feet get cold. Give any new setting a week before you judge it.</div>
+          <details class="tip-more">
+            <summary><span class="tm-q">Why the range is that wide, and why heat is the one to worry about</span><span class="tm-act"></span></summary>
+            <div class="tm-body">
+              <p class="tip-text">The two directions are <span class="hl">not equal</span>. With a blanket over you, it is heat that costs you deep sleep and dreaming sleep - cool barely registers. Cold is not free either: to fall asleep, your body dumps heat through your hands and feet, so a room cold enough to leave your feet cold shuts down the very route it is using.</p>
+              <p class="tip-text">The largest in-home study of this covered about 11,000 nights of wearable and sensor data. Sleep quality was best between 68 and 77 F (20-25 C). Going from 77 F to 86 F (25-30 C) cost 5-10% of sleep efficiency - the share of time in bed you actually spend asleep. The same study found the best temperature differs noticeably from person to person, which is why this is a range and not a number.</p>
+              <p class="tip-text">On the cold side, study after study finds sleep stages barely move. No significant difference anywhere from 55 F to 73 F (13-23 C). In older sleepers, none between 48 F and 68 F (9-20 C). What makes the cold side safe is your blanket. That is why the bed comes first in this guide.</p>
+              <p class="tip-text">The socks part is not folklore. One thing predicts how fast you fall asleep better than anything else: the temperature gap between your hands and feet and the rest of your body. It beats your body temperature, your heart rate, your melatonin, and how sleepy you feel.</p>
+              <p class="tip-src"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3427038/" target="_blank" rel="noopener">Okamoto-Mizuno &amp; Mizuno, 2012 - Effects of thermal environment on sleep and circadian rhythm (J Physiol Anthropol 31:14)</a></p>
+              <p class="tip-src"><a href="https://pubmed.ncbi.nlm.nih.gov/37474050/" target="_blank" rel="noopener">Baniassadi et al., 2023 - Nighttime ambient temperature and sleep in community-dwelling older adults (Sci Total Environ)</a></p>
+            </div>
+
+          </details>
+        </div>
+        <div class="spec">
+          <div class="spec-top"><span class="spec-k">Humidity</span><span class="spec-v">40-50%</span></div>
+          <div class="spec-do">Humidifier in winter. Dehumidifier or the AC on dry mode in summer. No drying laundry in the bedroom.</div>
+          <details class="tip-more">
+            <summary><span class="tm-q">Why 40-50%, and why summer nights are worse than the thermometer says</span><span class="tm-act"></span></summary>
+            <div class="tm-body">
+              <p class="tip-text">The upper limit is set by dust mites. They never drink - they pull water straight out of the air, and they need humidity above roughly 50% to keep a colony going. That one fact is why standard allergy advice is to keep indoor humidity under 50%. It holds them down, it does not wipe them out - but it is the difference between a mattress they can live in and one they can't.</p>
+              <p class="tip-text">The lower limit is your nose and throat. Below 30-40%, complaints of dry, stuffy air and sore eyes, nose and throat rise sharply in the research, and 40% tests better than under 30%. In winter, a heated home routinely sits below 30%.</p>
+              <p class="tip-text">And humidity is not a separate problem from heat. It multiplies heat. A room at 90 F (32 C) and 80% humidity produced more wakefulness and less deep sleep than 79 F (26 C) at 60%. Sweat that can't evaporate can't cool you, so if your summer nights are bad, humidity is likely doing more of the damage than the temperature reading suggests.</p>
+              <p class="tip-src"><a href="https://www.jacionline.org/article/S0091-6749(99)70298-8/fulltext" target="_blank" rel="noopener">Arlian et al., 1999 - Reducing relative humidity to control the house dust mite (J Allergy Clin Immunol)</a></p>
+              <p class="tip-src"><a href="https://www.sciencedirect.com/science/article/pii/S1438463917306946" target="_blank" rel="noopener">Wolkoff, 2018 - Indoor air humidity, air quality, and health: an overview (Int J Hyg Environ Health)</a></p>
+            </div>
+
+          </details>
+        </div>
+        <div class="spec">
+          <div class="spec-top"><span class="spec-k">Ventilation</span><span class="spec-v">CO2 under 1,000 ppm</span></div>
+          <div class="spec-do">Air the room out before bed. Then leave a window cracked or the door open, if noise and cold allow. If they don't, a ventilation unit or a trickle vent does the same job.</div>
+          <details class="tip-more">
+            <summary><span class="tm-q">The full scale, and what ventilating actually changed</span><span class="tm-act"></span></summary>
+            <div class="tm-body">
+              <p class="tip-text">Ppm just means how much CO2 is in the air, and this is the one number in this guide you can't feel. Outdoor air sits around 400 ppm - anything above that in your bedroom is air you have already breathed. A well-aired room holds 600-800. A closed room with someone breathing in it drifts past 1,500. Real bedrooms measured with the window shut averaged <span class="hl">2,400-2,600 ppm</span> by morning: more than double the limit, for seven or eight hours straight.</p>
+              <p class="tip-text">When the same rooms were ventilated, measured sleep quality improved - and so did next-day sleepiness, ability to concentrate, and performance on a test of logical thinking. In one of the two experiments the entire intervention was an open window.</p>
+              <p class="tip-src"><a href="https://onlinelibrary.wiley.com/doi/10.1111/ina.12254" target="_blank" rel="noopener">Strom-Tejsen et al., 2016 - The effects of bedroom air quality on sleep and next-day performance (Indoor Air 26:5)</a></p>
+            </div>
+
+          </details>
+        </div>
+        <div class="spec-note">One $30-60 CO2 meter reads all three of these numbers.</div>
+      </details>
+
+      <details class="section ref" id="sec-light">
+        <summary class="section-title"><span class="section-num">2</span><span class="section-label">Light</span><span class="ref-gist">Total darkness at night &middot; ordinary room light costs 88% of your melatonin &middot; get outside in the morning</span></summary>
+        <div class="spec">
+          <div class="spec-top"><span class="spec-k">At night</span><span class="spec-v">Total darkness</span></div>
+          <div class="spec-do">Blackout curtains (95%+). Tape over standby dots. Chargers and routers out of sight. No curtains? A proper sleep mask. Then test it: stand in the room with everything off, let your eyes adjust for a minute - whatever you can still see is what you sleep in.</div>
+          <details class="tip-more">
+            <summary><span class="tm-q">The numbers, and why this isn't just about melatonin</span><span class="tm-act"></span></summary>
+            <div class="tm-body">
+              <p class="tip-text">"Dark enough" is much darker than it feels. Ordinary room light - the level you would call almost dark - cuts your melatonin by <span class="hl">88%</span>, and shifts your body clock more than half as much as full daylight does. <span class="hl">About 1% of the brightness buys half the damage.</span></p>
+              <p class="tip-text">And it is not only about melatonin. One night under that same room light raised people's heart rate all night, cut their deep sleep and dreaming sleep, and left them worse at handling sugar the next morning. <span class="hl">Light does not need to wake you, or even to look bright, to take the repair part of your night.</span></p>
+              <p class="tip-text">The 9,000 lux in that comparison is daylight - stepping outside on a bright day, or sitting right in front of a 10,000-lux therapy lamp. Here is what the rest of the scale looks like. Moonlight is under 1. A candlelit room is about 10. A normal living room in the evening is 100-200. An office is 300-500. Outdoors on a grey day is 1,000-2,000. Outdoors in the sun is 30,000 and up.</p>
+              <p class="tip-text">With that scale in hand, the research reads cleanly. At about 3 lux, melatonin dropped 11%. At about 106 lux - a dimly lit room - it dropped 88%, and the shift in the body clock reached 56% of the most that light can do. At about 9,100 lux, 98%. The authors put it plainly: half of the maximum shift from bright evening light can be had with just over 1% of that light.</p>
+              <p class="tip-text">116 people spent the eight hours before bed under room light - under 200 lux. It pushed the start of their melatonin later in <span class="hl">99% of them</span>. It cut about <span class="hl">90 minutes</span> off the stretch of time their bodies treated as night. During sleep itself, room light cut melatonin by more than half in 85% of trials.</p>
+              <p class="tip-text">Then the finding that changes what this section is about. Twenty healthy adults slept one night at 100 lux versus under 3 lux, eyes closed throughout. The lit group came out 15% worse at handling sugar the next morning. Their heart rate ran higher across the whole night. Their nervous system sat tipped toward alert rather than rest. They got less deep sleep and less dreaming sleep. And their melatonin came out no different from the dark night - closed eyelids block enough light for that. Which is the point worth taking away: light can cost you the repair part of the night without ever touching the hormone everyone talks about. Melatonin is the yardstick for evening and morning light, when your eyes are open. It is not the yardstick for the light you sleep in.</p>
+              <p class="tip-text">Honest limits: 20 people, one night, healthy young adults, laboratory conditions, and what was measured are early warning signs, not diagnoses. It is not evidence that a lamp gives you a disease. It is good evidence that "almost dark" is not a small thing.</p>
+              <p class="tip-src"><a href="https://pubmed.ncbi.nlm.nih.gov/10922269/" target="_blank" rel="noopener">Zeitzer et al., 2000 - Sensitivity of the human circadian pacemaker to nocturnal light (J Physiol 526)</a></p>
+              <p class="tip-src"><a href="https://pubmed.ncbi.nlm.nih.gov/21193540/" target="_blank" rel="noopener">Gooley et al., 2011 - Exposure to room light before bedtime suppresses melatonin onset (JCEM 96:3)</a></p>
+              <p class="tip-src"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8944904" target="_blank" rel="noopener">Mason et al., 2022 - Light exposure during sleep impairs cardiometabolic function (PNAS 119:12)</a></p>
+            </div>
+          </details>
+        </div>
+        <div class="spec">
+          <div class="spec-top"><span class="spec-k">In the evening</span><span class="spec-v">Dim first, warm second</span></div>
+          <div class="spec-do">After sunset, turn lamps off rather than turning them orange, and light the room from below eye level. Warm bulbs run 1700-3200K; daylight bulbs at 5500K read as "noon" to your brain.</div>
+        </div>
+        <div class="spec">
+          <div class="spec-top"><span class="spec-k">Screens</span><span class="spec-v">Worth doing, not the fix</span></div>
+          <div class="spec-do">Turn on Night Shift on iPhone/Mac, Night Light on Windows/Android, set to switch on at sunset. Thirty seconds, works forever, costs nothing - just don't expect it to solve screens.</div>
+          <details class="tip-more">
+            <summary><span class="tm-q">What the Night Shift study actually found</span><span class="tm-act"></span></summary>
+            <div class="tm-body">
+              <p class="tip-text"><span class="hl">The screen isn't only light. It's the scrolling, the deciding, and the being reachable.</span> 167 adults aged 18-24. Seven nights in a row, each of them got the hour before bed in one of three ways: iPhone with Night Shift on, iPhone with Night Shift off, or no phone. Across the whole sample there were no significant differences in sleep outcomes between the groups.</p>
+              <p class="tip-text">Splitting by habitual sleep duration: among people averaging seven hours or more, the no-phone condition beat phone use - with or without the filter. Among people sleeping under six hours, Night Shift made no difference versus normal phone use either.</p>
+              <p class="tip-text">Keep the setting. It is free and the direction is right. Just don't let it be the thing you do instead of putting the phone down.</p>
+              <p class="tip-src"><a href="https://www.sleephealthjournal.org/article/S2352-7218(21)00060-7/abstract" target="_blank" rel="noopener">Jensen et al., 2021 - Does iPhone night shift mitigate negative effects of smartphone use on sleep outcomes (Sleep Health)</a></p>
+            </div>
+          </details>
+        </div>
+        <div class="spec">
+          <div class="spec-top"><span class="spec-k">In the morning</span><span class="spec-v">Outside, 10 minutes in the first hour</span></div>
+          <div class="spec-do">Best first - each step down is genuinely weaker than the one above:</div>
+          <ul class="blist">
+            <li><b>Outside, open sky - 1,000 to 10,000+ lux.</b> Overcast still counts. Ten minutes in the first hour. Nothing indoors replaces this.</li>
+            <li><b>A balcony, or an open window you face out of.</b> What matters is how much sky your eyes can see.</li>
+            <li><b>A 10,000-lux therapy lamp.</b> The honest indoor substitute, at the distance its manual specifies.</li>
+            <li><b>The middle of a lit room - 25-50 lux.</b> Where most people think they are getting their morning light. It is close to nothing.</li>
+          </ul>
+          <details class="tip-more">
+            <summary><span class="tm-q">Why outside, and why a window is not the same thing</span><span class="tm-act"></span></summary>
+            <div class="tm-body">
+              <p class="tip-text">Bright morning light is what sets your body clock, and indoors you simply can't get enough of it. Measured across ordinary days, people got about <span class="hl">1,000 lux</span> indoors against <span class="hl">4,500 lux</span> living outdoors.</p>
+              <p class="tip-text">Glass costs you more than it looks. Pressed to a closed window on a clear day you still get about <span class="hl">1,000 lux</span>; six feet back into the room is a different world. Open the curtains as well - but that is the bare minimum, not the fix.</p>
+              <p class="tip-text">Two more numbers for the ladder above. A dawn simulator alarm is worth more than nothing, and it sits below the therapy lamp. And across ordinary indoor and outdoor places, the typical reading was <span class="hl">1,175 lux outdoors against 179 indoors</span> - eight times, before you even get a clear day. For the first two hours after waking, the camping study below measured 930 lux indoors against 3,070 outdoors.</p>
+              <p class="tip-text">Participants were measured for one week living normally, then one week camping with no electrical light. Average daily exposure during waking hours: 979 lux in the normal week versus 4,487 camping - more than fourfold. First two hours awake: 934 versus 3,074 lux. Between sunset and sleep the pattern reversed: 21 lux normally versus 8 lux camping.</p>
+              <p class="tip-text">After the week outdoors, every measure of their internal clock sat about two hours earlier. Their actual sleep and wake times had moved only about 1.2 hours. The clock moved more than the schedule did.</p>
+              <p class="tip-text">Honest limit: eight people, one summer, and camping changes more than light. Take it as a measurement of how large the indoor/outdoor gap is, not as a promise that a week of morning walks moves your clock two hours.</p>
+              <p class="tip-src"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4020279/" target="_blank" rel="noopener">Wright et al., 2013 - Entrainment of the human circadian clock to the natural light-dark cycle (Current Biology 23:16)</a></p>
+            </div>
+          </details>
+        </div>
+      </details>
+
+      <details class="section ref" id="sec-sound">
+        <summary class="section-title"><span class="section-num">3</span><span class="section-label">Sound</span><span class="ref-gist">Under 30 dB &middot; bursts cost you the night, steady hum does not</span></summary>
+        <div class="spec">
+          <div class="spec-top"><span class="spec-k">The target</span><span class="spec-v">Under 30 dB</span></div>
+          <div class="spec-do">Quieter than most people picture. But loudness is not the main thing: a steady hum is not your problem, a door, a car, a notification or a partner shifting is.</div>
+          <details class="tip-more">
+            <summary><span class="tm-q">The dB scale, the 45 dB study, and where a snoring partner sits</span><span class="tm-act"></span></summary>
+            <div class="tm-body">
+              <p class="tip-text">Where the numbers sit, so you know what you are dealing with:</p>
+              <ul class="blist">
+                <li><b>Under 30 dB</b> - a quiet bedroom. This is the target.</li>
+                <li><b>About 40 dB</b> - a fridge humming two rooms away.</li>
+                <li><b>45 dB</b> - the level in the study below. Harm starts around here.</li>
+                <li><b>40-60 dB</b> - snoring, mild to moderate.</li>
+                <li><b>60-70 dB</b> - traffic through an open window.</li>
+              </ul>
+              <p class="tip-text">Your brain keeps listening while you sleep, and it reacts without waking you. In one study, road noise at only 45 dB kept people in brief stress reactions all night - heart rate and blood pressure spiking, nobody waking up. On paper the night looked normal. The body had spent it reacting. Every scenario in that study averaged the same 45 dB, and only the ones that came in bursts did damage.</p>
+              <p class="tip-text">Twenty-six healthy young adults slept in a laboratory across four different transport-noise scenarios: road or rail, from steady to sharply broken up. All of them were set to the <span class="hl">same 45 dB average level</span>. The road noise that came in the sharpest bursts added up to more total time in those brief stress reactions. It also raised the next evening's cortisol. And it changed nothing about the overall shape of the night's sleep. Limits: 26 people, young, healthy, laboratory, and cortisol and stress reactions are body measurements - not a measurement of how tired you feel.</p>
+              <p class="tip-text">Now put a snoring partner on that scale. Mild snoring measures around 40-50 dB, moderate 50-60 dB. In a study of 1,139 people undergoing sleep testing, 12% exceeded 55 dBA for a tenth of the night. A partner who snores is not background nuisance. They are at or above the level that produced the effect above.</p>
+              <p class="tip-src"><a href="https://www.sciencedirect.com/science/article/abs/pii/S0013935119308825" target="_blank" rel="noopener">Thiesse et al., 2020 - Transportation noise impairs cardiovascular function without altering sleep (Environmental Research 182)</a></p>
+              <p class="tip-src"><a href="https://pubmed.ncbi.nlm.nih.gov/10084490/" target="_blank" rel="noopener">Wilson et al., 1999 - The snoring spectrum: acoustic assessment in 1,139 individuals (Chest)</a></p>
+            </div>
+          </details>
+        </div>
+        <div class="spec">
+          <div class="spec-top"><span class="spec-k">Fixing it</span><span class="spec-v">In this order</span></div>
+          <ul class="blist">
+            <li><b>Kill the sudden noises you control.</b> Phone out of the room or fully silent. No notifications. No ticking clock. Oil the door.</li>
+            <li><b>Then close the window.</b> Worth 10-15 dB - but that trades air for quiet, which is why the real fix is getting your air from somewhere other than the window.</li>
+            <li><b>Then earplugs.</b> Last, not first.</li>
+          </ul>
+        </div>
+        <div class="spec">
+          <div class="spec-top"><span class="spec-k">Earplugs</span><span class="spec-v">Wax or silicone first, foam if needed</span></div>
+          <div class="spec-do">The best earplug is the one you don't pull out at 2 a.m. Wax and silicone sit flatter under a pillow and don't expand inside your ear, which is why people actually keep them in.</div>
+          <details class="tip-more">
+            <summary><span class="tm-q">How much each type actually blocks</span><span class="tm-act"></span></summary>
+            <div class="tm-body">
+              <p class="tip-text">Foam blocks the most where it counts: low sounds, which is exactly snoring and traffic rumble. Roughly what each buys you: <span class="hl">foam 25-33 dB, wax or silicone 15-25 dB</span>. Those are laboratory ratings, though - what you get at home is well below them, because nobody puts them in perfectly at bedtime.</p>
+            </div>
+          </details>
+        </div>
+        <div class="spec">
+          <div class="spec-top"><span class="spec-k">If you want sound</span><span class="spec-v">Music, not noise</span></div>
+          <div class="spec-do">The research is specific about what kind. Across the trials the recipe is the same:</div>
+          <ul class="blist">
+            <li><b>60-80 bpm</b> - a resting heart rate, so your pulse drifts down toward it</li>
+            <li><b>Instrumental</b> - no lyrics, ever</li>
+            <li><b>Low volume</b> - the studies ran 50-60 dB, a backdrop rather than a wall</li>
+            <li><b>Simple and repetitive</b> - nothing to follow, nothing to anticipate</li>
+            <li><b>On a timer</b> - 30 to 60 minutes, then off. In the trials this is listening at bedtime, not audio running until morning.</li>
+          </ul>
+          <div class="spec-do">Yes: ambient, lo-fi, soft classical, new age, nature sounds, slow instrumental jazz. No: anything built on a hook and a chorus.</div>
+          <details class="tip-more">
+            <summary><span class="tm-q">Why no lyrics, why no white noise, and where your own taste fits</span><span class="tm-act"></span></summary>
+            <div class="tm-body">
+              <p class="tip-text">Anything built on a hook and a chorus is <span class="hl">stimulating music</span>, and stimulating is exactly what it was written to be. Michael Jackson, Kesha, rap - all the opposite category. And soft classical was the most used category in the trials by far.</p>
+        <p class="tip-text">Lyrics are out for the same reason podcasts are. Words keep the language part of your brain working, and it keeps working after you are asleep. EEG recordings show the sleeping brain still sorting familiar voices from unfamiliar ones through every stage of the night.</p>
+              <p class="tip-text">The line is not the genre, it is the singing. Slow blues works instrumental, and stops working the moment someone sings.</p>
+              <p class="tip-text">One thing the research did favour: familiar music, and music from your own cultural background, beat unfamiliar music. So inside the recipe above, your own taste is an advantage rather than a compromise. If you want to check a playlist, here is what the trials deliberately avoided: lyrics, accented beats, percussion, syncopation.</p>
+              <p class="tip-text">If the audio comes from your phone, that is a step rather than a failure - it still beats scrolling. When you are ready to get the phone out of the room, a cheap speaker or a $5 clock radio carries the audio without carrying the phone.</p>
+              <p class="tip-text"><span class="hl">And why there is no white noise machine in this guide.</span> It is the standard recommendation everywhere, so its absence is deliberate. A systematic review of 38 studies rated the evidence for continuous noise improving sleep as <span class="hl">very low</span>. Their phrase, not ours: "which contradicts its widespread use." They also concluded it may harm sleep and hearing, and that better research is needed before anyone sells it as a sleep aid. There is a reasonable argument that steady sound masks sudden sound, and sudden sound is what the study above found harmful. But that is us joining the dots, not a result anyone has measured.</p>
+              <p class="tip-text">If you already sleep well with a fan or a sound app, nothing here says stop. It says we won't sell it to you as a fix, and if you are buying equipment, quiet at the source and earplugs have the better case.</p>
+              <p class="tip-src"><a href="https://pubmed.ncbi.nlm.nih.gov/33007706/" target="_blank" rel="noopener">Riedy et al., 2021 - Noise as a sleep aid: a systematic review (Sleep Medicine Reviews 55)</a></p>
+              <p class="tip-src"><a href="https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD010459.pub3/full" target="_blank" rel="noopener">Jespersen et al. - Music for insomnia in adults (Cochrane Database of Systematic Reviews)</a></p>
+            </div>
+          </details>
+        </div>
+      </details>
+
+      <details class="section ref" id="sec-dust">
+        <summary class="section-title"><span class="section-num">4</span><span class="section-label">Dust</span><span class="ref-gist">Humidity under 50% beats cleaning &middot; take the dust traps out of the room</span></summary>
+        <div class="spec">
+          <div class="spec-top"><span class="spec-k">The lever</span><span class="spec-v">Humidity under 50%</span></div>
+          <div class="spec-do">Not cleaning. Same target as the air section, and it does more than a vacuum does.</div>
+          <details class="tip-more">
+            <summary><span class="tm-q">Why humidity beats cleaning</span><span class="tm-act"></span></summary>
+            <div class="tm-body">
+              <p class="tip-text">Dust mites trigger reactions that break up your night - congestion, sneezing, itchy eyes. Even without diagnosed allergies, less dust means better air and better sleep.</p>
+              <p class="tip-text">And mites never drink. They take their water straight out of the air, and under 50% they can't keep a colony going. Cleaning removes what is already there; the humidity target stops it coming back.</p>
+            </div>
+          </details>
+        </div>
+        <div class="spec">
+          <div class="spec-top"><span class="spec-k">What to take out</span><span class="spec-v">Bed, nightstands, closed wardrobe - that's it</span></div>
+          <ul class="blist">
+            <li><b>Out</b> - carpets, open bookshelves, decorative pillows, stuffed animals</li>
+            <li><b>Plants are optional</b> - the reason to move them is not CO2, which is nothing next to your own breathing. It is that permanently damp soil grows mould.</li>
+            <li><b>Less stuff, less dusting</b> - a near-empty bedroom is simply faster to keep clean</li>
+          </ul>
+          <div class="spec-do">Your bedroom is for sleep and intimacy. Not work. Not storage. Not entertainment.</div>
+        </div>
+      </details>
+
+      <details class="section ref" id="sec-bed">
+        <summary class="section-title"><span class="section-num">5</span><span class="section-label">Bed</span><span class="ref-gist">Buy in order: base, mattress, pillow, bedding &middot; the pillow depends on the mattress</span></summary>
+        <div class="spec">
+          <div class="spec-top"><span class="spec-k">Buy in this order</span><span class="spec-v">Base, mattress, pillow, bedding</span></div>
+          <div class="spec-do">How high your pillow needs to be depends on how far your shoulder sinks into the mattress. Pick the pillow first and you will be picking it twice.</div>
+        </div>
+        <div class="spec">
+          <div class="spec-top"><span class="spec-k">The base</span><span class="spec-v">Flexible slats, not solid boards</span></div>
+          <div class="spec-do">The slats flex with your body and extend the life of your mattress. Minimum size for two people: 63x79 in (160x200 cm).</div>
+        </div>
+        <div class="spec">
+          <div class="spec-top"><span class="spec-k">Your mattress</span><span class="spec-v">Firmness by your weight</span></div>
+          <div class="spec-do">The top comfort layer should follow your contours.</div>
+          <ul class="blist">
+            <li><b>Under 130 lb (60 kg)</b> - soft</li>
+            <li><b>130-200 lb (60-90 kg)</b> - medium</li>
+            <li><b>Over 200 lb (90 kg)</b> - firm</li>
+            <li>Try before you buy - lie down in the store for 10-15 minutes</li>
+          </ul>
+        </div>
+        <div class="spec">
+          <div class="spec-top"><span class="spec-k">Your pillow</span><span class="spec-v">Height by how you sleep</span></div>
+          <ul class="blist">
+            <li><b>Side sleeper</b> - 4-5.5 in (10-14 cm), fills the gap between shoulder and head</li>
+            <li><b>Back sleeper</b> - 3-4 in (8-10 cm)</li>
+            <li><b>Stomach sleeper</b> - 2.5-3 in (6-8 cm), or no pillow at all</li>
+            <li><b>Fold test</b> - fold it in half; if it stays folded, it's dead, replace it</li>
+          </ul>
+        </div>
+        <div class="spec">
+          <div class="spec-top"><span class="spec-k">Blanket and bedding</span><span class="spec-v">Natural fabrics only</span></div>
+          <div class="spec-do">Cotton, linen or bamboo - synthetics trap heat and moisture. Match the blanket to the season. If your partner runs hot or cold differently, use two separate blankets.</div>
+        </div>
+      </details>
+
       <div class="divider"></div>
 
-      <div class="section">
-        <div class="block-head"><span class="block-mark"></span><span class="block-title">Tonight's Quick Wins</span></div>
-        <div class="quick-win"><div class="win-num">1</div><div class="win-text"><strong>Light check.</strong> Walk through your bedroom at night with all lights off. See any light? LED standby dots, streetlight through curtains, charger glow? Cover or block them.</div></div>
-        <div class="quick-win"><div class="win-num">2</div><div class="win-text"><strong>Temperature check.</strong> Set your thermostat to 68 F (20 C) for tonight. No thermostat? Crack a window 15 minutes before bed.</div></div>
-        <div class="quick-win"><div class="win-num">3</div><div class="win-text"><strong>Phone out.</strong> Move your phone to the other side of the room - or better, outside the bedroom entirely. Get a simple alarm clock.</div></div>
-        <div class="research">
-          <div class="rh">The research behind this</div>
-          <a href="https://www.sleepfoundation.org/bedroom-environment/best-temperature-for-sleep" target="_blank" rel="noopener noreferrer">Sleep Foundation - the best bedroom temperature for sleep &rarr;</a>
-          <a href="https://www.health.harvard.edu/healthy-aging-and-longevity/blue-light-has-a-dark-side" target="_blank" rel="noopener noreferrer">Harvard Health - light at night suppresses melatonin &rarr;</a>
-        </div>
-      </div>
+      <div class="divider"></div>
 
+      <div class="cta">
+        <div class="cta-h">Want your sharp hours back for good?</div>
+        <p>These bonuses are real wins on their own. The full 4-week ZeroFog program is the system that turns them into clear, productive days - without willpower or a rigid schedule.</p>
+        <a class="cta-btn" href="/sales/">See the full program &rarr;</a>
+      </div>
+      <div class="qr-print">
+        <div class="qr-box"><img src="/assets/img/qr-sales.svg" alt="QR code linking to thezerofog.com/sales"></div>
+        <div class="qr-cap">Scan for the full program<br>thezerofog.com/sales</div>
+      </div>
       <div class="disclaimer"><p>This material is for education, not medical advice - it doesn't diagnose or treat any condition. If sleep problems persist, or you have symptoms that concern you, talk with a qualified healthcare professional. Read our full <a href="/disclaimer/" target="_blank" rel="noopener noreferrer">disclaimer</a>.</p></div>
 
       <div class="footer"><p>This bonus is part of The Zero Fog. Based on clinical sleep medicine and environmental sleep research.</p></div>
-    </section>
+  </section>
 
     <!-- ---------------- 9 MISTAKES ---------------- -->
     <section class="bguide" id="bg-mistakes">
-      <div class="bridge"><p><span class="lead">You came to fix the fog and the energy crashes.</span> Most of what you have been told about "fixing your energy" is wrong - and the wrong moves quietly cost you the exact recovery your focus runs on. Here are nine of them.</p></div>
+      <div class="bridge"><p><span class="lead">You came to fix the fog and the energy crashes.</span> Most of what you have been told about "fixing your energy" is wrong - and the wrong moves quietly cost you the exact recovery your focus runs on. Here are ten of them.</p></div>
 
       <div class="header">
         <div class="badge">The Zero Fog - Bonus</div>
-        <h1><span class="accent">9</span> Recovery Mistakes</h1>
-        <p class="subtitle">Nine things you do for energy that sound logical but work against your biology</p>
+        <h1><span class="accent">10</span> Recovery Mistakes</h1>
+        <p class="subtitle">Ten things you do for energy that sound logical but work against your biology</p>
       </div>
 
       <div class="myth"><div class="myth-top"><span class="myth-num">1</span><span class="myth-claim">"You need exactly 8 hours."</span></div>
-        <p class="myth-real">The genetic range runs from about 6 to 9 hours. Under 6 impairs how you think; chronically over 9 is linked to its own health issues. <b>Your number is personal - find it, don't copy it.</b></p><div class="myth-src"><a href="https://www.sleepfoundation.org/how-sleep-works/how-much-sleep-do-we-really-need" target="_blank" rel="noopener noreferrer">Source: Sleep Foundation &rarr;</a></div></div>
+        <p class="myth-verdict">Seven is the floor, not eight. Above that, your number is yours.</p>
+        <p class="myth-real">Eight is an average, not a target. But there is a floor, and it sits at seven: the expert panel that reviewed the evidence found that six hours or less is not enough for an adult. <b>Don't round yours down to six because you're busy.</b></p>
+        <details class="tip-more"><summary><span class="tm-q">What about sleeping longer than eight?</span><span class="tm-act"></span></summary><div class="tm-body">
+          <p class="myth-real">The same panel deliberately set no upper limit at all. Some people run clean on seven, some need nine, and nine is fine.</p>
+          <p class="myth-real">If you regularly need ten or more and still wake up flattened, raise it with a doctor. Long sleep is more often a symptom of something than a cause.</p>
+          <p class="myth-src"><a href="https://aasm.org/seven-or-more-hours-of-sleep-per-night-a-health-necessity-for-adults/" target="_blank" rel="noopener noreferrer">Source: Watson et al., 2015 - AASM &amp; Sleep Research Society joint consensus &rarr;</a></p>
+        </div></details></div>
 
       <div class="myth"><div class="myth-top"><span class="myth-num">2</span><span class="myth-claim">"Sleep before midnight counts double."</span></div>
-        <p class="myth-real">Deep sleep happens in the first 3-4 hours of the night regardless of the clock. <b>A consistent schedule matters more than the hour you fall asleep.</b></p><div class="myth-src"><a href="https://www.sleepfoundation.org/stages-of-sleep/slow-wave-sleep" target="_blank" rel="noopener noreferrer">Source: Sleep Foundation &rarr;</a></div></div>
+        <p class="myth-verdict">Your body counts the hours you have been awake, not the hours on the clock. A steady schedule beats an early one.</p>
+        <p class="myth-real">Volunteers who lived a month with no clocks, on a 28-hour day, got the same deep sleep wherever their night happened to land.</p>
+        <details class="tip-more"><summary><span class="tm-q">How they proved it</span><span class="tm-act"></span></summary><div class="tm-body">
+          <p class="myth-real">The cleanest test of this ran for over a month. Volunteers lived with no clocks and no daylight, on a 28-hour day, so their sleep landed at every possible point of the body clock. Deep sleep never noticed. It tracked one thing only: how long they had been asleep.</p>
+          <p class="myth-src"><a href="https://www.jneurosci.org/content/15/5/3526" target="_blank" rel="noopener noreferrer">Source: Dijk &amp; Czeisler, 1995 - Journal of Neuroscience &rarr;</a></p>
+        </div></details></div>
 
       <div class="myth"><div class="myth-top"><span class="myth-num">3</span><span class="myth-claim">"You can catch up on weekends."</span></div>
-        <p class="myth-real">Sleeping in shifts your body clock by 2-4 hours (social jet lag) - so Monday feels like a flight across time zones. <b>The feeling of being caught up comes back; the underlying deficit doesn't fully.</b></p><div class="myth-src"><a href="https://academic.oup.com/sleep/article/43/10/zsaa076/5825065" target="_blank" rel="noopener noreferrer">Source: Journal SLEEP (Oxford) &rarr;</a></div></div>
+        <p class="myth-verdict">Sleeping longer helps. Waking later hurts. Add the hours to the front of the night, not the back.</p>
+        <p class="myth-real">The half that fails is the half everyone does. Waking later drags your body clock later, so Monday starts out of step. <b>Go to bed earlier; get up at your usual time.</b></p>
+        <details class="tip-more"><summary><span class="tm-q">What the lab found when it tested exactly this</span><span class="tm-act"></span></summary><div class="tm-body">
+          <p class="myth-real">In the lab, a weekend of unlimited recovery sleep did not protect the body. Across a repeating pattern of short weeks, people still ended up 9 to 27% worse at handling sugar.</p>
+          <p class="myth-real">A separate study split the two halves cleanly: people who slept longer on weekends tested better on attention, and people who woke later tested worse.</p>
+          <p class="myth-src"><a href="https://www.cell.com/current-biology/fulltext/S0960-9822(19)30098-3" target="_blank" rel="noopener noreferrer">Source: Depner et al., 2019 - Current Biology &rarr;</a></p>
+          <p class="myth-src"><a href="https://academic.oup.com/sleep/article/43/10/zsaa076/5825065" target="_blank" rel="noopener noreferrer">Source: Zhang et al., 2020 - SLEEP (Oxford) &rarr;</a></p>
+        </div></details></div>
 
       <div class="myth"><div class="myth-top"><span class="myth-num">4</span><span class="myth-claim">"A nightcap helps you sleep."</span></div>
-        <p class="myth-real">Alcohol sedates you faster, yes. But as your body breaks it down, it fragments the second half of the night and suppresses REM - the phase that handles memory and emotion. <b>You sleep, but you don't recover.</b></p><div class="myth-src"><a href="https://www.sleepfoundation.org/nutrition/alcohol-and-sleep" target="_blank" rel="noopener noreferrer">Source: Sleep Foundation &rarr;</a></div></div>
+        <p class="myth-verdict">You sleep, but you don't recover. Two drinks are already enough to cost you that.</p>
+        <p class="myth-real">Here is the part that stings. Pooling 27 studies, falling asleep faster only showed up at <b>five or more drinks</b>. But dreaming sleep - the phase that handles memory and emotion - was already disrupted at <b>two</b>, and got worse with every drink after. So a one-glass nightcap costs you the recovery and doesn't even buy you the thing you drank it for.</p>
+        <div class="myth-src"><a href="https://www.sciencedirect.com/science/article/pii/S1087079224001345" target="_blank" rel="noopener noreferrer">Source: Gardiner et al., 2025 - Sleep Medicine Reviews, meta-analysis of 27 studies &rarr;</a></div></div>
 
       <div class="myth"><div class="myth-top"><span class="myth-num">5</span><span class="myth-claim">"Sleeping pills fix insomnia."</span></div>
-        <p class="myth-real">Pills mostly help you fall asleep. They don't fix the cause, they change sleep architecture, and tolerance builds. <b>Used short-term they have a place; as a long-term fix they don't.</b></p><div class="myth-src"><a href="https://aasm.org/combination-treatment-chronic-insomnia-guideline/" target="_blank" rel="noopener noreferrer">Source: Am. Academy of Sleep Medicine &rarr;</a></div></div>
+        <p class="myth-verdict">Not one sleeping pill earned a strong recommendation. The only strong one in the guidelines goes to changing habits instead.</p>
+        <p class="myth-real">Look at what the people who write the guidelines actually concluded. The American Academy of Sleep Medicine has a guideline on drugs for chronic insomnia, and <b>every single recommendation in it is graded weak</b>. Not one drug earned a strong one. Meanwhile the same organisation's guideline on behaviour-based treatment gives its <b>one and only strong recommendation</b> to a structured behaviour-change program. <b>Same organisation, same method, opposite verdicts.</b></p>
+        <details class="tip-more"><summary><span class="tm-q">Which ones they recommend against - and what about melatonin</span><span class="tm-act"></span></summary><div class="tm-body">
+          <p class="myth-real">Six are recommended against outright. Three of those six you can buy without a prescription: <b>melatonin, valerian, and diphenhydramine</b> - the antihistamine inside most over-the-counter sleep aids.</p>
+          <p class="myth-real">Melatonin does have a real use for jet lag and for shifting your clock across time zones. That is a different job from treating insomnia.</p>
+          <p class="myth-real">And nothing here is a reason to stop something a doctor prescribed you. That is a conversation with them.</p>
+          <p class="myth-src"><a href="https://pubmed.ncbi.nlm.nih.gov/27998379/" target="_blank" rel="noopener noreferrer">Source: Sateia et al., 2017 - AASM pharmacologic treatment guideline &rarr;</a></p>
+          <p class="myth-src"><a href="https://jcsm.aasm.org/doi/10.5664/jcsm.8986" target="_blank" rel="noopener noreferrer">Source: Edinger et al., 2021 - AASM behavioural treatment guideline &rarr;</a></p>
+        </div></details></div>
 
       <div class="divider"></div>
 
       <div class="myth"><div class="myth-top"><span class="myth-num">6</span><span class="myth-claim">"I'm fine on 5 hours - I'm built different."</span></div>
-        <p class="myth-real">Research on chronic sleep restriction shows people running on under 6 hours stop noticing their own decline. <b>You feel fine. Your reaction time, decisions, and memory disagree.</b> (True short sleepers exist, but they're rare - far rarer than people who think they are one.)</p><div class="myth-src"><a href="https://pubmed.ncbi.nlm.nih.gov/12683469/" target="_blank" rel="noopener noreferrer">Source: Van Dongen et al., 2003 (PubMed) &rarr;</a></div></div>
+        <p class="myth-verdict">You feel fine. Your reaction time, your decisions and your memory disagree.</p>
+        <p class="myth-real">48 adults were held at 4, 6 or 8 hours in bed for 14 straight nights. The 8-hour group stayed flat. The 6-hour group drifted down to the impairment level of <b>one full night without sleep</b>; the 4-hour group reached <b>two nights</b>. And at the end, with their performance at its worst, those people <b>reported feeling only slightly sleepy</b>.</p>
+        <details class="tip-more"><summary><span class="tm-q">But what about real short sleepers?</span><span class="tm-act"></span></summary><div class="tm-body">
+          <p class="myth-real">They exist. They are also rare - far rarer than the number of people who believe they are one. The safe assumption is that you are not, until a fortnight of proper sleep proves otherwise.</p>
+          <p class="myth-src"><a href="https://pubmed.ncbi.nlm.nih.gov/12683469/" target="_blank" rel="noopener noreferrer">Source: Van Dongen et al., 2003 (PubMed) &rarr;</a></p>
+        </div></details></div>
 
       <div class="myth"><div class="myth-top"><span class="myth-num">7</span><span class="myth-claim">"Counting sheep works."</span></div>
-        <p class="myth-real">Picturing sheep is too visual - it engages your brain instead of calming it. What works is something monotonous: <b>counting backward from 300 by 3s.</b> Boring enough to crowd out thinking.</p><div class="myth-src"><a href="https://pubmed.ncbi.nlm.nih.gov/11863237/" target="_blank" rel="noopener noreferrer">Source: Harvey &amp; Payne, 2002 (PubMed) &rarr;</a></div></div>
+        <p class="myth-verdict">Boring your brain quiet doesn't work. Give it something interesting enough to crowd the worrying out.</p>
+        <p class="myth-real">It was tested on 41 people with insomnia. It did nothing. But the reason is the opposite of what everyone assumes: counting fails <b>because it's boring</b>. It takes up too little of your head, and worry walks straight back into the space left over. In the same study, the group handed a vivid, absorbing scene fell asleep faster than the controls.</p>
+        <details class="tip-more"><summary><span class="tm-q">How to actually do it tonight</span><span class="tm-act"></span></summary><div class="tm-body">
+          <p class="myth-real">Pick a place you know well and walk it in detail - the door, the light, what's underfoot, what you can hear.</p>
+          <p class="myth-real">Two rules for the place you pick. Detailed enough to occupy you completely. And neutral enough that there is nothing in it to solve - a work problem in vivid detail fills the same space, but brings the tension with it.</p>
+          <p class="myth-src"><a href="https://pubmed.ncbi.nlm.nih.gov/11863237/" target="_blank" rel="noopener noreferrer">Source: Harvey &amp; Payne, 2002 - Behaviour Research and Therapy &rarr;</a></p>
+        </div></details></div>
 
       <div class="myth"><div class="myth-top"><span class="myth-num">8</span><span class="myth-claim">"Night owls are just lazy."</span></div>
-        <p class="myth-real">Chronotype is largely genetic, not a character flaw. Forcing a true owl onto a lark's schedule doesn't build discipline - <b>it builds sleep debt.</b> Work with your type where you can.</p><div class="myth-src"><a href="https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1006125" target="_blank" rel="noopener noreferrer">Source: PLOS Genetics &rarr;</a></div></div>
+        <p class="myth-verdict">About half of it is inherited. Forcing a true owl onto a lark's schedule builds sleep debt, not discipline.</p>
+        <p class="myth-real">Across 8,753 pairs of twins, roughly <b>half</b> of whether you're a lark or an owl is inherited. Not a character flaw - and not a life sentence either, which is the useful half.</p>
+        <div class="myth-src"><a href="https://pubmed.ncbi.nlm.nih.gov/17542945/" target="_blank" rel="noopener noreferrer">Source: Koskenvuo et al., 2007 - nationwide twin study, 8,753 pairs &rarr;</a></div></div>
 
       <div class="myth"><div class="myth-top"><span class="myth-num">9</span><span class="myth-claim">"Snoring is harmless."</span></div>
-        <p class="myth-real">Loud, regular snoring can be a sign of sleep apnea - your airway briefly collapses through the night and your brain gets less oxygen each time. It's common and very treatable. <b>If you snore heavily or wake up tired no matter how long you slept, it's worth getting checked.</b></p><div class="myth-src"><a href="https://www.sleepfoundation.org/sleep-apnea/is-it-snoring-or-sleep-apnea" target="_blank" rel="noopener noreferrer">Source: Sleep Foundation &rarr;</a></div></div>
+        <p class="myth-verdict">Loud, regular snoring can mean your airway is closing at night. It is common, it is very treatable - get it checked.</p>
+        <p class="myth-real">The medical name is sleep apnea: your airway briefly collapses through the night and your brain gets less oxygen each time. "Common" undersells it - an estimate published in the Lancet puts <b>936 million adults aged 30 to 69</b> worldwide in the mild-to-severe range. <b>Get it looked at too if you wake up tired no matter how long you slept.</b></p>
+        <details class="tip-more"><summary><span class="tm-q">Why treating apnea may not be the end of it</span><span class="tm-act"></span></summary><div class="tm-body">
+          <p class="myth-real">Of those 936 million, 425 million sit at moderate-to-severe.</p>
+          <p class="myth-real">Treat it as a separate job from this guide. Fixing apnea fixes why you stop breathing at night. It doesn't tell your body when to sleep, and it doesn't switch your head off. Plenty of people get treated, sleep through the night, and are still tired - because those parts were never the airway's job.</p>
+          <p class="myth-src"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7007763/" target="_blank" rel="noopener noreferrer">Source: Benjafield et al., 2019 - Lancet Respiratory Medicine &rarr;</a></p>
+        </div></details></div>
 
-      <div class="divider"></div>
+      <div class="myth"><div class="myth-top"><span class="myth-num">10</span><span class="myth-claim">"A white noise machine fixes a noisy bedroom."</span></div>
+        <p class="myth-verdict">Fix the noise at the source first, earplugs second. If you do want sound, the answer is music, not noise.</p>
+        <p class="myth-real">It is the most recommended sleep gadget there is, on some of the thinnest evidence there is. A review of 38 studies rated the evidence for continuous noise improving sleep as <b>very low</b> - in their words, <b>"which contradicts its widespread use"</b> - and flagged that it may harm sleep and hearing. What the research points at instead is <b>bursts</b>: noise that keeps starting and stopping drove stress responses at just 45 dB (a quiet room with a fridge humming), while the same level held steady did not.</p>
+        <details class="tip-more"><summary><span class="tm-q">The one place white noise earns its keep - and what "music" actually means</span><span class="tm-act"></span></summary><div class="tm-body">
+          <p class="myth-real">If a fan already works for you, keep it. Nothing here says stop. It says don't buy a machine expecting it to fix your nights.</p>
+          <p class="myth-real"><b>And there is one place it does earn its keep - just not on sleep quality.</b> Do you fall asleep to podcasts, videos or scrolling? Then swapping to sound without words is a real win. Not because the noise helps you sleep, but because you are dropping a habit that keeps your brain at work.</p>
+          <p class="myth-real"><b>Music has the better case.</b> A Cochrane review pooled 10 trials in 708 people with insomnia symptoms. Music improved how well they said they slept, on evidence rated <b>moderate certainty</b> - the strongest support any audio option has, and a different league from white noise.</p>
+          <p class="myth-real"><b>But "music" there is a specific thing, not whatever you like.</b> Across the trials the recipe is consistent: <b>60-80 bpm</b> (roughly a resting heart rate), instrumental, low volume, simple repetitive structure, soft melodies. What they deliberately avoided: lyrics, accented beats, percussion, syncopation.</p>
+          <p class="myth-real">So ambient, lo-fi, soft classical, new age, nature sounds, slow instrumental jazz - yes. Michael Jackson, Kesha, rap, anything built on a hook and a chorus - no. That is the opposite category: stimulating music, which is exactly what it was designed to be. And lyrics are out for the same reason podcasts are - words keep the language part of your brain working, and it keeps working after you fall asleep.</p>
+          <p class="myth-real">Two side notes if you like to go digging. The "pink noise deepens sleep" studies people cite used sound pulses timed to brainwaves by laboratory equipment, not an app playing pink noise all night. And brown noise is the most hyped of the three, and the least studied.</p>
+          <p class="myth-src"><a href="https://pubmed.ncbi.nlm.nih.gov/33007706/" target="_blank" rel="noopener noreferrer">Source: Riedy et al., Sleep Medicine Reviews &rarr;</a></p>
+          <p class="myth-src"><a href="https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD010459.pub3/full" target="_blank" rel="noopener noreferrer">Source: Jespersen et al., Cochrane Database of Systematic Reviews &rarr;</a></p>
+        </div></details></div>
 
-      <div class="callout"><p><strong>The pattern:</strong> most sleep myths sound logical but work against your biology. The fix is rarely willpower - it's understanding how your body actually works, then aligning with it.</p></div>
+      <div class="callout"><p><strong>The pattern:</strong> most sleep myths sound logical but work against your biology. The fix is rarely willpower - it's understanding how your body actually works, then working with it instead of against it.</p></div>
 
+      <div class="cta">
+        <div class="cta-h">Want your sharp hours back for good?</div>
+        <p>These bonuses are real wins on their own. The full 4-week ZeroFog program is the system that turns them into clear, productive days - without willpower or a rigid schedule.</p>
+        <a class="cta-btn" href="/sales/">See the full program &rarr;</a>
+      </div>
+      <div class="qr-print">
+        <div class="qr-box"><img src="/assets/img/qr-sales.svg" alt="QR code linking to thezerofog.com/sales"></div>
+        <div class="qr-cap">Scan for the full program<br>thezerofog.com/sales</div>
+      </div>
       <div class="disclaimer"><p>This material is for education, not medical advice - it doesn't diagnose or treat any condition. Loud, regular snoring or pauses in breathing can signal a treatable medical condition - if that's you, or sleep problems persist, talk with a qualified healthcare professional. Read our full <a href="/disclaimer/" target="_blank" rel="noopener noreferrer">disclaimer</a>.</p></div>
 
       <div class="footer"><p>This bonus is part of The Zero Fog. Based on clinical sleep medicine and peer-reviewed sleep research.</p></div>
-    </section>
+  </section>
 
   </div>
 
@@ -1299,6 +1963,10 @@ const DB_SB = {
   _email: null,
 
   async currentUser(){
+    // No client (env not configured, or the CDN bundle failed to load) means we
+    // cannot know of a session — treat it as "nobody signed in" rather than
+    // throwing, so boot() can still fall through to FREE mode.
+    if(!sb) return null;
     const { data } = await sb.auth.getUser();
     const u = data && data.user;
     if(u){ this._userId = u.id; this._email = u.email; return { email: u.email, id: u.id }; }
@@ -1480,7 +2148,20 @@ const DB_LOCAL = {
 };
 
 // The rest of the app calls DB.* and never knows which backend it is.
-const DB = PREVIEW ? DB_LOCAL : DB_SB;
+// `let`, not `const`: boot() swaps in DB_LOCAL for anonymous visitors (FREE mode),
+// who get the bonuses in full and a preview of the paid tools, stored on-device.
+let DB = PREVIEW ? DB_LOCAL : DB_SB;
+
+// Auth is NOT part of the swap. FREE mode moves reads/writes to localStorage, but
+// signing in must still reach Supabase - otherwise a buyer clicking "sign in" from
+// FREE mode would be verified by the stub and never actually log in.
+const AUTH = PREVIEW ? DB_LOCAL : DB_SB;
+
+// FREE mode: no session, no purchase. Set by boot() before any view renders.
+// Bonuses are fully open; diary / assessment / protocol render as a preview
+// behind an upsell banner, backed by localStorage so nothing hits Supabase.
+let FREE = false;
+const PAID_VIEWS = ['diary','assessment','protocol','assistant'];
 
 const $ = id => document.getElementById(id);
 function dkey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
@@ -1490,11 +2171,44 @@ function todayKey(){ const d=new Date(); d.setHours(0,0,0,0); return dkey(d); }
 const gate = $('authGate');
 async function boot(){
   if(PREVIEW){ unlock(DB_LOCAL._email); return; }   // ?demo=1 : skip auth, open straight in
-  const u = await DB.currentUser();
+  let u = null;
+  try{ u = await AUTH.currentUser(); }
+  catch(e){ u = null; }   // network or config failure must not strand the visitor on a blank gate
   if(u){ await enterApp(u.email); }
-  else { gate.classList.add('show'); }
+  else { enterFreeMode(); }
+}
+
+/* Anonymous visitor: the bonuses are the product here, so the app opens straight
+   into them - no gate, no email, no code. The paid tools stay visible (a locked
+   door sells nothing) but render behind an upsell banner and write to
+   localStorage only. On purchase, recoveryInit's existing import shim carries
+   the tracker data over, so nothing typed here is lost. */
+function enterFreeMode(){
+  FREE = true;
+  DB = DB_LOCAL;
+  gate.classList.remove('show');
+  document.body.classList.add('free');
+  document.querySelectorAll('.navi[data-view]').forEach(n=>{
+    if(PAID_VIEWS.includes(n.dataset.view)) n.classList.add('locked');
+  });
+  document.querySelectorAll('.tab[data-view]').forEach(t=>{
+    if(PAID_VIEWS.includes(t.dataset.view)) t.classList.add('locked');
+  });
+  diaryInit();
+  assessInit();
+  protocolInit();
+  switchView('bonuses');
+  const sn=$('bonusSub'); if(sn) sn.classList.add('open');
+  const bt=document.querySelector('.navi.bonus'); if(bt) bt.classList.add('expanded');
 }
 function unlock(email){
+  // A visitor can sign in from inside FREE mode after buying, so undo it here:
+  // real backend, no upsell, no lock markers. PREVIEW keeps the local layer.
+  FREE = false;
+  DB = PREVIEW ? DB_LOCAL : DB_SB;
+  document.body.classList.remove('free');
+  document.querySelectorAll('.locked').forEach(x=>x.classList.remove('locked'));
+  const up = $('upsell'); if(up) up.hidden = true;
   gate.classList.remove('show');
   $('acct').style.visibility = 'visible';
   $('acctEmail').textContent = email;
@@ -1511,7 +2225,7 @@ function unlock(email){
 // Decide where an authenticated user lands: paid → into the app; not paid → "customers only" screen.
 // RLS already blocks non-paid data access; this gate is defence-in-depth + a clear message.
 async function enterApp(email){
-  if(await DB.isPaid()){
+  if(await AUTH.isPaid()){
     unlock(email);
   } else {
     $('step-email').style.display='none';
@@ -1527,7 +2241,7 @@ $('sendCode').addEventListener('click', async () => {
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ $('authErr').textContent='Enter a valid email.'; return; }
   if(!$('consentChk').checked){ $('authErr').textContent='Please agree to the data storage terms to continue.'; return; }
   try{
-    await DB.sendCode(email);
+    await AUTH.sendCode(email);
   }catch(e){
     $('authErr').textContent = "Couldn't send your code. Please try again in a moment.";
     return;
@@ -1539,24 +2253,39 @@ $('verifyCode').addEventListener('click', async () => {
   const email = $('authEmail').value.trim(), code = $('authCode').value.trim();
   $('authErr').textContent = '';
   try{
-    const u = await DB.verifyCode(email, code);
-    await DB.recordConsent(CONSENT_VERSION); // best-effort; 0 rows for users without a profile yet
+    const wasFree = FREE;
+    const u = await AUTH.verifyCode(email, code);
+    await AUTH.recordConsent(CONSENT_VERSION); // best-effort; 0 rows for users without a profile yet
+    // Signing in from FREE mode: the views were already rendered from localStorage and
+    // assessInit/protocolInit are guarded against a second run, so a reload is the
+    // honest way to re-render everything from the account.
+    if(wasFree){ location.reload(); return; }
     await enterApp(u.email);
   }
   catch(e){ $('authErr').textContent = e.message; }
 });
+/* FREE mode has no automatic gate, so buyers need a way to open it deliberately. */
+{
+  const usi = $('upSignIn');
+  if(usi) usi.addEventListener('click', () => {
+    $('step-locked').style.display='none';
+    $('step-code').style.display='none';
+    $('step-email').style.display='block';
+    gate.classList.add('show');
+  });
+}
 $('backToEmail').addEventListener('click', () => {
   $('step-code').style.display='none'; $('step-email').style.display='block';
   $('authErr').textContent='';
 });
 $('signOut').addEventListener('click', async () => {
-  await DB.signOut(); location.reload();
+  await AUTH.signOut(); location.reload();
 });
 $('signOut2').addEventListener('click', async () => {
-  await DB.signOut(); location.reload();
+  await AUTH.signOut(); location.reload();
 });
 $('lockedSignOut').addEventListener('click', async () => {
-  await DB.signOut(); location.reload();
+  await AUTH.signOut(); location.reload();
 });
 $('deleteData').addEventListener('click', async () => {
   $('deleteErr').textContent = '';
@@ -1593,12 +2322,127 @@ function bonusesInit(){
   bonusesBuilt = true;
   recoveryInit();   // shared tracker module + localStorage adapter
   caffeineInit();   // caffeine cutoff calculator
+  wavesInit();      // three-wave action list at the top of the bedroom guide
+}
+
+/* ---- Three waves ---------------------------------------------------------
+   Ticks and the chosen season live in localStorage, not the DB: they are a
+   "did I do this yet" list for one room, not account data, and waves 2 and 3
+   happen on later days — the reader comes back and needs to see where they
+   stopped. Same key for free readers and buyers. */
+function wavesInit(){
+  const K_DONE='zf_waves_done';
+  const acts=[...document.querySelectorAll('#view-bonuses .wv-act')];
+  if(!acts.length) return;
+
+  function read(k,def){ try{ return JSON.parse(localStorage.getItem(k)) ?? def; }catch(e){ return def; } }
+  function write(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+  let done=read(K_DONE,{}) || {};
+  function paint(){
+    let n=0;
+    acts.forEach(a=>{
+      const on=!!done[a.dataset.wv];
+      a.classList.toggle('done', on);
+      if(on) n++;
+    });
+    const c=$('wvCount'), b=$('wvBar'), m=$('wvMsg');
+    if(c) c.textContent=n+' of '+acts.length+' done';
+    if(b) b.style.width=(n/acts.length*100)+'%';
+    if(m) m.textContent = n===0 ? '' : n<4 ? 'tonight is already better' : n<acts.length ? 'keep going' : 'the whole room is handled';
+  }
+  acts.forEach(a=>{
+    const box=a.querySelector('.wv-box');
+    if(box) box.addEventListener('click', ()=>{
+      const k=a.dataset.wv;
+      done[k]=!done[k];
+      write(K_DONE, done);
+      paint();
+    });
+  });
+  paint();
+
+  /* Jump to a section, remember where we jumped from, and offer the way back.
+     The button hides itself once the reader is back level with that action, so
+     it never lingers over the list it points at. */
+  /* Jump to a section and offer the way back to the exact action we left from.
+     The origin lives in a data attribute rather than a closure variable, so the
+     button keeps working across repeated jumps. */
+  const back=$('wvBack');
+  /* scrollIntoView with an explicit instant behavior is the only reliable mover
+     in this shell: html carries scroll-behavior:smooth, which swallows repeated
+     programmatic jumps, and window.scrollTo / documentElement.scrollTop do not
+     take effect here at all. Landing offsets come from scroll-margin-top in CSS. */
+  function goTo(el){ el.scrollIntoView({block:'start', behavior:'instant'}); }
+  document.querySelectorAll('#view-bonuses .wv-why').forEach(link=>{
+    link.addEventListener('click', e=>{
+      // Drive the jump ourselves: the native hash jump does not land reliably
+      // inside this app shell.
+      const target=document.getElementById(link.getAttribute('href').slice(1));
+      const act=link.closest('.wv-act');
+      if(!target || !act) return;
+      e.preventDefault();
+      // The reference sections are collapsed by default, so open the one being
+      // asked for before jumping — otherwise the reader lands on a closed title.
+      if(target.tagName==='DETAILS') target.open=true;
+      goTo(target);
+      if(back){ back.dataset.origin=act.dataset.wv; back.hidden=false; }
+    });
+  });
+  if(back) back.addEventListener('click', ()=>{
+    const act=document.querySelector('#view-bonuses .wv-act[data-wv="'+back.dataset.origin+'"]');
+    if(act) goTo(act);
+    back.hidden=true;
+  });
+  /* Reading the reference end to end costs five presses now. This makes it one,
+     for the reader who wants the whole thing rather than one answer. */
+  {
+    const all=$('refAll');
+    if(all) all.addEventListener('click', ()=>{
+      const secs=[...document.querySelectorAll('#view-bonuses details.ref')];
+      const opening = secs.some(d=>!d.open);
+      secs.forEach(d=>{ d.open = opening; });
+      all.textContent = opening ? 'Close all five' : 'Open all five';
+    });
+  }
+
+  // Also retire the button once the reader has scrolled back level with the list
+  // on their own — it should never sit on top of the thing it points at.
+  window.addEventListener('scroll', ()=>{
+    if(!back || back.hidden) return;
+    const act=document.querySelector('#view-bonuses .wv-act[data-wv="'+back.dataset.origin+'"]');
+    if(!act) return;
+    const r=act.getBoundingClientRect();
+    if(r.top < window.innerHeight && r.bottom > 0) back.hidden=true;
+  }, {passive:true});
+
+}
+/* What the upsell says depends on which tool the visitor opened. Draft copy —
+   the IRON pass rewrites these before launch. */
+const UPSELL_COPY = {
+  diary:      'Fill it in for as long as you like — it stays on this device. Reading what it tells you, and knowing what to change because of it, is the program.',
+  assessment: 'You can take it. Turning a score into the specific thing to fix next is what the program does with it.',
+  protocol:  'This is the card the program builds with you, week by week. Have a look at how it is put together.',
+  assistant: 'Not built yet. It arrives for course members first.'
+};
+function applyFreeGate(name){
+  const up = $('upsell');
+  if(!up) return;
+  if(FREE && PAID_VIEWS.includes(name)){
+    const v = $('view-'+name);
+    if(v){ v.insertBefore(up, v.firstChild); }
+    $('upText').textContent = UPSELL_COPY[name] || UPSELL_COPY.diary;
+    up.hidden = false;
+  } else {
+    up.hidden = true;
+  }
 }
 function switchView(name){
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on', x.dataset.view===name));
   document.querySelectorAll('.navi[data-view]').forEach(x=>x.classList.toggle('on', x.dataset.view===name));
   document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
   const v=$('view-'+name); if(v) v.classList.add('on');
+  applyFreeGate(name);
   if(name==='bonuses'){
     bonusesInit();
     showGuide(currentGuide);
@@ -1626,6 +2470,31 @@ document.querySelectorAll('.subi').forEach(s=>s.addEventListener('click', ()=>{
 /* mobile in-view switcher */
 document.querySelectorAll('.bsw').forEach(b=>b.addEventListener('click', ()=>showGuide(b.dataset.guide)));
 
+/* Print the open bonus guide. Ported from the retired /webinar-bonuses page:
+   force every collapsed evidence fold open so the PDF is complete, print, then
+   restore exactly what the reader had open. */
+{
+  const bp = $('bonusPrint');
+  if(bp) bp.addEventListener('click', ()=>{
+    document.body.classList.add('printing-bonus');
+    window.print();
+    setTimeout(()=>document.body.classList.remove('printing-bonus'), 300);
+  });
+  window.addEventListener('beforeprint', ()=>{
+    if(!document.body.classList.contains('printing-bonus')) return;
+    // Both the evidence folds and the collapsed reference sections: a printed
+    // guide has to be the whole guide.
+    document.querySelectorAll('#view-bonuses details:not([open])').forEach(d=>{
+      d.setAttribute('data-reclose',''); d.open = true;
+    });
+  });
+  window.addEventListener('afterprint', ()=>{
+    document.querySelectorAll('#view-bonuses details[data-reclose]').forEach(d=>{
+      d.open = false; d.removeAttribute('data-reclose');
+    });
+  });
+}
+
 /* ---- Recovery tracker: shared module bridged to the app DB layer ----
    The shared module is adapter-agnostic; here we hand it a store that delegates
    to DB (DB_SB → Supabase table recovery_protocol_cards, or DB_LOCAL under
@@ -1640,6 +2509,14 @@ function recoveryInit(){
   // under these keys. This is the ONLY place in /app that reads them directly — a
   // pre-purchase import so buyers don't retype what they filled on the free page.
   function importLocalRecovery(){
+    // Source 1: FREE mode in this same app — DB_LOCAL stores one { units, dates }
+    // object. Checked first: it is the newer of the two on any device that has both.
+    try{
+      const free = JSON.parse(localStorage.getItem(DB_LOCAL._recoveryKey()) || 'null');
+      if(free && free.units && free.units.length) return { units: free.units, dates: free.dates || {} };
+    }catch(e){}
+    // Source 2: the retired /webinar-bonuses page, which kept two separate keys.
+    // Kept for visitors who filled the tracker there before it was folded into /app.
     try{
       const units = JSON.parse(localStorage.getItem('zf_recovery_units') || 'null');
       if(!units || !units.length) return null;   // no meaningful free-page data
@@ -2200,6 +3077,10 @@ function protocolInit(){
   const lines=[...form.querySelectorAll('.pc-line')];
   function grow(t){ t.style.height='auto'; if(t.scrollHeight) t.style.height=t.scrollHeight+'px'; }
   window.pcRegrow=()=>form.querySelectorAll('textarea.pc-cell').forEach(grow);
+  /* Same escape hatch as pcRegrow: writeData and DEMO_PC are private to this
+     initialiser, but FREE mode needs the example card pre-loaded — a read-only
+     preview of an empty form shows nothing at all. */
+  window.pcLoadDemo=()=>{ writeData(DEMO_PC); };
   function mark(l){ l.classList.toggle('filled', [...l.querySelectorAll('.pc-cell')].some(e=>e.value.trim()!=='')); }
   /* ---- list editor: one .pc-item row box per entry; Enter or "+ Add a line" adds, x removes,
           Backspace at row start merges up ---- */
@@ -2282,7 +3163,11 @@ function protocolInit(){
     if(f.type==='window'){ l.querySelector('[data-part="from"]').value=to24(v&&v.from); l.querySelector('[data-part="to"]').value=to24(v&&v.to); }
     else if(f.type==='text'){ l.querySelector('.pc-cell').value=v||''; }
     else setList(l, v, f.ph); mark(l); }); }
-  DB.getProtocol().then(writeData).catch(()=>{});
+  // FREE mode shows the founder's card as a read-only preview. Reading storage
+  // first and writing the example after would race: the stored (empty) card
+  // lands later and blanks the preview. So in FREE we never read at all.
+  if(FREE) writeData(DEMO_PC);
+  else DB.getProtocol().then(writeData).catch(()=>{});
   const sv=$('pcSave');
   sv.addEventListener('click', async ()=>{
     try{ await DB.saveProtocol(read()); sv.classList.add('saved'); sv.textContent='Saved ✓'; }
