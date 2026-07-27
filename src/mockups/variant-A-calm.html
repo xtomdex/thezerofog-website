@@ -572,6 +572,10 @@
   /* lazy load: Safari lays the inner doc out at a bogus width when the iframe loads
      inside a display:none view and never reflows it on reveal - so src is only set
      once the Bonuses view is actually visible */
+  /* NOTE: /webinar-bonuses/ was retired 2026-07-27 - the app is now the single home
+     for the bonuses. netlify.toml 301s this path to /app/, so the iframe still loads
+     something rather than a 404, but the ?embed=1&nav=1 contract is gone. This file is
+     kept as a layout pattern, not as a working preview. */
   var bLoaded=false, bStale=false, bPendGuide=null, bCurGuide='caffeine';
   function loadBonuses(){ bLoaded=true; bStale=false; if(bCurGuide!=='caffeine') bPendGuide=bCurGuide; bframe.src='/webinar-bonuses/?embed=1&nav=1&t='+Date.now(); }
   function ensureBonuses(){ if(!bLoaded||bStale) loadBonuses(); }

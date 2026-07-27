@@ -97,24 +97,26 @@
   status = 301
   force = true
 
-# Retired bonus PDFs → webinar bonuses hub
-# (PDFs removed 2026-07-10; bonuses live at /webinar-bonuses/ and inside /app/.
+# Retired bonus PDFs → the app
+# (PDFs removed 2026-07-10; the standalone /webinar-bonuses/ page was retired
+# 2026-07-27 and the app is now the single home for the bonuses. /app/ opens
+# with no login for non-buyers and lands on them.
 # Sleep-Diary-dark/light.pdf stay — they are course materials, not bonuses.)
 [[redirects]]
   from = "/downloads/Caffeine-Blueprint.pdf"
-  to = "/webinar-bonuses/"
+  to = "/app/"
   status = 301
   force = true
 
 [[redirects]]
   from = "/downloads/Recovery-Protocol.pdf"
-  to = "/webinar-bonuses/"
+  to = "/app/"
   status = 301
   force = true
 
 [[redirects]]
   from = "/downloads/9-Recovery-Mistakes.pdf"
-  to = "/webinar-bonuses/"
+  to = "/app/"
   status = 301
   force = true
 
@@ -134,3 +136,10 @@
   from = "/thank-you/"
   to = "/welcome/"
   status = 301
+
+# Retired standalone bonuses page → the app (2026-07-27)
+[[redirects]]
+  from = "/webinar-bonuses/*"
+  to = "/app/"
+  status = 301
+  force = true

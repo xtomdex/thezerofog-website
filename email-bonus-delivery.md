@@ -30,7 +30,7 @@ You saw how caffeine blocks your sleep pressure - hiding the signal that tells y
 [Download Your Caffeine Blueprint]
 
 **10 Recovery Mistakes**
-During the training you saw how most energy advice sounds logical but works against your biology. This guide breaks down 9 more of those traps - the ones most people fall into without realizing. Each one comes with what actually works instead.
+During the training you saw how most energy advice sounds logical but works against your biology. This guide breaks down 10 of those traps - the ones most people fall into without realizing. Each one comes with what actually works instead.
 
 [Download 10 Recovery Mistakes]
 
