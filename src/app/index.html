@@ -756,7 +756,16 @@
 
   /* ===== auth gate ===== */
   #authGate{ align-items:center; }
-  #authGate .modal{ border-radius:18px; margin:0 16px; }
+  #authGate .modal{ border-radius:18px; margin:0 16px; position:relative; }
+  /* The gate is always escapable: a visitor who taps sign in by accident, or signs in
+     without having bought, must get back to the bonuses with one click and never by
+     reloading the page. Closing from the "customers only" step drops him into FREE mode. */
+  .gate-x{ display:none; position:absolute; top:14px; right:14px; width:34px; height:34px; border-radius:9px;
+        background:var(--panel2); border:1px solid var(--line); color:var(--muted); font-size:20px; line-height:1;
+        align-items:center; justify-content:center; cursor:pointer; transition:.15s; z-index:2; }
+  .gate-x:hover{ border-color:var(--purple); color:var(--purple); }
+  #authGate.dismissible .gate-x{ display:flex; }
+  #authGate.dismissible .modal h3{ padding-right:44px; }
   .consent{ display:flex; gap:8px; align-items:flex-start; font-size:13px; line-height:1.4; margin:10px 0; text-align:left; }
   .consent input{ margin-top:2px; flex:0 0 auto; }
   .locked-msg{ font-size:14px; line-height:1.5; margin:0 0 14px; }
@@ -780,6 +789,29 @@
   .pc-ln{ flex:0 0 26px; height:26px; border-radius:8px; background:rgba(189,147,249,0.13); color:var(--purple); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:1px; }
   .pc-lh label{ display:block; font-size:14px; font-weight:700; line-height:1.3; }
   .pc-lh .hint{ display:block; font-size:11.5px; color:var(--dim); font-weight:400; margin-top:2px; }
+  /* Target wake time - opt-in, so it reads as an extra the student asked for, not a
+     field he forgot to fill. Quiet until tapped; the field carries its own remove. */
+  /* Own row: the section is a two-column grid, and without this the control gets
+     auto-placed into a leftover cell beside an unrelated field. */
+  .target-wrap{ grid-column:1 / -1; }
+  .target-field{ max-width:310px; }
+  .add-target{ display:inline-flex; align-items:center; gap:6px; background:none; border:1px dashed var(--line);
+        color:var(--dim); font-family:inherit; font-size:12.5px; font-weight:600; padding:8px 13px;
+        border-radius:9px; cursor:pointer; margin-top:2px; transition:.15s; }
+  .add-target:hover{ border-color:var(--purple); color:var(--purple); }
+  /* the `hidden` attribute loses to the display rules above, so spell it out */
+  .add-target[hidden], .target-field[hidden]{ display:none !important; }
+  .target-field{ position:relative; }
+  .target-field label{ padding-right:26px; }
+  .target-x{ position:absolute; top:12px; right:10px; background:none; border:none; color:var(--dim);
+        font-size:18px; line-height:1; cursor:pointer; padding:0 2px; }
+  .target-x:hover{ color:var(--purple); }
+  /* marks a value the diary filled in, so it never reads as something the student typed */
+  .pc-src{ display:none; margin-top:5px; font-size:10.5px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase; color:var(--purple); }
+  .pc-line.from-diary .pc-src{ display:block; }
+  /* Always on, unlike .pc-src: the student needs to know the window is computed BEFORE
+     it fills, otherwise an empty line reads as one he forgot. */
+  .pc-note{ display:block; margin-top:5px; font-size:11.5px; line-height:1.45; color:var(--dim); font-weight:400; }
   .pc-cell{ width:100%; background:var(--panel2); border:1px solid var(--line); color:var(--text); font-family:inherit; font-size:14px; padding:10px 12px; border-radius:9px; }
   .pc-cell:focus{ outline:none; border-color:rgba(189,147,249,0.5); }
   textarea.pc-cell{ resize:none; overflow:hidden; min-height:44px; line-height:1.5; }
@@ -889,6 +921,14 @@
     .side-foot .signout{ background:none; border:1px solid var(--line); color:var(--muted); font-family:inherit;
           font-size:11.5px; font-weight:600; padding:8px; border-radius:9px; cursor:pointer; }
     .side-foot .signout:hover{ color:var(--text); }
+    /* FREE mode has no Sign out, so the footer is where a buyer looks for the way in.
+       Only rendered in FREE mode - a signed-in member must never see "Sign in". */
+    .side-foot .signin{ display:none; align-items:center; justify-content:center; gap:8px; width:100%;
+          background:rgba(189,147,249,0.12); border:1px solid rgba(189,147,249,0.45); color:var(--purple);
+          font-family:inherit; font-size:13px; font-weight:700; height:40px; padding:0 12px; border-radius:10px;
+          cursor:pointer; transition:.15s; }
+    .side-foot .signin:hover{ background:rgba(189,147,249,0.2); border-color:var(--purple); }
+    body.free .side-foot .signin{ display:flex; }
     .side-collapse{ position:absolute; top:22px; right:12px; width:26px; height:26px; display:flex; align-items:center; justify-content:center;
           background:var(--panel); border:1px solid var(--line); border-radius:8px; color:var(--muted); font-size:14px; line-height:1;
           cursor:pointer; z-index:2; transition:.15s; }
@@ -908,7 +948,9 @@
     .app.collapsed .acct-side .em{ display:none; }
     .app.collapsed .side-foot{ padding:0 10px; }
     .app.collapsed .theme-toggle{ padding:0; }
-    .app.collapsed .theme-toggle .lb, .app.collapsed .side-foot .signout{ display:none; }
+    .app.collapsed .theme-toggle .lb, .app.collapsed .side-foot .signout,
+    .app.collapsed .side-foot .signin .lb{ display:none; }
+    .app.collapsed .side-foot .signin{ padding:0; }
 
     /* ---- diary: header row (crumb + h1 + date nav) ---- */
     .dhead{ display:flex; align-items:center; justify-content:space-between; gap:14px; max-width:960px; margin:0 auto 22px; }
@@ -979,6 +1021,7 @@
     body.printing-pc .pc-lh label{ color:#000; } body.printing-pc .pc-lh .hint{ color:#444; }
     body.printing-pc .pc-cell{ background:none; border:none; border-bottom:1px solid #ccc; border-radius:0; color:#000; overflow:visible; }
     body.printing-pc .pc-win .to{ color:#000; }
+    body.printing-pc .pc-src, body.printing-pc .pc-note{ display:none !important; }
     body.printing-pc .pc-list{ gap:0; }
     body.printing-pc .pc-item{ background:none; border:none; border-bottom:1px solid #ddd; border-radius:0; padding:2px 0; }
     body.printing-pc .pc-item.head{ border-bottom:none; padding-top:6px; }
@@ -1003,7 +1046,7 @@
     <div class="brand">The <span class="accent">Zero Fog</span></div>
     <div class="brand-sub">Member App <span class="beta">Beta</span></div>
     <nav class="snav">
-      <div class="navi on" data-view="diary" title="Sleep Diary"><svg viewBox="0 0 24 24"><path d="M3 4h18v16H3z"/><path d="M3 9h18"/><path d="M8 3v4"/></svg> <span class="nlb">Sleep Diary</span></div>
+      <div class="navi on" data-view="diary" title="Diary"><svg viewBox="0 0 24 24"><path d="M3 4h18v16H3z"/><path d="M3 9h18"/><path d="M8 3v4"/></svg> <span class="nlb">Diary</span></div>
       <div class="navi" data-view="assessment" title="Assessment"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> <span class="nlb">Assessment</span></div>
       <div class="navi" data-view="protocol" title="Protocol Card"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg> <span class="nlb">Protocol Card</span></div>
       <div class="navi" data-view="assistant" title="Sleep Assistant"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> <span class="nlb">Sleep Assistant</span> <span class="soon">Soon</span></div>
@@ -1019,6 +1062,7 @@
     <div class="acct-side"><div class="ava" id="sideAva"></div><div class="em"><b>Member</b><span id="acctEmail2"></span></div></div>
     <div class="side-foot">
       <button class="theme-toggle" id="themeToggle2" title="Switch light / dark" aria-label="Switch theme"><span class="ic">&#9788;</span><span class="lb">Light mode</span></button>
+      <button class="signin" id="sideSignIn" title="Sign in"><span class="ic">&#8594;]</span><span class="lb">Sign in</span></button>
       <button class="signout" id="signOut2">Sign out</button>
     </div>
   </aside>
@@ -1071,7 +1115,7 @@
   <div class="view on" id="view-diary">
     <div class="body">
       <div class="dhead">
-        <div class="dh-t"><div class="crumb">Sleep Diary</div><h1>Last night</h1></div>
+        <div class="dh-t"><div class="crumb">Diary</div><h1>Last night</h1></div>
         <div class="dpick">
           <div class="nav">
             <button id="prev">‹</button>
@@ -1112,6 +1156,20 @@
           <div class="field"><label>Final wake-up</label><input type="time" id="finalWake"></div>
           <div class="field"><label>Out of bed <span class="hint">- optional</span></label><input type="time" id="outBed"></div>
         </div>
+        <!-- Target wake time. Deliberately NOT a default field and NOT in the row above:
+             every other field records what happened, this one records what you are aiming
+             at while you move your wake time. Added with the plus, removed again once the
+             target is reached. CEO spec 2026-08-02, built 2026-08-03. The label must stay
+             "add target wake time" - lesson 1.1 tells the student to tap exactly that. -->
+        <div class="target-wrap">
+          <button type="button" class="add-target" id="addTarget">+ Add target wake time</button>
+          <div class="field target-field" id="targetField" hidden>
+            <label>Target wake time <span class="hint">- what you're moving toward</span>
+              <button type="button" class="target-x" id="removeTarget" aria-label="Remove target wake time">&times;</button>
+            </label>
+            <input type="time" id="targetWake">
+          </div>
+        </div>
         <div class="field">
           <label>Sleep quality</label>
           <div class="seg" data-seg="quality">
@@ -1150,7 +1208,7 @@
 
       <div class="section">
         <div class="stitle">Notes <span style="color:var(--dim);font-weight:400;letter-spacing:0">- optional</span></div>
-        <div class="field"><textarea id="notes" placeholder="Anything unusual - stress, travel, illness, late meal, sick kid..."></textarea></div>
+        <div class="field"><textarea id="notes" placeholder="Anything worth remembering - an autopilot you caught, stress, travel, illness, late meal, sick kid..."></textarea></div>
       </div>
       </div><!-- /diary-main -->
 
@@ -1773,7 +1831,7 @@
 
       <div class="myth"><div class="myth-top"><span class="myth-num">3</span><span class="myth-claim">"You can catch up on weekends."</span></div>
         <p class="myth-verdict">Sleeping longer helps. Waking later hurts. Add the hours to the front of the night, not the back.</p>
-        <p class="myth-real">The half that fails is the half everyone does. Waking later drags your body clock later, so Monday starts out of step. <b>Go to bed earlier; get up at your usual time.</b></p>
+        <p class="myth-real">The half that fails is the half everyone does. Waking later drags your body clock later, so your next working day starts out of step. <b>Go to bed earlier; get up at your usual time.</b></p>
         <details class="tip-more"><summary><span class="tm-q">What the lab found when it tested exactly this</span><span class="tm-act"></span></summary><div class="tm-body">
           <p class="myth-real">In the lab, a weekend of unlimited recovery sleep did not protect the body. Across a repeating pattern of short weeks, people still ended up 9 to 27% worse at handling sugar.</p>
           <p class="myth-real">A separate study split the two halves cleanly: people who slept longer on weekends tested better on attention, and people who woke later tested worse.</p>
@@ -1878,6 +1936,7 @@
 <!-- ===== AUTH GATE ===== -->
 <div class="overlay show" id="authGate">
   <div class="modal">
+    <button type="button" class="gate-x" id="gateX" aria-label="Close sign in">&times;</button>
     <h3>Your sleep tools</h3>
     <p class="sub">Sign in with your email to save your diary and assessment - on any device. We send you a one-time code, no password.</p>
     <div class="demo" id="authDemo" style="display:none"></div>
@@ -2231,6 +2290,9 @@ async function enterApp(email){
     $('step-email').style.display='none';
     $('step-code').style.display='none';
     $('step-locked').style.display='block';
+    // Escapable on purpose: a visitor who signed in without buying still gets the
+    // bonuses, and closing this drops him into FREE mode rather than a blank app.
+    gate.classList.add('dismissible');
     gate.classList.add('show'); // keep the overlay up; do NOT unlock the app
   }
 }
@@ -2264,14 +2326,44 @@ $('verifyCode').addEventListener('click', async () => {
   }
   catch(e){ $('authErr').textContent = e.message; }
 });
-/* FREE mode has no automatic gate, so buyers need a way to open it deliberately. */
+/* FREE mode has no automatic gate, so buyers need a way to open it deliberately -
+   from the upsell banner, and from the sidebar footer next to the theme toggle.
+   Whatever opens it, it must also be closable: before this, clicking "sign in" put
+   the visitor in a modal with no way out except a page reload. */
+function openGate(){
+  $('step-locked').style.display='none';
+  $('step-code').style.display='none';
+  $('step-email').style.display='block';
+  $('authErr').textContent='';
+  // Escapable only while there is an app behind the overlay, i.e. FREE mode.
+  gate.classList.toggle('dismissible', document.body.classList.contains('free'));
+  gate.classList.add('show');
+  const em = $('authEmail'); if(em) setTimeout(()=>em.focus(), 50);
+}
+function closeGate(){
+  if(!gate.classList.contains('dismissible')) return;
+  gate.classList.remove('show');
+  $('authErr').textContent='';
+  $('step-code').style.display='none';
+  $('step-email').style.display='block';
+  // Signed in but not a customer. There is no app behind the overlay yet, so hand them
+  // the same view a logged-out visitor gets: bonuses open, paid tools as a preview.
+  // Without this, anyone who tapped "sign in" out of curiosity had to reload the page
+  // to get back to the bonuses he came for.
+  if(!document.body.classList.contains('free')) enterFreeMode();
+}
 {
   const usi = $('upSignIn');
-  if(usi) usi.addEventListener('click', () => {
-    $('step-locked').style.display='none';
-    $('step-code').style.display='none';
-    $('step-email').style.display='block';
-    gate.classList.add('show');
+  if(usi) usi.addEventListener('click', openGate);
+  const ssi = $('sideSignIn');
+  if(ssi) ssi.addEventListener('click', openGate);
+  const gx = $('gateX');
+  if(gx) gx.addEventListener('click', closeGate);
+  // Click anywhere outside the box. The listener sits on the overlay, so a click
+  // inside .modal never reaches it.
+  gate.addEventListener('click', e => { if(e.target === gate) closeGate(); });
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && gate.classList.contains('show')) closeGate();
   });
 }
 $('backToEmail').addEventListener('click', () => {
@@ -2644,6 +2736,17 @@ document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',(
 ['intoBed','tried','finalWake','outBed','caffeine'].forEach(id=>{
   $(id).addEventListener('input',()=>{ state[id]=$(id).value; if(id==='caffeine'){ $('caffNone').classList.remove('on'); } calc(); });
 });
+/* Target wake time: opt-in, and opt-out again once it is reached. It is stored on the
+   entry like any other field (diary_entries.data is jsonb, so no schema change), which
+   also means the target that was live on a given night stays with that night.
+   It deliberately feeds nothing: fillFromDiary keeps reading Final wake-up only. */
+function showTarget(on){
+  $('targetField').hidden = !on;
+  $('addTarget').hidden = on;
+}
+$('addTarget').addEventListener('click', ()=>{ showTarget(true); $('targetWake').focus(); });
+$('removeTarget').addEventListener('click', ()=>{ state.targetWake=''; $('targetWake').value=''; showTarget(false); });
+$('targetWake').addEventListener('input', ()=>{ state.targetWake=$('targetWake').value; });
 $('notes').addEventListener('input',()=>{ state.notes=$('notes').value; });
 $('caffNone').addEventListener('click',()=>{
   $('caffNone').classList.toggle('on');
@@ -2723,6 +2826,8 @@ function applyState(){
   document.querySelectorAll('.chip.on,.s.on').forEach(x=>x.classList.remove('on'));
   ['intoBed','tried','finalWake','outBed','caffeine'].forEach(id=>$(id).value=state[id]&&state[id]!=='none'?state[id]:'');
   $('notes').value=state.notes||''; $('wakeVal').textContent=state.wakings||0;
+  $('targetWake').value = state.targetWake || '';
+  showTarget(!!state.targetWake);
   if(state.caffeine==='none') $('caffNone').classList.add('on');
   ['sol','waso','alcohol','nap','exercise','aid'].forEach(k=>{
     const g=document.querySelector('[data-chip="'+k+'"]'); if(g&&state[k]!=null){ const c=g.querySelector('[data-v="'+state[k]+'"]'); if(c)c.classList.add('on'); }
@@ -3035,8 +3140,13 @@ function protocolInit(){
   if(!form || pcBuilt) return;
   pcBuilt = true;
   const FIELDS = [
-    { id:'wake', label:'My wake window', hint:'observed, not a target', type:'window' },
-    { id:'sleep', label:'My sleep window', hint:'when you actually sleep - observed', type:'window' },
+    // `note` = the approved line explaining where an auto-filled window comes from.
+    // CEO-approved wording, verbatim, 2026-08-02. These are the only two lines the diary
+    // computes, so they are the only two that carry it.
+    { id:'wake', label:'My wake window', hint:'observed, not a target', type:'window',
+      note:'Worked out from every day in your diary, so it shifts as you log more. Change it by hand any time.' },
+    { id:'sleep', label:'My sleep window', hint:'when you actually sleep - observed', type:'window',
+      note:'Worked out from every day in your diary, so it shifts as you log more. Change it by hand any time.' },
     { id:'caffeine', label:'My caffeine cutoff', hint:'aim for 8h before your sleep window', type:'text', ph:'e.g. 5:00 PM' },
     { id:'morning', label:'My morning routine', hint:'first hour - light, phone-free, movement', type:'area', ph:'Light first. Phone-free 30-60 min. Some movement...' },
     { id:'meal', label:'My last meal', hint:'dinner window + a backup snack', type:'area', ph:'Dinner window ___ to ___, plus a light backup snack.' },
@@ -3062,7 +3172,7 @@ function protocolInit(){
     worry:"9:30-10:00 PM - to-do list for tomorrow, brain dump, planning, analysis.",
     night:"- Get up. No phone, don't check the time\n- Balcony: just sit or lie back in the fresh air\n- Or a book, time with the cats, the armchair in the living room\n- The one rule: don't stay in bed",
     reset:"- Drifted more than an hour: shift back 30 min a day. Less than an hour: fix it in one go\n- Underslept from an early start: no sleeping in, no napping it back - live the day as planned, bed slightly earlier\n- Flight with a big time difference: start shifting at home in advance - one hour of difference, one day\n- Nap: 20-25 min, timer on, no later than 5:00 PM. After: a walk or the balcony + a quick stretch\n- Slept under 5 hours: coffee nap - a coffee, lie down for 25 min, then a few squats, push-ups, a stretch",
-    smoking:"- Morning: no smoking for the first 30-45 min after waking\n- Evening: last cigarette 1.5-2 hours before bed",
+    smoking:"- Morning: no smoking for the first 30-45 min after waking\n- Evening: last cigarette 2-3 hours before bed",
     triggers:"- Interrupted deep in work mode -> irritation. Rule: clear work hours + \"I'll call you back when I'm free.\"\n- Work piling up + family adds more -> noisy head. Rule: write it down, rate the urgency, set a reminder.\n- Irritation or a small anxiety wave mid-work -> 20-30 min pause: phone away, jazz or silence, breathing to cool down. A cold drink on the balcony. If it really boils over: push-ups or the punching bag.",
   };
   FIELDS.forEach((f,i)=>{
@@ -3071,7 +3181,11 @@ function protocolInit(){
     if(f.type==='window') fill='<div class="pc-win"><input type="time" class="pc-cell" data-part="from"><span class="to">to</span><input type="time" class="pc-cell" data-part="to"></div>';
     else if(f.type==='text') fill='<input class="pc-cell" placeholder="'+(f.ph||'')+'">';
     else fill='<div class="pc-list"></div>';
-    line.innerHTML='<div class="pc-lh"><div class="pc-ln">'+num+'</div><div><label>'+f.label+'</label><span class="hint">'+f.hint+'</span></div></div><div>'+fill+'</div>';
+    // A line that carries `note` already says where the value came from, in fuller words -
+    // the short "filled in from your diary" tag would just repeat it on the same line.
+    const src = f.note ? '<span class="pc-note">'+f.note+'</span>'
+                       : '<span class="pc-src">filled in from your diary</span>';
+    line.innerHTML='<div class="pc-lh"><div class="pc-ln">'+num+'</div><div><label>'+f.label+'</label><span class="hint">'+f.hint+'</span>'+src+'</div></div><div>'+fill+'</div>';
     form.appendChild(line);
   });
   const lines=[...form.querySelectorAll('.pc-line')];
@@ -3115,7 +3229,9 @@ function protocolInit(){
   }
   form.addEventListener('input',e=>{
     if(e.target.tagName==='TEXTAREA'){ const li=e.target.closest('.pc-list'); if(li) refreshList(li); else grow(e.target); }
-    mark(e.target.closest('.pc-line'));
+    const ln=e.target.closest('.pc-line');
+    if(ln) ln.classList.remove('from-diary');   // the moment they touch it, it is theirs
+    mark(ln);
   });
   form.addEventListener('keydown',e=>{
     const t=e.target; if(t.tagName!=='TEXTAREA'||!t.closest('.pc-item')) return;
@@ -3160,14 +3276,84 @@ function protocolInit(){
     if(ap==='PM'&&h<12)h+=12; if(ap==='AM'&&h===12)h=0;
     return (h>23||+mi>59) ? '' : String(h).padStart(2,'0')+':'+mi; }
   function writeData(d){ d=d||{}; FIELDS.forEach((f,i)=>{ const l=lines[i], v=d[f.id];
+    l.classList.remove('from-diary');
     if(f.type==='window'){ l.querySelector('[data-part="from"]').value=to24(v&&v.from); l.querySelector('[data-part="to"]').value=to24(v&&v.to); }
     else if(f.type==='text'){ l.querySelector('.pc-cell').value=v||''; }
     else setList(l, v, f.ph); mark(l); }); }
   // FREE mode shows the founder's card as a read-only preview. Reading storage
   // first and writing the example after would race: the stored (empty) card
   // lands later and blanks the preview. So in FREE we never read at all.
+  /* ---- What the diary can fill in on its own ----
+     Three fields are observations, not decisions: when you actually wake, when you
+     actually sleep, and where your caffeine has to stop. The diary already holds all
+     three, so the student should never have to copy them across by hand. Everything
+     else on the card is a rule they choose while going through the lessons - we do
+     not guess those. Only empty fields get filled; a saved value always wins. */
+  const NIGHT_PIVOT = 720;   // clock times before noon belong to the night that started yesterday
+  const WAKE_PIVOT  = 180;   // wake times before 3am still belong to that night
+  function pct(sorted, p){
+    if(!sorted.length) return null;
+    const i = (sorted.length-1)*p, lo = Math.floor(i), hi = Math.ceil(i);
+    return Math.round(sorted[lo] + (sorted[hi]-sorted[lo])*(i-lo));
+  }
+  /* clock times wrap at midnight, so shift the early hours past 24:00 before any
+     sorting - otherwise 00:30 sorts before 23:00 and every window comes out wrong */
+  function circPct(vals, p, pivot){
+    const s = vals.filter(v=>v!=null).map(v=> v<pivot ? v+1440 : v).sort((a,b)=>a-b);
+    const v = pct(s, p);
+    return v==null ? null : ((v%1440)+1440)%1440;
+  }
+  function hhmm(mins){ mins=((mins%1440)+1440)%1440;
+    return String(Math.floor(mins/60)).padStart(2,'0')+':'+String(mins%60).padStart(2,'0'); }
+  function round5(mins){ return Math.round(mins/5)*5; }
+
+  function suggestFrom(rows){
+    const out = {};
+    const wakes = rows.map(r=>toMin(r.finalWake)).filter(v=>v!=null);
+    if(wakes.length>=5){
+      let a = round5(circPct(wakes,0.25,WAKE_PIVOT)), b = round5(circPct(wakes,0.75,WAKE_PIVOT));
+      if(((b-a+1440)%1440) < 15) b = a+15;          // a window of zero width is not a window
+      out.wake = { from:hhmm(a), to:hhmm(b) };
+    }
+    // sleep window = when the lights actually went out, through the final wake-up
+    const outs = rows.map(r=>{ const t=toMin(r.tried); return t!=null ? t : toMin(r.intoBed); }).filter(v=>v!=null);
+    if(outs.length>=5 && wakes.length>=5){
+      const start = round5(circPct(outs,0.5,NIGHT_PIVOT));
+      out.sleep = { from:hhmm(start), to:hhmm(round5(circPct(wakes,0.5,WAKE_PIVOT))) };
+    }
+    /* Deliberately NOT filled: the caffeine cutoff. Lesson 2.1 starts everyone at
+       bedtime minus 8h but then has them walk it later in half-hour steps, and the
+       Caffeine Blueprint gives a much earlier answer for a big dose. That is a
+       decision the student makes, not an observation the diary holds - guessing it
+       here would contradict their own Blueprint. */
+    return out;
+  }
+
+  function isEmpty(f, l){
+    if(f.type==='window') return !l.querySelector('[data-part="from"]').value && !l.querySelector('[data-part="to"]').value;
+    return !l.querySelector('.pc-cell').value.trim();
+  }
+  async function fillFromDiary(){
+    let rows=[];
+    try{
+      const today=new Date(); today.setHours(0,0,0,0);
+      const f=new Date(today); f.setDate(f.getDate()-27);
+      rows = await DB.getDiaryRange(dkey(f), dkey(today));
+    }catch(e){ return; }
+    const s = suggestFrom(rows||[]);
+    FIELDS.forEach((f,i)=>{
+      const v = s[f.id]; if(v===undefined) return;
+      const l = lines[i]; if(!isEmpty(f,l)) return;
+      if(f.type==='window'){
+        l.querySelector('[data-part="from"]').value = v.from;
+        l.querySelector('[data-part="to"]').value   = v.to;
+      } else { l.querySelector('.pc-cell').value = v; }
+      l.classList.add('from-diary'); mark(l);
+    });
+  }
+
   if(FREE) writeData(DEMO_PC);
-  else DB.getProtocol().then(writeData).catch(()=>{});
+  else DB.getProtocol().then(writeData).then(fillFromDiary).catch(()=>{});
   const sv=$('pcSave');
   sv.addEventListener('click', async ()=>{
     try{ await DB.saveProtocol(read()); sv.classList.add('saved'); sv.textContent='Saved ✓'; }
