@@ -1,0 +1,34 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//The Zero Fog//Maintenance Reminders//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:zf-maintenance-card@thezerofog.com
+SEQUENCE:0
+DTSTAMP:20260807T120000Z
+DTSTART;VALUE=DATE:20260901
+RRULE:FREQ=MONTHLY
+SUMMARY:ZeroFog - Review your Protocol Card (2 min)
+DESCRIPTION:Does anything need adjusting? Life changes - your card can change with it. Don't tweak it after one bad night\; adjust when something has genuinely shifted.
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:ZeroFog - Review your Protocol Card (2 min)
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:zf-maintenance-assessment@thezerofog.com
+SEQUENCE:0
+DTSTAMP:20260807T120000Z
+DTSTART;VALUE=DATE:20261101
+RRULE:FREQ=MONTHLY;INTERVAL=3
+SUMMARY:ZeroFog - Retake the Assessment
+DESCRIPTION:Open the Assessment in your Toolkit and retake it. Compare to your Day Zero baseline - that's your before and after\, as a number.
+BEGIN:VALARM
+TRIGGER:PT0S
+ACTION:DISPLAY
+DESCRIPTION:ZeroFog - Retake the Assessment
+END:VALARM
+END:VEVENT
+END:VCALENDAR
