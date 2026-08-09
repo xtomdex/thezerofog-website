@@ -54,6 +54,9 @@
   .tab{ flex:0 0 auto; text-align:center; background:none; border:none; color:var(--muted); font-family:inherit;
         font-size:13px; font-weight:600; padding:11px 11px 13px; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
   .tab.on{ color:var(--text); border-bottom-color:var(--purple); }
+  /* Assistant tab: parked behind "Soon" - greyed until it ships, opens the preview */
+  .tab-soon{ color:var(--dim); }
+  .tab-soon .soon{ margin-left:5px; }
   /* Bonuses tab: the "extra" - amber accent + sparkle, set apart from the 3 core tools */
   .tab-bonus{ color:var(--orange); }
   .tab-bonus .bstar{ font-size:11px; vertical-align:1px; }
@@ -1084,6 +1087,7 @@
       <button class="tab" data-view="assessment">Assessment</button>
       <button class="tab" data-view="protocol">Protocol</button>
       <button class="tab tab-bonus" data-view="bonuses"><span class="bstar">&#10022;</span> Bonuses</button>
+      <button class="tab tab-soon" data-view="assistant">Assistant <span class="soon">Soon</span></button>
     </div>
   </div>
 
