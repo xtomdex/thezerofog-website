@@ -2224,12 +2224,13 @@ function todayKey(){ const d=new Date(); d.setHours(0,0,0,0); return dkey(d); }
 /* ============ AUTH GATE ============ */
 const gate = $('authGate');
 async function boot(){
-  if(PREVIEW){ unlock(DB_LOCAL._email); return; }   // ?demo=1 : skip auth, open straight in
+  if(PREVIEW){ unlock(DB_LOCAL._email); routeFromHash(); return; }   // ?demo=1 : skip auth, open straight in
   let u = null;
   try{ u = await AUTH.currentUser(); }
   catch(e){ u = null; }   // network or config failure must not strand the visitor on a blank gate
   if(u){ await enterApp(u.email); }
   else { enterFreeMode(); }
+  routeFromHash();   // applied last, so a deep link overrides whichever view the mode opened on
 }
 
 /* Anonymous visitor: the bonuses are the product here, so the app opens straight
@@ -2556,6 +2557,26 @@ document.querySelectorAll('.subi').forEach(s=>s.addEventListener('click', ()=>{
 }));
 /* mobile in-view switcher */
 document.querySelectorAll('.bsw').forEach(b=>b.addEventListener('click', ()=>showGuide(b.dataset.guide)));
+
+/* ---------- deep links ----------
+   Course lessons say things like "open your Caffeine Blueprint" and the link has to land on the
+   guide itself, not in the hall. Routes are written #/name, NOT #name: the app already has an
+   element with id="caffeine" (the time input), so a bare hash would make the browser scroll to
+   that field instead. Unknown routes are ignored rather than guessed, so a stale link can never
+   strand anyone on a blank screen - they simply get the default view. */
+const VIEW_ROUTES = { diary:1, assessment:1, protocol:1, assistant:1, bonuses:1 };
+function openBonusNav(){
+  const sn=$('bonusSub'); if(sn) sn.classList.add('open');
+  const bt=document.querySelector('.navi.bonus'); if(bt){ bt.classList.add('expanded'); bt.classList.add('on'); }
+}
+function routeFromHash(){
+  const h=(location.hash||'').replace(/^#\/?/,'').trim().toLowerCase();
+  if(!h) return false;
+  if(BONUS_GUIDES[h]){ currentGuide=h; switchView('bonuses'); openBonusNav(); return true; }
+  if(VIEW_ROUTES[h]){ switchView(h); if(h==='bonuses') openBonusNav(); return true; }
+  return false;
+}
+window.addEventListener('hashchange', routeFromHash);
 
 /* Print the open bonus guide. Ported from the retired /webinar-bonuses page:
    force every collapsed evidence fold open so the PDF is complete, print, then
