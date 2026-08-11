@@ -62,7 +62,7 @@
   }
 
   // --- 3. Add-to-calendar buttons ---
-  var EVENT_TITLE = 'The Zero Fog - Live Training';
+  var EVENT_TITLE = 'The Zero Fog - Live Workshop';
   var EVENT_MINUTES = 60;
 
   function parseEventStart() {

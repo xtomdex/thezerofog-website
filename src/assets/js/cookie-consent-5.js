@@ -188,7 +188,7 @@
 
   // Custom funnel events, delegated so page scripts stay untouched:
   // - optin_submitted: landing form #optinForm (fires before the EverWebinar redirect)
-  // - checkout_clicked: #buyBtn on /sales/, .cta-checkout on /webinar-text/
+  // - checkout_clicked: #buyBtn on /sales/, .cta-checkout on /workshop-text/
   // - replay_video_started: first <video> play on /replay/ (no-op until embedded)
   document.addEventListener('submit', function(e) {
     if (e.target && e.target.id === 'optinForm') {

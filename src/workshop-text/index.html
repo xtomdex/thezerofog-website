@@ -23,6 +23,9 @@
     --bg:#f3f3f6; --surface:#ffffff; --surface2:#eceef1; --line:rgba(0,0,0,0.10);
     --text:#1a1a1a; --muted:#555555; --dim:#8a8a8a; --btn-text:#ffffff;
     --purple:#6d28d9; --pink:#be185d; --cyan:#0e7490; --green:#15803d; --red:#dc2626; --orange:#b45309;
+    /* long-form reading: ~600px of text at 18px lands around 62-68 characters a line */
+    --measure:648px; --gutter:24px;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
   }
   /* DARK (html.dark) - the original look */
   html.dark{
@@ -44,58 +47,95 @@
   html{scroll-behavior:smooth}
   body{
     font-family:'Inter',sans-serif; background:var(--bg); color:var(--text);
-    line-height:1.7; -webkit-font-smoothing:antialiased; font-size:18px;
+    line-height:1.8; -webkit-font-smoothing:antialiased; font-size:18px;
+    overflow-x:hidden;
   }
-  .wrap{max-width:720px;margin:0 auto;padding:0 22px}
+  /* .wrap is the single element that holds the whole article - the expiry gate at the
+     bottom replaces its contents wholesale, so nothing may live outside it. It is now a
+     full-bleed rail; the reading measure is held by .slab-inner. */
+  .wrap{width:100%;margin:0;padding:0}
+  .slab-inner{max-width:var(--measure);margin:0 auto;padding:0 var(--gutter)}
+
+  /* reading progress bar - thin fill at the very top of the viewport */
+  .progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:200;pointer-events:none}
+  .progress-fill{
+    display:block;height:100%;width:100%;background:var(--purple);
+    transform:scaleX(0);transform-origin:0 50%;will-change:transform;
+  }
+
+  /* section slabs - one per heading, alternating a very subtle tint for rhythm */
+  .slab{padding:60px 0}
+  .slab.alt{background:var(--surface2)}
+  .slab-intro{padding-top:48px}
+  .slab-inner > *:first-child{margin-top:0}
+  .slab-inner > *:last-child{margin-bottom:0}
 
   /* hero */
-  .hero{text-align:center;padding:64px 0 40px;border-bottom:1px solid var(--line);margin-bottom:10px}
-  .eyebrow{font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--purple);margin-bottom:22px}
+  .hero{text-align:center;padding:88px 0 64px;border-bottom:1px solid var(--line)}
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--purple);margin-bottom:22px;
+  }
   h1{
     font-family:'Inter',sans-serif;font-weight:900;
     font-size:clamp(34px,7vw,54px);line-height:1.12;letter-spacing:-0.5px;margin-bottom:20px;
   }
-  .hero .sub{font-size:18px;color:var(--muted);max-width:520px;margin:0 auto}
+  .hero .sub{font-size:18px;color:var(--muted);max-width:520px;margin:0 auto;line-height:1.6}
 
   /* section headings */
   h2{
     font-family:'Inter',sans-serif;font-weight:800;
-    font-size:clamp(26px,4.5vw,36px);line-height:1.2;margin:54px 0 18px;letter-spacing:-0.3px;
+    font-size:clamp(26px,4.5vw,34px);line-height:1.22;margin:0 0 26px;letter-spacing:-0.3px;
   }
   h2 .acc{color:var(--purple)}
   h3{font-size:19px;font-weight:700;margin:34px 0 12px;color:var(--text)}
-  .kicker{font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);display:block;margin:56px 0 -6px}
+  .kicker{
+    font-family:var(--mono);
+    font-size:12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);
+    display:block;margin:0 0 14px;
+  }
 
-  p{margin:0 0 18px}
-  p.lead{font-size:21px;color:var(--text)}
+  p{margin:0 0 1.35em}
+  p.lead{font-size:21px;color:var(--text);line-height:1.65}
   strong{color:var(--text);font-weight:700}
   em{color:var(--muted)}
 
   /* pull quote */
   .pull{
     font-family:'Inter',sans-serif;font-weight:700;letter-spacing:-0.2px;
-    font-size:clamp(20px,3.5vw,26px);line-height:1.4;color:var(--purple);
-    text-align:center;margin:42px 0;padding:24px 14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    font-size:clamp(20px,3.5vw,26px);line-height:1.45;color:var(--purple);
+    text-align:center;margin:48px 0;padding:30px 14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
   }
   .pull.pink{color:var(--pink)}
   .pull.cyan{color:var(--cyan)}
 
   blockquote{
-    border-left:3px solid var(--purple);padding:6px 0 6px 20px;margin:24px 0;
+    border-left:3px solid var(--purple);padding:6px 0 6px 22px;margin:32px 0;
     color:var(--muted);font-style:italic;
   }
-  blockquote .who{display:block;font-style:normal;font-size:14px;color:var(--dim);margin-top:8px;font-weight:600}
+  blockquote .who{
+    display:block;font-family:var(--mono);font-style:normal;font-size:13px;
+    color:var(--dim);margin-top:10px;font-weight:600;line-height:1.5;
+  }
 
-  /* figures */
-  figure{margin:34px 0}
-  figure img{width:100%;border-radius:12px;border:1px solid var(--line);display:block}
-  figcaption{font-size:13px;color:var(--dim);text-align:center;margin-top:10px;font-style:italic}
+  /* figures - given room, softly framed, captions in mono */
+  figure{margin:44px 0}
+  figure img{width:100%;border-radius:16px;border:1px solid var(--line);display:block}
+  figcaption{
+    font-family:var(--mono);font-size:12.5px;line-height:1.55;
+    color:var(--dim);text-align:center;margin-top:14px;
+  }
+  /* modest breakout so slides read wider than the text column - only when the
+     viewport can afford it, so the page never scrolls sideways on mobile */
+  @media(min-width:820px){
+    .slab-inner > figure{width:calc(100% + 96px);margin-left:-48px;margin-right:-48px}
+  }
 
   /* exhaustion cycle - animated inline SVG replica of deck slide 16 (V1 ring canon).
      Fixed dark palette on purpose: matches the other slide PNGs in both themes.
      Pulses run along the arrows via stroke-dashoffset; .anim is added lazily by
      an IntersectionObserver at the bottom of the page. */
-  .cycle-fig svg{width:100%;height:auto;border-radius:12px;border:1px solid var(--line);display:block;background:#1a1a1a}
+  .cycle-fig svg{width:100%;height:auto;border-radius:16px;border:1px solid var(--line);display:block;background:#1a1a1a}
   .cycle-runner{
     fill:none;stroke:#d8beff;stroke-width:6;stroke-linecap:round;opacity:0;
     stroke-dasharray:20 480;stroke-dashoffset:500;
@@ -107,7 +147,7 @@
   }
 
   /* callout / list cards */
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin:28px 0}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:26px 28px;margin:36px 0}
   .card.green{border-color:rgba(80,250,123,0.25)}
   .card.purple{border-color:rgba(189,147,249,0.3)}
   ul.clean{list-style:none;margin:14px 0}
@@ -116,10 +156,11 @@
   ul.check li::before{content:"\2713";color:var(--green);background:none;left:0;top:6px;width:auto;height:auto;font-weight:700}
 
   /* offer - price mirrors the deck price slides (Inter 900, purple), CTA = funnel-standard button (shared.css .cta-btn family) */
-  .offer{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid rgba(189,147,249,0.3);border-radius:18px;padding:34px 28px;margin:40px 0;text-align:center}
+  .offer{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid rgba(189,147,249,0.3);border-radius:18px;padding:38px 28px;margin:48px 0;text-align:center}
+  .slab.alt .offer{background:var(--surface)}
   .offer .price{font-family:'Inter',sans-serif;font-size:54px;font-weight:900;letter-spacing:-0.02em;color:var(--purple);line-height:1;margin:8px 0}
   .offer .price small{font-size:24px;font-weight:800;color:var(--purple);opacity:.85}
-  .offer .terms{font-size:15px;color:var(--muted);margin-bottom:8px}
+  .offer .terms{font-family:var(--mono);font-size:13.5px;letter-spacing:0.02em;color:var(--muted);margin-bottom:10px}
   .cta{
     display:inline-block;background:var(--green);color:var(--btn-text);font-weight:700;font-size:16px;
     font-family:'Inter',sans-serif;text-transform:uppercase;letter-spacing:0.15em;
@@ -127,43 +168,73 @@
   }
   .cta:hover{opacity:.92;transform:translateY(-1px)}
   .cta:active{transform:translateY(0)}
-  .guar{font-size:14px;color:var(--dim);margin-top:6px}
+  .guar{font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--dim);margin-top:8px}
 
-  .compare{display:flex;flex-direction:column;gap:10px;margin:22px 0;text-align:left}
-  .compare .row{display:flex;justify-content:space-between;gap:14px;padding:12px 16px;background:var(--surface2);border:1px solid var(--line);border-radius:10px}
-  .compare .row .n{color:var(--muted)} .compare .row .v{color:var(--text);font-weight:600;white-space:nowrap}
+  .compare{display:flex;flex-direction:column;gap:10px;margin:30px 0;text-align:left}
+  .compare .row{display:flex;justify-content:space-between;gap:14px;padding:14px 18px;background:var(--surface2);border:1px solid var(--line);border-radius:12px;line-height:1.5}
+  .slab.alt .compare .row{background:var(--surface)}
+  .compare .row .n{color:var(--muted)} .compare .row .v{font-family:var(--mono);color:var(--text);font-weight:600;white-space:nowrap}
   .compare .row.us{border-color:rgba(189,147,249,0.4)} .compare .row.us .v{color:var(--purple)}
 
-  hr.soft{border:none;border-top:1px solid var(--line);margin:46px 0}
+  /* Expiry - mirrors the replay timer so both surfaces read the same */
+  .expiry-bar{display:inline-flex;align-items:center;gap:10px;margin-top:18px;padding:8px 16px;
+    border:1px solid var(--line);border-radius:999px;background:var(--surface2)}
+  .expiry-label{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted)}
+  .expiry-nums{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--pink)}
+  .expired-panel{max-width:560px;margin:80px auto;padding:0 var(--gutter);text-align:center}
+  .expired-panel h2{font-size:30px;line-height:1.2;margin:0 0 14px}
+  .expired-panel p{color:var(--muted);margin:0 0 26px}
+  .read-badge{display:inline-block;font-family:var(--mono);font-size:12.5px;font-weight:600;color:var(--muted);
+    border:1px solid var(--line);border-radius:999px;padding:7px 16px;margin-top:18px}
 
-  .read-badge{display:inline-block;font-size:13.5px;font-weight:600;color:var(--muted);
-    border:1px solid var(--line);border-radius:999px;padding:6px 16px;margin-top:14px}
-
-  .footer{text-align:center;margin:60px 0 40px;padding-top:24px;border-top:1px solid var(--line)}
-  .footer p{font-size:12px;color:var(--dim);line-height:1.6}
+  .footer{text-align:center;margin:0;padding:44px 0 48px;border-top:1px solid var(--line)}
+  .footer p{font-size:12px;color:var(--dim);line-height:1.7}
+  .footer p + p{margin-top:10px}
   .footer a{color:var(--dim);text-decoration:none}.footer a:hover{color:var(--muted)}
 
   @media(max-width:540px){
+    :root{--gutter:20px}
     body{font-size:17px}
-    .hero{padding:44px 0 32px}
+    .hero{padding:56px 0 44px}
+    .slab{padding:44px 0}
     p.lead{font-size:19px}
-    .cta{width:100%}
+    figure{margin:32px 0}
+    .pull{margin:36px 0;padding:24px 8px}
+    .offer{padding:30px 20px;margin:36px 0}
+    .card{padding:22px 20px}
+    .cta{width:100%;padding:18px 20px;letter-spacing:0.1em}
+    .compare .row{flex-direction:column;gap:4px}
+    .compare .row .v{white-space:normal}
   }
+  @media(prefers-reduced-motion:reduce){ html{scroll-behavior:auto} }
 </style>
 </head>
 <body>
+<!-- Reading progress: fills as the reader scrolls. Purely decorative, hidden from AT. -->
+<div class="progress" aria-hidden="true"><span class="progress-fill" id="zfProgressFill"></span></div>
 <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
 <!-- VISUALS: synced 2026-07-13 to the 103-slide deck numbering (slide-prototype/webinar-slides-png). Image filenames = canon slide numbers. -->
 
 <div class="wrap">
 
   <header class="hero">
-    <div class="eyebrow">The Zero Fog</div>
-    <h1>Why You Lose 2-3 Sharp Hours Every Day - And How to Get Them Back</h1>
-    <p class="sub">The written version of the workshop. Same content, same order - in long-form, at your pace.</p>
-    <p class="read-badge">About a 30-minute read</p>
+    <div class="slab-inner">
+      <div class="eyebrow">The Zero Fog</div>
+      <h1>Why You Lose 2-3 Sharp Hours Every Day - And How to Get Them Back</h1>
+      <p class="sub">The written version of the workshop. Same content, same order - in long-form, at your pace.</p>
+      <p class="read-badge">About a 30-minute read</p>
+      <!-- Shares the replay's window: same localStorage key, same 48 hours, so the written
+           version and the recording expire together rather than one outliving the other.
+           #expiryBar must stay inside .hero - the gate at the bottom looks it up by id. -->
+      <div class="expiry-bar" id="expiryBar" hidden>
+        <span class="expiry-label">This page comes down in</span>
+        <span class="expiry-nums" id="expiryTimer">48:00:00</span>
+      </div>
+    </div>
   </header>
 
+  <section class="slab slab-intro">
+    <div class="slab-inner">
   <p class="lead">By the end of this, you'll understand why you lose two or three hours of sharp focus every single day.</p>
 
   <p>Do the math. Two to three hours a day, twenty working days a month - that's forty to sixty hours. A full work week, gone. Every single month. Multiply that by twelve, and it's four months of sharp thinking a year. Just... gone. I call it the <strong>productivity tax</strong>. You pay it every month, and you never even see the bill.</p>
@@ -173,11 +244,15 @@
   <p>And by the end you'll also have three free resources that tie into all of it - your Caffeine Blueprint, the 10 Recovery Mistakes, and the Recovery Protocol. Each one connects to what you're about to see.</p>
 
   <p>A quick word first. I'm not here to build a brand. I'm not here to sell you a personality. I'm here to share what actually works. The story you're about to read is real. The losses are real. And the system I found is real - built on peer-reviewed clinical science, the same protocols performance specialists use to restore a brain to full capacity.</p>
+    </div>
+  </section>
 
+  <section class="slab alt">
+    <div class="slab-inner">
   <h2>Your morning. See if this sounds like you.</h2>
 
   <figure>
-    <img src="img/slide-009.png" alt="11 PM - exhausted but wired">
+    <img src="img/slide-009.png" alt="11 PM - exhausted but wired" loading="lazy" decoding="async">
     <figcaption>11 PM. Your body is done - your brain won't shut off. Then 3 AM: wide awake.</figcaption>
   </figure>
 
@@ -192,7 +267,11 @@
   <p class="pull">You forgot what a hundred percent feels like.</p>
 
   <p>And the worst part? You stopped noticing. Being tired became your normal. You don't say "I'm exhausted" anymore. You say "I'm fine." But you're not fine. You're running at sixty percent. Every single day. And you don't even realize it.</p>
+    </div>
+  </section>
 
+  <section class="slab">
+    <div class="slab-inner">
   <h2>It's not discipline. It's your brain.</h2>
 
   <p>Think about your workday. You work eight, ten hours - and let's be honest, when you work from home it's rarely just eight. But how many of those hours are actually sharp? Maybe three. Four if you're lucky. The rest, you're just... there. At your desk. Going through the motions.</p>
@@ -202,13 +281,21 @@
   <p>It's like driving a car with the engine light on and the oil almost empty. The car still moves, but it's slow, it overheats, and every mile does more damage. That's your brain right now. It still works, but everything costs twice the effort and gives you half the result. And every decision you make in that state costs you. In time. In quality. In money.</p>
 
   <p>What nobody talks about: you can't fix this by working more hours. Working ten hours instead of eight doesn't make you more productive - it makes you more exhausted tomorrow. You're not underperforming because you're not working enough. You're underperforming because your brain can't use the hours you already have. The problem isn't the quantity of hours. It's the quality of what your brain does with them.</p>
+    </div>
+  </section>
 
+  <section class="slab alt">
+    <div class="slab-inner">
   <h2>The number that surprised me</h2>
 
   <p>Seventeen hours awake - that's not an all-nighter. That's just a long day. You wake up at seven AM and stay up until midnight. That's it. And at that point, your brain performs like you've had two glasses of wine. You wouldn't make business decisions after a glass of wine at two PM. But that's exactly what you're doing - every single day.</p>
 
   <p>Push it to twenty-four hours and you're at zero point one zero. Roughly a bottle of wine. Past the legal driving limit in every state. And no - that's not stumbling drunk. At that level you can still walk, talk, drive. People do it every morning. That's exactly what makes it so easy to miss: the damage sits in the quiet functions - reaction speed, judgment, focus. Reaction alone - down by up to half. Measurable on a test. Invisible from the inside. And you don't need an all-nighter to get there. Weeks of short nights land your brain in that same zone - researchers measured that too. It doesn't feel drunk. It measures drunk.</p>
+    </div>
+  </section>
 
+  <section class="slab">
+    <div class="slab-inner">
   <h2>You think it's burnout. It isn't.</h2>
 
   <p>You've probably told yourself this is burnout. Too much work. Too much stress. You need a break. So you take one. A long weekend. A week off. Maybe longer. I took a year off. A full year. And nothing changed. I rested - and still felt destroyed.</p>
@@ -218,7 +305,11 @@
   <p>It's like tearing a muscle. You don't fix a torn muscle by lying on the couch longer. A torn muscle needs targeted rehab - specific exercises, in the right order, at the right time. Without that, it just heals wrong. A vacation is the wrong tool for the job. Because "burnout" is the label we put on it. It's not the cause.</p>
 
   <p>If time off actually fixed this, you'd already be fine. Think about your last vacation. Did you come back sharp? Or did the fog come back within days?</p>
+    </div>
+  </section>
 
+  <section class="slab alt">
+    <div class="slab-inner">
   <span class="kicker">The exhaustion cycle</span>
   <h2>It's not a bad week. It's a cycle - and it's getting stronger.</h2>
 
@@ -333,9 +424,11 @@
   <p>And caffeine itself turns on you. After a few weeks of daily coffee, it almost stops giving you energy - it just prevents withdrawal. Your morning cup doesn't boost you. It brings you back to zero. You're not getting a lift, you're digging out of a hole that caffeine created. And the tolerance builds. You need more to feel the same, until even three cups barely moves the needle.</p>
 
   <p>If any of this sounds familiar - stay with me. The next part is where it starts to make sense. Because I went through all of it myself. And it took me three years to find the way out.</p>
+    </div>
+  </section>
 
-  <hr class="soft">
-
+  <section class="slab">
+    <div class="slab-inner">
   <span class="kicker">My story</span>
   <h2>It's probably a lot like yours</h2>
 
@@ -350,13 +443,21 @@
   <p class="pull pink">All I did was sleep, eat, drift around the house, watch TV, then sleep again.</p>
 
   <p>So I decided to just stop. Stop everything and rest. But rest didn't help. One month turned into six. Six turned into a year. A full year of doing nothing. No energy for friends - even texting back felt like a big deal. No energy for my wife - conversation felt like an obligation. I couldn't even play video games, and I loved games. I'd nap twice a day, and the only time I felt somewhat alive was after midnight. I'd stay up until two, three, four AM. And the cycle repeated.</p>
+    </div>
+  </section>
 
+  <section class="slab alt">
+    <div class="slab-inner">
   <h2>Then everything changed - and I didn't know why</h2>
 
   <p>Then my mom came to visit. We walked, went to the beach, spent time in the sun. I was exhausted by evening - but a different kind of exhausted. No room for afternoon naps. I started falling asleep at ten, eleven PM. And within days, everything shifted. I lost weight. The snoring stopped. I started going outside on my own. I started talking to my wife because I wanted to, not because I had to. I started actually replying to my friend's messages. I felt like a different person. But I had no idea why.</p>
 
   <p>Then she left. For a week or two I held on to that rhythm. But slowly the late nights crept back. The naps came back. The fog came back. Six weeks later I was sliding right back into the hole. And that's when it hit me: whatever had happened while she was here, it wasn't willpower. It wasn't motivation. Something about those weeks had reset something in my body. And without knowing what it was, I couldn't keep it.</p>
+    </div>
+  </section>
 
+  <section class="slab">
+    <div class="slab-inner">
   <h2>I decided to figure it out myself</h2>
 
   <p>I started going on evening walks, trying to hold on to at least that one habit. And I made a decision: I'm going to figure this out myself. Nobody was going to hand me the right answer.</p>
@@ -376,7 +477,11 @@
   <p class="pull cyan">Everyone is walking around broken - and nobody told them it can be fixed.</p>
 
   <p>It felt like I took NZT from the movie Limitless. I could see what to do with my life and how to do it. Wake up, morning routine, then I just go - task after task. When stress hits, I act instead of spiraling. Solutions that used to be hidden behind a wall of fog are just there now. Things I'd put off for months started getting done in hours. Not because I suddenly had superhuman discipline. Because my brain was finally running at full capacity.</p>
+    </div>
+  </section>
 
+  <section class="slab alt">
+    <div class="slab-inner">
   <h2>The real reason nothing worked</h2>
 
   <p>Looking back, I'd tried everything before that turning point. Coffee and energy drinks got me through the morning - but by 2 PM I was done. Productivity systems lasted a week before I quit. Every book gave me three hundred pages of tips and zero pages of explanation for why I had no energy in the first place. Every app tracked something but never told me what to actually change. Every supplement was "the answer" until I needed the next one.</p>
@@ -386,9 +491,11 @@
   <p class="pull">They sold me band-aids when I needed surgery.</p>
 
   <p>Three years. A lost career. Seventy thousand dollars gone - on decisions made by a brain running on fumes. That's what it cost me to find what the right specialist could have told me in one session. I took everything I learned and built it into one protocol. Dead simple. I could've done it in a month if someone had shown me. I started sharing it with friends. Then their friends reached out. Everyone had the same reaction: "Why didn't anyone tell me this before?"</p>
+    </div>
+  </section>
 
-  <hr class="soft">
-
+  <section class="slab">
+    <div class="slab-inner">
   <span class="kicker">The shift</span>
   <h2>You've been fixing the symptoms</h2>
 
@@ -403,7 +510,11 @@
   <p>Because the problem was never the tools. The problem was what was running underneath. And what runs underneath is sleep.</p>
 
   <p>Step back for a second. Your focus runs on your energy. And studies show nothing kills your energy faster than bad sleep. Not junk food. Not skipping the gym. Not even stress. When your brain doesn't recover at night, everything falls apart the next day. You're not lazy. You're not burning out. You've just been trying to fix the top of the chain while the bottom was broken. And it comes down to three systems. When they work together, everything works. When they don't, nothing does.</p>
+    </div>
+  </section>
 
+  <section class="slab alt">
+    <div class="slab-inner">
   <h2>The highest performers already know this</h2>
 
   <p>And it's not just people on forums sharing the exact same pattern - the same realization, the same fix. Look at who else figured this out.</p>
@@ -415,9 +526,11 @@
   <blockquote>It's not worth trading sleep for a few extra hours at the office. Not only will it make you exhausted, it'll literally make you stupid.<span class="who">- Jason Fried, founder of Basecamp</span></blockquote>
 
   <p>And <strong>Alex Becker</strong> - the founder of HYROS, one of the biggest ad-tracking platforms - ran a five-thousand-dollar business course. And you know what Week One was about? Not ads. Not funnels. Not copywriting. Sleep and body.</p>
+    </div>
+  </section>
 
-  <hr class="soft">
-
+  <section class="slab">
+    <div class="slab-inner">
   <span class="kicker">The three systems</span>
   <h2>Everything maps to one of three</h2>
 
@@ -430,7 +543,7 @@
   <p>You finally get to bed at a decent hour, exhausted - and the second your head hits the pillow, you start solving every problem from the day. Emails, calls, decisions. You lie there for hours. <strong>That's the Off-Switch.</strong> Your brain learned that bed is where you work, not where you rest.</p>
 
   <figure>
-    <img src="img/slide-038.png" alt="The Clock, the Battery, and the Off-Switch">
+    <img src="img/slide-038.png" alt="The Clock, the Battery, and the Off-Switch" loading="lazy" decoding="async">
     <figcaption>Three systems. Not five, not ten. Everything maps into one of these three.</figcaption>
   </figure>
 
@@ -448,11 +561,15 @@
   <p><strong>The Battery</strong> is your sleep pressure. It builds while you're awake. Caffeine blocks the signal and hides the need. Too much time in bed without sleeping dilutes it.</p>
 
   <p><strong>The Off-Switch</strong> is your nervous system's ability to shift from go mode to sleep mode. When it's stuck - racing brain, three AM waking, stress - you can't switch off.</p>
+    </div>
+  </section>
 
+  <section class="slab alt">
+    <div class="slab-inner">
   <h2>What Clock drift looks like in your week</h2>
 
   <figure>
-    <img src="img/slide-039.png" alt="Over 70 percent of people have social jetlag">
+    <img src="img/slide-039.png" alt="Over 70 percent of people have social jetlag" loading="lazy" decoding="async">
     <figcaption>Over 70% of people live with social jetlag. If you work from home - it's every single day.</figcaption>
   </figure>
 
@@ -461,12 +578,16 @@
   <p>There's a word for the version most people don't realize they have: social jetlag. Same thing - but you didn't fly anywhere. You go to bed at different times and wake up at different times, and your body reacts as if you crossed timezones. For most people it's weekdays versus weekends. But if you work from home, it's every single day. Monday you wake up at ten. Wednesday at noon. Thursday at nine. Your body never knows what timezone it's in. And you're trying to do focused work in that state.</p>
 
   <figure>
-    <img src="img/slide-040.png" alt="In sync versus out of sync">
+    <img src="img/slide-040.png" alt="In sync versus out of sync" loading="lazy" decoding="async">
     <figcaption>In sync: fall asleep fast, sleep deep, wake with energy. Out of sync: enough hours, zero rest.</figcaption>
   </figure>
 
   <p>When all three are in sync, you fall asleep fast, sleep deep, and wake up with energy. When they're out of sync, you get enough hours but zero rest. Exhausted but wired. Brain fog all day. This is why you can sleep seven or eight hours and still feel terrible - still foggy by noon, still dragging, still wondering why everyone else seems to have more energy. The hours aren't the problem. The systems are.</p>
+    </div>
+  </section>
 
+  <section class="slab">
+    <div class="slab-inner">
   <h2>Why nothing you tried worked</h2>
 
   <p>Think of it like baking a cake. You have all the right ingredients - but you forgot the main one and mixed the rest in the wrong order. No cake.</p>
@@ -486,15 +607,21 @@
   <p class="pull">It's not that you failed. The approach was incomplete.</p>
 
   <p>You were solving one piece of a three-piece problem. That's why the cycle doesn't break - you address one system, and the other two keep spinning the wheel.</p>
+    </div>
+  </section>
 
+  <section class="slab alt">
+    <div class="slab-inner">
   <h2>And your brain learned to stay awake</h2>
 
   <p>Within just a few weeks of bad nights, your brain forms a new association: bed equals stress. It's called conditioned arousal. Your brain learned that when you lie down, it's time to think, to worry, to scroll. It's a trained response - like Pavlov's dog - and every bad night makes it stronger. This is why "just relax" doesn't work. Your brain is doing exactly what it learned to do.</p>
 
   <p>And this doesn't get better on its own. It's not a phase or a rough patch. It's a pattern that self-reinforces. You carry it for years, and at some point you stop calling it a problem. You just call it... normal.</p>
+    </div>
+  </section>
 
-  <hr class="soft">
-
+  <section class="slab">
+    <div class="slab-inner">
   <span class="kicker">The good news</span>
   <h2>Resetting all three doesn't require sacrifice</h2>
 
@@ -513,7 +640,11 @@
   <p>You don't need more discipline. You need a system that runs without it.</p>
 
   <p>This is informed by a clinical method called CBT-i - Cognitive Behavioral Therapy for insomnia. Clinics use it. We adapted the behavioral principles for self-guided use, specifically for people with irregular schedules. Not a hospital program - a protocol designed for the chaos of working from home. Because that's where I live. And probably where you live too.</p>
+    </div>
+  </section>
 
+  <section class="slab alt">
+    <div class="slab-inner">
   <h2>How fast does it work?</h2>
 
   <div class="card">
@@ -527,16 +658,18 @@
   <p>Everyone's timeline is different - but many people who follow the protocol consistently notice the first changes within the first week or two.</p>
 
   <p>Now you know why your brain has been running at sixty percent: three systems out of sync. And why no productivity hack or coffee fix ever solved it: an incomplete approach. Let's talk about what the fix actually looks like.</p>
+    </div>
+  </section>
 
-  <hr class="soft">
-
+  <section class="slab">
+    <div class="slab-inner">
   <span class="kicker">The fix</span>
   <h2>One thing per lesson - not twenty</h2>
 
   <p>You don't need more tips. You've had tips your entire life. Turn off your phone. Drink chamomile tea. Tips are random - no order, no sequence. Most programs dump twenty things on you on day one. This one gives you one thing per lesson. You stack them over four weeks, and by the end those actions are running on autopilot - but you never had to do ten things at once.</p>
 
   <figure>
-    <img src="img/slide-059.png" alt="The 4-week roadmap">
+    <img src="img/slide-059.png" alt="The 4-week roadmap" loading="lazy" decoding="async">
     <figcaption>Four weeks. One system at a time. Then it runs itself.</figcaption>
   </figure>
 
@@ -548,9 +681,11 @@
   <p>Remember those eight or ten hours where only three or four are sharp? They start actually counting. Not because you're trying harder, but because your system is working. You get the same hours back - except this time they're real hours. Sharp hours. Think about what those two or three hours are actually worth to you. Not in theory - in real money, in projects you finish, in clients you land.</p>
 
   <p>This isn't biohacking, wellness-influencer advice, or guru wisdom. It's informed by CBT-i, used in clinics worldwide, adapted from the work of a sleep specialist with over thirty years of clinical practice. I'm not selling a personality. I'm sharing research that changed my life. Just the protocol, the research, and what actually works. Four weeks. That's it. Not a six-month commitment - a protocol with an end.</p>
+    </div>
+  </section>
 
-  <hr class="soft">
-
+  <section class="slab alt">
+    <div class="slab-inner">
   <span class="kicker">Free technique</span>
   <h2>Something you can try tonight</h2>
 
@@ -566,9 +701,11 @@
   </div>
 
   <p>What you just learned is one element of the third system - the Off-Switch. The protocol covers all three systems, and goes much deeper. Imagine what happens when they work together.</p>
+    </div>
+  </section>
 
-  <hr class="soft">
-
+  <section class="slab">
+    <div class="slab-inner">
   <span class="kicker">The protocol</span>
   <h2>The question isn't whether. It's when.</h2>
 
@@ -577,7 +714,11 @@
   <p>You have two paths. <strong>Path one</strong> - take the free technique, do your own research, and spend a few months figuring out what works. <strong>Path two</strong> - get the solution now: a four-week protocol, all three systems, fifteen minutes a day, built for your life. This isn't a dramatic life change. Fifteen minutes a day. Four weeks. That's it.</p>
 
   <p>And for the first time, this was built for people who work from home. Not a hospital program. Not advice for nine-to-five workers. Built for the chaos of no fixed schedule, no commute, no separation between work and rest.</p>
+    </div>
+  </section>
 
+  <section class="slab alt">
+    <div class="slab-inner">
   <h2>Let me show you what's inside</h2>
 
   <p>This is <strong>The Zero Fog</strong>. This is a founding launch - you're getting in before anyone else. And to be clear: this isn't a sleep course. It's a brain performance program. A four-week protocol that addresses all three systems - your Clock, your Battery, and your Off-Switch - so your brain actually recovers at night and you wake up sharp instead of foggy.</p>
@@ -585,31 +726,31 @@
   <p>The protocol is complete - I've tested it, my friends have tested it. It's packaged into short daily video lessons, ten to fifteen minutes each, so you can follow it step by step. Every lesson gives you one specific action. All four weeks are recorded and waiting for you. And it's progressive: each week builds on the last. Zero fluff. No "why sleep matters" filler. You already know it matters. This is about getting your hours back.</p>
 
   <figure>
-    <img src="img/slide-078.png" alt="Week 1 - Reset Your Clock">
+    <img src="img/slide-078.png" alt="Week 1 - Reset Your Clock" loading="lazy" decoding="async">
   </figure>
 
   <p><strong>Week 1 - Reset Your Clock.</strong> Get your mornings back. This is where your body learns when to sleep and when to wake. The milestone here: mornings get easier. You stop dragging yourself out of bed. Waking up stops feeling like a hangover.</p>
 
   <figure>
-    <img src="img/slide-079.png" alt="Week 2 - Charge Your Battery">
+    <img src="img/slide-079.png" alt="Week 2 - Charge Your Battery" loading="lazy" decoding="async">
   </figure>
 
   <p><strong>Week 2 - Charge Your Battery.</strong> Build real sleep pressure. This is where your body starts actually needing sleep when you lie down. Instead of tossing and turning, you feel that pull. For many it's week two - falling asleep gets faster, and that third cup of coffee becomes optional.</p>
 
   <figure>
-    <img src="img/slide-080.png" alt="Week 3 - Train Your Off-Switch">
+    <img src="img/slide-080.png" alt="Week 3 - Train Your Off-Switch" loading="lazy" decoding="async">
   </figure>
 
   <p><strong>Week 3 - Train Your Off-Switch.</strong> Shut down the racing brain. This teaches your nervous system to actually transition out of work mode at night. As week three settles in, many notice those racing thoughts at bedtime start fading. You stop replaying the day at midnight.</p>
 
   <figure>
-    <img src="img/slide-081.png" alt="Week 4 - Sync All Three">
+    <img src="img/slide-081.png" alt="Week 4 - Sync All Three" loading="lazy" decoding="async">
   </figure>
 
   <p><strong>Week 4 - Sync All Three.</strong> The system runs itself. You build your personal protocol card - one page that's yours for life - and it goes on autopilot. Those eight hours you work start actually counting. Not two sharp hours out of eight. Most of them sharp.</p>
 
   <figure>
-    <img src="img/slide-082.png" alt="Everything you get">
+    <img src="img/slide-082.png" alt="Everything you get" loading="lazy" decoding="async">
   </figure>
 
   <div class="card">
@@ -623,25 +764,33 @@
       <li>A week-by-week protocol guide so you never get lost</li>
     </ul>
   </div>
+    </div>
+  </section>
 
+  <section class="slab">
+    <div class="slab-inner">
   <h2>One dashboard runs your whole protocol</h2>
 
   <figure>
-    <img src="img/slide-083.png" alt="The Toolkit - your summary dashboard">
+    <img src="img/slide-083.png" alt="The Toolkit - your summary dashboard" loading="lazy" decoding="async">
   </figure>
 
   <p>And everything you track lives in one place - your Toolkit. Not a folder of printables. A working dashboard. The diary takes two minutes each morning - and after a few nights it starts working for you: it reads your data, finds your biggest leak, and points you to the exact lesson that fixes it.</p>
 
   <figure>
-    <img src="img/slide-084.png" alt="The Toolkit on your laptop and your phone">
+    <img src="img/slide-084.png" alt="The Toolkit on your laptop and your phone" loading="lazy" decoding="async">
   </figure>
 
   <p>It works on your laptop and on your phone - you add it to your home screen straight from the browser, no app store needed. Your assessment, your protocol card, your bonuses - all one tab away. Your data saves as you go.</p>
+    </div>
+  </section>
 
+  <section class="slab alt">
+    <div class="slab-inner">
   <h2>Plus your bonuses for watching today</h2>
 
   <figure>
-    <img src="img/slide-085.png" alt="Your bonuses">
+    <img src="img/slide-085.png" alt="Your bonuses" loading="lazy" decoding="async">
   </figure>
 
   <p>Remember the three tools I mentioned at the start? Here's why they matter more now that you've seen the system.</p>
@@ -653,24 +802,32 @@
   </ul>
 
   <p>These aren't PDFs - they're working tools. All three live in your Zero Fog dashboard at <a href="/app/">thezerofog.com/app</a>, and you can start with any of them tonight.</p>
+    </div>
+  </section>
 
-  <hr class="soft">
-
+  <section class="slab">
+    <div class="slab-inner">
   <span class="kicker">Honest answers</span>
   <h2>"I've tried everything"</h2>
 
   <p>I hear this a lot. But let's be real - most of what you tried was aimed at the wrong problem. More discipline. Better apps. Another morning routine. That was never going to work, because the root cause was somewhere else entirely.</p>
 
   <p>And even when it came to sleep, you tried pieces. Maybe melatonin. Maybe a tracker. Maybe you even did a sleep study. Smart move - that's real medicine. It looks for specific problems: apnea, restless legs, things that need a doctor. If it finds one - you treat it, and that's the win. But a clean result doesn't end the story. The study measures your night - it doesn't rebuild the habits and timing that shape it. That part happens at home, in how you run your days. And that's the part nobody hands you a system for. Incomplete solutions - isolated tips that were never designed to work together. Never all three systems, in the right order. That's the difference.</p>
+    </div>
+  </section>
 
+  <section class="slab alt">
+    <div class="slab-inner">
   <h2>"What if it doesn't work?"</h2>
 
   <p>Then you get your money back. Full thirty-day money-back guarantee. And there's nothing extra to produce - you'll be keeping the diary anyway, it's built into the protocol. Change your mind in the first week? One email, no questions, nothing to send at all. After that, send me two weeks of your diary - if you're not sleeping better, you pay nothing.</p>
 
   <p>One thing I want to mention: if you have diagnosed clinical insomnia or untreated sleep apnea, please see a specialist first. This protocol is powerful, but it's not a replacement for medical treatment. That said, even if you end up needing medical help, a solid sleep protocol is still your foundation. Doctors fix the condition. The protocol fixes everything around it.</p>
+    </div>
+  </section>
 
-  <hr class="soft">
-
+  <section class="slab">
+    <div class="slab-inner">
   <span class="kicker">The offer</span>
   <h2>So what does this cost?</h2>
 
@@ -695,21 +852,33 @@
   </div>
 
   <p>And here's the founding member promise: we'll find the right pace together. You can ask questions, share concerns, tell me what's not working. While the founding window is open I work with founding members personally - not a ticket queue: you write, I answer, we fix what's not working for you. That won't last past this group. You're not just buying a course - you're helping shape where it goes next. You won't fall off track without support.</p>
+    </div>
+  </section>
 
+  <section class="slab alt">
+    <div class="slab-inner">
   <h2>How much has the productivity tax already cost you?</h2>
 
   <p>Think about it. Not just in hours - in real money. Lost clients. Missed deadlines. Projects you couldn't finish. Remember: forty to sixty lost hours every month. Whatever your hour is worth, multiply it by forty. That's what you're losing every month. Plus the opportunities you didn't have the energy to take. Whatever that number is - and only you know it - this costs a fraction of one month of it. And that's before you count every app subscription, every course, every tool you bought hoping it would help. This fixes what those couldn't.</p>
 
   <figure>
-    <img src="img/slide-094.png" alt="30-day sleep-or-refund guarantee">
+    <img src="img/slide-094.png" alt="30-day sleep-or-refund guarantee" loading="lazy" decoding="async">
   </figure>
+    </div>
+  </section>
 
+  <section class="slab">
+    <div class="slab-inner">
   <h2>The guarantee</h2>
 
   <p>Here's how confident I am. Follow the protocol. You'll be tracking your sleep anyway - it's part of the system, there's a built-in diary. Change your mind in the first seven days? One email, no questions - nothing to send at all. After that it's just as easy: you already have the diary, so send me fourteen days of it. If you're not sleeping better, I refund every cent. No drama. I only ask one thing: do the work. Fair? Full terms are in the <a href="/refunds/">refund policy</a>.</p>
 
   <p class="pull cyan">What if this gave you back just one focused hour a day - one hour where your brain actually works? Would that alone be worth it?</p>
+    </div>
+  </section>
 
+  <section class="slab alt">
+    <div class="slab-inner">
   <h2>To recap, you get</h2>
 
   <div class="card">
@@ -725,7 +894,11 @@
       <li>Plus the bonuses: 10 Recovery Mistakes, Your Caffeine Blueprint, and The Recovery Protocol</li>
     </ul>
   </div>
+    </div>
+  </section>
 
+  <section class="slab">
+    <div class="slab-inner">
   <h2>The pattern doesn't break itself</h2>
 
   <p>Here's what I want you to remember. Every week your sleep system stays broken is another week of brain fog. Another week of half-finished tasks. Another week where you're working twice as hard for half the result. It doesn't plateau. It compounds. The longer you wait, the deeper the hole gets.</p>
@@ -746,10 +919,14 @@
   </div>
 
   <p style="text-align:center;color:var(--muted)">If you have any questions about the protocol, the course, or whether this is right for you - just email me at <a href="mailto:kirill@thezerofog.com">kirill@thezerofog.com</a>. That's my personal inbox, not a support desk - I read every message.</p>
+    </div>
+  </section>
 
   <div class="footer">
-    <p>The Zero Fog &nbsp;|&nbsp; This is an educational program for improving sleep and daytime performance. It is not a medical diagnosis or a substitute for professional advice. If you have diagnosed clinical insomnia or untreated sleep apnea, please consult a specialist.</p>
-    <p>&copy; 2026 The Zero Fog. All rights reserved. &nbsp;|&nbsp; <a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Refunds</a> &middot; <a href="/disclaimer/">Disclaimer</a> &middot; <a href="/contact/">Contact</a> &middot; <a href="#" onclick="zfShowCookieBanner(); return false;">Cookie Settings</a></p>
+    <div class="slab-inner">
+      <p>The Zero Fog &nbsp;|&nbsp; This is an educational program for improving sleep and daytime performance. It is not a medical diagnosis or a substitute for professional advice. If you have diagnosed clinical insomnia or untreated sleep apnea, please consult a specialist.</p>
+      <p>&copy; 2026 The Zero Fog. All rights reserved. &nbsp;|&nbsp; <a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Refunds</a> &middot; <a href="/disclaimer/">Disclaimer</a> &middot; <a href="/contact/">Contact</a> &middot; <a href="#" onclick="zfShowCookieBanner(); return false;">Cookie Settings</a></p>
+    </div>
   </div>
 
 </div>
@@ -785,6 +962,34 @@
 <script src="/assets/js/shared.js" defer></script>
 
 <script>
+/* Reading progress bar. Scroll listener throttled with requestAnimationFrame -
+   one transform per frame at most, no library. */
+(function(){
+  var fill = document.getElementById('zfProgressFill');
+  if (!fill) return;
+  var ticking = false;
+
+  function update(){
+    ticking = false;
+    var doc = document.documentElement;
+    var max = (doc.scrollHeight || 0) - window.innerHeight;
+    var p = max > 0 ? (window.pageYOffset || doc.scrollTop) / max : 0;
+    if (p < 0) p = 0; else if (p > 1) p = 1;
+    fill.style.transform = 'scaleX(' + p + ')';
+  }
+  function onScroll(){
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  }
+
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll, {passive:true});
+  update();
+})();
+</script>
+
+<script>
 /* Exhaustion cycle: start the pulse animation only when the figure is on
    screen, pause when it scrolls away. Without JS (or without IO) the figure
    stays as the static deck slide. */
@@ -816,6 +1021,66 @@
         .catch(function(){ restore(); var err=btn.parentNode.querySelector('.cta-err'); if(!err){ err=document.createElement('p'); err.className='cta-err'; err.style.cssText='color:#ff5555;font-size:13px;text-align:center;margin-top:10px;'; btn.parentNode.insertBefore(err, btn.nextSibling); } err.textContent='Something went wrong, please try again.'; });
     });
   });
+})();
+</script>
+
+<!-- ===== EXPIRY GATE =====
+     The written version must not outlive the recording. Both read the SAME key
+     (`zf_replay_end`, written by /assets/js/pages/replay.js) and the same 48 hour
+     window, so whichever page the visitor opens first starts the clock and the
+     other one inherits it. When it runs out the article is replaced by the offer.
+
+     This is a marketing deadline, not access control - clearing site data or an
+     incognito window resets it, exactly as it already does on /replay/. A real
+     limit needs a signed, dated link issued by the backend. -->
+<script>
+(function(){
+  var KEY = 'zf_replay_end';
+  var WINDOW_MS = 48 * 60 * 60 * 1000;
+  var stored = Number(localStorage.getItem(KEY));
+  var now = Date.now();
+  var end;
+
+  if (stored && stored > now) {
+    end = stored;                       // the replay (or an earlier visit here) already started it
+  } else if (stored && stored <= now) {
+    end = stored;                       // already expired - do not hand out a fresh window
+  } else {
+    end = now + WINDOW_MS;
+    localStorage.setItem(KEY, String(end));
+  }
+
+  function expire(){
+    var wrap = document.querySelector('.wrap');
+    if (!wrap) return;
+    wrap.innerHTML =
+      '<div class="expired-panel">' +
+        '<div class="eyebrow">The Zero Fog</div>' +
+        '<h2>This one has closed.</h2>' +
+        '<p>The written version stays up for the same 48 hours as the recording, and that window has ' +
+        'passed. The protocol itself is still open.</p>' +
+        '<a class="cta" href="/sales/">See the protocol</a>' +
+      '</div>';
+    document.title = 'Closed - The Zero Fog';
+  }
+
+  function tick(){
+    var diff = end - Date.now();
+    if (diff <= 0) { expire(); return; }
+    var el = document.getElementById('expiryTimer');
+    var bar = document.getElementById('expiryBar');
+    if (el && bar) {
+      bar.hidden = false;
+      var h = Math.floor(diff / 3600000);
+      var m = Math.floor((diff % 3600000) / 60000);
+      var s = Math.floor((diff % 60000) / 1000);
+      el.textContent = (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    }
+    setTimeout(tick, 1000);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tick);
+  else tick();
 })();
 </script>
 </body>

@@ -11,10 +11,10 @@ module.exports = function (eleventyConfig) {
 
   // Passthrough copy
   eleventyConfig.addPassthroughCopy("src/assets");
-  // Standalone webinar text-version long-read (self-contained HTML, served verbatim, noindex)
-  eleventyConfig.ignores.add("src/webinar-text/**");
-  eleventyConfig.addPassthroughCopy("src/webinar-text");
-  // Webinar bonus guides (self-contained HTML + PDFs, served verbatim)
+  // Standalone workshop text-version long-read (self-contained HTML, served verbatim, noindex)
+  eleventyConfig.ignores.add("src/workshop-text/**");
+  eleventyConfig.addPassthroughCopy("src/workshop-text");
+  // Workshop bonus guides (self-contained HTML + PDFs, served verbatim)
   eleventyConfig.ignores.add("src/bonuses/**");
   eleventyConfig.addPassthroughCopy("src/bonuses");
   // Combined webinar bonuses page (self-contained HTML+JS, served verbatim, noindex)
@@ -80,7 +80,7 @@ module.exports = function (eleventyConfig) {
 
     fs.writeFileSync(path.join(outDir, "config.js"), contents);
 
-    // dist/zf-env.js — tracking config for passthrough pages (/webinar-text/),
+    // dist/zf-env.js — tracking config for passthrough pages (/workshop-text/),
     // which can't read env via the pixel-meta.njk partial. Same globals, same
     // consent gate (cookie-consent-2.js loads nothing before consent === 'all').
     // Lives at the site root, NOT under /assets/ — /assets/* is cached immutable

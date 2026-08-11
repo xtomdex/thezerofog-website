@@ -143,3 +143,27 @@
   to = "/app/"
   status = 301
   force = true
+
+# The free offer is a workshop, not a webinar (CEO 2026-08-11). Routes renamed
+# so nothing in the funnel shows the old word in the address bar. These 301s
+# keep every link already sent out alive — /webinar-bonuses above is matched
+# first by its own rule, so it still lands on /app/.
+[[redirects]]
+  from = "/webinar"
+  to = "/workshop/"
+  status = 301
+
+[[redirects]]
+  from = "/webinar/"
+  to = "/workshop/"
+  status = 301
+
+[[redirects]]
+  from = "/webinar-text"
+  to = "/workshop-text/"
+  status = 301
+
+[[redirects]]
+  from = "/webinar-text/*"
+  to = "/workshop-text/:splat"
+  status = 301
