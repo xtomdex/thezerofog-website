@@ -1,32 +1,28 @@
-// Replay countdown - 48 hours from first visit
-(function() {
-  var key = 'zf_replay_end';
-  var stored = localStorage.getItem(key);
-  var end;
-  var now = Date.now();
+// The replay entry point.
+//
+// This file used to run the countdown itself: 48 hours from the first visit, kept in
+// localStorage. It had two defects that a July legal review flagged as deceptive urgency under
+// FTC Section 5, and both are gone with it:
+//
+//   1. Reaching zero changed the text to "Expired" and then served the video and the $67 button
+//      anyway. The deadline expired; nothing else did.
+//   2. `stored > now` failed once the stored time had passed, so the next visit wrote a fresh
+//      48 hours. The countdown restarted itself for anyone who came back.
+//
+// There is no timer here now. The replay lives in the room, where the deadline is computed on
+// the server from the session that person actually registered for, and where it genuinely closes.
 
-  if (stored && Number(stored) > now) {
-    end = Number(stored);
-  } else {
-    end = now + 48 * 60 * 60 * 1000; // 48 hours
-    localStorage.setItem(key, end);
+(function () {
+  var token = new URLSearchParams(window.location.search).get('t');
+
+  if (token) {
+    window.location.replace('/workshop/room/?t=' + encodeURIComponent(token));
+    return;
   }
 
-  function tick() {
-    var diff = Math.max(0, end - Date.now());
-    var h = Math.floor(diff / 3600000);
-    var m = Math.floor((diff % 3600000) / 60000);
-    var s = Math.floor((diff % 60000) / 1000);
-    var el = document.getElementById('replayTimer');
-    if (el) {
-      el.textContent = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-    }
-    if (diff > 0) requestAnimationFrame(tick);
-    else {
-      // Expired - show message
-      el.textContent = 'Expired';
-      el.style.color = 'var(--error)';
-    }
-  }
-  tick();
+  // No token: this is someone who typed the address, or followed an old link. There is nothing
+  // to show them - the replay is tied to a person and a session - so say that plainly rather
+  // than presenting a play button that cannot work.
+  var el = document.getElementById('replayMessage');
+  if (el) el.hidden = false;
 })();
