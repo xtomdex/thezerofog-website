@@ -36,9 +36,18 @@
     emailInput.required = true;
   }
 
+  // The button is NOT disabled while the form is incomplete, and that is deliberate.
+  //
+  // It used to be, and the result read as a broken page: a person picks a time, sees a greyed-out
+  // "Save My Seat", and has no way to find out that the address and the consent box are what is
+  // holding it. A control that refuses to work and will not say why is indistinguishable from one
+  // that is simply broken.
+  //
+  // The email field and the consent box both carry `required`, so the browser itself names them
+  // on submit, in the user's own language and next to the field at fault. The only condition it
+  // cannot see is whether a time was picked, and that one we say ourselves.
   function updateButton() {
-    var hasEmail = storedEmail || (emailInput.value && emailInput.value.indexOf('@') > 0);
-    btn.disabled = !(selected && consentEl.checked && hasEmail);
+    if (selected) errorEl.textContent = '';
   }
 
   function renderSlots(data) {
@@ -111,7 +120,11 @@
 
   formEl.addEventListener('submit', function (e) {
     e.preventDefault();
-    if (!selected) return;
+    if (!selected) {
+      errorEl.textContent = 'Pick a time first.';
+      if (listEl.scrollIntoView) listEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
 
     var email = storedEmail || emailInput.value;
 

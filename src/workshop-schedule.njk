@@ -27,7 +27,11 @@ permalink: /workshop/schedule/
   <p class="eyebrow">Free Workshop</p>
 
   <h1>Pick the time that suits you</h1>
-  <p class="subtitle">It runs about 90 minutes. Times below are in your own timezone.</p>
+  {# "About an hour" is the measured length, not a guess: the master runs 3510.73 s - 58:31 -
+     read off the file with ffprobe on 2026-08-13. It said 90 minutes until then, which was half
+     an hour of somebody's evening claimed under false pretences. Duration figures in this project
+     have lied before; if the recording is ever replaced, measure it again before touching this. #}
+  <p class="subtitle">It runs about an hour. Times below are in your own timezone.</p>
 
   <div id="slotStatus" class="slot-status">Loading times…</div>
 
@@ -51,7 +55,9 @@ permalink: /workshop/schedule/
 
     <p class="form-error" id="scheduleError" role="alert"></p>
 
-    <button type="submit" class="cta-btn" id="scheduleBtn" disabled>Save My Seat</button>
+    {# Full width to match the slots and the address field above it - it was the one control in
+       the column that hugged its own text and sat against the left edge. #}
+    <button type="submit" class="cta-btn cta-btn--full" id="scheduleBtn">Save My Seat</button>
   </form>
 
   <p class="disclaimer">This is an educational program, not medical treatment. Results vary.</p>
