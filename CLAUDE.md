@@ -76,12 +76,43 @@ Rule: every field declared in `_data/` must be used somewhere in templates. If a
 
 Located in `netlify/functions/`. Accessible at `/.netlify/functions/<name>`.
 
+Shared helpers live in `netlify/functions/lib/` — a subdirectory without a matching index file,
+which Netlify does **not** register as a function. Do not put helpers at the top level of
+`netlify/functions/`; every file there is deployed as an endpoint.
+
 Current functions:
 - `optin.js` — validates form input and proxies to Make.com webhook. On success it
-  returns `{ ok: true, redirectUrl }` where `redirectUrl` is the bare EverWebinar
-  schedule URL (`EVERWEBINAR_SCHEDULE_URL`, no email appended — URL prefill is
-  unsupported). The client appends UTM params before redirecting to the webinar
-  registration page.
+  returns `{ ok: true, redirectUrl }`, where `redirectUrl` is our own schedule step
+  (`/workshop/schedule/`). It no longer reads `EVERWEBINAR_SCHEDULE_URL` — that variable
+  is gone, along with the 500 it caused whenever it was unset. The client appends UTM
+  params before redirecting, and carries the email address in `sessionStorage` rather
+  than in the URL.
+
+### Workshop room
+
+Our own automated-session system, built instead of buying EverWebinar. Spec:
+`_Marketing/WORKSHOP-ROOM-SPEC-2026-08-13.md`. Tables are all prefixed `wr_`, reached
+**only** with `SUPABASE_SECRET_KEY` — they carry RLS with no policies, so nothing in a
+browser can read them.
+
+- `lib/wr-time.js` — timezone and slot maths on `Intl`, no dependencies. Handles both DST
+  transition nights; a wall-clock time that does not exist resolves forward, never backward.
+- `lib/wr-db.js` — PostgREST over native `fetch`, CSPRNG join tokens.
+- `lib/wr-config.js` — the room's entire behaviour as one object (`DEFAULT_CONFIG`), overridable
+  by the single row in `wr_config` without a deploy. Also owns `deriveSegments()`.
+- `wr-slots.js` — GET, the bookable sessions in the visitor's timezone. Creates nothing.
+- `wr-register.js` — POST, registers, mints the token, queues every email, forwards the lead to
+  Make. Revalidates the chosen slot server-side; a client cannot book a time we never offered.
+- `wr-room.js` — GET `?t=`, session state and playhead. The only route by which the video URL
+  reaches a browser.
+- `wr-heartbeat.js` — POST, watched-seconds accumulation and segment derivation. The claim is
+  clamped against wall-clock elapsed time, so the browser cannot buy a segment it did not earn.
+- `wr-question.js` — POST, a real question to the host.
+- `wr-notify.js` — scheduled every 5 minutes. Drains the queue, re-checks the segment and the
+  buyer flag at send time, hands delivery to Make.
+- `wr-retention.js` — scheduled daily. Deletes registrations past the retention window.
+- `wr-stats.js` — GET, protected by `WORKSHOP_ADMIN_KEY`. Every metric EverWebinar's dashboard
+  shows, computed from our rows.
 - `create-checkout.js` — creates a Stripe Checkout Session via the Stripe REST API using
   native `fetch` (no Stripe SDK / no npm deps). POST only (OPTIONS → CORS preflight, other
   methods → 405). One-time payment (`mode: payment`), price referenced by `STRIPE_PRICE_ID`.
@@ -142,7 +173,9 @@ Client-side integrations (consumed by `_data/env.js`):
 **Server-only** — available to Functions only. NEVER use the `PUBLIC_` prefix; NEVER expose via `_data/`.
 - `MAKE_WEBHOOK_URL` — Make.com webhook endpoint for form submissions
 - `MAILERLITE_API_KEY`
-- `EVERWEBINAR_SCHEDULE_URL` — EverWebinar registration/schedule page URL; `optin.js` returns it as-is for client-side redirect after a successful opt-in (client appends UTM params)
+- `WORKSHOP_ADMIN_KEY` — shared key gating `wr-stats.js`, which returns registrant addresses and watch behaviour. Unset means the endpoint answers 404 to everyone, including us.
+- `WORKSHOP_SCHEDULE_PATH` — optional override for the post-opt-in redirect. Unset in production.
+- ~~`EVERWEBINAR_SCHEDULE_URL`~~ — **removed 2026-08-13.** EverWebinar was not bought; the schedule step is ours. The variable's absence used to make `optin.js` return 500 and drop the lead before Make ever saw it.
 - `STRIPE_SECRET_KEY` — Stripe secret key. Used by `create-checkout.js` for Bearer auth to the Stripe REST API. Server-only — NEVER exposed to the client.
 - `STRIPE_PRICE_ID` — Stripe Price ID (`price_…`) for the $67 one-time Founding Member price; referenced when creating the Checkout Session.
 - `STRIPE_WEBHOOK_SECRET` — Stripe webhook signing secret (`whsec_…`). Used by `stripe-webhook.js` to verify the `Stripe-Signature` header (HMAC-SHA256). Server-only — NEVER exposed to the client.
@@ -194,12 +227,13 @@ Claude reads the `.md`, locates the matching block in the `.njk`, and applies th
 
 ## Integrations (in progress)
 
-- **Make.com** — webhook for form submissions, proxied via `netlify/functions/optin.js`.
-  Flow: opt-in → Make forward (lead captured) → redirect to EverWebinar schedule page. The
-  client appends the landing-page UTM params (`utm_source/medium/campaign/content/term`, when
-  present) to the redirect URL for attribution. `/confirmation` is reached AFTER EverWebinar
-  registration, not directly after opt-in.
-- **EverWebinar** — webinar room
+- **Make.com** — webhook for form submissions, proxied via `netlify/functions/optin.js`, and the
+  delivery endpoint the workshop room's notification cron hands each due email to.
+  Flow: opt-in → Make forward (lead captured) → `/workshop/schedule/` → pick a session →
+  `wr-register` → `/confirmation/`. The client appends the landing-page UTM params
+  (`utm_source/medium/campaign/content/term`, when present) for attribution.
+- **Workshop room** — ours, see above. EverWebinar was evaluated and **not bought**:
+  `_Marketing/WORKSHOP-ROOM-COST-COMPARISON-2026-08-13.md`.
 - **Stripe** — checkout on sales page (integration planned, not yet implemented)
 - **MailerLite** — email sequences via Make.com
 - **Systeme.io** — LMS (course delivery)
