@@ -15,9 +15,12 @@ export const DEFAULT_CONFIG = {
   key: WEBINAR_KEY,
 
   video: {
-    // Placeholder until the master is uploaded to the CloudFront distribution that already serves
-    // the course lessons. Kept as a plain URL so swapping hosts touches one line.
-    url: null,
+    // The master, uploaded 2026-08-13 through Systeme's Files library to the CloudFront
+    // distribution that already serves the course lessons. Kept as a plain URL so swapping
+    // hosts touches one line. Verified on upload: 469425309 bytes and MD5
+    // cecc92f6949e6d80ca98d0fe9ad1c444, identical to the local master; HEAD answers 200 with
+    // `accept-ranges: bytes` and a mid-file range request answers 206.
+    url: 'https://d1yei2z3i6k35z.cloudfront.net/17244934/6a7e1894985ac3.17625125_FullWebV2.mp4',
     youtubeFallbackId: 'LLUaY4viebE',
     posterUrl: null,
     // Measured off the master with ffprobe on 2026-08-13: `Full Web V2.mp4`, 3510.73 s,
@@ -53,7 +56,20 @@ export const DEFAULT_CONFIG = {
 
   room: {
     allowSeek: false,
-    joinGraceMinutes: 15, // how long after the start someone can still be let in
+    // How long after the start someone can still be let in. Was 15, cut to 5 on 2026-08-13.
+    //
+    // Measured off the master's own caption track: the housekeeping ends at 02:31.859, on
+    // "All right. Let's talk about your morning." Everything before it is welcome, agenda, the
+    // recording/CC notes, the bonus tease and the language aside. Everything after it is the
+    // identification block, and the reveal at 21:56 only lands on someone who sat through it.
+    // A 15-minute grace let people in having missed two thirds of the run-up - they hear the
+    // mechanism named without a single argument for it and conclude there is nothing new,
+    // which is worse than not attending. A late arrival is sent to the next session instead;
+    // with `jit.intervalMin` at 15 that is a wait of minutes, not hours.
+    //
+    // 5 rather than the measured 2:32 is deliberate: CEO ruling 2026-08-13 is to run at 5,
+    // watch who lands between 2:32 and 5:00, and tighten to 2.5 if that band converts badly.
+    joinGraceMinutes: 5,
     stickyMessage: null,
     endRedirect: '/replay/',
     offer: {

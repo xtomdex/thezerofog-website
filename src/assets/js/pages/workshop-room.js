@@ -83,7 +83,12 @@
 
     // On the way out the page is being torn down and fetch will be cancelled; sendBeacon is the
     // only thing that survives. Same pattern the consent script already uses before a redirect.
-    if (event === 'exit' && navigator.sendBeacon) {
+    //
+    // `offer_click` is in this branch for the same reason as `exit` and not as an afterthought:
+    // the offer button is an ordinary link, so the click and the navigation to /sales happen in
+    // the same tick. A plain fetch would be cancelled by the navigation and we would lose the
+    // single hottest signal in the room - precisely on the people who reached for the price.
+    if ((event === 'exit' || event === 'offer_click') && navigator.sendBeacon) {
       navigator.sendBeacon('/.netlify/functions/wr-heartbeat', new Blob([body], { type: 'application/json' }));
       return;
     }
@@ -109,6 +114,16 @@
     els.offer.hidden = false;
     beat('offer_shown');
   }
+
+  // Reaching for the price is an act, and until now only the SHOWING of the offer was recorded.
+  // `offer_click` was already an allowed event type on the server and in the schema - the button
+  // simply was never wired to it, so we knew who saw the price and not who moved toward it.
+  //
+  // Bound once at load rather than inside showOffer(): the same button is also revealed on the
+  // expired-session branch, which never calls showOffer at all.
+  els.offerBtn.addEventListener('click', function () {
+    beat('offer_click', { phase: phase, href: els.offerBtn.getAttribute('href') });
+  });
 
   function showHandout(item) {
     if (shownElements['handout:' + item.url]) return;
@@ -226,6 +241,24 @@
       }
     });
 
+  }
+
+  // The room's own pulse, deliberately NOT inside startPlayback().
+  //
+  // It used to live there, and the consequence was that someone who opened the room and never
+  // pressed Join sent exactly one signal in their whole visit - the initial wr-room request.
+  // After that, silence: no heartbeat, no exit. We could not tell a person sitting in front of
+  // an unplayed session from one who closed the tab ten seconds in, and both were filed as
+  // no-shows. Everything that reacts to "here but not watching" needs this pulse to exist
+  // before the video does.
+  //
+  // `watchedSec` stays at zero until playback actually moves the playhead, so a beat sent from
+  // an idle room cannot inflate anyone's watch time or move them a segment.
+  var lifecycleBound = false;
+  function bindLifecycle() {
+    if (lifecycleBound) return;
+    lifecycleBound = true;
+
     setInterval(function () {
       if (!ended) beat('heartbeat');
     }, HEARTBEAT_MS);
@@ -322,6 +355,9 @@
     els.status.hidden = true;
     els.stage.hidden = false;
     els.joinBtn.hidden = false;
+
+    // From here the room is on screen, so it reports itself whether or not anyone presses play.
+    bindLifecycle();
 
     // A click before playing is not decoration: every browser refuses to autoplay with sound
     // without a user gesture, and a muted session is worse than a button.

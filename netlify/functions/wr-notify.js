@@ -12,7 +12,7 @@
 // link included.
 
 import { json, select, update } from './lib/wr-db.js';
-import { loadConfig } from './lib/wr-config.js';
+import { loadConfig, deriveSegments } from './lib/wr-config.js';
 
 const BATCH = 200;
 
@@ -83,7 +83,27 @@ export default async function handler() {
     }
 
     const attendance = Array.isArray(reg.wr_attendance) ? reg.wr_attendance[0] : reg.wr_attendance;
-    const personSegments = attendance?.segments || [];
+
+    // A missing attendance row is not "no information about this person" - it IS the information.
+    // Only wr-room.js and wr-heartbeat.js ever create one, and both require the room to have been
+    // opened, so no row means they never arrived.
+    //
+    // Reading that as an empty segment list silently broke the entire no-show branch: E9 and E8-B
+    // are addressed to SEG-A-noshow, `stillApplies` looks for an intersection, and an empty list
+    // intersects nothing - so the emails written for people who did not come were skipped for
+    // exactly the people who did not come. In a webinar funnel that is the largest group of all.
+    //
+    // Derived through deriveSegments rather than hard-coding the string, so this branch cannot
+    // drift away from the segment logic the heartbeat uses.
+    const personSegments =
+      attendance?.segments?.length
+        ? attendance.segments
+        : deriveSegments({
+            attended: false,
+            watchedToRevealSec: false,
+            watchedToOfferSec: false,
+            replayEarned: false,
+          });
 
     if (!stillApplies(row.segments, personSegments)) {
       await update('wr_notifications', { id: `eq.${row.id}` }, { status: 'skipped' }).catch(() => {});

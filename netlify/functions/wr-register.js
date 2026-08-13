@@ -13,6 +13,7 @@ import {
   json,
   mintToken,
   preflight,
+  remove,
   select,
   selectOne,
   update,
@@ -211,6 +212,34 @@ export default async function handler(req) {
         registration_id: `eq.${previous.id}`,
         status: 'eq.pending',
       }, { status: 'superseded' });
+
+      // The attendance of the session they are leaving must go with it.
+      //
+      // The registration row is REPLACED on (webinar_key, email), so `registration_id` survives a
+      // re-registration - and wr_attendance hangs off that id and was never touched here. Two
+      // things then leaked across sessions, both of them quietly:
+      //
+      //   watched_sec is written with Math.max, deliberately, so that reloading the page cannot
+      //   walk the counter backwards. Across registrations that same guard carried the old
+      //   session's total into the new one: someone who watched forty minutes and then no-showed
+      //   their next slot still derived SEG-D-stayed and received the closing sequence for a
+      //   session they were never in.
+      //
+      //   first_seen_at was only ever written when no row existed, so it stayed anchored to the
+      //   FIRST session. The wall-clock clamp in wr-heartbeat measures a claim against the time
+      //   elapsed since that stamp - with a stale one it allows anything, which switches off the
+      //   anti-inflation guard for precisely the people who come back.
+      //
+      // Deleting rather than zeroing: a returning registrant should look exactly like a new one,
+      // and every column here describes attendance at a session that is no longer theirs. Their
+      // notification history is untouched and still carries the record of the sessions missed.
+      //
+      // Best effort. A stale attendance row is bad; refusing the registration over it is worse.
+      try {
+        await remove('wr_attendance', { registration_id: `eq.${previous.id}` });
+      } catch (err) {
+        console.error('wr-register: could not clear previous attendance:', err.message);
+      }
     }
 
     const utmValues = {};
