@@ -1,0 +1,83 @@
+---
+title: "The Zero Fog Workshop"
+permalink: /workshop/room/
+---
+{% extends "layouts/base.njk" %}
+
+{# The session room. Token-gated: everything on this page is drawn from what wr-room.js returns
+   for the token in the URL, and nothing - including the video address - is rendered without one.
+
+   Deliberately at /workshop/room/ rather than replacing /workshop/. The existing /workshop/ page
+   is the walkthrough copy that /confirmation/ still links to, and it keeps working until the
+   database is live and this room has been tested end to end. Swapping them later is one line of
+   frontmatter, not a rewrite.
+
+   Copy rule, CEO 2026-08-11: workshop and session. Never "webinar", never "training". #}
+
+{% block head_extras %}
+<meta name="robots" content="noindex">
+{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="/assets/css/pages/replay-3.css">
+<link rel="stylesheet" href="/assets/css/pages/workshop-room.css">
+{% endblock %}
+
+{% block content %}
+
+<a href="/" class="brand">The Zero Fog</a>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
+
+<div class="replay room" id="room">
+
+  <h1>The 4-Week Process That Cleared My Brain Fog And Got My Sharp Hours Back</h1>
+
+  <p class="room-status" id="roomStatus">Opening your session…</p>
+
+  <p class="room-countdown" id="roomCountdown" hidden></p>
+
+  <div class="room-expiry-bar" id="roomExpiryBar" hidden>
+    <span class="room-expiry-label">This replay closes in</span>
+    <span class="room-expiry-nums" id="roomExpiry">--:--:--</span>
+  </div>
+
+  <p class="room-notice" id="roomNotice" hidden></p>
+
+  <div class="room-stage" id="roomStage" hidden>
+    <div class="video-wrapper">
+      {# The caption track is added by JS from the config, not hardcoded here - the master
+         carries its captions as an embedded mov_text track, which no browser renders, so they
+         are served as a WebVTT sidecar instead. #}
+      <video id="roomVideo" playsinline preload="metadata"></video>
+      <button type="button" class="room-join" id="roomJoin" hidden>Join the session</button>
+    </div>
+  </div>
+
+  <div class="room-handouts" id="roomHandouts" hidden></div>
+
+  <div class="replay-cta room-offer" id="roomOffer" hidden>
+    <h2 id="roomOfferHeadline"></h2>
+    <p>The founding member price won't last. Lock in $67 before it goes back to $167.</p>
+    <p class="price">$67</p>
+    <p class="price-sub">One-time payment. Lifetime access. 30-day guarantee.</p>
+    <a href="/sales#enroll" class="cta-btn" id="roomOfferBtn">Get The Protocol</a>
+  </div>
+
+  <form class="room-question" id="roomQuestionForm">
+    <label for="roomQuestion">Have a question? Send it to Kirill.</label>
+    <textarea id="roomQuestion" rows="2" placeholder="Type your question…"></textarea>
+    <button type="submit" class="room-question-btn">Send</button>
+    <p class="room-question-note" id="roomQuestionNote"></p>
+  </form>
+
+  <p class="room-sticky" id="roomSticky" hidden></p>
+
+  <p class="disclaimer">This is an educational program, not medical treatment. Results vary.</p>
+
+</div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="/assets/js/pages/workshop-room.js" defer></script>
+{% endblock %}

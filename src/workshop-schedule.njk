@@ -1,0 +1,65 @@
+---
+title: "Pick Your Time - The Zero Fog"
+permalink: /workshop/schedule/
+---
+{% extends "layouts/base.njk" %}
+
+{# The schedule step. Reached straight after the opt-in form, which carries the address here in
+   sessionStorage rather than in the URL. Copy rule, CEO 2026-08-11: this is a workshop and an
+   occurrence of it is a session - the words "webinar" and "training" appear nowhere. #}
+
+{% block head_extras %}
+<meta name="robots" content="noindex">
+{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="/assets/css/pages/replay-3.css">
+<link rel="stylesheet" href="/assets/css/pages/workshop-schedule.css">
+{% endblock %}
+
+{% block content %}
+
+<a href="/" class="brand">The Zero Fog</a>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
+
+<div class="replay schedule">
+
+  <p class="eyebrow">Free Workshop</p>
+
+  <h1>Pick the time that suits you</h1>
+  <p class="subtitle">It runs about 90 minutes. Times below are in your own timezone.</p>
+
+  <div id="slotStatus" class="slot-status">Loading times…</div>
+
+  <ul id="slotList" class="slot-list" hidden></ul>
+
+  <form id="scheduleForm" class="schedule-form" hidden>
+    <div id="emailRow" class="field" hidden>
+      <label for="scheduleEmail">Where should we send your link?</label>
+      <input type="email" id="scheduleEmail" name="email" autocomplete="email"
+             placeholder="you@example.com" required>
+    </div>
+
+    {# Honeypot. Bots fill it, people never see it. #}
+    <input type="text" name="website" id="scheduleWebsite" tabindex="-1" autocomplete="off"
+           aria-hidden="true">
+
+    <label class="consent">
+      <input type="checkbox" id="scheduleConsent" required>
+      <span id="consentText">I agree to receive emails about this workshop and can unsubscribe at any time.</span>
+    </label>
+
+    <p class="form-error" id="scheduleError" role="alert"></p>
+
+    <button type="submit" class="cta-btn" id="scheduleBtn" disabled>Save My Seat</button>
+  </form>
+
+  <p class="disclaimer">This is an educational program, not medical treatment. Results vary.</p>
+
+</div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="/assets/js/pages/workshop-schedule.js" defer></script>
+{% endblock %}
