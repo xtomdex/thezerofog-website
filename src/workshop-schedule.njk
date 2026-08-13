@@ -38,10 +38,17 @@ permalink: /workshop/schedule/
   <ul id="slotList" class="slot-list" hidden></ul>
 
   <form id="scheduleForm" class="schedule-form" hidden>
+    {# `required` is NOT in this markup, and must never be put back. The row is hidden whenever the
+       address already arrived from the landing page, which is the ordinary path through the
+       funnel - and a required, empty, display:none field makes the whole form invalid. The
+       browser then refuses to submit and cannot show its message either, because it has nothing
+       focusable to attach it to, so the button does precisely nothing. That is what a visitor
+       coming from the opt-in met on every attempt. The script sets `.required` on this input at
+       runtime, and only in the branch where the row is actually shown. #}
     <div id="emailRow" class="field" hidden>
       <label for="scheduleEmail">Where should we send your link?</label>
       <input type="email" id="scheduleEmail" name="email" autocomplete="email"
-             placeholder="you@example.com" required>
+             placeholder="you@example.com">
     </div>
 
     {# Honeypot. Bots fill it, people never see it. #}
