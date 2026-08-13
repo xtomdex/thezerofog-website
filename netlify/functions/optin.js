@@ -60,14 +60,12 @@ export default async function handler(req) {
     });
   }
 
-  const scheduleUrl = process.env.EVERWEBINAR_SCHEDULE_URL;
-  if (!scheduleUrl) {
-    console.error('EVERWEBINAR_SCHEDULE_URL environment variable is not set');
-    return new Response(JSON.stringify({ error: 'Server configuration error' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
+  // The schedule step is ours now, so there is no external URL to be missing and no environment
+  // variable that can take this function down. It used to read EVERWEBINAR_SCHEDULE_URL and
+  // return 500 when unset, which killed the lead before it ever reached Make.
+  //
+  // Overridable only so a Deploy Preview can point somewhere else; unset is the normal case.
+  const scheduleUrl = process.env.WORKSHOP_SCHEDULE_PATH || '/workshop/schedule/';
 
   const payload = { email: email.trim() };
   if (name && typeof name === 'string' && name.trim()) {
@@ -86,9 +84,10 @@ export default async function handler(req) {
       throw new Error('Upstream error');
     }
 
-    // Lead accepted by Make. Return the EverWebinar schedule URL as-is. EverWebinar
-    // URL prefill is unsupported, so we do NOT append the email here. The client
-    // appends UTM params (from the landing-page URL) before redirecting.
+    // Lead accepted by Make. Return the schedule step. The email is deliberately NOT put in the
+    // URL - the client carries it in sessionStorage to the next page, because an address in a
+    // query string ends up in browser history, in referrer headers and in any analytics that
+    // records paths.
     return new Response(JSON.stringify({ ok: true, redirectUrl: scheduleUrl }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

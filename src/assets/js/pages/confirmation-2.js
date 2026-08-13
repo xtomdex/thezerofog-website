@@ -1,29 +1,42 @@
-// confirmation-2.js — runs on /confirmation/ after EverWebinar redirects post-registration.
-// (Renamed from confirmation.js 2026-07-14: rename + content change together defeat
-// Netlify's hash dedupe, which re-served stale artifacts for unchanged files.)
+// confirmation-2.js - runs on /confirmation/ after our own schedule step registers someone.
+// (Filename kept from 2026-07-14: a rename plus a content change together defeat Netlify's hash
+// dedupe, which once re-served a stale artifact for an unchanged file. Not worth re-testing.)
 //
-// Three jobs: populate registrant details from wj_lead_* URL params, reveal the
-// correct device-strategy message (desktop vs mobile), and build add-to-calendar
-// links from the event params EverWebinar appends when "Send register information
-// and webinar information" is ON: wj_event_ts, wj_event_tz, wj_next_event_date,
-// wj_next_event_time, wj_next_event_timezone, wj_lead_unique_link_live_room.
+// Rewritten 2026-08-13. It used to read EverWebinar's wj_* parameters, which nothing ever sent -
+// so the greeting, the registrant details and the add-to-calendar buttons were dead code on a
+// live page. The parameters are ours now and they do arrive:
 //
-// NOTE: the exact wj_event_ts format is not fixed in WebinarJam docs — this code
-// accepts unix seconds, unix milliseconds, or a Date.parse()-able string, and the
-// wj_next_event_* pair as a fallback. Verify against a real test registration
-// before trusting the calendar buttons in production; on any parse failure the
-// buttons simply stay hidden.
+//   t     - the join token
+//   slot  - session start, ISO 8601 in UTC
+//   tz    - the timezone the visitor picked in
+//   when  - the human label they saw when picking, e.g. "Today at 7:00 PM EDT"
+//   dur   - session length in minutes
+//   name  - optional
 //
-// SECURITY: all wj_* values come from the URL and are attacker-controllable. They
-// MUST be injected via textContent only — never innerHTML / insertAdjacentHTML.
-// The join link is embedded in calendar-event text (URL-encoded), never rendered
-// as a clickable href on the page, and only if it is a plain https:// URL.
+// The address is NOT in the URL by design; it comes from sessionStorage and is cleared here.
+//
+// SECURITY: every value below is attacker-controllable, because it comes from the query string.
+// It is injected with textContent only - never innerHTML - and the join link is rebuilt from our
+// own origin plus the token rather than taken from a parameter.
 
 (function () {
-  // --- 1. Registrant details from EverWebinar URL params ---
   var params = new URLSearchParams(window.location.search);
-  var firstName = (params.get('wj_lead_first_name') || '').trim();
-  var email = (params.get('wj_lead_email') || '').trim();
+
+  var token = (params.get('t') || '').trim();
+  var slotIso = (params.get('slot') || '').trim();
+  var when = (params.get('when') || '').trim();
+  var firstName = (params.get('name') || '').trim();
+  var durationMin = parseInt(params.get('dur') || '90', 10);
+  if (!(durationMin > 0 && durationMin < 600)) durationMin = 90;
+
+  // --- 1. Who they are ---
+
+  var email = '';
+  try {
+    email = sessionStorage.getItem('zf_workshop_email') || '';
+    // Read once. Leaving it behind would show a stale address to whoever opens this tab next.
+    sessionStorage.removeItem('zf_workshop_email');
+  } catch (err) {}
 
   if (email) {
     var emailEl = document.getElementById('regEmail');
@@ -43,55 +56,45 @@
     }
   }
 
-  // --- 2. Device-aware message ---
-  // Conservative detection: require BOTH a coarse pointer AND a mobile UA token
-  // before flipping to the mobile variant. When uncertain, fall through to desktop
-  // since desktop is the primary conversion device for the webinar.
+  // --- 2. The time they picked ---
+
+  var slotEl = document.getElementById('regSlot');
+  if (slotEl && when) {
+    slotEl.textContent = when;
+    slotEl.classList.remove('hidden');
+  }
+
+  // --- 3. The join link ---
+  //
+  // Built from our own origin and the token rather than read from a parameter, so a crafted URL
+  // cannot turn this button into a link to somewhere else.
+
+  var joinEl = document.getElementById('regJoin');
+  if (joinEl && /^[A-Za-z0-9_-]{16,}$/.test(token)) {
+    joinEl.href = '/workshop/room/?t=' + encodeURIComponent(token);
+    joinEl.classList.remove('hidden');
+  }
+
+  // --- 4. Device-aware message ---
+  // Conservative detection: require BOTH a coarse pointer AND a mobile UA token before flipping
+  // to the mobile variant. When uncertain, fall through to desktop.
   var ua = navigator.userAgent || '';
   var coarsePointer =
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(pointer: coarse)').matches;
-  var mobileToken =
-    /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+    typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+  var mobileToken = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
   var isMobile = coarsePointer && mobileToken;
 
-  var targetId = isMobile ? 'deviceMobile' : 'deviceDesktop';
-  var deviceEl = document.getElementById(targetId);
-  if (deviceEl) {
-    deviceEl.classList.remove('hidden');
-  }
+  var deviceEl = document.getElementById(isMobile ? 'deviceMobile' : 'deviceDesktop');
+  if (deviceEl) deviceEl.classList.remove('hidden');
 
-  // --- 3. Add-to-calendar buttons ---
-  var EVENT_TITLE = 'The Zero Fog - Live Workshop';
-  var EVENT_MINUTES = 60;
+  // --- 5. Add to calendar ---
+  //
+  // "Workshop", never "webinar" or "live" - CEO 2026-08-11 on the naming, and the standing rule
+  // that we never assert a session is live.
 
-  function parseEventStart() {
-    // Preferred: wj_event_ts as a unix timestamp (timezone-independent).
-    var ts = (params.get('wj_event_ts') || '').trim();
-    if (/^\d+$/.test(ts)) {
-      var n = parseInt(ts, 10);
-      if (n > 1e12) n = Math.floor(n / 1000); // milliseconds → seconds
-      // Sanity window: 2020–2040, otherwise treat as unparsed.
-      if (n > 1577836800 && n < 2208988800) return new Date(n * 1000);
-    }
-    if (ts) {
-      var parsedTs = new Date(ts);
-      if (!isNaN(parsedTs.getTime())) return parsedTs;
-    }
-    // Fallback: wj_next_event_date + wj_next_event_time, parsed in the browser's
-    // local timezone (EverWebinar shows registrants times in their own timezone,
-    // so local interpretation matches what they saw when registering).
-    var date = (params.get('wj_next_event_date') || '').trim();
-    var time = (params.get('wj_next_event_time') || '').trim();
-    if (date && time) {
-      var parsed = new Date(date + ' ' + time);
-      if (!isNaN(parsed.getTime())) return parsed;
-    }
-    return null;
-  }
+  var EVENT_TITLE = 'The Zero Fog Workshop';
 
   function toCalStamp(d) {
-    // UTC basic format: YYYYMMDDTHHMMSSZ
     return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
   }
 
@@ -99,19 +102,20 @@
     return s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
   }
 
-  var start = parseEventStart();
+  var start = slotIso ? new Date(slotIso) : null;
+  if (start && isNaN(start.getTime())) start = null;
+
   var btnsEl = document.getElementById('calBtns');
   var googleEl = document.getElementById('calGoogle');
   var icsEl = document.getElementById('calIcs');
 
   if (start && btnsEl && googleEl && icsEl) {
-    var end = new Date(start.getTime() + EVENT_MINUTES * 60000);
-    var joinLink = (params.get('wj_lead_unique_link_live_room') || '').trim();
-    if (!/^https:\/\/[^\s]+$/.test(joinLink)) joinLink = '';
+    var end = new Date(start.getTime() + durationMin * 60000);
+    var joinUrl = token ? window.location.origin + '/workshop/room/?t=' + token : '';
 
-    var description = joinLink
-      ? 'Your personal join link: ' + joinLink + '\nJoin from a desktop for the best experience.'
-      : 'Your join link is in your registration email.\nJoin from a desktop for the best experience.';
+    var description = joinUrl
+      ? 'Your personal link: ' + joinUrl + '\nA desktop or laptop works best.'
+      : 'Your link is in your email.\nA desktop or laptop works best.';
 
     var stamps = toCalStamp(start) + '/' + toCalStamp(end);
     googleEl.href =

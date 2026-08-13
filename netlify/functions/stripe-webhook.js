@@ -16,6 +16,43 @@ import crypto from 'node:crypto';
 // (or further in the future) than 5 minutes.
 const SIGNATURE_TOLERANCE_SECONDS = 300;
 
+/**
+ * Stamp `purchased_at` on this person's workshop registration, if they have one.
+ *
+ * Written with a bare fetch rather than through lib/wr-db.js so this handler keeps its property
+ * of importing nothing but node:crypto — it is the one endpoint an attacker can reach without a
+ * token, and its dependency surface is deliberately minimal.
+ *
+ * Swallows every error. A paid order must never fail because a follow-up flag did not save.
+ */
+async function markWorkshopBuyer(email) {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SECRET_KEY;
+  if (!url || !key || !email) return;
+
+  try {
+    const endpoint = new URL(`${url}/rest/v1/wr_registrations`);
+    endpoint.searchParams.set('email', `eq.${email.trim().toLowerCase()}`);
+
+    const res = await fetch(endpoint, {
+      method: 'PATCH',
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify({ purchased_at: new Date().toISOString() }),
+    });
+
+    if (!res.ok) {
+      console.error('markWorkshopBuyer: Supabase returned', res.status);
+    }
+  } catch (err) {
+    console.error('markWorkshopBuyer failed:', err.message);
+  }
+}
+
 // Minimal headers kept for consistency with the other functions. Stripe does not
 // send a CORS preflight, so no OPTIONS handling is required here.
 const baseHeaders = {
@@ -136,6 +173,18 @@ export default async function handler(req) {
     session_id: session.id,
     source: 'stripe_checkout',
   };
+
+  // Mark the buyer inside the workshop room, if this address ever registered for a session.
+  //
+  // This is the buyer guard the whole sales sequence hangs off: every follow-up email carries
+  // "and not a buyer", and wr-notify.js reads exactly this column immediately before each send.
+  // Stripe stays the single source of purchase truth - the room never decides who bought, it
+  // only records what Stripe already established.
+  //
+  // Best effort, and deliberately so. A failure here must not make this handler return 500,
+  // because that would have Stripe retry a payment that was processed correctly. The worst case
+  // is one follow-up email reaching a customer, which the guard step in Make still catches.
+  await markWorkshopBuyer(email);
 
   // Forward to Make. If Make is down or errors, return 500 so Stripe retries —
   // we don't want to silently lose a paid order.

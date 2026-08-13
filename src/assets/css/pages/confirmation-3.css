@@ -34,7 +34,7 @@
   margin-bottom: 48px;
 }
 
-/* === REGISTRANT DETAILS (populated from EverWebinar wj_lead_* URL params) === */
+/* === REGISTRANT DETAILS (populated by confirmation-2.js from our own params + sessionStorage) === */
 .reg-greeting {
   font-size: 0.7rem;
   letter-spacing: 0.25em;

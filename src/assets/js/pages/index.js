@@ -23,10 +23,20 @@ document.getElementById('optinForm').addEventListener('submit', function(e) {
     return res.json();
   })
   .then(function(data) {
-    // Redirect to the EverWebinar schedule page returned by the function.
-    // If no redirectUrl is present (e.g. honeypot path), treat it as a benign
-    // success and leave the button in its submitted state — no error shown.
+    // Redirect to the schedule step returned by the function. If no redirectUrl is
+    // present (e.g. honeypot path), treat it as a benign success and leave the button
+    // in its submitted state — no error shown.
     if (!data || !data.redirectUrl) return;
+
+    // Carry the address to the schedule step without putting it in the URL. A query
+    // string would leave it in history, in referrers and in any analytics that records
+    // paths. sessionStorage dies with the tab, which is exactly the lifetime we want.
+    try {
+      sessionStorage.setItem('zf_workshop_email', email);
+    } catch (err) {
+      // Private mode or a storage-blocked browser: the schedule step asks for the
+      // address again rather than failing.
+    }
 
     // Fire the Meta Pixel "Lead" event — best-effort, consent-gated. Only fires
     // when the pixel actually loaded (consent === 'all' + configured ID). If the
@@ -36,14 +46,18 @@ document.getElementById('optinForm').addEventListener('submit', function(e) {
       fbq('track', 'Lead');
     }
 
-    // Forward UTM params from the current landing-page URL to EverWebinar for
+    // Forward UTM params from the current landing-page URL to the schedule step for
     // attribution. Only the five standard utm_* keys are forwarded (never other
     // landing params like the A/B ?w=). The URL object merges with any query
-    // params the schedule URL already carries instead of clobbering them.
+    // params the target already carries instead of clobbering them.
+    //
+    // The second argument matters: the redirect target is now a same-site path, and
+    // `new URL('/workshop/schedule/')` on its own throws — which would silently drop
+    // every UTM param into the catch below.
     try {
       var landingParams = new URLSearchParams(window.location.search);
       var utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
-      var target = new URL(data.redirectUrl);
+      var target = new URL(data.redirectUrl, window.location.origin);
       utmKeys.forEach(function(key) {
         var value = landingParams.get(key);
         if (value) target.searchParams.set(key, value);

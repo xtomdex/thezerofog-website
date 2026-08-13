@@ -28,13 +28,17 @@ permalink: /confirmation/
 
   <p class="reg-details hidden" id="regDetails">We sent it to <strong id="regEmail"></strong>.</p>
 
-  {# TEMPORARY (2026-07-20): direct watch button while the webinar lives on our
-     own /workshop/ page. REMOVE this whole block when EverWebinar goes live -
-     the email flow below is the permanent path. Inline styles on purpose:
-     avoids touching confirmation-3.css (cache-rename rule) for a throwaway block. #}
+  {# The time they picked, echoed back. Revealed by JS from the `when` parameter our schedule
+     step passes - the exact label they saw when choosing, in their own timezone. #}
+  <p class="reg-details hidden" id="regSlot"></p>
+
+  {# The personal join link. Revealed only when a token is present, and built by JS from our own
+     origin rather than from a parameter, so a crafted URL cannot repoint it.
+     Inline styles on purpose: keeps confirmation-3.css untouched, which the cache-rename rule
+     in this project makes expensive to change. #}
   <div style="text-align:center;margin:28px 0 8px;">
-    <a href="/workshop/" style="display:inline-block;background:var(--accent);color:#0d0d0d;font-weight:800;font-size:1rem;padding:16px 32px;border-radius:10px;text-decoration:none;letter-spacing:-0.01em;">Watch the Free Workshop Now</a>
-    <p style="font-size:0.8rem;color:var(--text2);margin-top:10px;">It's ready right now - no need to wait for the email.</p>
+    <a href="#" id="regJoin" class="hidden" style="display:inline-block;background:var(--accent);color:#0d0d0d;font-weight:800;font-size:1rem;padding:16px 32px;border-radius:10px;text-decoration:none;letter-spacing:-0.01em;">Open my session</a>
+    <p style="font-size:0.8rem;color:var(--text2);margin-top:10px;">This is your personal link - keep it. It also arrives by email.</p>
   </div>
 
 
@@ -49,8 +53,8 @@ permalink: /confirmation/
     <p class="device-text">For the best experience, join from a desktop or laptop when it starts. You'll see the slides, demos, and Q&amp;A in full.</p>
   </div>
 
-  {# Calendar buttons: revealed by JS only when EverWebinar passes a usable
-       event date (wj_event_ts / wj_next_event_*). Hidden on direct visits. #}
+  {# Calendar buttons: revealed by JS only when the `slot` parameter carries a usable start time.
+     Hidden on direct visits, which is every visit that did not come through the schedule step. #}
   <div class="cal-btns hidden" id="calBtns">
     <a class="cal-btn" id="calGoogle" href="#" target="_blank" rel="noopener">Add to Google Calendar</a>
     <a class="cal-btn" id="calIcs" href="#" download="the-zero-fog-workshop.ics">Apple / Outlook (.ics)</a>
