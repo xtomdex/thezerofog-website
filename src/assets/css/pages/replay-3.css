@@ -51,6 +51,13 @@ h1 { font-family: 'Inter', sans-serif; font-size: clamp(1.9rem, 3.8vw, 2.6rem); 
 }
 .replay-cta h2 { font-family: 'Inter', sans-serif; font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.01em; }
 .replay-cta p { font-size: 0.9rem; color: var(--text2); margin-bottom: 20px; line-height: 1.6; }
+/* Nothing styled the plain links inside this block, so the address in "Lost the email?" rendered
+   in the browser's default #0000EE on a #222 panel - measured, and effectively unreadable. Every
+   other address on the site (legal pages, sales) is the accent colour; this matches them. The
+   :not() keeps the CTA button, which is also an <a> in here, on its own styling. */
+.replay-cta a:not(.cta-btn) { color: var(--accent); font-weight: 600; text-decoration: none; }
+.replay-cta a:not(.cta-btn):hover { color: var(--accent-hover); text-decoration: underline; }
+
 .replay-cta .price { font-size: 1.8rem; font-weight: 900; color: var(--text); margin-bottom: 4px; }
 .replay-cta .price-sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 20px; }
 

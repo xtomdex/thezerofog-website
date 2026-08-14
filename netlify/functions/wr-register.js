@@ -282,9 +282,16 @@ export default async function handler(req) {
       { returning: false }
     );
 
-    // The lead still goes to Make, unchanged. Make owns MailerLite, tagging and anything Dima
-    // wires downstream; this system owns timing and segmentation, not list management.
-    const makeUrl = process.env.MAKE_WEBHOOK_URL;
+    // The lead still goes to Make. Make owns MailerLite, tagging and anything Dima wires
+    // downstream; this system owns timing and segmentation, not list management.
+    //
+    // "Unchanged" is what the previous comment claimed and it was not true: the opt-in form
+    // sends `{email, name}`, this sends five more fields and - because the schedule step never
+    // asks for a name - usually sends no `name` at all, since JSON.stringify drops undefined.
+    // Three registrations in a row on 2026-08-13 preceded Make stopping the opt-in scenario.
+    // The route is overridable so the two can be split without a deploy, but which module
+    // actually failed is only visible in Make's own execution history.
+    const makeUrl = config.webhooks?.routes?.registration || process.env.MAKE_WEBHOOK_URL;
     if (makeUrl) {
       try {
         const res = await fetch(makeUrl, {

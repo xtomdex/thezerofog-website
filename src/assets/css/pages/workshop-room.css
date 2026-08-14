@@ -1,6 +1,15 @@
 /* The session room. Layered on replay-3.css, which already supplies the page frame, the video
    wrapper, the CTA block and the disclaimer. */
 
+/* An author `display` rule outranks the browser's own `[hidden] { display: none }`, and every
+   piece of this page is drawn by adding or removing that attribute. Without this guard the
+   expiry bar - `display: flex` two rules below - sat on screen from the moment the room opened,
+   in every state, telling someone waiting for a session to start that they are watching a
+   replay. The handouts row had the same hole. */
+.room [hidden] {
+  display: none !important;
+}
+
 .room-status {
   text-align: center;
   color: var(--text2);

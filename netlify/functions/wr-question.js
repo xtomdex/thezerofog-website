@@ -60,8 +60,17 @@ export default async function handler(req) {
 
   // Best effort. The question is already saved; failing to forward it costs a notification, not
   // the question itself.
+  //
+  // Deliberately NOT falling back to MAKE_WEBHOOK_URL. That URL is the opt-in scenario's own
+  // webhook, built for one payload - `{email, name}` - and Make answers a payload it cannot map
+  // with an error, then stops the whole scenario after a few of them. On 2026-08-13 that is
+  // exactly what happened: the funnel's lead scenario was taken down by traffic from this room.
+  // A question with nowhere to go stays in wr_events; a stopped scenario costs every lead.
   const config = await loadConfig().catch(() => null);
-  const target = config?.webhooks?.routes?.question || process.env.MAKE_WEBHOOK_URL;
+  const target = config?.webhooks?.routes?.question || process.env.MAKE_QUESTION_WEBHOOK_URL;
+  if (!target) {
+    console.warn('wr-question: no question endpoint configured - stored only, not forwarded');
+  }
   if (target) {
     try {
       await fetch(target, {

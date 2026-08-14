@@ -52,9 +52,14 @@ export default async function handler() {
 
   if (!due || !due.length) return json({ ok: true, sent: 0, skipped: 0 });
 
-  const target = config.webhooks?.routes?.notification || process.env.MAKE_WEBHOOK_URL;
+  // Same reason as in wr-question.js, and here the stakes are higher: this function runs on a
+  // five-minute cron. Pointed at the opt-in scenario's webhook it would post a payload that
+  // scenario cannot read, over and over, until Make stopped it - and with it the whole funnel.
+  // Without an endpoint the rows simply stay `pending` and go out when one is configured, so
+  // refusing to send costs a delay and nothing else.
+  const target = config.webhooks?.routes?.notification || process.env.MAKE_NOTIFICATION_WEBHOOK_URL;
   if (!target) {
-    console.error('wr-notify: no delivery endpoint configured');
+    console.error('wr-notify: no delivery endpoint configured - set MAKE_NOTIFICATION_WEBHOOK_URL');
     return json({ error: 'no endpoint' }, 500);
   }
 
