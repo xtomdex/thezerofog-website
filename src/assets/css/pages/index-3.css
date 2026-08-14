@@ -106,7 +106,9 @@ body {
   font-weight: 600;
   letter-spacing: 0;
   color: var(--text);
-  opacity: 0.78; /* 0.6 measured 4.48:1 in the light theme */
+  /* opacity removed 2026-08-14: it passed the contrast maths at 8.36:1, but Cormorant at
+     1.1rem is a thin serif and the wordmark still read as washed out. Size alone carries the
+     de-emphasis now. */
 }
 
 /* === HERO SECTION === */

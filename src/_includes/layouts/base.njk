@@ -16,7 +16,7 @@
 {% if canonical %}<link rel="canonical" href="{{ canonical }}">{% endif %}
 {% block head_extras %}{% endblock %}
 {% include "partials/pixel-meta.njk" %}
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preload" href="/assets/fonts/inter-var-latin.v1.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ '/assets/css/shared.css' | v }}">
 <link rel="stylesheet" href="{{ '/assets/css/cookie-consent-3.css' | v }}">
 {% include "partials/head-meta.njk" %}

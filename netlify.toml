@@ -52,6 +52,15 @@
   [headers.values]
     Cache-Control = "public, max-age=3600, must-revalidate"
 
+# Fonts are the one thing under /assets that can honestly keep `immutable` without the `| v`
+# filter: they are referenced from inside CSS, where no template filter reaches, so the version
+# is carried in the filename itself (inter-var-latin.v1.woff2). A new cut means a new name, and
+# the old one is never re-fetched.
+[[headers]]
+  for = "/assets/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 [[headers]]
   for = "/*.html"
   [headers.values]

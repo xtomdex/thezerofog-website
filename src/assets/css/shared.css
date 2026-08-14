@@ -1,5 +1,43 @@
 /* === THE ZERO FOG - SHARED DESIGN SYSTEM (Dracula) === */
 
+/* === FONTS ===
+   Self-hosted 2026-08-14. They used to come from fonts.googleapis.com, which put two extra
+   origins on the critical path before a single word could be painted: the stylesheet from
+   googleapis, then the files themselves from gstatic, each with its own DNS lookup and TLS
+   handshake, and the browser only learns which files it needs after the first one answers. On a
+   throttled phone that is most of the wait before first paint.
+
+   Both are VARIABLE latin-subset files - one request each covers every weight we use, instead of
+   the ten static faces the old link asked for. 48 KB and 37 KB, served from our own origin with
+   the year-long immutable cache, honest because the version is in the filename.
+
+   Cormorant is only the wordmark, and the wordmark is display:none under 640px - so with
+   @font-face a phone never requests it at all. The old stylesheet was fetched regardless.
+
+   font-display: swap - text paints immediately in the fallback and reflows when the file lands.
+   Never `block`: a font file must not be allowed to hold the page hostage. */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/assets/fonts/inter-var-latin.v1.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+    U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF,
+    U+FFFD;
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('/assets/fonts/cormorant-garamond-var-latin.v1.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+    U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF,
+    U+FFFD;
+}
+
 /* === RESET === */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -80,7 +118,9 @@ body {
   background: var(--bg2); border: 1px solid var(--border);
   border-radius: 20px; padding: 6px 14px; cursor: pointer;
   font-family: 'Inter', sans-serif; font-size: 0.65rem; font-weight: 500;
-  color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase;
+  /* --text2, not --muted: this is 0.65rem uppercase with wide tracking, and muted cleared AA
+     only just (4.89:1 in the light theme). Small tracked caps need more than the minimum. */
+  color: var(--text2); letter-spacing: 1.5px; text-transform: uppercase;
   transition: all 0.3s;
 }
 .theme-toggle:hover { color: var(--text); border-color: var(--border-accent); }
@@ -89,10 +129,12 @@ body {
 .brand {
   position: fixed; top: 18px; left: 20px; z-index: 100;
   font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 600;
-  letter-spacing: 0; color: var(--text); opacity: 0.78; /* 0.6 measured 4.48:1 in the light theme */
+  letter-spacing: 0; color: var(--text); /* opacity removed 2026-08-14: it passed the contrast maths at 8.36:1, but Cormorant at
+     1.1rem is a thin serif and the wordmark still read as washed out. Size alone carries the
+     de-emphasis now. */
   text-decoration: none;
 }
-.brand:hover { opacity: 0.7; }
+.brand:hover { color: var(--accent); }
 
 /* === FOOTER === */
 .footer { text-align: center; padding: 40px 24px; border-top: 1px solid var(--border); }

@@ -93,7 +93,10 @@
   height: 100%;
   border: 0;
   background: rgba(0, 0, 0, 0.55);
-  color: var(--text);
+  /* Fixed, not var(--text). This plate is always dark - it sits on a dark wash over video - so a
+     theme colour puts #1a1a1a ink on it the moment someone switches to the light theme, and the
+     only label in the room becomes invisible. */
+  color: #f8f8f2;
   font: inherit;
   /* It is the only thing to do on this screen and it sits on a 16:9 rectangle, so it is sized
      to be read at a glance rather than looked for. Text alone, deliberately: a play glyph would
@@ -121,7 +124,7 @@
   justify-content: center;
   gap: 10px;
   background: #000;
-  color: var(--text);
+  color: #f8f8f2; /* fixed for the same reason as .room-join - the plate is black in both themes */
   font-size: clamp(1.5rem, 3vw, 2.1rem);
   font-weight: 900;
   letter-spacing: -0.01em;
@@ -132,7 +135,7 @@
 .room-ended span {
   font-size: clamp(0.8rem, 1.4vw, 1rem);
   font-weight: 500;
-  color: var(--muted);
+  color: #b9b9b9; /* on #000: 9.7:1 - readable without competing with the line above */
   letter-spacing: 0;
 }
 
