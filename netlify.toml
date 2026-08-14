@@ -182,14 +182,32 @@
 # so nothing in the funnel shows the old word in the address bar. These 301s
 # keep every link already sent out alive — /webinar-bonuses above is matched
 # first by its own rule, so it still lands on /app/.
+#
+# /workshop/ itself is gone (CEO 2026-08-14). It was the old evergreen replay
+# page: the whole workshop on an unlisted YouTube embed, no registration, the
+# $67 button underneath — and the cut it carried was three weeks older than the
+# master the room plays. It bypassed the session model entirely, so anyone
+# holding an old /webinar link watched the wrong video and was never segmented.
+# These now enter the funnel at the top instead. Exact paths only: /workshop/room/
+# and /workshop/schedule/ are separate rules to Netlify and are untouched.
 [[redirects]]
   from = "/webinar"
-  to = "/workshop/"
+  to = "/"
   status = 301
 
 [[redirects]]
   from = "/webinar/"
-  to = "/workshop/"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/workshop"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/workshop/"
+  to = "/"
   status = 301
 
 [[redirects]]
