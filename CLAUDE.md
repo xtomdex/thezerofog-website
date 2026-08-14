@@ -183,7 +183,7 @@ Client-side integrations (consumed by `_data/env.js`):
   group sends the email). Unset `MAILERLITE_API_KEY` means the rows stay `pending` - a delay,
   nothing else. `MAILERLITE_API_BASE` exists to point the selftest at an unreachable host.
 - `MAILERLITE_API_KEY` — the delivery credential for the whole notification queue (see above)
-- `WORKSHOP_ADMIN_KEY` — shared key gating `wr-stats.js`, which returns registrant addresses and watch behaviour. Unset means the endpoint answers 404 to everyone, including us.
+- `WORKSHOP_ADMIN_KEY` — shared key gating `wr-stats.js`, which returns registrant addresses and watch behaviour. Unset means the endpoint answers 404 to everyone, including us. **The value is raw base64 with `+` and `/` inside — it MUST be URL-encoded in the query string.** A bare `?key=$WORKSHOP_ADMIN_KEY` turns `+` into a space server-side and 404s; this already produced a false "prod key doesn't match" finding twice (2026-08-13 and -14).
 - `WORKSHOP_SCHEDULE_PATH` — optional override for the post-opt-in redirect. Unset in production.
 - ~~`EVERWEBINAR_SCHEDULE_URL`~~ — **removed 2026-08-13.** EverWebinar was not bought; the schedule step is ours. The variable's absence used to make `optin.js` return 500 and drop the lead before Make ever saw it.
 - `STRIPE_SECRET_KEY` — Stripe secret key. Used by `create-checkout.js` for Bearer auth to the Stripe REST API. Server-only — NEVER exposed to the client.
