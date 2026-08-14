@@ -211,7 +211,16 @@
     if (ended) return;
     ended = true;
     beat('exit');
-    if (state.endRedirect) window.location.href = state.endRedirect;
+    if (!state.endRedirect) return;
+    // The token has to travel. /replay/ is a doorway, not a page: with a token it forwards
+    // straight back here and wr-room decides the state, without one it shows "your link is in
+    // your email". Sending someone there bare at the exact second they finished the session -
+    // with the offer on screen - dead-ends the most valuable minute we have.
+    var target = state.endRedirect;
+    if (token && target.indexOf('t=') === -1) {
+      target += (target.indexOf('?') === -1 ? '?' : '&') + 't=' + encodeURIComponent(token);
+    }
+    window.location.href = target;
   }
 
   // Sound is the only thing the click is really for.
