@@ -1,0 +1,13 @@
+{# Domain verification for Meta Business Portfolio `The Zero Fog` (1421033719846706),
+   added 2026-08-14. Meta only scrapes the root document, but the tag ships on every page so a
+   future re-check against any URL also passes. It MUST stay inside <head> and MUST NOT be
+   injected by JavaScript - Meta's scraper reads the raw HTML and ignores anything the browser
+   adds later.
+
+   Without a verified domain there is no Aggregated Event Measurement, and conversions from iOS
+   users who declined tracking never reach us. Do not remove this tag: verification is re-checked
+   periodically, and losing it silently costs the iOS half of the audience.
+
+   The same tag is repeated in the two passthrough pages that never render this layout:
+   src/app/index.html and src/workshop-text/index.html. #}
+<meta name="facebook-domain-verification" content="f1gvsy66cg78yii0hem6e3dszley7x">
