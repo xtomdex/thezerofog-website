@@ -134,6 +134,14 @@ module.exports = function (eleventyConfig) {
       "// GENERATED at build time from env — do not edit.\n" +
       "// Public, non-secret tracking config. Trackers are consent-gated in cookie-consent-2.js.\n" +
       (pixelId ? `window.ZF_META_PIXEL_ID = ${JSON.stringify(pixelId)};\n` : "") +
+      (pixelId && process.env.EXPECTED_AMOUNT_TOTAL
+        ? `window.ZF_PURCHASE_VALUE = ${JSON.stringify(
+            String(Number(process.env.EXPECTED_AMOUNT_TOTAL) / 100)
+          )};\n` +
+          `window.ZF_PURCHASE_CURRENCY = ${JSON.stringify(
+            (process.env.EXPECTED_CURRENCY || "usd").toUpperCase()
+          )};\n`
+        : "") +
       (posthogKey
         ? `window.ZF_POSTHOG_KEY = ${JSON.stringify(posthogKey)};\n` +
           `window.ZF_POSTHOG_HOST = ${JSON.stringify(posthogHost)};\n`

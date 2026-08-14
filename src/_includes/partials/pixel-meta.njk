@@ -4,7 +4,7 @@
    ONLY after consent ('all'). Passthrough pages (e.g. /workshop-text/) get the
    same globals from the generated /zf-env.js instead (see .eleventy.js). #}
 {% if env.meta_pixel_id %}
-<script>window.ZF_META_PIXEL_ID = "{{ env.meta_pixel_id }}";</script>
+<script>window.ZF_META_PIXEL_ID = "{{ env.meta_pixel_id }}";{% if env.purchase_value %} window.ZF_PURCHASE_VALUE = "{{ env.purchase_value }}"; window.ZF_PURCHASE_CURRENCY = "{{ env.purchase_currency }}";{% endif %}</script>
 {% endif %}
 {% if env.posthog_key %}
 <script>window.ZF_POSTHOG_KEY = "{{ env.posthog_key }}"; window.ZF_POSTHOG_HOST = "{{ env.posthog_host }}";</script>

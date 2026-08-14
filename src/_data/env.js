@@ -11,5 +11,17 @@ module.exports = {
   // client JS only when set; PostHog itself is consent-gated exactly like the
   // pixel (loads only on consent === 'all'). Empty key = site stays analytics-free.
   posthog_key: process.env.PUBLIC_POSTHOG_KEY || '',
-  posthog_host: process.env.PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com'
+  posthog_host: process.env.PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
+
+  // Purchase value for the Meta Pixel, read from the same pair stripe-webhook.js validates the
+  // order against - so the number the pixel reports and the number we refuse to accept can never
+  // drift apart. Cents there, major units here, because that is what Meta expects.
+  //
+  // Not a secret: it is the public price. Empty when unset, and the pixel then reports the sale
+  // without a value rather than inventing one - the founding price is a ladder ($67 -> $167 ->
+  // $250-290) and a hard-coded number would quietly misreport revenue from the day it moves.
+  purchase_value: process.env.EXPECTED_AMOUNT_TOTAL
+    ? String(Number(process.env.EXPECTED_AMOUNT_TOTAL) / 100)
+    : '',
+  purchase_currency: (process.env.EXPECTED_CURRENCY || 'usd').toUpperCase()
 };

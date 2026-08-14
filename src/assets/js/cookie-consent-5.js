@@ -103,6 +103,18 @@
     banner.classList.add(mode === 'optout' ? 'zf-mode-optout' : 'zf-mode-optin');
   }
 
+  // Value and currency come from env (EXPECTED_AMOUNT_TOTAL / EXPECTED_CURRENCY), the same pair
+  // stripe-webhook.js validates the order against, so the reported number cannot drift from the
+  // accepted one. Unset means we report the sale with no value rather than a made-up one: a
+  // wrong price teaches the delivery system to chase the wrong customers.
+  function purchaseParams() {
+    if (!window.ZF_PURCHASE_VALUE) return {};
+    return {
+      value: Number(window.ZF_PURCHASE_VALUE),
+      currency: window.ZF_PURCHASE_CURRENCY || 'USD',
+    };
+  }
+
   // Load marketing pixels (Meta Pixel). Idempotent, inert when no ID configured.
   function loadMarketingPixels() {
     if (!window.ZF_META_PIXEL_ID) return;
@@ -119,6 +131,33 @@
     'https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', window.ZF_META_PIXEL_ID);
     fbq('track', 'PageView');
+
+    // Purchase. Stripe sends buyers to /welcome/?session_id=... (create-checkout.js success_url),
+    // so this is the only place in the browser where a completed sale is observable. Without it
+    // the account measures traffic and leads and no revenue at all, which is what optimisation
+    // actually needs. Sits beside the PostHog `purchase_landed` below, on the same condition.
+    //
+    // eventID is the Stripe checkout session id, and it is the whole point: stripe-webhook.js
+    // already holds the same id server-side, so when the Conversions API lands it can send the
+    // same event with the same id and Meta will collapse the pair instead of counting two sales.
+    //
+    // Guarded against a reload: the browser event is fire-and-forget and a refresh of the success
+    // page would otherwise book a second purchase. sessionStorage, not localStorage - a genuine
+    // second purchase later gets a different session id anyway, and this keeps the key from
+    // living forever.
+    var sid = (location.search.match(/[?&]session_id=([^&]+)/) || [])[1];
+    if (sid && location.pathname.indexOf('/welcome') === 0) {
+      var seen = 'zf_fb_purchase_' + sid;
+      try {
+        if (!sessionStorage.getItem(seen)) {
+          sessionStorage.setItem(seen, '1');
+          fbq('track', 'Purchase', purchaseParams(), { eventID: decodeURIComponent(sid) });
+        }
+      } catch (e) {
+        // Private mode can refuse sessionStorage. Losing the guard is better than losing the sale.
+        fbq('track', 'Purchase', purchaseParams(), { eventID: decodeURIComponent(sid) });
+      }
+    }
 
     window.zfPixelLoaded = true;
   }
