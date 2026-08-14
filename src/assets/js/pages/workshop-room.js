@@ -312,6 +312,16 @@
     els.video.addEventListener('timeupdate', onTimeUpdate);
     els.video.addEventListener('ended', finish);
 
+    // Behind the blur the browser's own context menu is a way around every gate on this page:
+    // "Picture in picture" plays the frames unblurred in an OS window, "Show controls" hands over
+    // an unmute button, "Copy video address" hands over the master. None of it goes through
+    // join(), so the watcher stays joined=false - watched_sec zero, no timed elements, filed as
+    // a no-show and mailed "I noticed you didn't make it". Closed only before the click, and
+    // only during a live session: a replay is openly a replay and keeps its normal menu.
+    els.video.addEventListener('contextmenu', function (e) {
+      if (phase === 'live' && !joined) e.preventDefault();
+    });
+
     // No seek bar is rendered, but a keyboard or a media key can still move the playhead
     // during the session. Snap it back.
     els.video.addEventListener('seeking', function () {

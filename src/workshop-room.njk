@@ -48,7 +48,13 @@ permalink: /workshop/room/
       {# The caption track is added by JS from the config, not hardcoded here - the master
          carries its captions as an embedded mov_text track, which no browser renders, so they
          are served as a WebVTT sidecar instead. #}
-      <video id="roomVideo" playsinline preload="metadata"></video>
+      {# disablePictureInPicture: the blur is a CSS filter on this element, and Picture-in-Picture
+         paints the decoded frames in an OS window where page CSS does not reach. Two clicks in
+         Chrome's own context menu and the whole session plays unblurred, un-joined - watched in
+         full by someone the room then files as a no-show. controlsList keeps the same menu from
+         offering the master as a download once the replay turns controls on. #}
+      <video id="roomVideo" playsinline preload="metadata"
+             disablePictureInPicture controlsList="nodownload noremoteplayback"></video>
       <button type="button" class="room-join" id="roomJoin" hidden>Join the session</button>
     </div>
   </div>
