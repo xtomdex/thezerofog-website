@@ -57,6 +57,20 @@
   var shownElements = {};
   var ended = false;
 
+  // The session runs muted behind a blur before anyone presses Join, so the room shows that
+  // something is happening rather than a black rectangle. `joined` is the line between the two,
+  // and it guards everything that must not happen to a person who has not joined yet:
+  //
+  // - watched seconds. Accumulating them behind the blur would carry somebody into
+  //   SEG-D-stayed - and the closing email sequence - for a session they never saw.
+  // - the offer, handouts and announcements. Revealed under a blur they are simply lost, and
+  //   `shownElements` would then refuse to show them again after the click.
+  //
+  // It is a separate flag rather than "is the video playing" on purpose: those two are the same
+  // thing today and would quietly stop being the same the first time anything else starts
+  // playback.
+  var joined = false;
+
   function say(text) {
     els.status.hidden = false;
     els.status.textContent = text;
@@ -167,15 +181,15 @@
   function onTimeUpdate() {
     var now = els.video.currentTime;
 
-    if (lastTime !== null) {
+    if (lastTime !== null && joined) {
       var delta = now - lastTime;
       // Only forward movement at roughly real speed counts. A jump means a seek or a buffer
-      // skip, and neither is watching.
+      // skip, and neither is watching. Time spent behind the blur is not watching either.
       if (delta > 0 && delta <= MAX_TIMEUPDATE_DELTA_SEC) watchedSec += delta;
     }
     lastTime = now;
 
-    applyTimedElements(now);
+    if (joined) applyTimedElements(now);
 
     // Keep the playhead pinned to the session clock. Small corrections only - resetting
     // currentTime is visible to the viewer, so it is done when the drift is real, not
@@ -200,6 +214,58 @@
     if (state.endRedirect) window.location.href = state.endRedirect;
   }
 
+  // Sound is the only thing the click is really for.
+  //
+  // Every browser refuses to autoplay with sound without a gesture, but muted autoplay is
+  // allowed - so the session can already be running, blurred, when the room opens. What the
+  // visitor sees is movement rather than a black rectangle, and the click asks to hear it rather
+  // than to start it, which is a smaller thing to ask.
+  //
+  // It also hides a real delay: the master has its moov atom at the end of a 469 MB file, so the
+  // browser spends a noticeable moment locating it before the first frame. Behind the blur that
+  // moment reads as the session already being under way.
+  //
+  // The blur has to be heavy enough that nothing on the slide can be read. This is not a poster
+  // frame - the 2026-07-25 rule stands, and a still frame with a play button would break it. A
+  // picture that is visibly moving says the opposite of "recording".
+  function join() {
+    if (joined) return;
+    joined = true;
+
+    els.joinBtn.hidden = true;
+    els.stage.classList.remove('room-stage--preroll');
+    els.video.muted = false;
+
+    if (phase === 'replay') {
+      // A replay never ran behind a blur - nothing is loaded yet, and it starts at the top.
+      startPlayback(0);
+      beat('join');
+      return;
+    }
+
+    // Time passed while they sat behind the blur, and the playhead follows the session clock.
+    if (phase === 'live' && !ended) {
+      var target = livePosition();
+      if (target < state.durationSec) {
+        els.video.currentTime = target;
+        lastTime = target;
+      }
+    }
+
+    // Whatever should already be on screen at this point in the session - the offer above all -
+    // was deliberately not revealed behind the blur. Reveal it now, in one go.
+    applyTimedElements(els.video.currentTime);
+
+    if (els.video.paused) {
+      els.video.play().catch(function () {
+        say('Press play to start.');
+        els.video.controls = true;
+      });
+    }
+
+    beat('join');
+  }
+
   function startPlayback(position) {
     els.video.src = state.videoUrl;
     if (state.posterUrl) els.video.poster = state.posterUrl;
@@ -221,10 +287,15 @@
       els.video.currentTime = Math.max(0, position);
       lastTime = els.video.currentTime;
       els.video.play().catch(function () {
-        // Autoplay was refused even after the click. Surface it rather than showing a
-        // silent black rectangle.
-        say('Press play to start.');
-        els.video.controls = true;
+        // Muted autoplay is allowed almost everywhere, but not everywhere: Chrome's data saver
+        // and iOS low power mode refuse it outright. Fall back to what the room did before the
+        // preroll existed - a plain button on black - rather than leaving someone in front of a
+        // blurred still with no explanation. The button still works; only the preview is lost.
+        els.stage.classList.remove('room-stage--preroll');
+        if (joined) {
+          say('Press play to start.');
+          els.video.controls = true;
+        }
       });
     });
 
@@ -359,12 +430,16 @@
     // From here the room is on screen, so it reports itself whether or not anyone presses play.
     bindLifecycle();
 
-    // A click before playing is not decoration: every browser refuses to autoplay with sound
-    // without a user gesture, and a muted session is worse than a button.
-    els.joinBtn.addEventListener('click', function () {
-      els.joinBtn.hidden = true;
-      startPlayback(phase === 'replay' ? 0 : state.positionSec);
-    });
+    els.joinBtn.addEventListener('click', join);
+
+    // A replay is openly a replay. It has controls, it starts at the beginning, and running it
+    // behind a blur would only pretend otherwise - join() loads it on the click instead.
+    if (phase === 'replay') return;
+
+    // Live: the session starts immediately, muted and blurred, and the button asks for sound.
+    els.stage.classList.add('room-stage--preroll');
+    els.video.muted = true;
+    startPlayback(state.positionSec);
   }
 
   if (!token) {

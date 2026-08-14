@@ -16,6 +16,10 @@ import { loadConfig, deriveSegments } from './lib/wr-config.js';
 
 const EVENT_TYPES = new Set([
   'heartbeat',
+  // Opening the room and joining the session stopped being the same act when the session began
+  // playing muted behind a blur before anyone clicks. Without this row the two are
+  // indistinguishable, and "sat in front of the blur and left" would read as "attended".
+  'join',
   'offer_shown',
   'offer_click',
   'handout_click',

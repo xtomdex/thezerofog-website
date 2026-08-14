@@ -74,8 +74,18 @@
   background: #000;
 }
 
-/* Every browser refuses to autoplay with sound without a gesture, so the session opens behind
-   a button rather than behind a silent black rectangle. */
+/* Before the click the session is already running, muted, under a blur heavy enough that nothing
+   on a slide can be read. The point is that it visibly MOVES: a still frame with a play button
+   would say "recording", and a moving one says the opposite. The blur is on the video itself
+   rather than on a layer above it, so no overlay can be dragged aside or switched off in an
+   inspector to read the slide underneath. */
+.room-stage--preroll #roomVideo {
+  filter: blur(18px) brightness(0.75);
+  transform: scale(1.06); /* blur softens the frame edges - the scale pushes them out of view */
+}
+
+/* Every browser refuses to autoplay with sound without a gesture, so the room asks for sound
+   with this button rather than opening on a silent black rectangle. */
 .room-join {
   position: absolute;
   inset: 0;
