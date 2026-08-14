@@ -1039,6 +1039,16 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Shared Recovery tracker module (browser-global window.ZFRecoveryTracker); same file as /webinar-bonuses. -->
 <script src="/shared/recovery-tracker.js"></script>
+
+<!-- Cookie consent + tracking config. Same reason as src/workshop-text/index.html: this file is
+     served verbatim (11ty passthrough), so it cannot use the base.njk partials - the banner
+     markup is inlined at the end of <body> (keep in sync with
+     src/_includes/partials/cookie-banner.njk) and the tracking config comes from the generated
+     /zf-env.js rather than pixel-meta.njk.
+
+     Missing here until 2026-08-14, which meant the bonuses page - the one E6 sends people to -
+     had no consent banner at all and was invisible to the pixel. -->
+<link rel="stylesheet" href="/assets/css/cookie-consent-3.css">
 </head>
 <body>
 <div class="app">
@@ -3431,5 +3441,27 @@ function protocolInit(){
 
 boot();
 </script>
+
+<div id="zf-cookie-banner" role="dialog" aria-label="Cookie consent">
+  <button type="button" class="zf-cb-close" aria-label="Close" onclick="zfDismissBanner()">&times;</button>
+  <div class="zf-cb-inner">
+    <div class="zf-cb-text zf-v-optin">
+      <strong>We use cookies.</strong> Essential cookies keep this site working. With your consent we also use analytics and advertising cookies. Details in our <a href="/privacy/">Privacy Policy</a>.
+    </div>
+    <div class="zf-cb-text zf-v-optout">
+      <strong>We use cookies</strong> for analytics and advertising. You can opt out anytime. Details in our <a href="/privacy/">Privacy Policy</a>.
+    </div>
+    <div class="zf-cb-actions zf-v-optin">
+      <button type="button" class="zf-cb-btn-essential" onclick="zfSetConsent('essential')">Essential Only</button>
+      <button type="button" class="zf-cb-btn-accept" onclick="zfSetConsent('all')">Accept All</button>
+    </div>
+    <div class="zf-cb-actions zf-v-optout">
+      <button type="button" class="zf-cb-btn-essential" onclick="zfSetConsent('essential')">Opt out</button>
+      <button type="button" class="zf-cb-btn-accept" onclick="zfSetConsent('all')">OK</button>
+    </div>
+  </div>
+</div>
+<script src="/zf-env.js"></script>
+<script src="/assets/js/cookie-consent-5.js" defer></script>
 </body>
 </html>
