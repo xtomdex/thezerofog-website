@@ -94,9 +94,12 @@ html:not(.dark) #zf-cookie-banner {
 }
 html:not(.dark) #zf-cookie-banner .zf-cb-text strong { color: #1a1a1a; }
 html:not(.dark) #zf-cookie-banner .zf-cb-text a { color: #7c5cbf; }
-html:not(.dark) #zf-cookie-banner .zf-cb-btn-accept { background: #2ecc71; color: #ffffff; }
+/* 2026-08-14: white on this green measured 2.10:1 - the OK button that gates every tracker
+   on the site was the least readable thing on it. Dark ink matches the dark theme. */
+html:not(.dark) #zf-cookie-banner .zf-cb-btn-accept { background: #2ecc71; color: #1a1a1a; }
 html:not(.dark) #zf-cookie-banner .zf-cb-btn-accept:hover { background: #27ae60; }
-html:not(.dark) #zf-cookie-banner .zf-cb-btn-essential { color: #777777; }
+/* was #777777, 4.48:1 - just under AA */
+html:not(.dark) #zf-cookie-banner .zf-cb-btn-essential { color: #6b6b6b; }
 html:not(.dark) #zf-cookie-banner .zf-cb-btn-essential:hover { color: #1a1a1a; }
 html:not(.dark) #zf-cookie-banner .zf-cb-close {
   background: rgba(124, 92, 191, 0.12); color: #1a1a1a;
