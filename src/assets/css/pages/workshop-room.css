@@ -95,10 +95,14 @@
   background: rgba(0, 0, 0, 0.55);
   color: var(--text);
   font: inherit;
-  font-size: 1.1rem;
-  font-weight: 700;
+  /* It is the only thing to do on this screen and it sits on a 16:9 rectangle, so it is sized
+     to be read at a glance rather than looked for. Text alone, deliberately: a play glyph would
+     make it a video player, which is the one thing the 2026-07-25 rule keeps off this stage. */
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-weight: 900;
   cursor: pointer;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
 }
 
 .room-join:hover {
