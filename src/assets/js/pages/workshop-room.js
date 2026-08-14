@@ -238,6 +238,7 @@
 
     if (phase === 'replay') {
       // A replay never ran behind a blur - nothing is loaded yet, and it starts at the top.
+      els.video.controls = state.allowSeek !== false;
       startPlayback(0);
       beat('join');
       return;
@@ -406,7 +407,9 @@
     phase = state.state === 'replay' ? 'replay' : 'live';
 
     if (phase === 'replay') {
-      els.video.controls = state.allowSeek !== false;
+      // Controls are switched on when there is something to control - see join(). Turning them
+      // on here, before a source exists, drew a dead scrubber reading 0:00 underneath the join
+      // overlay, which reads as a broken player rather than one waiting to be started.
       if (els.expiry) {
         document.getElementById('roomExpiryBar').hidden = false;
         renderExpiry();
