@@ -22,7 +22,7 @@ canonical: "https://thezerofog.com/"
 {% endblock %}
 
 {% block page_css %}
-<link rel="stylesheet" href="/assets/css/pages/index-3.css">
+<link rel="stylesheet" href="{{ '/assets/css/pages/index-3.css' | v }}">
 {% endblock %}
 
 {% block content %}
@@ -97,5 +97,5 @@ canonical: "https://thezerofog.com/"
 {% endblock %}
 
 {% block page_scripts %}
-<script src="/assets/js/pages/index.js" defer></script>
+<script src="{{ '/assets/js/pages/index.js' | v }}" defer></script>
 {% endblock %}

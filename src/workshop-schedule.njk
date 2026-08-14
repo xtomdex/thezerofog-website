@@ -13,8 +13,8 @@ permalink: /workshop/schedule/
 {% endblock %}
 
 {% block page_css %}
-<link rel="stylesheet" href="/assets/css/pages/replay-3.css">
-<link rel="stylesheet" href="/assets/css/pages/workshop-schedule.css">
+<link rel="stylesheet" href="{{ '/assets/css/pages/replay-3.css' | v }}">
+<link rel="stylesheet" href="{{ '/assets/css/pages/workshop-schedule.css' | v }}">
 {% endblock %}
 
 {% block content %}
@@ -74,5 +74,5 @@ permalink: /workshop/schedule/
 {% endblock %}
 
 {% block page_scripts %}
-<script src="/assets/js/pages/workshop-schedule.js" defer></script>
+<script src="{{ '/assets/js/pages/workshop-schedule.js' | v }}" defer></script>
 {% endblock %}

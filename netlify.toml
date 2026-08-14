@@ -13,10 +13,44 @@
 [build.processing]
   skip_processing = true
 
+# CSS and JS are referenced with a `?v=<hash>` of their own bytes (the `v` filter in
+# .eleventy.js), so a changed file is a changed URL and a year of `immutable` is honest.
+#
+# It was not honest before 2026-08-14: the same header sat on unversioned filenames, and
+# `immutable` means the browser will not revalidate even on an ordinary reload. Every style and
+# script fix we shipped was invisible to anyone who had visited the site before. That was
+# measured, not suspected - a deployed fix did not reach the page until a hard reload.
 [[headers]]
-  for = "/assets/*"
+  for = "/assets/css/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# The rest of /assets - images, video, caption tracks. These are referenced from inside CSS (the
+# replay poster) and from JS, where no filter can add a version, so they must stay revalidatable.
+# A conditional request per file is nothing at this traffic; serving a year-old caption track
+# nobody can replace is not.
+#
+# Listed one directory at a time on purpose. A catch-all `/assets/*` would also match the two
+# rules above, and which of two overlapping rules wins is not something to leave to guesswork.
+[[headers]]
+  for = "/assets/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
+[[headers]]
+  for = "/assets/video/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
+[[headers]]
+  for = "/assets/captions/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
 
 [[headers]]
   for = "/*.html"

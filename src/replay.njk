@@ -17,7 +17,7 @@ permalink: /replay/
 {% endblock %}
 
 {% block page_css %}
-<link rel="stylesheet" href="/assets/css/pages/replay-3.css">
+<link rel="stylesheet" href="{{ '/assets/css/pages/replay-3.css' | v }}">
 {% endblock %}
 
 {% block content %}
@@ -50,5 +50,5 @@ permalink: /replay/
 {% endblock %}
 
 {% block page_scripts %}
-<script src="/assets/js/pages/replay.js" defer></script>
+<script src="{{ '/assets/js/pages/replay.js' | v }}" defer></script>
 {% endblock %}

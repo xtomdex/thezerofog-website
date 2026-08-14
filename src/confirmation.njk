@@ -10,7 +10,7 @@ permalink: /confirmation/
 {% endblock %}
 
 {% block page_css %}
-<link rel="stylesheet" href="/assets/css/pages/confirmation-3.css">
+<link rel="stylesheet" href="{{ '/assets/css/pages/confirmation-3.css' | v }}">
 {% endblock %}
 
 {% block content %}
@@ -131,5 +131,5 @@ permalink: /confirmation/
 {% endblock %}
 
 {% block page_scripts %}
-<script src="/assets/js/pages/confirmation-2.js" defer></script>
+<script src="{{ '/assets/js/pages/confirmation-2.js' | v }}" defer></script>
 {% endblock %}

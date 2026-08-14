@@ -10,7 +10,7 @@ permalink: /sales/
 {% endblock %}
 
 {% block page_css %}
-<link rel="stylesheet" href="/assets/css/pages/sales-6.css">
+<link rel="stylesheet" href="{{ '/assets/css/pages/sales-6.css' | v }}">
 {% endblock %}
 
 {% block content %}
@@ -243,5 +243,5 @@ permalink: /sales/
 {% endblock %}
 
 {% block page_scripts %}
-<script src="/assets/js/pages/sales.js" defer></script>
+<script src="{{ '/assets/js/pages/sales.js' | v }}" defer></script>
 {% endblock %}

@@ -17,8 +17,8 @@
 {% block head_extras %}{% endblock %}
 {% include "partials/pixel-meta.njk" %}
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/css/shared.css">
-<link rel="stylesheet" href="/assets/css/cookie-consent-3.css">
+<link rel="stylesheet" href="{{ '/assets/css/shared.css' | v }}">
+<link rel="stylesheet" href="{{ '/assets/css/cookie-consent-3.css' | v }}">
 {% include "partials/head-meta.njk" %}
 {% block page_css %}{% endblock %}
 </head>
@@ -29,8 +29,8 @@
 {% include "partials/footer.njk" %}
 {% include "partials/cookie-banner.njk" %}
 
-<script src="/assets/js/shared.js" defer></script>
-<script src="/assets/js/cookie-consent-5.js" defer></script>
+<script src="{{ '/assets/js/shared.js' | v }}" defer></script>
+<script src="{{ '/assets/js/cookie-consent-5.js' | v }}" defer></script>
 {% block page_scripts %}{% endblock %}
 
 </body>

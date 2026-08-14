@@ -19,8 +19,8 @@ permalink: /workshop/room/
 {% endblock %}
 
 {% block page_css %}
-<link rel="stylesheet" href="/assets/css/pages/replay-3.css">
-<link rel="stylesheet" href="/assets/css/pages/workshop-room.css">
+<link rel="stylesheet" href="{{ '/assets/css/pages/replay-3.css' | v }}">
+<link rel="stylesheet" href="{{ '/assets/css/pages/workshop-room.css' | v }}">
 {% endblock %}
 
 {% block content %}
@@ -79,5 +79,5 @@ permalink: /workshop/room/
 {% endblock %}
 
 {% block page_scripts %}
-<script src="/assets/js/pages/workshop-room.js" defer></script>
+<script src="{{ '/assets/js/pages/workshop-room.js' | v }}" defer></script>
 {% endblock %}
