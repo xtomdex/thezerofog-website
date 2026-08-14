@@ -244,23 +244,28 @@ export function describeSlot(instant, viewerZone, now) {
     .formatToParts(instant)
     .find((p) => p.type === 'timeZoneName')?.value;
 
+  // The date, always, and never the weekday.
+  //
+  // "Today" and "Tomorrow" alone left someone unable to say what date they had just booked - the
+  // one question a booking has to answer. The weekday is left out on purpose: no weekday names
+  // appear in anything a customer reads, and a date is what a calendar entry needs anyway.
+  const dateLabel = new Intl.DateTimeFormat('en-US', {
+    timeZone: viewerZone,
+    month: 'short',
+    day: 'numeric',
+  }).format(instant);
+
   let dayLabel;
-  if (slotDate.iso === todayDate.iso) dayLabel = 'Today';
-  else if (slotDate.iso === tomorrowDate.iso) dayLabel = 'Tomorrow';
-  else {
-    dayLabel = new Intl.DateTimeFormat('en-US', {
-      timeZone: viewerZone,
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-    }).format(instant);
-  }
+  if (slotDate.iso === todayDate.iso) dayLabel = `Today, ${dateLabel}`;
+  else if (slotDate.iso === tomorrowDate.iso) dayLabel = `Tomorrow, ${dateLabel}`;
+  else dayLabel = dateLabel;
 
   const minutesAway = Math.round((instant.getTime() - now.getTime()) / MINUTE);
 
   return {
     startsAt: instant.toISOString(),
     dayLabel,
+    dateLabel,
     time,
     zoneLabel,
     label: `${dayLabel} at ${time}${zoneLabel ? ` ${zoneLabel}` : ''}`,

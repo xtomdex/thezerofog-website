@@ -122,12 +122,31 @@ function buildQueue({ registrationId, sessionStart, durationSec, config, recipie
     // six-hour reminder an instant later, and must never get one back-dated.
     const alreadyPast = scheduledFor.getTime() <= now.getTime();
 
+    // ...nor one whose own promise the delivery window has broken.
+    //
+    // The window pushes anything landing at night into the next morning. For a follow-up that is
+    // right. For a countdown it is not, because the countdown is in the text. Measured on a JIT
+    // slot at 07:15 New York: the six-hour reminder computes to 01:15, the one-hour to 06:15,
+    // both get moved to 07:00, and they arrive together with the fifteen-minute one - three
+    // emails in the same minute, a quarter of an hour before the session, each still naming a
+    // different lead time. Neither `alreadyPast` nor a check against the anchor sees it: every
+    // one of those times is in the future and before the session starts.
+    //
+    // So the test is not whether it arrives in time, but whether it still tells the truth. Any
+    // forward move breaks a countdown, and a reminder that cannot be sent when it says it will
+    // be is better not sent - the later reminders in the sequence still cover that person.
+    const windowBrokeThePromise =
+      entry.offsetMin < 0 && scheduledFor.getTime() !== raw.getTime();
+
     return {
       registration_id: registrationId,
       template: entry.template,
       segments: entry.segments,
       scheduled_for: scheduledFor.toISOString(),
-      status: alreadyPast && entry.anchor !== 'register' ? 'skipped' : 'pending',
+      status:
+        entry.anchor !== 'register' && (alreadyPast || windowBrokeThePromise)
+          ? 'skipped'
+          : 'pending',
     };
   });
 }

@@ -8,8 +8,14 @@
 // with it. Run it after any change to the wr-* functions; it has already caught two defects that
 // reading the code did not.
 //
-// Reads credentials from .env, which is gitignored. No email is ever sent: MAKE_WEBHOOK_URL is
-// pointed at an unreachable host for the notification step.
+// Reads credentials from .env, which is gitignored. No email is ever sent: the notification
+// endpoint is pointed at an unreachable host for that step.
+//
+// One thing to know before running it against production: the notify step drains the WHOLE
+// queue, not only the rows this test made, so every other due notification is attempted against
+// that unreachable host and comes back a failure. Nothing is lost - a failed send stays
+// `pending` and only records the error text, so the next cron run picks it up again - but the
+// error column on other people's rows will carry this test's fingerprints.
 
 import fs from 'node:fs';
 for (const line of fs.readFileSync('/Users/Cyrill/AI SANDBOX/thezerofog-website/.env','utf8').split('\n')) {
@@ -137,14 +143,67 @@ try {
   const { default: notify } = await import(B + 'wr-notify.js');
   await db.update('wr_registrations', { id:`eq.${regId}` }, { purchased_at: new Date().toISOString() });
   await db.update('wr_notifications', { registration_id:`eq.${regId}`, template:'eq.E7' }, { scheduled_for: new Date(Date.now()-1000).toISOString() });
-  process.env.MAKE_WEBHOOK_URL = 'https://example.invalid/never-called';
+  // Its own endpoint, not the opt-in webhook. wr-notify stopped falling back to MAKE_WEBHOOK_URL
+  // on 2026-08-14 - posting a notification payload to the lead scenario is what stopped it and
+  // took the funnel down with it - so without this the queue is never drained and every
+  // assertion below reads "pending" for reasons that have nothing to do with the buyer guard.
+  process.env.MAKE_NOTIFICATION_WEBHOOK_URL = 'https://example.invalid/never-called';
   const nr = await notify();
   const nb = await nr.json();
   const e7 = await db.selectOne('wr_notifications', { select:'status', registration_id:`eq.${regId}`, template:'eq.E7' });
   eq('notify: a buyer is never pitched', e7.status, 'skipped');
   console.log(`     notify run: sent ${nb.sent}, skipped ${nb.skipped}, failed ${nb.failed}`);
 
-  // --- 8. a bad token must reveal nothing ---
+  // --- 8. the no-show, who is the largest group in any webinar funnel ---
+  //
+  // Segments are written by wr-heartbeat, and wr-heartbeat only ever hears from someone who
+  // opened the room. Somebody who never opened it has no attendance row at all, so their segment
+  // list used to come back empty - and an empty list intersects with nothing, so E9 and E8-B were
+  // silently marked `skipped` for precisely the people they were written for. Fixed on
+  // 2026-08-13 and never covered by a test until now.
+  const noShowEmail = `wr-selftest-noshow-${Date.now()}@thezerofog.com`;
+  const nsr = await register(new Request(URL_BASE + 'wr-register', { method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ email: noShowEmail, startsAt: chosen.startsAt, kind: chosen.kind, tz:'America/New_York', consent:true })}));
+  const nsBody = await nsr.json();
+  const nsReg = await db.selectOne('wr_registrations', { select:'id', email:`eq.${noShowEmail}` });
+
+  const nsAttendance = await db.select('wr_attendance', { select:'registration_id', registration_id:`eq.${nsReg.id}` });
+  eq('no-show: never opened the room, so no attendance row exists', (nsAttendance||[]).length, 0);
+
+  // Make E9 due and drain the queue. It must be attempted, not skipped.
+  await db.update('wr_notifications', { registration_id:`eq.${nsReg.id}`, template:'eq.E9' }, { scheduled_for: new Date(Date.now()-1000).toISOString() });
+  await notify();
+  const e9 = await db.selectOne('wr_notifications', { select:'status', registration_id:`eq.${nsReg.id}`, template:'eq.E9' });
+  eq('no-show: E9 is not skipped for someone with no attendance row', e9.status === 'skipped', false);
+  console.log(`     E9 for a no-show ended as: ${e9.status}`);
+
+  // --- 9. registering again must not inherit the last session's watching ---
+  //
+  // `registration_id` is reused when a registration is replaced, and wr_attendance hangs off it.
+  // watched_sec is written with Math.max on purpose, so a reload cannot roll the counter back -
+  // and through a re-registration that same shield used to carry the old total into the new
+  // session. Someone who watched 40 minutes and then skipped the next session still came out as
+  // SEG-D-stayed and got the closing sequence for a session they were not at.
+  await db.upsert('wr_attendance', {
+    registration_id: nsReg.id,
+    first_seen_at: new Date(Date.now() - 60*60*1000).toISOString(),
+    last_seen_at: new Date().toISOString(),
+    watched_sec: 2600,
+    max_position_sec: 2600,
+    segments: ['SEG-D-stayed'],
+  }, 'registration_id');
+
+  const again = await register(new Request(URL_BASE + 'wr-register', { method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ email: noShowEmail, startsAt: chosen.startsAt, kind: chosen.kind, tz:'America/New_York', consent:true })}));
+  eq('re-register: accepted', again.status, 200);
+  const afterRe = await db.select('wr_attendance', { select:'watched_sec,segments', registration_id:`eq.${nsReg.id}` });
+  eq('re-register: the old attendance row is gone, not carried forward', (afterRe||[]).length, 0);
+
+  await db.remove('wr_registrations', { id:`eq.${nsReg.id}` });
+
+  // --- 10. a bad token must reveal nothing ---
   const br = await room(new Request(URL_BASE + 'wr-room?t=' + 'x'.repeat(32)));
   eq('room: unknown token -> 404', br.status, 404);
 
