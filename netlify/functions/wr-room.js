@@ -42,8 +42,15 @@ export default async function handler(req) {
   if (req.method === 'OPTIONS') return preflight();
   if (req.method !== 'GET') return json({ error: 'Method not allowed' }, 405);
 
-  const token = new URL(req.url).searchParams.get('t');
+  const url = new URL(req.url);
+  const token = url.searchParams.get('t');
   if (!token || token.length < 16) return json({ error: 'Invalid link.' }, 400);
+
+  // Which door the visitor came through. Only /replay/ sets this, and it only matters after the
+  // session has ended - see the `ended` branch below. It gates nothing secret: the same token
+  // would open the replay from that page anyway. It exists so the room cannot silently become
+  // the replay on its own.
+  const view = url.searchParams.get('view');
 
   let config;
   try {
@@ -166,6 +173,27 @@ export default async function handler(req) {
 
   if (config.replay.mode === 'redirect' && config.replay.redirectUrl) {
     return json({ ...base, state: 'replay-redirect', redirectUrl: config.replay.redirectUrl });
+  }
+
+  // The replay is a separate destination, not what the room turns into (CEO 2026-08-14).
+  //
+  // It used to be both: the second the session ended, the same room handed the same person the
+  // same video with a scrub bar. The one who sat through to the offer - the hottest person in the
+  // funnel, looking at the price - was told, in effect, that nothing had to be decided today.
+  // And it contradicted our own email: E9 and E10-B go out an hour later promising the replay to
+  // people who did NOT come or left early. It was never meant for the person who stayed.
+  //
+  // So the room now ends. The replay lives at /replay/?t=, which is what the email links to, and
+  // reaching it takes that deliberate step - `view=replay` is set by that page and by nothing
+  // else. Same player, same token, same 48-hour deadline; only the way in is different.
+  if (view !== 'replay') {
+    return json({
+      ...base,
+      state: 'ended',
+      offerUrl: config.room.offer.url,
+      offerHeadline: config.room.offer.headline,
+      offerButtonLabel: config.room.offer.buttonLabel,
+    });
   }
 
   return json({

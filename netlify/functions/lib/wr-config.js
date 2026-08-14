@@ -70,7 +70,10 @@ export const DEFAULT_CONFIG = {
     // watch who lands between 2:32 and 5:00, and tighten to 2.5 if that band converts badly.
     joinGraceMinutes: 5,
     stickyMessage: null,
-    endRedirect: '/replay/',
+    // Nothing. The room no longer sends anyone anywhere when the session ends (CEO 2026-08-14):
+    // it shows the end of the session and the offer, and the replay is reached from the email
+    // link to /replay/ instead. Kept as a key so a future decision has somewhere to land.
+    endRedirect: null,
     offer: {
       // The button appears when the product does, at 43:49, and stays for the rest of the
       // session. Not at the price (53:06) - by then they have watched nine minutes of pitch

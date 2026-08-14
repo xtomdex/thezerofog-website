@@ -16,7 +16,10 @@
   var token = new URLSearchParams(window.location.search).get('t');
 
   if (token) {
-    window.location.replace('/workshop/room/?t=' + encodeURIComponent(token));
+    // view=replay is what makes the room serve the replay at all. Without it the room shows the
+    // end of the session and the offer - see wr-room.js. This page is the only door to the
+    // replay, and the link in the E9/E10-B emails points here.
+    window.location.replace('/workshop/room/?t=' + encodeURIComponent(token) + '&view=replay');
     return;
   }
 

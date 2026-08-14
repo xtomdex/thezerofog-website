@@ -56,6 +56,11 @@ permalink: /workshop/room/
       <video id="roomVideo" playsinline preload="metadata"
              disablePictureInPicture controlsList="nodownload noremoteplayback"></video>
       <button type="button" class="room-join" id="roomJoin" hidden>Join the session</button>
+      {# The end of the session, in the frame the session was in. Not a button and not a link:
+         there is nothing left to press here, and the replay is a separate destination reached
+         from the email. Wording obeys the 2026-07-25 rule - "never assert live, never deny it" -
+         so it says session, never broadcast and never stream. #}
+      <div class="room-ended" id="roomEnded" hidden>The workshop has ended.<span>Thanks for being here.</span></div>
     </div>
   </div>
 

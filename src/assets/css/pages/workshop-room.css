@@ -109,6 +109,33 @@
   background: rgba(0, 0, 0, 0.42);
 }
 
+/* The end of the session, in the same frame and the same voice as the way in. Solid black rather
+   than the join screen's translucent wash: there is no longer a picture behind it, and a plate
+   that still let something show through would read as a player waiting to be poked. */
+.room-ended {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #000;
+  color: var(--text);
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  text-align: center;
+  padding: 0 24px;
+}
+
+.room-ended span {
+  font-size: clamp(0.8rem, 1.4vw, 1rem);
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0;
+}
+
 .room-handouts {
   display: flex;
   flex-wrap: wrap;

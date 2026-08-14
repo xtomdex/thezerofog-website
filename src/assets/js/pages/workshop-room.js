@@ -36,6 +36,7 @@
     stage: document.getElementById('roomStage'),
     video: document.getElementById('roomVideo'),
     joinBtn: document.getElementById('roomJoin'),
+    endedPlate: document.getElementById('roomEnded'),
     countdown: document.getElementById('roomCountdown'),
     notice: document.getElementById('roomNotice'),
     offer: document.getElementById('roomOffer'),
@@ -209,19 +210,15 @@
 
   function finish() {
     if (ended) return;
-    ended = true;
     beat('exit');
-    if (!state.endRedirect) return;
-    // The token has to travel. /replay/ is a doorway, not a page: with a token it forwards
-    // straight back here and wr-room decides the state, without one it shows "your link is in
-    // your email". Sending someone there bare at the exact second they finished the session -
-    // with the offer on screen - dead-ends the most valuable minute we have.
-    var target = state.endRedirect;
-    if (token && target.indexOf('t=') === -1) {
-      target += (target.indexOf('?') === -1 ? '?' : '&') + 't=' + encodeURIComponent(token);
-    }
-    window.location.href = target;
+    // The room ends here, it does not become the replay (CEO 2026-08-14). Whoever sat through to
+    // the offer is looking at the price with nothing else on screen, and handing them the same
+    // video back with a scrub bar was the loudest possible way to say nothing needs deciding
+    // today. The replay is a separate destination and arrives by email, an hour later, addressed
+    // to the people who did not come or left early.
+    showEnded();
   }
+
 
   // Sound is the only thing the click is really for.
   //
@@ -398,12 +395,46 @@
     setInterval(tick, 1000);
   }
 
+  // Used both when the room is opened after the session and when the session ends under someone
+  // who is watching. The video element is emptied, not merely hidden: a paused <video> still
+  // holds 448 MB of buffered master, and on a phone that is the difference between a page that
+  // idles and one the browser kills.
+  function showEnded() {
+    ended = true;
+    els.stage.hidden = false;
+    els.joinBtn.hidden = true;
+    els.video.hidden = true;
+    try {
+      els.video.pause();
+      els.video.removeAttribute('src');
+      els.video.load();
+    } catch (e) { /* nothing to release */ }
+    if (els.endedPlate) els.endedPlate.hidden = false;
+    if (els.notice) els.notice.hidden = true;
+    if (els.expiry) els.expiry.textContent = '';
+  }
+
   function render() {
     serverSkewMs = new Date(state.serverNow).getTime() - Date.now();
 
     if (state.state === 'early') {
       say('Your session has not started yet.');
       renderCountdown();
+      return;
+    }
+
+    // The session is over and the replay is somewhere else. Show the frame with the end of the
+    // session in it, and the offer under it - that offer is the only live thing left on the page,
+    // and it is why nobody is being sent anywhere.
+    if (state.state === 'ended') {
+      showEnded();
+      say('');
+      if (state.offerUrl) {
+        els.offerBtn.href = state.offerUrl;
+        els.offerBtn.textContent = state.offerButtonLabel || 'Get The Protocol';
+        els.offerHeadline.textContent = state.offerHeadline || '';
+        els.offer.hidden = false;
+      }
       return;
     }
 
@@ -469,7 +500,12 @@
     return;
   }
 
-  fetch('/.netlify/functions/wr-room?t=' + encodeURIComponent(token))
+  // `view` is carried through from the address bar: /replay/ forwards here with view=replay, and
+  // that is the only way the server will serve the replay after a session has ended.
+  var view = new URLSearchParams(window.location.search).get('view');
+
+  fetch('/.netlify/functions/wr-room?t=' + encodeURIComponent(token) +
+        (view ? '&view=' + encodeURIComponent(view) : ''))
     .then(function (res) {
       return res.json().then(function (body) {
         return { ok: res.ok, body: body };
