@@ -45,14 +45,25 @@ function isBookableSlot(instant, now, schedule, blockedDates) {
   if (instant.getTime() < now.getTime()) return false;
 
   if (schedule.jit.enabled) {
-    // Any JIT boundary still in the future qualifies, not only the very next one: a visitor who
-    // sat on the page for a minute must not have their click rejected.
+    // Any real JIT boundary still in the future qualifies (CEO 2026-08-14).
+    //
+    // `minLeadMinutes` used to be applied twice: once to decide which slot we OFFER, and again
+    // here to decide what we ACCEPT. Those are different questions. The lead time exists so we
+    // never put a slot in front of someone they cannot make - it has no business rejecting the
+    // click that follows.
+    //
+    // What it cost, measured against this module rather than reasoned about: the schedule page
+    // preselects the nearest JIT slot, and wr-slots will happily offer one that is 5 minutes and
+    // ten seconds away. The old rule then recomputed `nextJitSlot(now)` at click time, which by
+    // then had moved to the NEXT boundary, so delta went negative and the visitor got a 409 on
+    // the option we had chosen for them. The window was "minutes shown minus five" - as little as
+    // ten seconds to type an email and tick a box.
+    //
+    // Accepting up to the boundary itself is safe: that person arrives on time, and the room
+    // grants a further `joinGraceMinutes` (5) after the start anyway.
     const step = schedule.jit.intervalMin * 60 * 1000;
-    const first = nextJitSlot(now, {
-      intervalMin: schedule.jit.intervalMin,
-      minLeadMinutes: schedule.minLeadMinutes,
-    });
-    const delta = instant.getTime() - first.getTime();
+    const hourStart = Math.floor(now.getTime() / (60 * 60 * 1000)) * 60 * 60 * 1000;
+    const delta = instant.getTime() - hourStart;
     const withinWindow = instant.getTime() <= now.getTime() + schedule.maxDaysAhead * DAY_MS;
     if (delta >= 0 && delta % step === 0 && withinWindow) {
       if (!blockedDates.includes(zonedDateParts(instant, schedule.fixedTimeZone).iso)) return true;
