@@ -148,11 +148,11 @@ try {
   const { default: notify } = await import(B + 'wr-notify.js');
   await db.update('wr_registrations', { id:`eq.${regId}` }, { purchased_at: new Date().toISOString() });
   await db.update('wr_notifications', { registration_id:`eq.${regId}`, template:'eq.E7' }, { scheduled_for: new Date(Date.now()-1000).toISOString() });
-  // Its own endpoint, not the opt-in webhook. wr-notify stopped falling back to MAKE_WEBHOOK_URL
-  // on 2026-08-14 - posting a notification payload to the lead scenario is what stopped it and
-  // took the funnel down with it - so without this the queue is never drained and every
-  // assertion below reads "pending" for reasons that have nothing to do with the buyer guard.
-  process.env.MAKE_NOTIFICATION_WEBHOOK_URL = 'https://example.invalid/never-called';
+  // Delivery is MailerLite now (2026-08-14). Point the API base at an unreachable host so the
+  // notify step exercises the whole path but no real subscriber is ever touched: a failed send
+  // stays `pending`, which is the same contract the old webhook had.
+  process.env.MAILERLITE_API_KEY = process.env.MAILERLITE_API_KEY || 'selftest';
+  process.env.MAILERLITE_API_BASE = 'https://example.invalid/never-called';
   const nr = await notify();
   const nb = await nr.json();
   const e7 = await db.selectOne('wr_notifications', { select:'status', registration_id:`eq.${regId}`, template:'eq.E7' });

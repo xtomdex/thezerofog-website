@@ -106,3 +106,19 @@ own fields, rather than replacing the row.
   registration, two questions typed in the workshop room, and the registration that caused the
   failure. All five are our own addresses. They replay when the scenario is switched on.
 - Payment Processing (6209692) is also inactive.
+
+## 2026-08-14 - Make is out of the notification path (no scenario touched)
+
+**Changed by:** Claude, at Kirill's instruction. Nothing inside Make was modified - this entry
+records an architecture decision that affects what Make will NOT be asked to do.
+
+The planned third scenario ("workshop_notification" -> emails) is cancelled. Reasons, counted:
+the Free plan allows 2 active scenarios and both slots are taken (Webinar Opt-In 5275566,
+Payment Processing 6209692); the 1000 operations/month budget is ~25 registrants' worth of
+funnel; and the opt-in scenario never sent mail anyway (webhook -> datastore -> MailerLite
+subscriber) - sending always lived in MailerLite.
+
+`wr-notify.js` now delivers directly to MailerLite (`lib/wr-mailerlite.js`): one group per
+template (`wr-E1`...`wr-E13`, 19 groups created 2026-08-14 via API), an automation per group
+sends the email. Make keeps exactly its two existing jobs: the opt-in lead forward and the
+Stripe payment forward. `MAKE_NOTIFICATION_WEBHOOK_URL` is retired and must never be set.

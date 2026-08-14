@@ -13,6 +13,8 @@
 
 import { json, select, update } from './lib/wr-db.js';
 import { loadConfig, deriveSegments } from './lib/wr-config.js';
+import { describeSlot } from './lib/wr-time.js';
+import { deliverNotification } from './lib/wr-mailerlite.js';
 
 const BATCH = 200;
 
@@ -52,15 +54,12 @@ export default async function handler() {
 
   if (!due || !due.length) return json({ ok: true, sent: 0, skipped: 0 });
 
-  // Same reason as in wr-question.js, and here the stakes are higher: this function runs on a
-  // five-minute cron. Pointed at the opt-in scenario's webhook it would post a payload that
-  // scenario cannot read, over and over, until Make stopped it - and with it the whole funnel.
-  // Without an endpoint the rows simply stay `pending` and go out when one is configured, so
-  // refusing to send costs a delay and nothing else.
-  const target = config.webhooks?.routes?.notification || process.env.MAKE_NOTIFICATION_WEBHOOK_URL;
-  if (!target) {
-    console.error('wr-notify: no delivery endpoint configured - set MAKE_NOTIFICATION_WEBHOOK_URL');
-    return json({ error: 'no endpoint' }, 500);
+  // Delivery is MailerLite, directly (2026-08-14) - see lib/wr-mailerlite.js for why Make is
+  // out of this path. Without a key the rows simply stay `pending` and go out when one is
+  // configured, so refusing to send costs a delay and nothing else.
+  if (!process.env.MAILERLITE_API_KEY) {
+    console.error('wr-notify: no delivery configured - set MAILERLITE_API_KEY');
+    return json({ error: 'no delivery' }, 500);
   }
 
   let sent = 0;
@@ -153,8 +152,13 @@ export default async function handler() {
       template: row.template,
       email: reg.email,
       name: reg.name || undefined,
-      // Merge fields the templates already expect.
+      // Merge fields the templates already expect. slot_time_label is what [SLOT_TIME] shows:
+      // "Today, Aug 14 at 2:00 PM EDT" in the RECIPIENT's own zone, computed at send time so
+      // Today/Tomorrow stay true.
       slot_time: session?.starts_at || null,
+      slot_time_label: session?.starts_at
+        ? describeSlot(new Date(session.starts_at), reg.time_zone || 'America/New_York', now).label
+        : null,
       time_zone: reg.time_zone || null,
       room_url: roomUrl,
       calendar_url: calendarUrl,
@@ -169,16 +173,7 @@ export default async function handler() {
     };
 
     try {
-      const res = await fetch(target, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(config.webhooks?.bearer ? { Authorization: `Bearer ${config.webhooks.bearer}` } : {}),
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) throw new Error(`delivery endpoint returned ${res.status}`);
+      await deliverNotification(payload);
 
       await update(
         'wr_notifications',

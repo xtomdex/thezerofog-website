@@ -177,11 +177,12 @@ Client-side integrations (consumed by `_data/env.js`):
   real visitors — the live funnel goes down. This happened on 2026-08-13.
 - `MAKE_QUESTION_WEBHOOK_URL` — where `wr-question.js` forwards a question. No fallback to
   `MAKE_WEBHOOK_URL`; unset means the question is stored in `wr_events` and not forwarded.
-- `MAKE_NOTIFICATION_WEBHOOK_URL` — where `wr-notify.js` hands each due email. No fallback either;
-  unset means the queue rows stay `pending` until an endpoint exists, which costs a delay and
-  nothing else. The cron runs every five minutes, so a fallback here would re-break the opt-in
-  scenario indefinitely.
-- `MAILERLITE_API_KEY`
+- ~~`MAKE_NOTIFICATION_WEBHOOK_URL`~~ — **retired 2026-08-14.** Make is out of the email path
+  (2 active scenarios both taken, 1000 ops/month ≈ 25 registrants); `wr-notify.js` now delivers
+  straight to MailerLite via `lib/wr-mailerlite.js` (one group per template, an automation per
+  group sends the email). Unset `MAILERLITE_API_KEY` means the rows stay `pending` - a delay,
+  nothing else. `MAILERLITE_API_BASE` exists to point the selftest at an unreachable host.
+- `MAILERLITE_API_KEY` — the delivery credential for the whole notification queue (see above)
 - `WORKSHOP_ADMIN_KEY` — shared key gating `wr-stats.js`, which returns registrant addresses and watch behaviour. Unset means the endpoint answers 404 to everyone, including us.
 - `WORKSHOP_SCHEDULE_PATH` — optional override for the post-opt-in redirect. Unset in production.
 - ~~`EVERWEBINAR_SCHEDULE_URL`~~ — **removed 2026-08-13.** EverWebinar was not bought; the schedule step is ours. The variable's absence used to make `optin.js` return 500 and drop the lead before Make ever saw it.
