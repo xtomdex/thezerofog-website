@@ -69,7 +69,7 @@ try {
   const q = await db.select('wr_notifications', { select:'template,status,scheduled_for,segments', registration_id:`eq.${regId}`, order:'scheduled_for.asc' });
   console.log('\n     queue:');
   for (const n of q) console.log(`       ${n.template.padEnd(6)} ${n.status.padEnd(10)} ${n.scheduled_for}`);
-  eq('queue: one row per configured email', q.length, 16);
+  eq('queue: one row per configured email', q.length, 19);
   const pending = q.filter(n=>n.status==='pending').map(n=>n.template);
   const skipped = q.filter(n=>n.status==='skipped').map(n=>n.template);
   eq('queue: E1 is pending, not skipped', pending.includes('E1'), true);
@@ -121,8 +121,13 @@ try {
     return r.status;
   };
 
-  await hit(600);
+  // Below bounceSec, a peek is filed as a no-show so the rebook chain picks it up (2026-08-14).
+  await hit(180);
   let a = await db.selectOne('wr_attendance', { select:'watched_sec,segments', registration_id:`eq.${regId}` });
+  eq('beat: 3 min watched -> bounced, not no-show', a.segments, ['SEG-A-bounced']);
+
+  await hit(600);
+  a = await db.selectOne('wr_attendance', { select:'watched_sec,segments', registration_id:`eq.${regId}` });
   eq('beat: 10 min watched -> pre-reveal', a.segments, ['SEG-B-pre-reveal']);
 
   await hit(1400);
@@ -153,6 +158,19 @@ try {
   const e7 = await db.selectOne('wr_notifications', { select:'status', registration_id:`eq.${regId}`, template:'eq.E7' });
   eq('notify: a buyer is never pitched', e7.status, 'skipped');
   console.log(`     notify run: sent ${nb.sent}, skipped ${nb.skipped}, failed ${nb.failed}`);
+
+  // --- 7b. the no-sales guard: E13's one-click promise ---
+  //
+  // no_sales must silence exactly the templates flagged `sales: true` and nothing else. The
+  // buyer flag from step 7 is cleared first - it would shadow the guard under test.
+  await db.update('wr_registrations', { id:`eq.${regId}` }, { purchased_at: null, no_sales: true });
+  await db.update('wr_notifications', { registration_id:`eq.${regId}`, template:'eq.E12' }, { status: 'pending', scheduled_for: new Date(Date.now()-1000).toISOString() });
+  await db.update('wr_notifications', { registration_id:`eq.${regId}`, template:'eq.E6' }, { status: 'pending', scheduled_for: new Date(Date.now()-1000).toISOString() });
+  await notify();
+  const e12 = await db.selectOne('wr_notifications', { select:'status', registration_id:`eq.${regId}`, template:'eq.E12' });
+  eq('notify: no-sales silences a price email', e12.status, 'skipped');
+  const e6 = await db.selectOne('wr_notifications', { select:'status,error', registration_id:`eq.${regId}`, template:'eq.E6' });
+  eq('notify: no-sales keeps the useful stuff (E6 attempted, not skipped)', e6.status, 'pending');
 
   // --- 8. the no-show, who is the largest group in any webinar funnel ---
   //

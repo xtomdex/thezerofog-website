@@ -63,7 +63,7 @@ export default async function handler(req) {
   let registration;
   try {
     registration = await selectOne('wr_registrations', {
-      select: 'id,email,name,time_zone,session_id,wr_sessions(starts_at,kind)',
+      select: 'id,email,name,time_zone,session_id,wr_sessions(starts_at,kind),wr_attendance(max_position_sec)',
       token: `eq.${token}`,
     });
   } catch (err) {
@@ -196,6 +196,17 @@ export default async function handler(req) {
     });
   }
 
+  // Where the replay should open. "You can pick up where you stepped out" is a promise the
+  // E10-B email makes (CEO 2026-08-14) - so the replay starts at the furthest point this person
+  // actually reached, not at zero. Monotonic max_position_sec covers both live and earlier
+  // replay visits. Two guards: someone who barely started gets a clean start from the top, and
+  // someone who reached the end is not dropped onto the closing frame.
+  const attendance = Array.isArray(registration.wr_attendance)
+    ? registration.wr_attendance[0]
+    : registration.wr_attendance;
+  const reached = attendance?.max_position_sec || 0;
+  const resumeAtSec = reached > 120 && reached < durationSec - 120 ? reached : 0;
+
   return json({
     ...base,
     state: 'replay',
@@ -204,6 +215,7 @@ export default async function handler(req) {
     // $67 button anyway, and restarted itself on the next visit.
     expiresAt: new Date(replayEnd).toISOString(),
     secondsUntilExpiry: Math.round((replayEnd - now) / 1000),
+    resumeAtSec,
     allowSeek: config.replay.allowSeek,
     videoUrl: videoSource(config, 'replay'),
     posterUrl: config.video.posterUrl,

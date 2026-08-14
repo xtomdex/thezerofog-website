@@ -49,7 +49,7 @@ export default async function handler(req) {
   rows = rows || [];
 
   const duration = config.video.durationSec;
-  const { revealSec, offerSec, watchedFraction } = config.timecodes;
+  const { revealSec, offerSec, thresholdGraceSec } = config.timecodes;
 
   const totals = {
     registrants: rows.length,
@@ -78,9 +78,9 @@ export default async function handler(req) {
     if (live > 0) {
       totals.liveAttendees += 1;
       totals.liveWatchedSecSum += live;
-      if (live >= revealSec * watchedFraction) totals.watchedToReveal += 1;
-      if (live >= offerSec * watchedFraction) totals.watchedToOffer += 1;
-      if (live >= duration * watchedFraction) totals.watchedAll += 1;
+      if (live >= revealSec - thresholdGraceSec) totals.watchedToReveal += 1;
+      if (live >= offerSec - thresholdGraceSec) totals.watchedToOffer += 1;
+      if (live >= duration - thresholdGraceSec) totals.watchedAll += 1;
 
       // The retention curve is drawn from WATCHED seconds, not from the furthest position
       // reached. Someone who joined at minute 40 was not present for minutes 0 to 39, and a
@@ -107,7 +107,7 @@ export default async function handler(req) {
     });
     source.registrants += 1;
     if (live > 0) source.attended += 1;
-    if (live >= offerSec * watchedFraction) source.sawOffer += 1;
+    if (live >= offerSec - thresholdGraceSec) source.sawOffer += 1;
     if (row.purchased_at) source.buyers += 1;
 
     // Which session times actually produce attendance - the question that decides the schedule.
@@ -142,7 +142,7 @@ export default async function handler(req) {
     generatedAt: new Date().toISOString(),
     // Stated on the response so nobody reads these numbers without knowing the boundaries they
     // were computed against - the timecodes are provisional until the master is locked.
-    timecodes: { revealSec, offerSec, watchedFraction, durationSec: duration },
+    timecodes: { revealSec, offerSec, thresholdGraceSec, durationSec: duration },
     totals: {
       ...totals,
       showUpRate: pct(totals.liveAttendees, totals.registrants),

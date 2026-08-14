@@ -1,0 +1,56 @@
+---
+title: "No more price emails - The Zero Fog"
+permalink: /no-thanks/
+---
+{% extends "layouts/base.njk" %}
+
+{# The landing side of E13's P.P.S.: "one click here and I stop." The click carries the join
+   token; the page calls wr-preferences, which sets no_sales on the registration, and wr-notify
+   keeps the promise at send time. This is deliberately NOT an unsubscribe - the person stays on
+   the list and keeps every non-sales email. #}
+
+{% block head_extras %}
+<meta name="robots" content="noindex">
+{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{{ '/assets/css/pages/replay-3.css' | v }}">
+{% endblock %}
+
+{% block content %}
+
+<a href="/" class="brand">The Zero Fog</a>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
+
+<div class="replay">
+
+  <div id="ntWorking">
+    <h1>One second...</h1>
+  </div>
+
+  <div id="ntDone" hidden>
+    <h1>Done. Nothing more about the price.</h1>
+    <p class="subtitle">The useful emails still come. And if you ever do want the protocol,
+    the door stays open at <a href="/sales/">thezerofog.com/sales</a> - you just won't hear
+    about it from me again.</p>
+  </div>
+
+  <div id="ntNoToken" hidden>
+    <h1>This link is missing its code.</h1>
+    <p class="subtitle">Please use the link from your email - it carries the code that tells us
+    whose emails to change. Nothing has been changed yet.</p>
+  </div>
+
+  <div id="ntError" hidden>
+    <h1>That didn't go through.</h1>
+    <p class="subtitle">Nothing has been changed. Try the link from your email once more, or
+    just reply to any email with "no price emails" and I'll set it by hand.</p>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ '/assets/js/pages/no-thanks.js' | v }}" defer></script>
+{% endblock %}

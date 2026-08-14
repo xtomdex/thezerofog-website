@@ -127,7 +127,7 @@ export default async function handler(req) {
   // the fix for the leak the old EverWebinar plan logged and never resolved: someone who joins at
   // minute 40 and leaves at minute 50 exits after the reveal timecode but has watched none of it,
   // and under an exit-minute rule would receive the mechanism by email. Here they cannot.
-  const { revealSec, offerSec, watchedFraction } = config.timecodes;
+  const { revealSec, offerSec, thresholdGraceSec, bounceSec } = config.timecodes;
 
   // Live and replay are counted in separate columns and never pooled. They answer different
   // questions: "did they see the reveal in the session" decides the post-session branch, while
@@ -137,10 +137,15 @@ export default async function handler(req) {
   const totalWatched = liveWatched + replayWatched;
 
   const segments = deriveSegments({
-    attended: liveWatched > 0,
-    watchedToRevealSec: liveWatched >= revealSec * watchedFraction,
-    watchedToOfferSec: liveWatched >= offerSec * watchedFraction,
-    replayEarned: replayWatched >= revealSec * watchedFraction || event === 'bonus_click',
+    // A few peeked minutes are not attendance (CEO 2026-08-14): below bounceSec the person is
+    // filed as a no-show so the rebook chain (E9/E9-B/E9-C) picks them up instead of the
+    // replay email. Recomputed on every beat, so anyone still watching crosses the line
+    // naturally as their watched seconds grow.
+    attended: liveWatched >= bounceSec,
+    bounced: liveWatched > 0 && liveWatched < bounceSec,
+    watchedToRevealSec: liveWatched >= revealSec - thresholdGraceSec,
+    watchedToOfferSec: liveWatched >= offerSec - thresholdGraceSec,
+    replayEarned: replayWatched >= revealSec - thresholdGraceSec || event === 'bonus_click',
   });
 
   try {

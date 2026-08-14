@@ -243,9 +243,11 @@
     els.video.muted = false;
 
     if (phase === 'replay') {
-      // A replay never ran behind a blur - nothing is loaded yet, and it starts at the top.
+      // A replay never ran behind a blur - nothing is loaded yet. It opens at the furthest
+      // point this person actually reached (server-computed resumeAtSec), so "pick up where
+      // you stepped out" in the E10-B email is literally true; a fresh viewer starts at the top.
       els.video.controls = state.allowSeek !== false;
-      startPlayback(0);
+      startPlayback(state.resumeAtSec || 0);
       beat('join');
       return;
     }

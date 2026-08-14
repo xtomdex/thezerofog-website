@@ -126,8 +126,15 @@ function buildQueue({ registrationId, sessionStart, durationSec, config, recipie
 
     // E1 is a receipt, not a reminder - holding it until morning would leave someone who just
     // signed up staring at an inbox with nothing in it.
-    const scheduledFor =
-      entry.anchor === 'register' ? raw : applyDeliveryWindow(raw, recipientZone, window);
+    //
+    // E5 (start, offset 0) is exempt for the same reason, decided by CEO 2026-08-14: it is the
+    // door to a session the person chose themselves minutes ago. A JIT registrant at 02:00 gets
+    // a 02:15 slot; the window would move "starting right now" to 07:00 - five hours after the
+    // session - and that person's E2-E4 countdowns are all skipped, so E5 is the only email
+    // that can carry the room link to them at start time.
+    const exemptFromWindow =
+      entry.anchor === 'register' || (entry.anchor === 'start' && entry.offsetMin === 0);
+    const scheduledFor = exemptFromWindow ? raw : applyDeliveryWindow(raw, recipientZone, window);
 
     // The conditional reminders. Someone registering for a session in 20 minutes must not get a
     // six-hour reminder an instant later, and must never get one back-dated.

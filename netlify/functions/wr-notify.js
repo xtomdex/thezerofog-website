@@ -39,7 +39,7 @@ export default async function handler() {
     due = await select('wr_notifications', {
       select:
         'id,template,segments,scheduled_for,registration_id,' +
-        'wr_registrations(email,name,token,time_zone,purchased_at,wr_sessions(starts_at),wr_attendance(segments,watched_sec,replay_watched_sec))',
+        'wr_registrations(email,name,token,time_zone,purchased_at,no_sales,wr_sessions(starts_at),wr_attendance(segments,watched_sec,replay_watched_sec))',
       status: 'eq.pending',
       scheduled_for: `lte.${now.toISOString()}`,
       order: 'scheduled_for.asc',
@@ -87,6 +87,19 @@ export default async function handler() {
       continue;
     }
 
+    // The no-sales guard. E13's P.P.S. promises "one click here and I stop - you'll still get
+    // the useful stuff, just nothing about the price". The click sets no_sales on the
+    // registration (wr-preferences.js), and this is where the promise is kept: templates
+    // flagged `sales: true` in the schedule are skipped, everything else still goes.
+    if (reg.no_sales) {
+      const entry = config.notifications.schedule.find((e) => e.template === row.template);
+      if (entry?.sales) {
+        await update('wr_notifications', { id: `eq.${row.id}` }, { status: 'skipped' }).catch(() => {});
+        skipped += 1;
+        continue;
+      }
+    }
+
     const attendance = Array.isArray(reg.wr_attendance) ? reg.wr_attendance[0] : reg.wr_attendance;
 
     // A missing attendance row is not "no information about this person" - it IS the information.
@@ -118,6 +131,23 @@ export default async function handler() {
 
     const session = Array.isArray(reg.wr_sessions) ? reg.wr_sessions[0] : reg.wr_sessions;
 
+    const roomUrl = `${process.env.PUBLIC_SITE_URL || 'https://thezerofog.com'}/workshop/room/?t=${reg.token}`;
+
+    // The same Google Calendar entry the confirmation page builds, rebuilt server-side so E1's
+    // add-to-calendar button has somewhere real to point (it used to lean on EverWebinar's link,
+    // which is gone). Title and description mirror confirmation-2.js - one event, two doors.
+    let calendarUrl = null;
+    if (session?.starts_at) {
+      const start = new Date(session.starts_at);
+      const end = new Date(start.getTime() + Math.round(config.video.durationSec / 60) * 60000);
+      const stamp = (d) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+      calendarUrl =
+        'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+        '&text=' + encodeURIComponent('The Zero Fog Workshop') +
+        '&dates=' + encodeURIComponent(stamp(start) + '/' + stamp(end)) +
+        '&details=' + encodeURIComponent('Your personal link: ' + roomUrl + '\nA desktop or laptop works best.');
+    }
+
     const payload = {
       type: 'workshop_notification',
       template: row.template,
@@ -126,7 +156,13 @@ export default async function handler() {
       // Merge fields the templates already expect.
       slot_time: session?.starts_at || null,
       time_zone: reg.time_zone || null,
-      room_url: `${process.env.PUBLIC_SITE_URL || 'https://thezerofog.com'}/workshop/room/?t=${reg.token}`,
+      room_url: roomUrl,
+      calendar_url: calendarUrl,
+      // The only door to the replay (see replay.js): /replay/?t= redirects into the room with
+      // view=replay. Maps to [REPLAY_LINK] in E7-B / E8 / E8-B / E9 / E10-B.
+      replay_url: `${process.env.PUBLIC_SITE_URL || 'https://thezerofog.com'}/replay/?t=${reg.token}`,
+      // Maps to [STOP_FOUNDING_EMAILS] in E13: the one-click opt-out from the sales cadence.
+      no_sales_url: `${process.env.PUBLIC_SITE_URL || 'https://thezerofog.com'}/no-thanks/?t=${reg.token}`,
       segments: personSegments,
       from: config.notifications.sender.from,
       reply_to: config.notifications.sender.replyTo,

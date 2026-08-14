@@ -120,9 +120,21 @@ export const DEFAULT_CONFIG = {
     // counted as having heard it. This is the same reasoning that moved the boundary from
     // slide 92 to slide 79 in the 2026-07-25 fact-check.
     offerSec: 2629,
-    // Fraction of a threshold that counts as "reached it". Watched seconds, not position, so a
-    // scrubber on the replay cannot buy the mechanism by dragging past it.
-    watchedFraction: 0.9,
+    // How close to a mark still counts as "reached it": the mark minus this many seconds.
+    // Watched seconds, not position, so a scrubber on the replay cannot buy the mechanism by
+    // dragging past it.
+    //
+    // Was a fraction (0.9) of the mark - but a fraction scales with where the mark sits, and at
+    // the offer mark (43:49) it opened a four-and-a-half-minute gap: someone leaving at 39:26
+    // was counted as "stayed", thanked for sitting through, and priced in E7 before the product
+    // had ever been shown to them. A fixed 90 seconds forgives a dropped heartbeat, nothing
+    // more. CEO 2026-08-14.
+    thresholdGraceSec: 90,
+    // Below this many watched seconds, someone who technically joined is treated as a no-show
+    // for email purposes (CEO 2026-08-14): a person who peeked for a few minutes should be
+    // rebooked into a live session (E9 chain), not handed the replay (E10-B) - they have seen
+    // nothing worth resuming. At or above it, they are a real early leaver.
+    bounceSec: 300,
   },
 
   notifications: {
@@ -130,6 +142,10 @@ export const DEFAULT_CONFIG = {
     // otherwise put its six-hour reminder at 3am.
     deliveryWindow: { startHour: 7, endHour: 23 },
     sender: { from: 'hello@thezerofog.com', replyTo: 'kirill@thezerofog.com' },
+    // `sales: true` marks the templates that name a price. A registration with no_sales = true
+    // (the /no-thanks/ one-click from E13's P.P.S.) is skipped for exactly these and keeps
+    // everything else - that is the promise "you'll still get the useful stuff, just nothing
+    // about the price". The manual CLOSE-24H blast must honour the same flag.
     schedule: [
       { template: 'E1', anchor: 'register', offsetMin: 0, segments: ['all'] },
       { template: 'E2', anchor: 'start', offsetMin: -360, segments: ['all'] },
@@ -137,17 +153,28 @@ export const DEFAULT_CONFIG = {
       { template: 'E4', anchor: 'start', offsetMin: -15, segments: ['all'] },
       { template: 'E5', anchor: 'start', offsetMin: 0, segments: ['all'] },
 
+      // The no-show chain: rebook -> rebook -> replay (CEO 2026-08-14). The replay is
+      // deliberately the THIRD door, not the first - a session with a countdown converts,
+      // a video on demand waits forever. E9-C's "within 24 hours" wording depends on its
+      // offset staying >= the replay window minus a day; move one, recheck the other.
       { template: 'E9', anchor: 'end', offsetMin: 60, segments: ['SEG-A-noshow'] },
+      // E9-D is the bounce VARIANT of step one, not a fourth step: same rebook ask, an opening
+      // that is true for someone who sat five minutes. The tail of the chain is shared.
+      { template: 'E9-D', anchor: 'end', offsetMin: 60, segments: ['SEG-A-bounced'] },
+      { template: 'E9-B', anchor: 'end', offsetMin: 1200, segments: ['SEG-A-noshow', 'SEG-A-bounced'] },
+      { template: 'E9-C', anchor: 'end', offsetMin: 1680, segments: ['SEG-A-noshow', 'SEG-A-bounced'] },
       { template: 'E10-B', anchor: 'end', offsetMin: 60, segments: ['SEG-B-pre-reveal'] },
       { template: 'E6', anchor: 'end', offsetMin: 30, segments: ['SEG-D-stayed'] },
-      { template: 'E7', anchor: 'end', offsetMin: 120, segments: ['SEG-D-stayed'] },
-      { template: 'E7-B', anchor: 'end', offsetMin: 120, segments: ['SEG-C-pre-offer'] },
-      { template: 'E7-C', anchor: 'end', offsetMin: 960, segments: ['SEG-SAW-REVEAL'] },
-      { template: 'E8', anchor: 'end', offsetMin: 1440, segments: ['SEG-SAW-REVEAL'] },
-      { template: 'E8-B', anchor: 'end', offsetMin: 1440, segments: ['SEG-A-noshow', 'SEG-B-pre-reveal'] },
-      { template: 'E11', anchor: 'end', offsetMin: 2880, segments: ['SEG-CLOSE'] },
-      { template: 'E12', anchor: 'end', offsetMin: 4320, segments: ['SEG-CLOSE'] },
-      { template: 'E13', anchor: 'end', offsetMin: 5760, segments: ['SEG-CLOSE'] },
+      { template: 'E7', anchor: 'end', offsetMin: 120, segments: ['SEG-D-stayed'], sales: true },
+      { template: 'E7-B', anchor: 'end', offsetMin: 120, segments: ['SEG-C-pre-offer'], sales: true },
+      { template: 'E7-C', anchor: 'end', offsetMin: 960, segments: ['SEG-SAW-REVEAL'], sales: true },
+      { template: 'E8', anchor: 'end', offsetMin: 1440, segments: ['SEG-SAW-REVEAL'], sales: true },
+      // E8-B lost the no-show segment on 2026-08-14: no-shows now get the E9 chain above,
+      // and their replay email is E9-C. Only the early leavers remain.
+      { template: 'E8-B', anchor: 'end', offsetMin: 1440, segments: ['SEG-B-pre-reveal'] },
+      { template: 'E11', anchor: 'end', offsetMin: 2880, segments: ['SEG-CLOSE'], sales: true },
+      { template: 'E12', anchor: 'end', offsetMin: 4320, segments: ['SEG-CLOSE'], sales: true },
+      { template: 'E13', anchor: 'end', offsetMin: 5760, segments: ['SEG-CLOSE'], sales: true },
       // CLOSE-24H is deliberately absent: it is fired by hand when the founding window closes.
     ],
   },
@@ -214,10 +241,14 @@ export async function loadConfig({ fresh = false } = {}) {
 }
 
 /** The segments a person belongs to, given what they actually watched. */
-export function deriveSegments({ attended, watchedToRevealSec, watchedToOfferSec, replayEarned }) {
+export function deriveSegments({ attended, bounced, watchedToRevealSec, watchedToOfferSec, replayEarned }) {
   const segments = [];
 
-  if (!attended) segments.push('SEG-A-noshow');
+  // A bounce (opened the room, watched under bounceSec) follows the no-show REBOOK chain but
+  // must not get the no-show WORDING - "I noticed you didn't make it" is false for someone who
+  // sat through five minutes (CEO 2026-08-14). Separate segment, separate first email (E9-D),
+  // shared tail (E9-B / E9-C).
+  if (!attended) segments.push(bounced ? 'SEG-A-bounced' : 'SEG-A-noshow');
 
   if (attended) {
     if (!watchedToRevealSec) segments.push('SEG-B-pre-reveal');
@@ -232,7 +263,7 @@ export function deriveSegments({ attended, watchedToRevealSec, watchedToOfferSec
     segments.push('SEG-SAW-REVEAL');
   }
 
-  if (replayEarned && (segments.includes('SEG-A-noshow') || segments.includes('SEG-B-pre-reveal'))) {
+  if (replayEarned && (segments.includes('SEG-A-noshow') || segments.includes('SEG-A-bounced') || segments.includes('SEG-B-pre-reveal'))) {
     segments.push('SEG-REPLAY-EARNED');
   }
 
