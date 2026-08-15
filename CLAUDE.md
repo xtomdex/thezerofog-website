@@ -120,7 +120,9 @@ browser can read them.
   `{ ok: true, url }` where `url` is Stripe's hosted checkout page; the sales page redirects
   there. `success_url` → `${PUBLIC_SITE_URL}/welcome/?session_id={CHECKOUT_SESSION_ID}`,
   `cancel_url` → `${PUBLIC_SITE_URL}/sales/`. Session carries an extensible `metadata`
-  object (`metadata[source]=sales_page` for now). Stripe errors are logged server-side and
+  object (`metadata[source]=sales_page` for now) and a 2-hour `expires_at` — the resulting
+  `checkout.session.expired` event is what triggers the E18 abandoned-checkout email (the
+  default 24h expiry would send it a day late). Stripe errors are logged server-side and
   returned to the client as a generic message (no internal detail leaked). Webhook handling /
   LMS enrollment is a **separate later task** — not implemented here.
 - `stripe-webhook.js` — receives Stripe `checkout.session.completed` webhooks (server-to-server,
@@ -139,8 +141,16 @@ browser can read them.
   `sendPurchaseWelcome` — adds the buyer to the MailerLite group `wr-E14`, whose join fires the
   purchase-welcome automation. No remove-before-add there, so a duplicate Stripe delivery cannot
   double-send E14. It also stamps `purchased_at` on the buyer's `wr_registrations` row (the
-  buyer guard `wr-notify.js` reads before every send). Response
-  codes drive Stripe's retry behavior: **200** = forwarded OK, or a non-target event type ignored,
+  buyer guard `wr-notify.js` reads before every send). It also handles
+  `checkout.session.expired` (sessions carry a 2h `expires_at`): if the expired session captured
+  an email and is unpaid, `sendAbandonedCheckout` adds the address to the MailerLite group
+  `wr-E18`, whose join fires the E18 recovery note. Buyers are skipped (anyone already in
+  `wr-E14`), and no remove-before-add means a repeat abandonment can never send a second nudge —
+  "the only nudge I'll send" in E18's body is enforced in code. Always answers 200 to expired
+  events (a recovery email is never worth a Stripe retry). Requires the Stripe webhook endpoint
+  to be subscribed to `checkout.session.expired` (dashboard setting — pending Stripe access).
+  Response codes drive Stripe's retry behavior: **200** = forwarded OK, or a non-target event
+  type ignored, an expired session handled,
   or a signature-valid event that failed payment validation (acknowledge, no retry); **400** =
   missing/invalid signature, empty body, or parse failure (forged/bad — no retry); **500** = env
   misconfig, missing email on a paid session, or Make forward failed (Stripe SHOULD retry).

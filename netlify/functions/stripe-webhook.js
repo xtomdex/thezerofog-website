@@ -117,6 +117,83 @@ async function sendPurchaseWelcome(email) {
   }
 }
 
+/**
+ * Send E18, the abandoned-checkout recovery note, by adding the person to the MailerLite group
+ * `wr-E18`. Same bare-fetch/no-imports contract as sendPurchaseWelcome above.
+ *
+ * Guards, in order:
+ * - Buyers are skipped: anyone already in `wr-E14` paid (possibly in a second checkout session
+ *   while this one quietly expired) and must never get a recovery nudge.
+ * - No remove-before-add: if the address is already in wr-E18 from an earlier abandonment, the
+ *   add fires no join and no second email — "this is the only nudge I'll send" is enforced here,
+ *   not just in the automation's re-enter setting.
+ *
+ * Best effort, never throws: a lost recovery email is a log line, not a Stripe retry.
+ */
+async function sendAbandonedCheckout(email) {
+  const key = process.env.MAILERLITE_API_KEY;
+  if (!key || !email) {
+    if (!key) console.error('E18 skipped: MAILERLITE_API_KEY is not set');
+    return;
+  }
+  const base = process.env.MAILERLITE_API_BASE || 'https://connect.mailerlite.com/api';
+  const headers = {
+    Authorization: `Bearer ${key}`,
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  };
+  const normalized = email.trim().toLowerCase();
+
+  try {
+    // Skip buyers: an existing subscriber sitting in wr-E14 already purchased.
+    const existing = await fetch(
+      `${base}/subscribers/${encodeURIComponent(normalized)}`,
+      { headers }
+    );
+    if (existing.ok) {
+      const groups = (await existing.json())?.data?.groups || [];
+      if (groups.some((g) => g.name === 'wr-E14')) {
+        console.log('E18 skipped: buyer', normalized);
+        return;
+      }
+    }
+
+    const gRes = await fetch(`${base}/groups?filter[name]=wr-E18`, { headers });
+    if (!gRes.ok) {
+      console.error('E18: group lookup returned', gRes.status);
+      return;
+    }
+    const gid = ((await gRes.json())?.data || []).find((g) => g.name === 'wr-E18')?.id;
+    if (!gid) {
+      console.error('E18: no MailerLite group named wr-E18');
+      return;
+    }
+
+    const up = await fetch(`${base}/subscribers`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ email: normalized }),
+    });
+    if (!up.ok) {
+      console.error('E18: subscriber upsert returned', up.status);
+      return;
+    }
+    const subscriberId = (await up.json())?.data?.id;
+    if (!subscriberId) {
+      console.error('E18: subscriber upsert returned no id');
+      return;
+    }
+
+    const add = await fetch(`${base}/subscribers/${subscriberId}/groups/${gid}`, {
+      method: 'POST',
+      headers,
+    });
+    if (!add.ok) console.error('E18: group add returned', add.status);
+  } catch (err) {
+    console.error('sendAbandonedCheckout failed:', err.message);
+  }
+}
+
 // Minimal headers kept for consistency with the other functions. Stripe does not
 // send a CORS preflight, so no OPTIONS handling is required here.
 const baseHeaders = {
@@ -181,6 +258,20 @@ export default async function handler(req) {
       status: 400,
       headers: baseHeaders,
     });
+  }
+
+  // An abandoned checkout: the session expired (create-checkout.js sets a 2h
+  // expires_at) with an email captured and no payment. Sends E18, the single
+  // recovery note, via the same join-fires-the-automation mechanism as E14.
+  // Always acknowledged with 200 — a recovery email is never worth a Stripe retry.
+  if (event.type === 'checkout.session.expired') {
+    const expired = event.data?.object || {};
+    const abandonedEmail =
+      expired.customer_details?.email || expired.customer_email || null;
+    if (abandonedEmail && expired.payment_status !== 'paid') {
+      await sendAbandonedCheckout(abandonedEmail);
+    }
+    return received();
   }
 
   // We only act on completed checkouts. Any other event type is acknowledged

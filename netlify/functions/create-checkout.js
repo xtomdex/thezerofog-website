@@ -38,6 +38,10 @@ function buildSessionParams(priceId, baseUrl, withTosConsent) {
   params.set('cancel_url', `${baseUrl}/sales/`);
   // Extensible metadata — a later task can add lead_id/source without restructuring.
   params.set('metadata[source]', 'sales_page');
+  // Expire abandoned checkouts after 2 hours (Stripe allows 30min-24h, default 24h).
+  // The `checkout.session.expired` webhook is what triggers the E18 abandoned-checkout
+  // email — with the default expiry it would arrive a full day late.
+  params.set('expires_at', String(Math.floor(Date.now() / 1000) + 2 * 60 * 60));
   if (withTosConsent) {
     params.set('consent_collection[terms_of_service]', 'required');
     params.set('custom_text[terms_of_service_acceptance][message]', TOS_CONSENT_MESSAGE);

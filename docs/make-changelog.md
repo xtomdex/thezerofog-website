@@ -15,6 +15,47 @@ Rules for anyone adding an entry:
 
 ---
 
+## 2026-08-15 (fourth session) - CLOSE-24H draft campaign built, E18 abandoned-checkout email created end to end
+
+**Done by:** Claude, at Kirill's instruction (texts CEO-approved same day). MailerLite + site
+code; nothing in Make touched.
+
+### 1. CLOSE-24H exists as a draft campaign
+
+The founding-window close email was canon-only. Now: draft campaign id `195883484850423128`
+("CLOSE-24H - founding window closing (fire by hand)"), canon verbatim, subject variant A,
+`[CLOSE_TIME]` left as a visible placeholder for hand-editing at fire time. Empty container
+group `close-24h-recipients` (id `195883542398371582`) awaits the recipient list, which is
+pulled from wr-stats on fire day (watched, not purchased, no `no_sales`). The API cannot attach
+groups to a draft - recipients get picked in the dashboard send flow. Full fire-day checklist:
+`_Marketing/emails/MAILERLITE-SETUP-2026-08-14.md`.
+
+### 2. E18 - abandoned checkout recovery, new email + code trigger
+
+A checkout opened and walked away from produced nothing before. Now:
+
+- **Canon** `_Marketing/emails/E18-abandoned-checkout.md` (CEO approved subject C "Did
+  something break at checkout?"). One friction-removal note, zero voiced objections, sends
+  once ever.
+- **Code** (`create-checkout.js`): sessions now carry a 2h `expires_at` - the expiry event is
+  the trigger; the default 24h would deliver the note a day late.
+- **Code** (`stripe-webhook.js`): new `checkout.session.expired` branch -> `sendAbandonedCheckout`
+  -> MailerLite group join `wr-E18` (group id `195883831271622375`). Buyers skipped via wr-E14
+  membership; no remove-before-add, so a repeat abandonment cannot re-send. Always 200 to
+  Stripe on expired events.
+- **Tested locally** through the real handler (signed HMAC path, real MailerLite): new address
+  lands in wr-E18 exactly once; duplicate delivery adds nothing; `kirill+e14test@` (buyer)
+  skipped with a log line; no-email event is a no-op; forged signature 400. Reference
+  subscriber `kirill+e18test@thezerofog.com` remains in the group.
+
+### Open on the Stripe side (needs dashboard access - Kirill has requested it from Dmitrii)
+
+- Subscribe the webhook endpoint to `checkout.session.expired` (Developers -> Webhooks ->
+  endpoint -> add event). Until then the E18 trigger never fires - the code path is inert.
+- The wr-E18 MailerLite automation itself (join -> send E18, re-enter OFF) is built separately;
+  until it exists AND is activated (Free plan slots are full), a join sends nothing.
+- Refund receipts toggle check for E16 (Settings -> Customer emails -> Refunds) - same access.
+
 ## 2026-08-15 (third session, addendum) - wr-E17 deleted from MailerLite
 
 **Done by:** Claude, on Kirill's explicit decision, minutes after the entry below was written.
