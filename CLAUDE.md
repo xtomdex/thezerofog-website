@@ -133,7 +133,13 @@ browser can read them.
   `amount_total === EXPECTED_AMOUNT_TOTAL`, `currency === EXPECTED_CURRENCY` (case-insensitive).
   On a valid paid order it forwards a **normalized** payload (`email`, `amount_total`, `currency`,
   `country`, `session_id`, `source: 'stripe_checkout'`) to `MAKE_STRIPE_WEBHOOK_URL` — NOT the raw
-  Stripe object. Enrollment / LMS / MailerLite happen **downstream in Make**, not here. Response
+  Stripe object. Enrollment / LMS stay **downstream in Make**. Two best-effort follow-ups run
+  after the Make forward succeeds, both awaited, both swallowing errors (a paid order must never
+  500 because a follow-up failed): `provisionAppUser` (Supabase auth user + paid profile) and
+  `sendPurchaseWelcome` — adds the buyer to the MailerLite group `wr-E14`, whose join fires the
+  purchase-welcome automation. No remove-before-add there, so a duplicate Stripe delivery cannot
+  double-send E14. It also stamps `purchased_at` on the buyer's `wr_registrations` row (the
+  buyer guard `wr-notify.js` reads before every send). Response
   codes drive Stripe's retry behavior: **200** = forwarded OK, or a non-target event type ignored,
   or a signature-valid event that failed payment validation (acknowledge, no retry); **400** =
   missing/invalid signature, empty body, or parse failure (forged/bad — no retry); **500** = env

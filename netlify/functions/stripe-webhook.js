@@ -1,8 +1,9 @@
 // Receives Stripe `checkout.session.completed` webhooks, verifies the Stripe
 // signature (native crypto HMAC-SHA256 — no Stripe SDK / no npm dependencies),
 // validates the payment (paid + expected amount + expected currency), and forwards
-// a NORMALIZED payload to a Make webhook. This is a thin secure gateway only —
-// enrollment / LMS / MailerLite happen downstream in the Make scenario, not here.
+// a NORMALIZED payload to a Make webhook. Enrollment / LMS stay downstream in the
+// Make scenario. The purchase-welcome email (E14) is the one email sent from here,
+// via MailerLite directly — Make has been out of the email path since 2026-08-14.
 //
 // This endpoint is called server-to-server by Stripe (NOT from the browser), so it
 // is NOT gated on a browser Origin. Response codes drive Stripe's retry behavior:
@@ -50,6 +51,69 @@ async function markWorkshopBuyer(email) {
     }
   } catch (err) {
     console.error('markWorkshopBuyer failed:', err.message);
+  }
+}
+
+/**
+ * Send E14, the purchase-welcome email, by adding the buyer to the MailerLite group `wr-E14` —
+ * the same join-fires-the-automation mechanism the whole workshop funnel uses (lib/wr-mailerlite.js).
+ *
+ * Written with bare fetch for the same reason as markWorkshopBuyer: this handler keeps its
+ * import surface at node:crypto only. Two deliberate differences from the funnel transport:
+ * no merge fields (E14's body needs none), and NO remove-before-add — adding an existing group
+ * member fires no join, so a duplicate Stripe delivery cannot double-send the welcome.
+ *
+ * Best effort, never throws: a failed welcome email must not 500 a correctly processed payment
+ * (Stripe would retry the whole event). A failure lands in the function log and support fixes it.
+ */
+async function sendPurchaseWelcome(email) {
+  const key = process.env.MAILERLITE_API_KEY;
+  if (!key || !email) {
+    if (!key) console.error('E14 skipped: MAILERLITE_API_KEY is not set');
+    return;
+  }
+  const base = process.env.MAILERLITE_API_BASE || 'https://connect.mailerlite.com/api';
+  const headers = {
+    Authorization: `Bearer ${key}`,
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  };
+
+  try {
+    const gRes = await fetch(`${base}/groups?filter[name]=wr-E14`, { headers });
+    if (!gRes.ok) {
+      console.error('E14: group lookup returned', gRes.status);
+      return;
+    }
+    const groups = (await gRes.json())?.data || [];
+    const gid = groups.find((g) => g.name === 'wr-E14')?.id;
+    if (!gid) {
+      console.error('E14: no MailerLite group named wr-E14');
+      return;
+    }
+
+    const up = await fetch(`${base}/subscribers`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ email: email.trim().toLowerCase() }),
+    });
+    if (!up.ok) {
+      console.error('E14: subscriber upsert returned', up.status);
+      return;
+    }
+    const subscriberId = (await up.json())?.data?.id;
+    if (!subscriberId) {
+      console.error('E14: subscriber upsert returned no id');
+      return;
+    }
+
+    const add = await fetch(`${base}/subscribers/${subscriberId}/groups/${gid}`, {
+      method: 'POST',
+      headers,
+    });
+    if (!add.ok) console.error('E14: group add returned', add.status);
+  } catch (err) {
+    console.error('sendPurchaseWelcome failed:', err.message);
   }
 }
 
@@ -225,6 +289,10 @@ export default async function handler(req) {
   } else {
     console.warn('[provision] SUPABASE_URL or SUPABASE_SECRET_KEY not set — skipping app provisioning');
   }
+
+  // The purchase-welcome email (E14). Runs only after Make succeeded, same contract as
+  // provisioning above: awaited, best-effort, never affects the response.
+  await sendPurchaseWelcome(email);
 
   return received();
 }
