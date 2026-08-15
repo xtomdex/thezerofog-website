@@ -15,6 +15,34 @@ Rules for anyone adding an entry:
 
 ---
 
+## 2026-08-15 (fifth session) - Stripe live webhook endpoint created (there was NONE), refund receipts on
+
+**Done by:** Claude, in the Stripe dashboard, minutes after Kirill got access from Dmitrii.
+Account `acct_1MwtLAF7WNgmgjSN` (The Zero Fog), LIVE mode.
+
+### 1. The live account had ZERO webhook endpoints
+
+Nothing in live mode listened to Stripe at all - `checkout.session.completed` from a real
+purchase would have reached nobody: no Make forward, no app user, no E14, no `purchased_at`
+stamp. The `STRIPE_WEBHOOK_SECRET` sitting in Netlify belonged to some endpoint that does not
+exist in live mode (probably a sandbox one - "Import - 1" is offered in the wizard).
+
+Created: destination `zerofog-site-webhook` (id `we_1U4liWF7WNgmgjSNSItWwZfe`), URL
+`https://thezerofog.com/.netlify/functions/stripe-webhook`, API version 2022-11-15, listening
+to exactly two events: `checkout.session.completed`, `checkout.session.expired` (the E18
+trigger). Active.
+
+**Open until Kirill runs it:** `netlify env:set STRIPE_WEBHOOK_SECRET <new whsec>` - until the
+new endpoint's signing secret replaces the stale one, every delivery gets a 400. Also to
+verify: `STRIPE_SECRET_KEY` in Netlify is `sk_live_`, not `sk_test_`.
+
+### 2. Customer emails: Refunds receipts ON
+
+Settings -> Business -> Customer emails: both "Successful payments" and "Refunds" were OFF.
+"Refunds" switched ON per Kirill's ruling - E16's footer line "confirmation from Stripe
+arrives separately" is now true, the canon stays uncut, the E16 open item is closed.
+"Successful payments" left as found - Kirill's call pending.
+
 ## 2026-08-15 (fourth session) - CLOSE-24H draft campaign built, E18 abandoned-checkout email created end to end
 
 **Done by:** Claude, at Kirill's instruction (texts CEO-approved same day). MailerLite + site
