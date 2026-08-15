@@ -121,7 +121,7 @@ lives inside the site:
   (448 MB master, range requests verified, byte-identical upload: MD5 = CDN etag).
 
 Spec with every EverWebinar capability answered by name:
-`_Marketing/WORKSHOP-ROOM-SPEC-2026-08-13.md`.
+`docs/WORKSHOP-ROOM-SPEC-2026-08-13.md`.
 
 ### 2. The functions, end to end
 

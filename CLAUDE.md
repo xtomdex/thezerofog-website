@@ -91,7 +91,7 @@ Current functions:
 ### Workshop room
 
 Our own automated-session system, built instead of buying EverWebinar. Spec:
-`_Marketing/WORKSHOP-ROOM-SPEC-2026-08-13.md`. Tables are all prefixed `wr_`, reached
+`docs/WORKSHOP-ROOM-SPEC-2026-08-13.md`. Tables are all prefixed `wr_`, reached
 **only** with `SUPABASE_SECRET_KEY` — they carry RLS with no policies, so nothing in a
 browser can read them.
 
