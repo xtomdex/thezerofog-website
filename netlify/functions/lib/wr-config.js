@@ -15,12 +15,15 @@ export const DEFAULT_CONFIG = {
   key: WEBINAR_KEY,
 
   video: {
-    // The master, uploaded 2026-08-13 through Systeme's Files library to the CloudFront
-    // distribution that already serves the course lessons. Kept as a plain URL so swapping
-    // hosts touches one line. Verified on upload: 469425309 bytes and MD5
-    // cecc92f6949e6d80ca98d0fe9ad1c444, identical to the local master; HEAD answers 200 with
-    // `accept-ranges: bytes` and a mid-file range request answers 206.
-    url: 'https://d1yei2z3i6k35z.cloudfront.net/17244934/6a7e1894985ac3.17625125_FullWebV2.mp4',
+    // The faststart remux of the master (`Full Web V2 faststart.mp4`, moov atom moved to the
+    // head so playback and seeking start without fetching the file tail - matters for JIT
+    // joins mid-session). Uploaded 2026-08-15 through Systeme's Files library to the same
+    // CloudFront distribution. Verified on upload: 469342284 bytes and MD5
+    // 81b60375c93ad4ddf55daf773a50577c, identical to the local remux; HEAD answers 200 with
+    // `accept-ranges: bytes`, a mid-file range request answers 206, and the first bytes read
+    // ftyp -> moov. The 2026-08-13 non-faststart file stays on the CDN untouched:
+    // https://d1yei2z3i6k35z.cloudfront.net/17244934/6a7e1894985ac3.17625125_FullWebV2.mp4
+    url: 'https://d1yei2z3i6k35z.cloudfront.net/17244934/6a80c8a1335307.23741413_FullWebV2faststart.mp4',
     posterUrl: null,
     // Measured off the master with ffprobe on 2026-08-13: `Full Web V2.mp4`, 3510.73 s,
     // 1920x1080 at 30fps, 448 MB. NOT estimated - the duration headers in this project have
