@@ -40,7 +40,9 @@
 [[headers]]
   for = "/assets/img/*"
   [headers.values]
-    Cache-Control = "public, max-age=3600, must-revalidate"
+    # A day, not a year: image URLs carry no version, so long immutable caching would pin a
+    # stale replay poster. stale-while-revalidate keeps repeat views instant anyway.
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
 
 [[headers]]
   for = "/assets/video/*"
