@@ -15,6 +15,56 @@ Rules for anyone adding an entry:
 
 ---
 
+## 2026-08-15 (third session) - every one of the 19 re-enter settings was wrong, E5 canon restore, refunds@ finally exists
+
+**Done by:** Claude, at Kirill's instruction. Nothing in Make was touched - this entry records
+MailerLite and Zoho changes, logged here because Dmitrii owns the funnel transport end to end.
+
+### 1. MailerLite: all 19 pre-existing automations had a defective re-enter setting - all fixed
+
+The "re-enter defaults to a 1-day delay" trap documented in the previous entry was checked
+against every old workflow. Result: **all 19 were wrong.** 18 had the checkbox ON but the hidden
+radio still on the default "Add delay: 1 Day(s)"; wr-E4 had the re-enter checkbox itself OFF.
+The earlier belief that E1 was confirmed correct was false.
+
+Now every one of the 19 = checkbox ON + "As soon as they match the triggers". Each fix was
+verified by reopening the settings after save, not assumed. The three ACTIVE automations
+(E1-E3) went through pause -> fix -> reactivate and are ACTIVE again. E14-E17 were built
+correctly and were not touched.
+
+### 2. wr-E5 text restored to canon
+
+The live E5 email said "Same day." where the canon file `_Marketing/emails/E5-starting-now.md`
+says "Same night." Restored via the email code editor (CodeMirror dispatch - reading the editor
+content out is blocked by MailerLite, writing in works), verified in the saved preview.
+
+A full audit of all 19 texts against their canon files found this as the ONLY divergence:
+18 exact matches, E5 now the 19th. Senders uniform (Kirill <hello@thezerofog.com>, reply-to
+kirill@), subjects = variant A everywhere, footers per canon, zero "training"/"webinar"
+wording, refund contact everywhere = refunds@. Limitation: texts only - the dashboard preview
+rewrites button HREFs, so links remain unverified.
+
+### 3. Zoho: refunds@thezerofog.com exists now, with the E17 auto-reply built in
+
+Customer mail to refunds@ **bounced** until today - the address existed nowhere (only
+`refund@` singular, as an alias on Kirill's mailbox), while E7/E11/E13 and the legal pages
+tell buyers to write to refunds@. Zoho user licenses are full (2 of 2, a third is paid), so it
+was built as a Zoho **group**: refunds@ -> member kirill@, everyone may send to it. On the
+group, Auto Response for "External members outside of the group" = the canon E17 text verbatim
+(Tally link without the email/order URL parameters - Zoho cannot merge them; the form works
+bare).
+
+Consequence for the funnel: the MailerLite wr-E17 automation (refund request received) is now
+redundant - the Zoho auto-reply covers the same moment. Whether to deactivate it or keep it as
+a backup is an open decision; nothing was deleted.
+
+### Still open after this session
+
+- wr-E17 in MailerLite: deactivate or keep as backup (see above).
+- `refund@` (singular) alias on Kirill's mailbox: keep or remove.
+- E16 footer line "confirmation from Stripe arrives separately": waiting on whether Stripe
+  refund receipt emails are actually enabled.
+
 ## 2026-08-15 (later the same day) - E14-E17 built, purchase email wired in code, SPF/DKIM verified
 
 **Done by:** Claude, at Kirill's instruction. Four items from the open list below are now closed
