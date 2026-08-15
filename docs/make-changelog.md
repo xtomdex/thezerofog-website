@@ -32,16 +32,20 @@ Created: destination `zerofog-site-webhook` (id `we_1U4liWF7WNgmgjSNSItWwZfe`), 
 to exactly two events: `checkout.session.completed`, `checkout.session.expired` (the E18
 trigger). Active.
 
-**Open until Kirill runs it:** `netlify env:set STRIPE_WEBHOOK_SECRET <new whsec>` - until the
-new endpoint's signing secret replaces the stale one, every delivery gets a 400. Also to
-verify: `STRIPE_SECRET_KEY` in Netlify is `sk_live_`, not `sk_test_`.
+**CLOSED same session:** the new endpoint's signing secret is set in Netlify (production
+context; the stale value it replaced was 20 chars and not even `whsec_`-shaped), site
+redeployed (`ready`), and the live function answers 400 to an unsigned POST - signature
+verification is active with the new secret. Still to verify when convenient:
+`STRIPE_SECRET_KEY` in Netlify is `sk_live_`, not `sk_test_` - checkable by prefix, or simply
+by the first real checkout.
 
 ### 2. Customer emails: Refunds receipts ON
 
 Settings -> Business -> Customer emails: both "Successful payments" and "Refunds" were OFF.
 "Refunds" switched ON per Kirill's ruling - E16's footer line "confirmation from Stripe
 arrives separately" is now true, the canon stays uncut, the E16 open item is closed.
-"Successful payments" left as found - Kirill's call pending.
+"Successful payments" switched ON as well (Kirill's call, same session): the buyer gets a
+proper Stripe payment receipt; E14 is a welcome, not a receipt.
 
 ## 2026-08-15 (fourth session) - CLOSE-24H draft campaign built, E18 abandoned-checkout email created end to end
 
