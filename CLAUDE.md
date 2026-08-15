@@ -113,6 +113,14 @@ browser can read them.
 - `wr-retention.js` — scheduled daily. Deletes registrations past the retention window.
 - `wr-stats.js` — GET, protected by `WORKSHOP_ADMIN_KEY`. Every metric EverWebinar's dashboard
   shows, computed from our rows.
+- `wr-course-complete.js` — POST, receives the Systeme.io automation-rule webhook fired on
+  "Course completed" and sends E15 (course-complete feedback ask) by adding the finisher to the
+  MailerLite group `wr-E15` — join-fires-the-automation, same as the rest of the transport.
+  Gated by a shared key in the query string (`?key=` vs `SYSTEME_WEBHOOK_KEY`, timing-safe) —
+  Systeme webhooks can't sign requests. The Systeme payload shape is undocumented, so the
+  handler walks the JSON for the first plausible email and logs the top-level keys. The `order`
+  merge field (E15's Tally URL) comes best-effort from the buyer's Supabase profile
+  (`payment_session_id`). No remove-before-add — a re-completed course cannot re-send.
 - `create-checkout.js` — creates a Stripe Checkout Session via the Stripe REST API using
   native `fetch` (no Stripe SDK / no npm deps). POST only (OPTIONS → CORS preflight, other
   methods → 405). One-time payment (`mode: payment`), price referenced by `STRIPE_PRICE_ID`.
@@ -199,6 +207,9 @@ Client-side integrations (consumed by `_data/env.js`):
   group sends the email). Unset `MAILERLITE_API_KEY` means the rows stay `pending` - a delay,
   nothing else. `MAILERLITE_API_BASE` exists to point the selftest at an unreachable host.
 - `MAILERLITE_API_KEY` — the delivery credential for the whole notification queue (see above)
+- `SYSTEME_WEBHOOK_KEY` — shared key gating `wr-course-complete.js` (Systeme's "Send webhook"
+  rule carries it as `?key=` in the URL). Plain hex on purpose — no URL-encoding traps. Unset
+  means every delivery 401s and E15 never fires.
 - `WORKSHOP_ADMIN_KEY` — shared key gating `wr-stats.js`, which returns registrant addresses and watch behaviour. Unset means the endpoint answers 404 to everyone, including us. **The value is raw base64 with `+` and `/` inside — it MUST be URL-encoded in the query string.** A bare `?key=$WORKSHOP_ADMIN_KEY` turns `+` into a space server-side and 404s; this already produced a false "prod key doesn't match" finding twice (2026-08-13 and -14).
 - `WORKSHOP_SCHEDULE_PATH` — optional override for the post-opt-in redirect. Unset in production.
 - ~~`EVERWEBINAR_SCHEDULE_URL`~~ — **removed 2026-08-13.** EverWebinar was not bought; the schedule step is ours. The variable's absence used to make `optin.js` return 500 and drop the lead before Make ever saw it.

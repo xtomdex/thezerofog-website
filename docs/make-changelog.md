@@ -15,6 +15,24 @@ Rules for anyone adding an entry:
 
 ---
 
+## 2026-08-15 (fifth session, addendum) - E15 trigger built end to end (Systeme -> site -> MailerLite)
+
+**Done by:** Claude, at Kirill's instruction. The course-complete feedback email finally has a
+real trigger; until today adding someone to wr-E15 was purely manual.
+
+- **New function** `netlify/functions/wr-course-complete.js` (commit `477fff2`): receives the
+  Systeme webhook, walks the undocumented payload for the email, looks up the `order` merge
+  field from the buyer's Supabase profile, joins the person into `wr-E15`. Gated by
+  `SYSTEME_WEBHOOK_KEY` (?key= in the URL, plain hex, timing-safe compare) - Systeme cannot
+  sign webhooks. No remove-before-add: a re-completed course cannot re-send. Tested locally
+  (5 cases) and on prod (wrong key 401, right key 200, test subscriber landed in wr-E15 once).
+- **Systeme automation rule created and ACTIVE**: trigger "Course completed" (course: 4 Week
+  Protocol) -> action "Send webhook" -> the function URL. This uses the Free plan's ONLY
+  automation-rule slot (1/1) - any future Systeme rule needs a plan upgrade or this slot.
+- End-to-end caveat: the wr-E15 MailerLite automation itself is still INACTIVE (Free plan, 3
+  slots on E1-E3), so a completion today writes the subscriber into the group and sends
+  nothing - same holding pattern as the rest of the funnel until the Comfort upgrade.
+
 ## 2026-08-15 (fifth session) - Stripe live webhook endpoint created (there was NONE), refund receipts on
 
 **Done by:** Claude, in the Stripe dashboard, minutes after Kirill got access from Dmitrii.
