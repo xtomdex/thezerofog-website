@@ -52,8 +52,9 @@ A checkout opened and walked away from produced nothing before. Now:
 
 - Subscribe the webhook endpoint to `checkout.session.expired` (Developers -> Webhooks ->
   endpoint -> add event). Until then the E18 trigger never fires - the code path is inert.
-- The wr-E18 MailerLite automation itself (join -> send E18, re-enter OFF) is built separately;
-  until it exists AND is activated (Free plan slots are full), a join sends nothing.
+- The wr-E18 MailerLite automation IS built (id `195888810672785341`, API-verified complete,
+  re-enter OFF by design - the email promises a single nudge). It is INACTIVE (Free plan slots
+  are full); until activation after the Comfort upgrade, a join sends nothing.
 - Refund receipts toggle check for E16 (Settings -> Customer emails -> Refunds) - same access.
 
 ## 2026-08-15 (third session, addendum) - wr-E17 deleted from MailerLite
