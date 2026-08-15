@@ -108,8 +108,11 @@ export const DEFAULT_CONFIG = {
   },
 
   // Read off the master's own caption track on 2026-08-13, not estimated from the script.
-  // AWAITING CEO CONFIRMATION BY EAR - the seconds are exact, the choice of sentence is a
-  // judgement call and it decides which email a person gets.
+  // CEO CONFIRMED BY EAR 2026-08-15, both marks: each sits a couple of seconds before the
+  // moment itself, which he ruled correct - against the 90s grace below the offset is noise,
+  // and early is the conservative direction. A third mark on the PRICE reveal was considered
+  // and rejected the same day: no email distinguishes "saw the product" from "heard the
+  // price", so the segment would have no consumer.
   timecodes: {
     // 21:56 - "And what runs underneath is sleep." The mechanism is named here for the first
     // time; everything before it is pre-reveal language and must stay that way in email.
