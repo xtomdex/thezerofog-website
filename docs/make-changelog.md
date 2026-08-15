@@ -15,6 +15,23 @@ Rules for anyone adding an entry:
 
 ---
 
+## 2026-08-15 (third session, addendum) - wr-E17 deleted from MailerLite
+
+**Done by:** Claude, on Kirill's explicit decision, minutes after the entry below was written.
+Two of its three open items are now closed:
+
+- **wr-E17 automation (id 195852550545605999) and group wr-E17 (id 195850861933495603)
+  DELETED** via the API (both 204, verified: automation GET returns 410, group search returns
+  zero). Reason: the Zoho auto-reply on refunds@ is the same email, and the planned bulk
+  activation of all inactive workflows after the Comfort upgrade would have double-sent every
+  refund requester. Full pre-deletion backup (automation JSON incl. email body, group JSON,
+  rebuild recipe): `_Marketing/emails/_archive-wr-E17-deleted-2026-08-15/`. E17's only channel
+  is now the Zoho group auto-response. Consequence: the `order` send-gate field concerns
+  E15/E16 only.
+- **`refund@` (singular) alias stays** on Kirill's mailbox as a typo catcher. Closed, no action.
+
+Still open: the E16 footer line about Stripe refund receipts (waiting on Dmitrii).
+
 ## 2026-08-15 (third session) - every one of the 19 re-enter settings was wrong, E5 canon restore, refunds@ finally exists
 
 **Done by:** Claude, at Kirill's instruction. Nothing in Make was touched - this entry records
