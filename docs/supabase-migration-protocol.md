@@ -104,13 +104,43 @@ already exists (you cannot see the live DB).
 
 ### What you must NOT do
 
-- Do NOT run `supabase db push` or any `supabase` command (you have no CLI).
-- Do NOT create, rename, or delete files inside `supabase/migrations/` — that is applied
-  history, owned by the migration owner.
 - Do NOT assume a table doesn't exist and write destructive setup for it — when in doubt,
   flag it.
-- Do NOT `git push`. Commit your work (code + the `supabase/drafts/` file) as granular
-  Conventional Commits; the owner reviews and pushes.
+- Do NOT write `drop`, `alter ... type`, `rename`, or `drop column` (see the SQL rules
+  above). That restriction did not move — see the standing amendment below.
+
+### Standing amendment — the agent may apply (owner, 2026-08-16)
+
+The owner lifted the apply ban: *"можем делать это через тебя, просто ты должен всё
+проверять и не косячить перед тем как что-то делать."* Migrations, the move into
+`migrations/`, and `git push` may all be done by the agent. What was traded away is the
+second pair of eyes, so the verification below is not optional — it replaces the owner's
+review, and skipping a step is the whole cost of the amendment.
+
+There is **no Supabase CLI on this machine** (`which supabase` finds nothing), so
+`db push` is not the route. Apply with the Management API, which works with the
+`SUPABASE_ACCESS_TOKEN` already in `.env`:
+
+```
+POST https://api.supabase.com/v1/projects/<ref>/database/query   {"query": "<the file>"}
+```
+
+The `<ref>` is the subdomain of `SUPABASE_URL`. Run this checklist **before** the POST:
+
+1. **The table really is missing.** Query the live DB (`select tablename from pg_tables
+   where schemaname='public'`). Never conclude from a document.
+2. **The SQL is additive and idempotent.** `create ... if not exists`, and no `drop`,
+   `alter ... type`, `rename`, `truncate`, `delete`. Grep for them.
+3. **The columns match the code**, name for name, plus the unique constraint any upsert's
+   conflict key relies on. Read the handler, not the draft's comment block.
+4. **Name the rollback out loud before applying.** For a brand-new table it is one
+   `drop table` and nothing is lost, which is why no backup is needed. If a migration
+   touches an existing table or its data, that is no longer true: **stop and get a real
+   dump first** — and since there is no CLI, that means the owner's hands in the
+   dashboard (Database -> Backups). Do not apply such a migration on your own.
+5. **Verify by a different road than you applied by.** The Management API reporting
+   success is not proof; re-read the table through PostgREST and check RLS, grants and
+   columns against a sibling table.
 
 ---
 
