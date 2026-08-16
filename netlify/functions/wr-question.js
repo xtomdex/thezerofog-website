@@ -1,14 +1,19 @@
 // POST /.netlify/functions/wr-question
 //
-// A real question typed by someone in the room. Stored, and forwarded to Make so it reaches an
-// inbox rather than a table nobody opens.
+// A real question typed by someone in the room. Stored, and pushed to the operator so it reaches
+// a person rather than a table nobody opens.
 //
 // This is the honest half of what EverWebinar calls a chat. There is no moderator sitting in the
 // room, and a message box that answers nobody would be worse than one that plainly forwards - so
 // the page says who reads them and this function makes that true.
+//
+// It did not, between 2026-08-13 and 2026-08-16: the forward went to MAKE_QUESTION_WEBHOOK_URL,
+// which was never set in production, and no admin surface listed the rows either. Three
+// questions sat unread. Make is now out of the funnel entirely, so the route is a Telegram
+// message to the operator, and wr-stats returns the questions as the durable second copy.
 
 import { insert, json, preflight, selectOne } from './lib/wr-db.js';
-import { loadConfig } from './lib/wr-config.js';
+import { formatPosition, notifyOperator } from './lib/wr-telegram.js';
 
 const MAX_LENGTH = 2000;
 
@@ -58,36 +63,17 @@ export default async function handler(req) {
     return json({ error: 'Server error' }, 500);
   }
 
-  // Best effort. The question is already saved; failing to forward it costs a notification, not
-  // the question itself.
-  //
-  // Deliberately NOT falling back to MAKE_WEBHOOK_URL. That URL is the opt-in scenario's own
-  // webhook, built for one payload - `{email, name}` - and Make answers a payload it cannot map
-  // with an error, then stops the whole scenario after a few of them. On 2026-08-13 that is
-  // exactly what happened: the funnel's lead scenario was taken down by traffic from this room.
-  // A question with nowhere to go stays in wr_events; a stopped scenario costs every lead.
-  const config = await loadConfig().catch(() => null);
-  const target = config?.webhooks?.routes?.question || process.env.MAKE_QUESTION_WEBHOOK_URL;
-  if (!target) {
-    console.warn('wr-question: no question endpoint configured - stored only, not forwarded');
-  }
-  if (target) {
-    try {
-      await fetch(target, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'workshop_question',
-          email: registration.email,
-          name: registration.name,
-          position_sec: position,
-          text: clean,
-        }),
-      });
-    } catch (err) {
-      console.error('wr-question: forward failed:', err.message);
-    }
-  }
+  // Best effort, and awaited rather than fired and forgotten - a serverless function that
+  // returns is free to be frozen mid-request, which would drop the alert silently. The question
+  // is already saved either way, and wr-stats lists it, so a failed push costs a notification
+  // and never the question.
+  const who = registration.name ? `${registration.name} <${registration.email}>` : registration.email;
+  await notifyOperator(
+    'Question from the workshop room\n\n' +
+      `From: ${who}\n` +
+      `At: ${formatPosition(position)} into the session\n\n` +
+      clean
+  );
 
   return json({ ok: true });
 }

@@ -112,12 +112,18 @@ browser can read them.
   reaches a browser.
 - `wr-heartbeat.js` — POST, watched-seconds accumulation and segment derivation. The claim is
   clamped against wall-clock elapsed time, so the browser cannot buy a segment it did not earn.
-- `wr-question.js` — POST, a real question to the host.
+- `wr-question.js` — POST, a real question to the host. Stored in `wr_events`, then pushed to the
+  operator over Telegram (`lib/wr-telegram.js`). The push is awaited, not fired-and-forgotten — a
+  serverless function that has returned can be frozen mid-request — and is best-effort: it never
+  fails the request, because the row is the record and `wr-stats` lists it regardless.
 - `wr-notify.js` — scheduled every 5 minutes. Drains the queue, re-checks the segment and the
-  buyer flag at send time, hands delivery to Make.
+  buyer flag at send time, hands delivery to MailerLite (`lib/wr-mailerlite.js`) — Make left this
+  path on 2026-08-14.
 - `wr-retention.js` — scheduled daily. Deletes registrations past the retention window.
 - `wr-stats.js` — GET, protected by `WORKSHOP_ADMIN_KEY`. Every metric EverWebinar's dashboard
-  shows, computed from our rows.
+  shows, computed from our rows. It also returns `questions` — the text people typed in the room,
+  newest first, with who asked and where in the session. Read in its own query, not embedded in
+  the registrations one, so a failure on either side does not cost the other.
 - `wr-course-complete.js` — POST, receives the Systeme.io automation-rule webhook fired on
   "Course completed" and sends E15 (course-complete feedback ask) by adding the finisher to the
   MailerLite group `wr-E15` — join-fires-the-automation, same as the rest of the transport.
@@ -228,8 +234,16 @@ Client-side integrations (consumed by `_data/env.js`):
 - `MAILERLITE_LEADS_GROUP_ID` — optional; the MailerLite group an opt-in lead joins. Defaults to
   `183307718676711076` (`ADs`), the group Make wrote to, so the list stays continuous. No
   automation is attached to it — joining sends nothing.
-- `MAKE_QUESTION_WEBHOOK_URL` — where `wr-question.js` forwards a question. No fallback to
-  `MAKE_WEBHOOK_URL`; unset means the question is stored in `wr_events` and not forwarded.
+- ~~`MAKE_QUESTION_WEBHOOK_URL`~~ — **retired 2026-08-16.** It was never set in production, so
+  every question typed in the room between 2026-08-13 and 2026-08-16 was stored and reached
+  nobody. Replaced by `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID`.
+- `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` — the operator-alert channel
+  (`lib/wr-telegram.js` → `notifyOperator()`). Used by `wr-question.js`. Chosen over email
+  because every email path we own is a marketing path: MailerLite sends only by group-join firing
+  an automation, the Free plan caps active automations at three, and the operator would land in
+  his own subscriber list with an unsubscribe footer under a customer's question. Unset means no
+  push — the question is still stored and still listed by `wr-stats`, which is why previews need
+  no value.
 - ~~`MAKE_NOTIFICATION_WEBHOOK_URL`~~ — **retired 2026-08-14.** Make is out of the email path
   (2 active scenarios both taken, 1000 ops/month ≈ 25 registrants); `wr-notify.js` now delivers
   straight to MailerLite via `lib/wr-mailerlite.js` (one group per template, an automation per

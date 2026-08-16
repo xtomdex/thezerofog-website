@@ -185,11 +185,9 @@ export const DEFAULT_CONFIG = {
     ],
   },
 
-  webhooks: {
-    // Event name -> Make endpoint. Falls back to MAKE_WEBHOOK_URL when a name is missing.
-    routes: {},
-    bearer: null,
-  },
+  // A `webhooks` block lived here until 2026-08-16, mapping event names to Make endpoints. Its
+  // only reader was wr-question, and Make is out of the funnel entirely - operator alerts go to
+  // Telegram now (lib/wr-telegram.js), which needs no per-event routing table.
 
   privacy: {
     // Delete registrations and their attendance this many months after registration. Mirrors the

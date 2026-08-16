@@ -12,6 +12,7 @@ import { json, preflight, safeEqual, select } from './lib/wr-db.js';
 import { loadConfig } from './lib/wr-config.js';
 
 const CURVE_BUCKET_SEC = 300; // five-minute resolution, matching what EverWebinar plots
+const QUESTION_LIMIT = 200;
 
 function pct(part, whole) {
   return whole ? Math.round((part / whole) * 1000) / 10 : 0;
@@ -47,6 +48,37 @@ export default async function handler(req) {
   }
 
   rows = rows || [];
+
+  // The questions people actually typed in the room. The page promises "Kirill reads these
+  // himself", and until 2026-08-16 nothing made that true: wr-question stored the row and
+  // forwarded it to a Make webhook that was never configured in production, and no surface here
+  // showed it. A question is worth more than any number below it, so it is read separately
+  // rather than embedded in the registration query - one lost read must not cost the whole
+  // dashboard, and vice versa.
+  let questionRows = [];
+  try {
+    questionRows =
+      (await select('wr_events', {
+        select: 'id,created_at,position_sec,payload,wr_registrations(email,name)',
+        type: 'eq.question',
+        order: 'created_at.desc',
+        limit: QUESTION_LIMIT,
+      })) || [];
+  } catch (err) {
+    console.error('wr-stats: question read failed:', err.message);
+  }
+
+  const questions = questionRows.map((row) => {
+    const reg = Array.isArray(row.wr_registrations) ? row.wr_registrations[0] : row.wr_registrations;
+    return {
+      id: row.id,
+      askedAt: row.created_at,
+      email: reg?.email || null,
+      name: reg?.name || null,
+      positionSec: row.position_sec,
+      text: row.payload?.text || '',
+    };
+  });
 
   const duration = config.video.durationSec;
   const { revealSec, offerSec, thresholdGraceSec } = config.timecodes;
@@ -154,6 +186,8 @@ export default async function handler(req) {
         : 0,
       conversionRate: pct(totals.buyers, totals.liveAttendees),
     },
+    // Newest first, and deliberately near the top of what a reader scans.
+    questions,
     segments: segmentCounts,
     retentionCurve: curve.map((count, i) => ({
       minute: (i * CURVE_BUCKET_SEC) / 60,
