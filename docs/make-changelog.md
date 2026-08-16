@@ -53,6 +53,15 @@ What changed and why:
   (contact created, enrolled), existing-contact path, already-enrolled 422 -> 200, Systeme
   down -> 500, forged signature -> 400 with zero Systeme calls, unpaid/wrong-amount sessions
   acknowledged without enrolling, missing key -> 500.
+- **Live-verified same day** with the real key (`Site-Stripe-Webhook`, created by Kirill in
+  Systeme -> Settings -> MCP & API keys; Dmitrii's `Enroll-New-Student-For-Make` key was left
+  untouched): a signed fake purchase for `kirill+enrolltest@thezerofog.com` ran the real
+  handler against the real Systeme API - contact 438327812 created, enrollment 23816734 into
+  course 606107 ("4 Week Protocol") with full_access confirmed by a separate API read; a
+  duplicate delivery got Systeme's 422 and answered 200 without a second enrollment. Test
+  contact and enrollment deleted afterwards (both 204). `SYSTEME_API_KEY` is set in Netlify
+  production and the site redeployed (deploy 6a818351..., 09:30 UTC); prod presence of the
+  key is proven by the endpoint answering 400 (signature) rather than 500 (config) to a probe.
 
 **End state for Make:** both scenarios remain, both off. Webinar Opt-In (5275566) is the only
 one that will ever be turned on again - it goes ON at launch together with the Core upgrade
