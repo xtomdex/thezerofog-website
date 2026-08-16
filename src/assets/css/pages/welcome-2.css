@@ -15,6 +15,13 @@ h1 {
   letter-spacing: -0.02em; line-height: 1.12;
   margin-bottom: 16px; text-align: center;
 }
+/* The promise, between the confirmation and the logistics. Sits above .subtitle in
+   weight on purpose: it is the reason the person paid, and the subtitle is housekeeping. */
+.promise {
+  font-size: 1.15rem; color: var(--text); font-weight: 600;
+  line-height: 1.6; max-width: 560px; text-align: center;
+  margin-bottom: 20px;
+}
 .subtitle {
   font-size: 1.05rem; color: var(--text2); margin-bottom: 48px;
   line-height: 1.7; max-width: 520px; text-align: center;
