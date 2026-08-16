@@ -15,6 +15,50 @@ Rules for anyone adding an entry:
 
 ---
 
+## 2026-08-16 (later) - Webinar Opt-In (5275566) retired: lead capture moved into the site
+
+**Raised by:** Dmitrii - "why keep Make at all if it is only in the opt-in now". **Decided by:**
+Kirill, same day. **Done by:** Claude. **Nothing was changed inside Make** - no blueprint edit,
+no module touched, so there is no before/after diff to record. The scenario is left exactly as
+it is, still disabled; what changed is that the site no longer calls it.
+
+**What the scenario did** (from `docs/make-backups/scenario-5275566-blueprint-2026-08-14-after.json`,
+four modules): custom webhook `2837321` -> set variable `lead_id` = uuid -> data store `131783`
+AddRecord keyed on email with `{email, source:'optin', lead_id, created_at, purchased_at,
+webinar_status, payment_session_id, webinar_first_name}` -> MailerLite CreateUpdateSubscriber
+into group `183307718676711076` (`ADs`).
+
+**What replaces it:** `netlify/functions/optin.js` writes the lead to Supabase `wr_leads`
+(upsert on email) and adds the subscriber to the same `ADs` group through the MailerLite API we
+already use for the notification queue. The group id is hard-defaulted in code and overridable
+by `MAILERLITE_LEADS_GROUP_ID`, so the list stays continuous across the switch.
+
+**Why, beyond the EUR 10/month:** Make was a single point of failure on the first step of the
+funnel. `optin.js` returned 500 to the visitor whenever the webhook answered non-2xx, so a
+stopped scenario took the funnel down (2026-08-13) and a disabled one queued leads into a
+webhook nothing drains. The new handler runs both writes under `Promise.allSettled` and only
+answers 500 if BOTH fail - one failure is logged and the other copy holds the lead.
+
+**Second change in the same commit:** `wr-register.js` no longer forwards the registration to
+`MAKE_WEBHOOK_URL`. That forward posted five fields the opt-in webhook could not map - the
+payload that stopped the scenario on 2026-08-13 - and with Make disabled every registration was
+filling the same 50-slot queue. Nothing downstream read Make's copy: the registration is in
+`wr_registrations`, the emails in `wr_notifications`, the list membership in MailerLite.
+
+**Verified before commit:** the handler was run locally against the live MailerLite API with
+`kirill+optinprobe@thezerofog.com` - subscriber created in `ADs`, answer `200 {ok,redirectUrl}`
+even though the Supabase write failed with `PGRST205` (the table is not applied yet), which is
+exactly the intended degradation. The probe subscriber was deleted afterwards (204).
+
+**Open, in this order:** (1) apply `supabase/drafts/DRAFT_wr_leads.sql` - until then leads land
+in MailerLite only; (2) deploy; (3) drain the 18 records sitting in webhook queue `2837321`
+(they are opt-ins and registrations from the period the scenario was off) - export them from
+Make and import into `ADs` / `wr_leads` by hand, they are real people; (4) delete
+`MAKE_WEBHOOK_URL` from Netlify production once the deploy is verified. **Make can then be
+cancelled entirely - no scenario is reachable from the site any more.**
+
+---
+
 ## 2026-08-16 - Payment Processing (6209692) retired: enrollment moved into the site's Stripe webhook
 
 **Decided by:** Kirill, 2026-08-16, after reviewing the arguments. **Done by:** Claude, in the

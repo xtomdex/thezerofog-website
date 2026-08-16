@@ -81,12 +81,17 @@ which Netlify does **not** register as a function. Do not put helpers at the top
 `netlify/functions/`; every file there is deployed as an endpoint.
 
 Current functions:
-- `optin.js` — validates form input and proxies to Make.com webhook. On success it
-  returns `{ ok: true, redirectUrl }`, where `redirectUrl` is our own schedule step
-  (`/workshop/schedule/`). It no longer reads `EVERWEBINAR_SCHEDULE_URL` — that variable
-  is gone, along with the 500 it caused whenever it was unset. The client appends UTM
-  params before redirecting, and carries the email address in `sessionStorage` rather
-  than in the URL.
+- `optin.js` — validates form input and stores the lead itself. Make.com is out of this
+  path since 2026-08-16: the function writes the address to `wr_leads` (upsert on email)
+  and adds the subscriber to the MailerLite list group `ADs` — the same two things Make's
+  scenario did. Both writes run under `Promise.allSettled`, and the visitor only sees an
+  error if **both** fail; a single failure is logged and the other copy carries the lead.
+  That inversion is the point: a non-2xx from Make used to make this function 500 and the
+  lead was gone before anything stored it. On success it returns `{ ok: true, redirectUrl }`,
+  where `redirectUrl` is our own schedule step (`/workshop/schedule/`). It no longer reads
+  `EVERWEBINAR_SCHEDULE_URL` — that variable is gone, along with the 500 it caused whenever
+  it was unset. The client appends UTM params before redirecting, and carries the email
+  address in `sessionStorage` rather than in the URL.
 
 ### Workshop room
 
@@ -199,10 +204,13 @@ Client-side integrations (consumed by `_data/env.js`):
   Meta Pixel env name.
 
 **Server-only** — available to Functions only. NEVER use the `PUBLIC_` prefix; NEVER expose via `_data/`.
-- `MAKE_WEBHOOK_URL` — Make.com webhook endpoint for the opt-in scenario. It is built for one
-  payload, `{email, name}`. **Post nothing else here.** Make errors on a payload it cannot map and
-  stops the scenario after a few of them, and a stopped scenario makes `optin.js` return 500 to
-  real visitors — the live funnel goes down. This happened on 2026-08-13.
+- ~~`MAKE_WEBHOOK_URL`~~ — **retired 2026-08-16.** It fed the opt-in scenario, which was built
+  for one payload, `{email, name}`; Make errored on anything else, stopped the scenario, and a
+  stopped scenario made `optin.js` return 500 to real visitors (2026-08-13). Both readers are
+  gone: `optin.js` stores the lead itself, and `wr-register.js` no longer forwards registrations.
+- `MAILERLITE_LEADS_GROUP_ID` — optional; the MailerLite group an opt-in lead joins. Defaults to
+  `183307718676711076` (`ADs`), the group Make wrote to, so the list stays continuous. No
+  automation is attached to it — joining sends nothing.
 - `MAKE_QUESTION_WEBHOOK_URL` — where `wr-question.js` forwards a question. No fallback to
   `MAKE_WEBHOOK_URL`; unset means the question is stored in `wr_events` and not forwarded.
 - ~~`MAKE_NOTIFICATION_WEBHOOK_URL`~~ — **retired 2026-08-14.** Make is out of the email path
@@ -270,12 +278,13 @@ Claude reads the `.md`, locates the matching block in the `.njk`, and applies th
 
 ## Integrations (in progress)
 
-- **Make.com** — the opt-in lead forward only (scenario 5275566), proxied via
-  `netlify/functions/optin.js`. Flow: opt-in → Make forward (lead captured) →
-  `/workshop/schedule/` → pick a session → `wr-register` → `/confirmation/`. The client appends
-  the landing-page UTM params (`utm_source/medium/campaign/content/term`, when present) for
-  attribution. Email delivery (2026-08-14) and payment processing (2026-08-16) both moved out
-  of Make and into our own functions.
+- **Make.com** — **out of the funnel entirely as of 2026-08-16.** Email delivery left on
+  2026-08-14, payment processing and the opt-in lead capture on 2026-08-16; both scenarios
+  (Opt-In 5275566, Payment Processing 6209692) are disabled and nothing in the site calls
+  Make any more. Flow now: opt-in → `optin.js` (lead written to `wr_leads` + MailerLite `ADs`)
+  → `/workshop/schedule/` → pick a session → `wr-register` → `/confirmation/`. The client
+  appends the landing-page UTM params (`utm_source/medium/campaign/content/term`, when present)
+  for attribution.
 - **Workshop room** — ours, see above. EverWebinar was evaluated and **not bought**:
   `_Marketing/WORKSHOP-ROOM-COST-COMPARISON-2026-08-13.md`.
 - **Stripe** — checkout on the sales page (`create-checkout.js`) + live webhook (`stripe-webhook.js`): payment → direct Systeme course enrollment + E14 welcome + app provisioning

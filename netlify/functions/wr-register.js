@@ -319,37 +319,13 @@ export default async function handler(req) {
       { returning: false }
     );
 
-    // The lead still goes to Make. Make owns MailerLite, tagging and anything Dima wires
-    // downstream; this system owns timing and segmentation, not list management.
-    //
-    // "Unchanged" is what the previous comment claimed and it was not true: the opt-in form
-    // sends `{email, name}`, this sends five more fields and - because the schedule step never
-    // asks for a name - usually sends no `name` at all, since JSON.stringify drops undefined.
-    // Three registrations in a row on 2026-08-13 preceded Make stopping the opt-in scenario.
-    // The route is overridable so the two can be split without a deploy, but which module
-    // actually failed is only visible in Make's own execution history.
-    const makeUrl = config.webhooks?.routes?.registration || process.env.MAKE_WEBHOOK_URL;
-    if (makeUrl) {
-      try {
-        const res = await fetch(makeUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: cleanEmail,
-            name: registrationRow.name || undefined,
-            slot_time: instant.toISOString(),
-            time_zone: recipientZone,
-            token,
-            ...utmValues,
-          }),
-        });
-        if (!res.ok) console.error('wr-register: Make returned', res.status);
-      } catch (err) {
-        // A registration that reached our database is a real registration. Losing the Make
-        // forward costs a tag; losing the registration costs the lead.
-        console.error('wr-register: Make forward failed:', err.message);
-      }
-    }
+    // The Make forward that used to sit here was removed on 2026-08-16 along with the rest of
+    // Make. It posted the registration to the opt-in webhook - a payload of five extra fields
+    // the scenario could not map, which is what stopped that scenario on 2026-08-13 - and with
+    // Make disabled every registration since had been filling a webhook queue that nothing
+    // drains. The registration itself lives in wr_registrations above, the emails are queued in
+    // wr_notifications, and the list membership is MailerLite's. Nothing downstream was reading
+    // Make's copy.
 
     const described = describeSlot(instant, recipientZone, now);
 

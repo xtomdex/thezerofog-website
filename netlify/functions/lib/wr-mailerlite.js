@@ -63,6 +63,24 @@ export function resetGroupCache() {
 }
 
 /**
+ * Add a plain list subscriber - no automation behind the group, no send. This is the opt-in
+ * lead capture that used to be Make's second step (`mailerlite2:CreateUpdateSubscriber` into
+ * group `ADs`), and the group id below is that same group.
+ *
+ * Unlike deliverNotification there is no leave-then-join here: a join must NOT fire anything,
+ * and a returning visitor is simply already a member. Throws on failure - the caller decides
+ * whether that is fatal.
+ */
+export async function addListSubscriber(email, groupId, { name } = {}) {
+  const body = { email, groups: [groupId] };
+  if (name) body.fields = { name };
+  const up = await api('/subscribers', 'POST', body);
+  const subscriberId = up?.data?.id;
+  if (!subscriberId) throw new Error('MailerLite upsert returned no subscriber id');
+  return subscriberId;
+}
+
+/**
  * Deliver one queued notification. Throws on any failure so wr-notify records the error and
  * leaves the row pending for the next cron run.
  */
