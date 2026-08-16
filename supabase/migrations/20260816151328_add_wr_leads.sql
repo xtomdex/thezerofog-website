@@ -1,6 +1,6 @@
 -- ============================================================================
--- DRAFT - wr_leads. Not applied. The owner moves this into supabase/migrations/
--- with a real timestamp when he decides to apply it.
+-- wr_leads. Moved out of supabase/drafts/ on 2026-08-16 on the owner's word,
+-- to be applied with `supabase db push`.
 -- ============================================================================
 --
 -- WHAT THIS SUPPORTS
