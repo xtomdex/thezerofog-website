@@ -6,9 +6,9 @@
 // Payment Processing scenario (6209692) stays permanently off; this handler is
 // the single consumer of Stripe events. The purchase-welcome email (E14) is the
 // one email sent from here, via MailerLite directly — Make has been out of the
-// email path since 2026-08-14. A full refund runs the same path backwards: the buyer
-// is tagged `refunded` in Systeme (which fires the workflow that unenrolls them) and
-// loses `is_paid` in the app.
+// email path since 2026-08-14. A full refund runs the same path backwards: the buyer's
+// Systeme enrollment is deleted, they are tagged `refunded`, and they lose `is_paid`
+// in the app.
 //
 // This endpoint is called server-to-server by Stripe (NOT from the browser), so it
 // is NOT gated on a browser Origin. Response codes drive Stripe's retry behavior:
@@ -120,25 +120,27 @@ async function enrollInCourse(email) {
 }
 
 /**
- * Close the course after a refund, by tagging the contact `refunded` in Systeme.io.
+ * Close the course after a refund: delete the buyer's enrollment in Systeme.io outright.
  *
- * The tag is a bridge, not the mechanism. Systeme's public API can CREATE an enrollment but
- * cannot delete one — `/school/courses/{id}/enrollments` answers `allow: POST` and there is no
- * per-enrollment route (verified against the live API 2026-08-16). The only way to unenroll
- * programmatically is to make Systeme do it to itself: our tag fires the `Refunded` workflow
- * (Tag added -> Revoke access to a course), which is built inside Systeme.
+ * The delete route is NOT under the course — `/school/courses/{id}/enrollments` takes POST only,
+ * which is what makes it look like enrollments cannot be removed. It lives one level up:
+ * `GET /school/enrollments?contact={id}` lists them and `DELETE /school/enrollments/{id}` removes
+ * one (both verified against the live API 2026-08-16). A deleted enrollment stays in the listing
+ * with `active: false`.
  *
- * That means this function is useful even while the workflow is paused or the account's single
- * free automation slot is spent elsewhere — the tag still records who was refunded, and access
- * closes the moment the workflow is switched on.
+ * The `refunded` tag is still applied afterwards, best effort, for two reasons: it is the record
+ * of who was refunded, and it fires the Systeme `Refunded` workflow, which revokes course access
+ * a second time. That redundancy is deliberate and free — revoking an already-revoked enrollment
+ * changes nothing, and it means access still closes if this handler ever loses its API key.
  *
  * Does NOT create the contact: no contact means no enrollment, and there is nothing to revoke.
- * Returns true when the tag is on the contact (or there was no contact to tag), false on a
- * transient failure — the caller answers 500 so Stripe retries rather than leaving a refunded
+ * Returns true once every matching enrollment is gone (or there was nothing to remove), false on
+ * a transient failure — the caller answers 500 so Stripe retries rather than leaving a refunded
  * buyer with an open course.
  */
-async function tagRefunded(email) {
+async function revokeCourseAccess(email) {
   const key = process.env.SYSTEME_API_KEY;
+  const courseId = String(process.env.SYSTEME_COURSE_ID || '606107');
   const tagId = Number(process.env.SYSTEME_REFUNDED_TAG_ID || '2134135');
   const base = process.env.SYSTEME_API_BASE || 'https://api.systeme.io/api';
   const headers = {
@@ -164,22 +166,49 @@ async function tagRefunded(email) {
       return true;
     }
 
-    // 2xx = tagged; 4xx = already tagged (idempotent success — a duplicate Stripe delivery or
-    // a second partial-then-full refund cannot fire the workflow twice into an error).
-    const tagged = await fetch(`${base}/contacts/${contactId}/tags`, {
-      method: 'POST',
+    // Only this contact's enrollments — the endpoint ignores every other filter name, so a
+    // wrong parameter silently returns the whole account and we would delete other people's
+    // access. `contact` is the one that filters (verified).
+    const enrolled = await fetch(`${base}/school/enrollments?contact=${contactId}&limit=100`, {
       headers,
-      body: JSON.stringify({ tagId }),
     });
-    if (tagged.ok) return true;
-    if (tagged.status >= 400 && tagged.status < 500) {
-      console.log('refund: tag call returned', tagged.status, '- treating as already tagged');
-      return true;
+    if (!enrolled.ok) {
+      console.error('refund: enrollment lookup returned', enrolled.status);
+      return false;
     }
-    console.error('refund: tag call returned', tagged.status);
-    return false;
+    const rows = (await enrolled.json())?.items || [];
+    const mine = rows.filter(
+      (r) => String(r?.course?.id) === courseId && r?.active !== false && r?.contact?.id === contactId
+    );
+
+    for (const row of mine) {
+      const gone = await fetch(`${base}/school/enrollments/${row.id}`, {
+        method: 'DELETE',
+        headers,
+      });
+      // 4xx = already gone (a duplicate Stripe delivery, or a second refund on the same charge).
+      if (!gone.ok && !(gone.status >= 400 && gone.status < 500)) {
+        console.error('refund: enrollment delete returned', gone.status, 'for', row.id);
+        return false;
+      }
+    }
+    console.log('refund: revoked', mine.length, 'enrollment(s) for', normalized);
+
+    // The record, and the second line of defence. Never fails the revocation: the course is
+    // already closed by the time this runs.
+    try {
+      await fetch(`${base}/contacts/${contactId}/tags`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ tagId }),
+      });
+    } catch (err) {
+      console.error('refund: tagging failed (ignored):', err.message);
+    }
+
+    return true;
   } catch (err) {
-    console.error('tagRefunded failed:', err.message);
+    console.error('revokeCourseAccess failed:', err.message);
     return false;
   }
 }
@@ -497,7 +526,7 @@ export default async function handler(req) {
       return received();
     }
 
-    const revoked = await tagRefunded(refundedEmail);
+    const revoked = await revokeCourseAccess(refundedEmail);
     if (!revoked) {
       return new Response(JSON.stringify({ error: 'Revocation failed' }), {
         status: 500,

@@ -169,12 +169,17 @@ browser can read them.
   It also handles `charge.refunded`, and only when the refund is **full** (`charge.refunded ===
   true`; a partial refund leaves access open on purpose). The trigger is deliberately the refund
   itself and not a refund request — support tries to keep the customer first. Two things close:
-  `tagRefunded` puts the Systeme tag `refunded` (`SYSTEME_REFUNDED_TAG_ID`, default 2134135) on
-  the contact, and `revokeAppAccess` flips `is_paid` back to false on the app profile. The tag is
-  a bridge, not the mechanism — Systeme's public API can create an enrollment but **cannot delete
-  one** (`/school/courses/{id}/enrollments` answers `allow: POST`, no per-enrollment route), so
-  the unenrollment is done by a Systeme workflow named `Refunded` (Tag added -> Revoke access to
-  a course). A transient tagging failure returns 500 so Stripe retries rather than leaving a
+  `revokeCourseAccess` deletes the buyer's Systeme enrollment, and `revokeAppAccess` flips
+  `is_paid` back to false on the app profile. **The enrollment delete route is not under the
+  course** — `/school/courses/{id}/enrollments` takes POST only, which is why it looks like
+  enrollments cannot be removed; the real routes are `GET /school/enrollments?contact={id}` and
+  `DELETE /school/enrollments/{id}` (a deleted enrollment stays in the listing as
+  `active: false`). Note that `contact` is the ONLY filter name that endpoint honours — any other
+  parameter is ignored and the call returns every enrollment in the account. Afterwards the
+  contact is tagged `refunded` (`SYSTEME_REFUNDED_TAG_ID`, default 2134135), best effort: it is
+  the record of who was refunded, and it fires the Systeme workflow `Refunded` (Tag added ->
+  Revoke access to a course) as a deliberate second line of defence.
+  A transient revocation failure returns 500 so Stripe retries rather than leaving a
   refunded buyer with an open course; the auth user and `purchased_at` are deliberately left
   alone (deleting the user would take their diary with it, and clearing `purchased_at` would put
   a refunder back into the sales sequence).
