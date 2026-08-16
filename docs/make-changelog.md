@@ -15,6 +15,52 @@ Rules for anyone adding an entry:
 
 ---
 
+## 2026-08-16 - Payment Processing (6209692) retired: enrollment moved into the site's Stripe webhook
+
+**Decided by:** Kirill, 2026-08-16, after reviewing the arguments. **Done by:** Claude, in the
+site repo only - nothing inside Make was modified. The scenario simply stays off, permanently.
+
+What changed and why:
+
+- The blueprint backup (`docs/make-backups/scenario-6209692-blueprint-2026-08-14.json`) showed
+  this scenario was the ONLY place a buyer got enrolled into the course
+  (`systeme-io:createEnrollment`, course 606107 "The Zero Fog", full_access). The site's
+  `stripe-webhook.js` sent the welcome email and stamped the buyer flag but enrolled no one.
+- Meanwhile the live Stripe account's only webhook endpoint (created 2026-08-15,
+  `zerofog-site-webhook`) points at the site, not at Make - so the scenario would never have
+  fired anyway without adding a second Stripe endpoint at Make's unsigned custom webhook.
+- Decision: rather than wire Stripe to Make, `stripe-webhook.js` now does the enrollment
+  itself, directly against the Systeme public API, replicating the scenario's exact logic:
+  find contact by email -> create if missing (`locale: en`) -> POST
+  `/school/courses/606107/enrollments` with `{contactId, accessType: "full_access"}`.
+  Reasons Kirill accepted: single signature-verified consumer of Stripe events (Make's custom
+  webhook cannot verify Stripe signatures - anyone with the URL could have faked a purchase);
+  Stripe retries a 500 for days, while a Make scenario error self-disables the scenario
+  (exactly how Opt-In died on 2026-08-13); email + buyer flag + enrollment now live in one
+  code path with one log.
+- Idempotency preserved: a 4xx on the enrollment call is treated as already-enrolled (the
+  scenario used an Ignore error handler on the same call); a duplicate Stripe delivery cannot
+  double-enroll or double-send E14.
+- Deliberately NOT replicated: the scenario's final MailerLite step (add to group
+  `186291398819973016`, the pre-workshop-era buyers group whose legacy automation was deleted
+  2026-08-16). Its job is done by the wr-E14 purchase-welcome join, which already lives in the
+  webhook.
+- Env changes: `MAKE_STRIPE_WEBHOOK_URL` retired (must never be set again); new
+  `SYSTEME_API_KEY` (Systeme public API key) is now REQUIRED by the webhook - unset means paid
+  orders answer 500 and Stripe retries until it is set (delayed, never lost). Optional
+  `SYSTEME_COURSE_ID` defaults to 606107.
+- Tested with a local mock Systeme API + signed fake Stripe events, 13 checks: happy path
+  (contact created, enrolled), existing-contact path, already-enrolled 422 -> 200, Systeme
+  down -> 500, forged signature -> 400 with zero Systeme calls, unpaid/wrong-amount sessions
+  acknowledged without enrolling, missing key -> 500.
+
+**End state for Make:** both scenarios remain, both off. Webinar Opt-In (5275566) is the only
+one that will ever be turned on again - it goes ON at launch together with the Core upgrade
+(~EUR 10/mo, decided 2026-08-16: Free's 1000 ops/mo at 4 ops per lead is ~250 leads, not
+enough for ad traffic). Payment Processing (6209692) stays off forever; do not enable it, or
+buyers would be double-enrolled (harmless but confusing) and the unsigned webhook would be a
+standing free-course backdoor.
+
 ## 2026-08-15 (fifth session, addendum) - E15 trigger built end to end (Systeme -> site -> MailerLite)
 
 **Done by:** Claude, at Kirill's instruction. The course-complete feedback email finally has a

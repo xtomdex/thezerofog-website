@@ -141,10 +141,14 @@ browser can read them.
   `v1` signature, and enforces a 300s replay tolerance on the `t` timestamp. After verification
   it parses the event and validates the order: `payment_status === 'paid'`,
   `amount_total === EXPECTED_AMOUNT_TOTAL`, `currency === EXPECTED_CURRENCY` (case-insensitive).
-  On a valid paid order it forwards a **normalized** payload (`email`, `amount_total`, `currency`,
-  `country`, `session_id`, `source: 'stripe_checkout'`) to `MAKE_STRIPE_WEBHOOK_URL` — NOT the raw
-  Stripe object. Enrollment / LMS stay **downstream in Make**. Two best-effort follow-ups run
-  after the Make forward succeeds, both awaited, both swallowing errors (a paid order must never
+  On a valid paid order it enrolls the buyer into the Systeme.io course **directly** (since
+  2026-08-16; Make's Payment Processing scenario 6209692 is permanently off): find the contact
+  by email via the Systeme public API (`SYSTEME_API_KEY`), create it if missing, then create a
+  `full_access` enrollment into course `SYSTEME_COURSE_ID` (default 606107). A 4xx on the
+  enrollment call is treated as "already enrolled" (idempotent — a duplicate Stripe delivery
+  cannot double-enroll); a transient Systeme failure returns 500 so Stripe retries and no paid
+  order is ever dropped. Two best-effort follow-ups run
+  after the enrollment succeeds, both awaited, both swallowing errors (a paid order must never
   500 because a follow-up failed): `provisionAppUser` (Supabase auth user + paid profile) and
   `sendPurchaseWelcome` — adds the buyer to the MailerLite group `wr-E14`, whose join fires the
   purchase-welcome automation. No remove-before-add there, so a duplicate Stripe delivery cannot
@@ -161,7 +165,7 @@ browser can read them.
   type ignored, an expired session handled,
   or a signature-valid event that failed payment validation (acknowledge, no retry); **400** =
   missing/invalid signature, empty body, or parse failure (forged/bad — no retry); **500** = env
-  misconfig, missing email on a paid session, or Make forward failed (Stripe SHOULD retry).
+  misconfig, missing email on a paid session, or the Systeme enrollment failed (Stripe SHOULD retry).
 
 ## Build & deploy
 
@@ -216,7 +220,9 @@ Client-side integrations (consumed by `_data/env.js`):
 - `STRIPE_SECRET_KEY` — Stripe secret key. Used by `create-checkout.js` for Bearer auth to the Stripe REST API. Server-only — NEVER exposed to the client.
 - `STRIPE_PRICE_ID` — Stripe Price ID (`price_…`) for the $67 one-time Founding Member price; referenced when creating the Checkout Session.
 - `STRIPE_WEBHOOK_SECRET` — Stripe webhook signing secret (`whsec_…`). Used by `stripe-webhook.js` to verify the `Stripe-Signature` header (HMAC-SHA256). Server-only — NEVER exposed to the client.
-- `MAKE_STRIPE_WEBHOOK_URL` — Make webhook endpoint that `stripe-webhook.js` forwards verified, validated Stripe checkout events to. SEPARATE from `MAKE_WEBHOOK_URL` (opt-in flow).
+- ~~`MAKE_STRIPE_WEBHOOK_URL`~~ — **retired 2026-08-16.** Make is out of the payment path: `stripe-webhook.js` enrolls the buyer into the Systeme course directly; the Payment Processing scenario (6209692) stays permanently off.
+- `SYSTEME_API_KEY` — Systeme.io public API key (Settings → Public API keys). `stripe-webhook.js` uses it to find/create the buyer's contact and create the course enrollment. Unset means every paid order answers 500 and Stripe retries until it is set — delayed, never lost.
+- `SYSTEME_COURSE_ID` — optional; the course buyers are enrolled into. Defaults to `606107` ("The Zero Fog").
 - `EXPECTED_AMOUNT_TOTAL` — expected paid amount in cents (e.g. `6700`); `stripe-webhook.js` rejects (acknowledges without forwarding) any session whose `amount_total` differs.
 - `EXPECTED_CURRENCY` — expected currency (lowercase ISO code, e.g. `usd`); `stripe-webhook.js` compares case-insensitively before forwarding.
 
@@ -264,15 +270,16 @@ Claude reads the `.md`, locates the matching block in the `.njk`, and applies th
 
 ## Integrations (in progress)
 
-- **Make.com** — webhook for form submissions, proxied via `netlify/functions/optin.js`, and the
-  delivery endpoint the workshop room's notification cron hands each due email to.
-  Flow: opt-in → Make forward (lead captured) → `/workshop/schedule/` → pick a session →
-  `wr-register` → `/confirmation/`. The client appends the landing-page UTM params
-  (`utm_source/medium/campaign/content/term`, when present) for attribution.
+- **Make.com** — the opt-in lead forward only (scenario 5275566), proxied via
+  `netlify/functions/optin.js`. Flow: opt-in → Make forward (lead captured) →
+  `/workshop/schedule/` → pick a session → `wr-register` → `/confirmation/`. The client appends
+  the landing-page UTM params (`utm_source/medium/campaign/content/term`, when present) for
+  attribution. Email delivery (2026-08-14) and payment processing (2026-08-16) both moved out
+  of Make and into our own functions.
 - **Workshop room** — ours, see above. EverWebinar was evaluated and **not bought**:
   `_Marketing/WORKSHOP-ROOM-COST-COMPARISON-2026-08-13.md`.
-- **Stripe** — checkout on sales page (integration planned, not yet implemented)
-- **MailerLite** — email sequences via Make.com
+- **Stripe** — checkout on the sales page (`create-checkout.js`) + live webhook (`stripe-webhook.js`): payment → direct Systeme course enrollment + E14 welcome + app provisioning
+- **MailerLite** — email sequences, delivered directly via the MailerLite API (`lib/wr-mailerlite.js`); group-join fires each automation
 - **Systeme.io** — LMS (course delivery)
 
 ## Database (Supabase)

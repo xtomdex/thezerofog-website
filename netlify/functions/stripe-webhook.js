@@ -1,9 +1,12 @@
 // Receives Stripe `checkout.session.completed` webhooks, verifies the Stripe
 // signature (native crypto HMAC-SHA256 — no Stripe SDK / no npm dependencies),
-// validates the payment (paid + expected amount + expected currency), and forwards
-// a NORMALIZED payload to a Make webhook. Enrollment / LMS stay downstream in the
-// Make scenario. The purchase-welcome email (E14) is the one email sent from here,
-// via MailerLite directly — Make has been out of the email path since 2026-08-14.
+// validates the payment (paid + expected amount + expected currency), and enrolls
+// the buyer into the Systeme.io course directly (find-or-create contact, then
+// create enrollment). Make is out of the payment path since 2026-08-16 — its
+// Payment Processing scenario (6209692) stays permanently off; this handler is
+// the single consumer of Stripe events. The purchase-welcome email (E14) is the
+// one email sent from here, via MailerLite directly — Make has been out of the
+// email path since 2026-08-14.
 //
 // This endpoint is called server-to-server by Stripe (NOT from the browser), so it
 // is NOT gated on a browser Origin. Response codes drive Stripe's retry behavior:
@@ -26,6 +29,94 @@ const SIGNATURE_TOLERANCE_SECONDS = 300;
  *
  * Swallows every error. A paid order must never fail because a follow-up flag did not save.
  */
+/**
+ * Enroll the buyer into the Systeme.io course — the step that actually opens the product.
+ * Mirrors what Make's Payment Processing scenario (6209692, now permanently off) did:
+ * find the contact by email, create it if missing, then create a full_access enrollment
+ * into the course. Same bare-fetch/no-imports contract as everything else in this file.
+ *
+ * Idempotency: Systeme rejects a duplicate enrollment with a 4xx, and this function treats
+ * any 4xx from the enrollment call as "already enrolled" — a duplicate Stripe delivery or a
+ * retry after a partial failure cannot produce a second enrollment or an error loop. (Make's
+ * scenario used an Ignore error handler on the same call for the same reason.)
+ *
+ * Returns true when the buyer is enrolled (or already was), false on a transient failure —
+ * the caller answers Stripe with 500 in that case so the event is retried. A paid order must
+ * never be silently dropped: no course access without either an enrollment or a Stripe retry.
+ */
+async function enrollInCourse(email) {
+  const key = process.env.SYSTEME_API_KEY;
+  const courseId = process.env.SYSTEME_COURSE_ID || '606107';
+  const base = process.env.SYSTEME_API_BASE || 'https://api.systeme.io/api';
+  const headers = {
+    'X-API-Key': key,
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  };
+  const normalized = email.trim().toLowerCase();
+
+  try {
+    // 1) Find the contact by email.
+    let contactId = null;
+    const list = await fetch(`${base}/contacts?email=${encodeURIComponent(normalized)}`, {
+      headers,
+    });
+    if (list.ok) {
+      const data = await list.json();
+      const items = data?.items || (Array.isArray(data) ? data : []);
+      contactId = items[0]?.id || null;
+    } else {
+      console.error('enroll: contact lookup returned', list.status);
+      return false;
+    }
+
+    // 2) Create the contact if it does not exist. A 4xx here means a concurrent
+    //    request created it first — look it up again rather than failing the order.
+    if (!contactId) {
+      const created = await fetch(`${base}/contacts`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ email: normalized, locale: 'en' }),
+      });
+      if (created.ok) {
+        contactId = (await created.json())?.id || null;
+      } else if (created.status >= 400 && created.status < 500) {
+        const retry = await fetch(
+          `${base}/contacts?email=${encodeURIComponent(normalized)}`,
+          { headers }
+        );
+        if (retry.ok) {
+          const data = await retry.json();
+          const items = data?.items || (Array.isArray(data) ? data : []);
+          contactId = items[0]?.id || null;
+        }
+      }
+      if (!contactId) {
+        console.error('enroll: could not create or find contact for paid order');
+        return false;
+      }
+    }
+
+    // 3) Create the enrollment. 2xx = enrolled; 4xx = already enrolled (idempotent
+    //    success); anything else = transient, let Stripe retry.
+    const enroll = await fetch(`${base}/school/courses/${courseId}/enrollments`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ contactId, accessType: 'full_access' }),
+    });
+    if (enroll.ok) return true;
+    if (enroll.status >= 400 && enroll.status < 500) {
+      console.log('enroll: enrollment call returned', enroll.status, '- treating as already enrolled');
+      return true;
+    }
+    console.error('enroll: enrollment call returned', enroll.status);
+    return false;
+  } catch (err) {
+    console.error('enrollInCourse failed:', err.message);
+    return false;
+  }
+}
+
 async function markWorkshopBuyer(email) {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SECRET_KEY;
@@ -211,7 +302,7 @@ export default async function handler(req) {
 
   // Validate required server-side configuration.
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  const makeWebhookUrl = process.env.MAKE_STRIPE_WEBHOOK_URL;
+  const systemeApiKey = process.env.SYSTEME_API_KEY;
   const expectedAmount = process.env.EXPECTED_AMOUNT_TOTAL;
   const expectedCurrency = process.env.EXPECTED_CURRENCY;
 
@@ -219,8 +310,8 @@ export default async function handler(req) {
     console.error('STRIPE_WEBHOOK_SECRET environment variable is not set');
     return serverConfigError();
   }
-  if (!makeWebhookUrl) {
-    console.error('MAKE_STRIPE_WEBHOOK_URL environment variable is not set');
+  if (!systemeApiKey) {
+    console.error('SYSTEME_API_KEY environment variable is not set');
     return serverConfigError();
   }
   if (!expectedAmount) {
@@ -320,15 +411,6 @@ export default async function handler(req) {
     });
   }
 
-  const payload = {
-    email,
-    amount_total: session.amount_total,
-    currency: session.currency,
-    country: session.customer_details?.address?.country || null,
-    session_id: session.id,
-    source: 'stripe_checkout',
-  };
-
   // Mark the buyer inside the workshop room, if this address ever registered for a session.
   //
   // This is the buyer guard the whole sales sequence hangs off: every follow-up email carries
@@ -337,37 +419,25 @@ export default async function handler(req) {
   // only records what Stripe already established.
   //
   // Best effort, and deliberately so. A failure here must not make this handler return 500,
-  // because that would have Stripe retry a payment that was processed correctly. The worst case
-  // is one follow-up email reaching a customer, which the guard step in Make still catches.
+  // because that would have Stripe retry a payment that was processed correctly (the enrollment
+  // below is idempotent, but a retried event still re-runs the whole handler for nothing). The
+  // worst case is one follow-up email reaching a customer, which wr-notify's send-time buyer
+  // re-check still catches.
   await markWorkshopBuyer(email);
 
-  // Forward to Make. If Make is down or errors, return 500 so Stripe retries —
-  // we don't want to silently lose a paid order.
-  try {
-    const upstream = await fetch(makeWebhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-
-    if (!upstream.ok) {
-      console.error('Make webhook returned', upstream.status);
-      return new Response(JSON.stringify({ error: 'Upstream error' }), {
-        status: 500,
-        headers: baseHeaders,
-      });
-    }
-  } catch (err) {
-    console.error('Failed to forward to Make:', err);
-    return new Response(JSON.stringify({ error: 'Upstream error' }), {
+  // Open the course. This is the product — a failure here returns 500 so Stripe
+  // retries the event until the enrollment lands; a paid order is never dropped.
+  const enrolled = await enrollInCourse(email);
+  if (!enrolled) {
+    return new Response(JSON.stringify({ error: 'Enrollment failed' }), {
       status: 500,
       headers: baseHeaders,
     });
   }
 
-  // Best-effort app-user provisioning. Runs only after Make succeeded. Never affects the response:
-  // the course (via Make) is already guaranteed; app access is a bonus that support can fix if it
-  // fails. Awaited so it completes within the function lifetime, but fully wrapped.
+  // Best-effort app-user provisioning. Runs only after the enrollment succeeded. Never affects
+  // the response: the course is already guaranteed; app access is a bonus that support can fix
+  // if it fails. Awaited so it completes within the function lifetime, but fully wrapped.
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseSecret = process.env.SUPABASE_SECRET_KEY;
   if (supabaseUrl && supabaseSecret) {
@@ -381,8 +451,8 @@ export default async function handler(req) {
     console.warn('[provision] SUPABASE_URL or SUPABASE_SECRET_KEY not set — skipping app provisioning');
   }
 
-  // The purchase-welcome email (E14). Runs only after Make succeeded, same contract as
-  // provisioning above: awaited, best-effort, never affects the response.
+  // The purchase-welcome email (E14). Runs only after the enrollment succeeded, same contract
+  // as provisioning above: awaited, best-effort, never affects the response.
   await sendPurchaseWelcome(email);
 
   return received();
