@@ -50,12 +50,16 @@ filling the same 50-slot queue. Nothing downstream read Make's copy: the registr
 even though the Supabase write failed with `PGRST205` (the table is not applied yet), which is
 exactly the intended degradation. The probe subscriber was deleted afterwards (204).
 
+**The webhook queue holds nothing worth recovering - checked, not assumed.** All 21 log records
+on hook `2837321` (13-15.08, none since) were pulled and scanned for addresses: `kirbissb@gmail.com`
+x5, thirteen `kirill+*@thezerofog.com` test aliases, `kirbissb+wrtest*@gmail.com` x2, and one
+fuzz payload with a 900-character local part. Not one real lead - the site has had no traffic,
+the ads have never run. So the queue gets cleared, not drained.
+
 **Open, in this order:** (1) apply `supabase/drafts/DRAFT_wr_leads.sql` - until then leads land
-in MailerLite only; (2) deploy; (3) drain the 18 records sitting in webhook queue `2837321`
-(they are opt-ins and registrations from the period the scenario was off) - export them from
-Make and import into `ADs` / `wr_leads` by hand, they are real people; (4) delete
-`MAKE_WEBHOOK_URL` from Netlify production once the deploy is verified. **Make can then be
-cancelled entirely - no scenario is reachable from the site any more.**
+in MailerLite only; (2) deploy; (3) delete `MAKE_WEBHOOK_URL` from Netlify production once the
+deploy is verified. **Make can then be cancelled entirely - no scenario is reachable from the
+site any more.**
 
 ---
 
