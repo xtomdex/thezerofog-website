@@ -6,7 +6,9 @@
 // Payment Processing scenario (6209692) stays permanently off; this handler is
 // the single consumer of Stripe events. The purchase-welcome email (E14) is the
 // one email sent from here, via MailerLite directly — Make has been out of the
-// email path since 2026-08-14.
+// email path since 2026-08-14. A full refund runs the same path backwards: the buyer
+// is tagged `refunded` in Systeme (which fires the workflow that unenrolls them) and
+// loses `is_paid` in the app.
 //
 // This endpoint is called server-to-server by Stripe (NOT from the browser), so it
 // is NOT gated on a browser Origin. Response codes drive Stripe's retry behavior:
@@ -114,6 +116,113 @@ async function enrollInCourse(email) {
   } catch (err) {
     console.error('enrollInCourse failed:', err.message);
     return false;
+  }
+}
+
+/**
+ * Close the course after a refund, by tagging the contact `refunded` in Systeme.io.
+ *
+ * The tag is a bridge, not the mechanism. Systeme's public API can CREATE an enrollment but
+ * cannot delete one — `/school/courses/{id}/enrollments` answers `allow: POST` and there is no
+ * per-enrollment route (verified against the live API 2026-08-16). The only way to unenroll
+ * programmatically is to make Systeme do it to itself: our tag fires the `Refunded` workflow
+ * (Tag added -> Revoke access to a course), which is built inside Systeme.
+ *
+ * That means this function is useful even while the workflow is paused or the account's single
+ * free automation slot is spent elsewhere — the tag still records who was refunded, and access
+ * closes the moment the workflow is switched on.
+ *
+ * Does NOT create the contact: no contact means no enrollment, and there is nothing to revoke.
+ * Returns true when the tag is on the contact (or there was no contact to tag), false on a
+ * transient failure — the caller answers 500 so Stripe retries rather than leaving a refunded
+ * buyer with an open course.
+ */
+async function tagRefunded(email) {
+  const key = process.env.SYSTEME_API_KEY;
+  const tagId = Number(process.env.SYSTEME_REFUNDED_TAG_ID || '2134135');
+  const base = process.env.SYSTEME_API_BASE || 'https://api.systeme.io/api';
+  const headers = {
+    'X-API-Key': key,
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  };
+  const normalized = email.trim().toLowerCase();
+
+  try {
+    const list = await fetch(`${base}/contacts?email=${encodeURIComponent(normalized)}`, {
+      headers,
+    });
+    if (!list.ok) {
+      console.error('refund: contact lookup returned', list.status);
+      return false;
+    }
+    const data = await list.json();
+    const items = data?.items || (Array.isArray(data) ? data : []);
+    const contactId = items[0]?.id || null;
+    if (!contactId) {
+      console.log('refund: no Systeme contact for', normalized, '- nothing to revoke');
+      return true;
+    }
+
+    // 2xx = tagged; 4xx = already tagged (idempotent success — a duplicate Stripe delivery or
+    // a second partial-then-full refund cannot fire the workflow twice into an error).
+    const tagged = await fetch(`${base}/contacts/${contactId}/tags`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ tagId }),
+    });
+    if (tagged.ok) return true;
+    if (tagged.status >= 400 && tagged.status < 500) {
+      console.log('refund: tag call returned', tagged.status, '- treating as already tagged');
+      return true;
+    }
+    console.error('refund: tag call returned', tagged.status);
+    return false;
+  } catch (err) {
+    console.error('tagRefunded failed:', err.message);
+    return false;
+  }
+}
+
+/**
+ * Close the Toolkit after a refund: flip `is_paid` back to false on the buyer's profile.
+ *
+ * Systeme knows nothing about our app, so revoking the course leaves /app wide open unless this
+ * runs too. The auth user itself is left alone — deleting it would take the person's diary
+ * entries with it, and a refunder who buys again should land back in their own data.
+ *
+ * Deliberately does NOT clear `purchased_at` on the workshop registration: that column is the
+ * buyer guard wr-notify.js reads before every send, and clearing it would put a person who just
+ * asked for their money back into the sales sequence again.
+ *
+ * Best effort, never throws — the course is already closed by the time this runs.
+ */
+async function revokeAppAccess(email) {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SECRET_KEY;
+  if (!url || !key || !email) return;
+
+  try {
+    const endpoint = new URL(`${url}/rest/v1/profiles`);
+    endpoint.searchParams.set('email', `eq.${email.trim().toLowerCase()}`);
+
+    const res = await fetch(endpoint, {
+      method: 'PATCH',
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        'User-Agent': 'zerofog-stripe-webhook',
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify({ is_paid: false }),
+    });
+
+    if (!res.ok) {
+      console.error('revokeAppAccess: Supabase returned', res.status);
+    }
+  } catch (err) {
+    console.error('revokeAppAccess failed:', err.message);
   }
 }
 
@@ -362,6 +471,41 @@ export default async function handler(req) {
     if (abandonedEmail && expired.payment_status !== 'paid') {
       await sendAbandonedCheckout(abandonedEmail);
     }
+    return received();
+  }
+
+  // A refund. Fires when the money is actually back with the customer — NOT when someone asks
+  // for it. That is the point: support tries to keep the customer first, and access only closes
+  // once the refund is really issued.
+  //
+  // Full refunds only. Stripe sets `refunded: true` on the charge exactly when the whole amount
+  // is back; a partial refund (a goodwill gesture, a duplicate charge fixed) leaves it false and
+  // must not take the course away.
+  if (event.type === 'charge.refunded') {
+    const charge = event.data?.object || {};
+    if (charge.refunded !== true) {
+      console.log('refund: partial refund on', charge.id, '- access left open');
+      return received();
+    }
+
+    const refundedEmail =
+      charge.billing_details?.email || charge.receipt_email || null;
+    if (!refundedEmail) {
+      // Nothing to act on, and no retry will conjure an address. Acknowledge and log loudly —
+      // this one needs a human to close the access by hand.
+      console.error('refund: no email on refunded charge', charge.id, '- revoke by hand');
+      return received();
+    }
+
+    const revoked = await tagRefunded(refundedEmail);
+    if (!revoked) {
+      return new Response(JSON.stringify({ error: 'Revocation failed' }), {
+        status: 500,
+        headers: baseHeaders,
+      });
+    }
+
+    await revokeAppAccess(refundedEmail);
     return received();
   }
 

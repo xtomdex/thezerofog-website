@@ -166,6 +166,18 @@ browser can read them.
   "the only nudge I'll send" in E18's body is enforced in code. Always answers 200 to expired
   events (a recovery email is never worth a Stripe retry). Requires the Stripe webhook endpoint
   to be subscribed to `checkout.session.expired` (dashboard setting — pending Stripe access).
+  It also handles `charge.refunded`, and only when the refund is **full** (`charge.refunded ===
+  true`; a partial refund leaves access open on purpose). The trigger is deliberately the refund
+  itself and not a refund request — support tries to keep the customer first. Two things close:
+  `tagRefunded` puts the Systeme tag `refunded` (`SYSTEME_REFUNDED_TAG_ID`, default 2134135) on
+  the contact, and `revokeAppAccess` flips `is_paid` back to false on the app profile. The tag is
+  a bridge, not the mechanism — Systeme's public API can create an enrollment but **cannot delete
+  one** (`/school/courses/{id}/enrollments` answers `allow: POST`, no per-enrollment route), so
+  the unenrollment is done by a Systeme workflow named `Refunded` (Tag added -> Revoke access to
+  a course). A transient tagging failure returns 500 so Stripe retries rather than leaving a
+  refunded buyer with an open course; the auth user and `purchased_at` are deliberately left
+  alone (deleting the user would take their diary with it, and clearing `purchased_at` would put
+  a refunder back into the sales sequence).
   Response codes drive Stripe's retry behavior: **200** = forwarded OK, or a non-target event
   type ignored, an expired session handled,
   or a signature-valid event that failed payment validation (acknowledge, no retry); **400** =
@@ -230,7 +242,8 @@ Client-side integrations (consumed by `_data/env.js`):
 - `STRIPE_WEBHOOK_SECRET` — Stripe webhook signing secret (`whsec_…`). Used by `stripe-webhook.js` to verify the `Stripe-Signature` header (HMAC-SHA256). Server-only — NEVER exposed to the client.
 - ~~`MAKE_STRIPE_WEBHOOK_URL`~~ — **retired 2026-08-16.** Make is out of the payment path: `stripe-webhook.js` enrolls the buyer into the Systeme course directly; the Payment Processing scenario (6209692) stays permanently off.
 - `SYSTEME_API_KEY` — Systeme.io public API key (Settings → Public API keys). `stripe-webhook.js` uses it to find/create the buyer's contact and create the course enrollment. Unset means every paid order answers 500 and Stripe retries until it is set — delayed, never lost.
-- `SYSTEME_COURSE_ID` — optional; the course buyers are enrolled into. Defaults to `606107` ("The Zero Fog").
+- `SYSTEME_COURSE_ID` — optional; the course buyers are enrolled into. Defaults to `606107` ("4 Week Protocol" — that is the course's real name in Systeme).
+- `SYSTEME_REFUNDED_TAG_ID` — optional; the tag `stripe-webhook.js` puts on a contact after a full refund, which fires the Systeme `Refunded` workflow that unenrolls them. Defaults to `2134135` (`refunded`). Unset workflow = the tag still lands and access closes the moment it is switched on.
 - `EXPECTED_AMOUNT_TOTAL` — expected paid amount in cents (e.g. `6700`); `stripe-webhook.js` rejects (acknowledges without forwarding) any session whose `amount_total` differs.
 - `EXPECTED_CURRENCY` — expected currency (lowercase ISO code, e.g. `usd`); `stripe-webhook.js` compares case-insensitively before forwarding.
 
