@@ -15,20 +15,31 @@ export const DEFAULT_CONFIG = {
   key: WEBINAR_KEY,
 
   video: {
-    // The faststart remux of the master (`Full Web V2 faststart.mp4`, moov atom moved to the
-    // head so playback and seeking start without fetching the file tail - matters for JIT
-    // joins mid-session). Uploaded 2026-08-15 through Systeme's Files library to the same
-    // CloudFront distribution. Verified on upload: 469342284 bytes and MD5
-    // 81b60375c93ad4ddf55daf773a50577c, identical to the local remux; HEAD answers 200 with
-    // `accept-ranges: bytes`, a mid-file range request answers 206, and the first bytes read
-    // ftyp -> moov. The 2026-08-13 non-faststart file stays on the CDN untouched:
-    // https://d1yei2z3i6k35z.cloudfront.net/17244934/6a7e1894985ac3.17625125_FullWebV2.mp4
-    url: 'https://d1yei2z3i6k35z.cloudfront.net/17244934/6a80c8a1335307.23741413_FullWebV2faststart.mp4',
+    // 2026-08-17: the refund-corrected master. The recording asked for "two weeks of the diary"
+    // in two places and showed a slide listing "Send me 14 days of entries" - both contradicted
+    // the policy, which became unconditional the same day. Two passages were cut (11.2 s at
+    // 51:08 and 11.0 s at 55:17, each join hidden by a 0.3 s cross-dissolve; both cut points sit
+    // inside real 0.7-1.0 s pauses) and slide 101 was replaced. Re-voicing was tried and
+    // rejected: Descript renders single words in his voice but a whole sentence sounds like
+    // someone else, and there is nowhere to place a new line anyway - the webcam PiP is on
+    // screen for all 58 minutes without a single break, so any cover-up would be the only one
+    // in the film.
+    //
+    // Only two 4 s / 22 s bridges were re-encoded (CRF 16); the other 58 minutes are stream
+    // copies. Proven, not assumed: decoded frames in untouched regions match the previous
+    // master at SSIM 1.000000. Verified after upload: 465900328 bytes (identical to local),
+    // MD5 8e40a0d24e90985a425728020f3eadff locally, HEAD 200 with `accept-ranges: bytes`,
+    // a mid-file range answers 206, first bytes read ftyp -> moov.
+    //
+    // The two older files stay on the CDN untouched as rollback points:
+    // .../6a80c8a1335307.23741413_FullWebV2faststart.mp4 (2026-08-15, pre-refund-fix)
+    // .../6a7e1894985ac3.17625125_FullWebV2.mp4 (2026-08-13, non-faststart)
+    url: 'https://d1yei2z3i6k35z.cloudfront.net/17244934/6a832c1d0fc977.60695874_FullWebV2-refund-fixed.mp4',
     posterUrl: null,
-    // Measured off the master with ffprobe on 2026-08-13: `Full Web V2.mp4`, 3510.73 s,
-    // 1920x1080 at 30fps, 448 MB. NOT estimated - the duration headers in this project have
-    // lied before and once cost five agents a false finding.
-    durationSec: 3511,
+    // Measured with ffprobe on the uploaded file: 3488.048 s, 1920x1080 at 30fps. Was 3511
+    // before the two cuts removed 22.7 s. NOT estimated - the duration headers in this project
+    // have lied before and once cost five agents a false finding.
+    durationSec: 3488,
     // Captions ship as a WebVTT sidecar. The master carries them as an embedded mov_text track,
     // which an HTML5 <video> element does not render at all.
     captionsUrl: '/assets/captions/workshop-v2.vtt',
