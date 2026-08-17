@@ -2269,7 +2269,36 @@ function enterFreeMode(){
   const sn=$('bonusSub'); if(sn) sn.classList.add('open');
   const bt=document.querySelector('.navi.bonus'); if(bt) bt.classList.add('expanded');
 }
+/* Record that this person opened the product, in our own ledger rather than in analytics.
+   `auth.users.last_sign_in_at` is a single overwritten value, so without this there is no
+   history to show anyone who claims they never received what they paid for.
+
+   The row is written server-side by netlify/functions/service-log.js, which verifies this
+   token and ignores anything we might put in the body - a log the subject can write is not
+   evidence. Not consent-gated: this is a record of contract performance, not tracking, and
+   gating it would leave exactly the customers who decline cookies with an empty file.
+
+   Fire-and-forget on purpose. PREVIEW (?demo=1) never logs - it is not a real session. */
+async function logServiceEvent(event){
+  if (PREVIEW || !sb) return;
+  try {
+    const { data } = await sb.auth.getSession();
+    const token = data && data.session && data.session.access_token;
+    if (!token) return;
+    await fetch('/.netlify/functions/service-log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ event })
+    });
+  } catch (e) { /* bookkeeping must never break the page */ }
+}
+
 function unlock(email){
+  // Published for the Crisp block at the end of the file, which lives in its own script and
+  // cannot see `DB` (top-level `let` never lands on window). One explicit handoff beats that
+  // block reaching into this one's internals.
+  window.ZF_USER_EMAIL = email || null;
+  logServiceEvent('sign_in');
   // A visitor can sign in from inside FREE mode after buying, so undo it here:
   // real backend, no upsell, no lock markers. PREVIEW keeps the local layer.
   FREE = false;
@@ -3466,5 +3495,70 @@ boot();
 </div>
 <script src="/zf-env.js"></script>
 <script src="/assets/js/cookie-consent-5.js" defer></script>
+
+<!-- Crisp live chat, buyer side. Added 2026-08-17: the chat used to live ONLY inside the Systeme
+     course area, so a customer sitting in the Toolkit - the same customer - had no way to reach
+     anyone. CEO's model: Crisp is the buyers' channel, kirill@ is the founder line, support@ is
+     for people who have not bought.
+
+     Gated on the same zf_cookies_consent cookie the whole domain uses, and deliberately NOT folded
+     into cookie-consent-5.js's loadTrackers(): support chat is not a tracker, and grouping it with
+     the pixels would make the banner's own copy untrue. The consent logic here mirrors the course
+     block (_Course/systeme-blocks/course-embedded-code.html) on purpose - one behaviour, two
+     places, because Systeme cannot include our file.
+
+     The Systeme course page can only tell Crisp a display name. Here we know exactly who is
+     signed in, so the session carries the real email and the chat has a thread per person. -->
+<script>
+(function () {
+  var m = document.cookie.match(/(?:^|;\s*)zf_cookies_consent=(all|essential)(?:;|$)/);
+  var choice = m ? m[1] : null;
+  if (choice === 'essential') return;
+  if (choice === 'all') { init(); return; }
+
+  var cached = null;
+  try { cached = sessionStorage.getItem('zf_course_regime'); } catch (e) {}
+  if (cached === 'optout') { init(); return; }
+  if (cached === 'optin') return;
+
+  fetch('/geo').then(function (r) { return r.json(); }).then(function (d) {
+    var OPT_IN = ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU',
+      'IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE',
+      'IS','LI','NO','GB','CH'];
+    var regime = (d && d.country && OPT_IN.indexOf(d.country) === -1) ? 'optout' : 'optin';
+    try { sessionStorage.setItem('zf_course_regime', regime); } catch (e) {}
+    if (regime === 'optout') init();
+  }).catch(function () {});
+
+  function init() {
+    if (window.zfCrispLoaded) return;
+    window.zfCrispLoaded = true;
+    window.$crisp = window.$crisp || [];
+    window.CRISP_WEBSITE_ID = 'bef46e79-4888-4c70-93ae-f6a18470fc61';
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://client.crisp.chat/l.js';
+    document.head.appendChild(s);
+    identifyWhenKnown();
+  }
+
+  /* The email arrives after the one-time-code sign-in, which can happen long after this script
+     runs - so poll briefly rather than assume a load order, and stop either way. A chat thread
+     with no address is still a working chat; a wrong address would be worse. */
+  function identifyWhenKnown() {
+    var tries = 0;
+    var t = setInterval(function () {
+      tries++;
+      var email = window.ZF_USER_EMAIL || null;
+      if (email) {
+        clearInterval(t);
+        try { window.$crisp.push(['set', 'user:email', [email]]); } catch (e) {}
+      } else if (tries > 60) {
+        clearInterval(t);
+      }
+    }, 2000);
+  }
+})();
+</script>
 </body>
 </html>
