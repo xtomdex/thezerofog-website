@@ -32,6 +32,12 @@ const corsHeaders = {
 
 // Only these may be recorded. An open `event` field would let a caller write prose
 // into what is meant to be a ledger.
+//
+// 'app_open' is what the app actually sends, and the name is deliberate: unlock() runs
+// both on a fresh one-time-code sign-in AND when an existing session is restored, so
+// calling every row a "sign_in" would overstate what happened. This log's only job is to
+// survive being questioned, and a label that is loose in our favour is the first thing an
+// opponent pulls on. 'sign_in' stays accepted for a future caller that genuinely means it.
 const ALLOWED_EVENTS = new Set(['sign_in', 'app_open']);
 
 function json(body, status = 200) {

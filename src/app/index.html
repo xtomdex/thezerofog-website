@@ -2298,7 +2298,9 @@ function unlock(email){
   // cannot see `DB` (top-level `let` never lands on window). One explicit handoff beats that
   // block reaching into this one's internals.
   window.ZF_USER_EMAIL = email || null;
-  logServiceEvent('sign_in');
+  /* 'app_open', not 'sign_in': unlock() runs both after a one-time-code sign-in and when
+     boot() restores an existing session, so the honest name is the weaker one. */
+  logServiceEvent('app_open');
   // A visitor can sign in from inside FREE mode after buying, so undo it here:
   // real backend, no upsell, no lock markers. PREVIEW keeps the local layer.
   FREE = false;
