@@ -37,6 +37,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
+// Two shapes arrive here:
+//   {kind:'watch', studentId, lectureId, watched, duration, course, name} -> lesson_watch
+//   {studentId, completed, total, course, name}                          -> course_progress
+
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -60,20 +64,57 @@ export default async function handler(req) {
     return json({ ok: false });
   }
 
+  // Body may arrive as text/plain: the watch report is sent with navigator.sendBeacon at
+  // page-hide, and only a simple content type avoids a CORS preflight the browser has no
+  // time left to complete. req.json() parses either way.
   let body = {};
   try { body = await req.json(); } catch (e) { return json({ error: 'Bad JSON' }, 400); }
 
   // Everything below is attacker-controlled. Nothing is stored that is not one of these.
   const studentId = body.studentId;
-  const completed = body.completed;
-  const total = body.total;
   const course = typeof body.course === 'string' ? body.course.slice(0, 64) : null;
   const name = typeof body.name === 'string' ? body.name.slice(0, 120) : null;
-
   if (!isInt(studentId, 1, 1e12)) return json({ error: 'Bad studentId' }, 400);
-  if (!isInt(completed, 0, 1000)) return json({ error: 'Bad completed' }, 400);
-  if (!isInt(total, 0, 1000)) return json({ error: 'Bad total' }, 400);
-  if (completed > total) return json({ error: 'Bad counts' }, 400);
+
+  let row = null;
+
+  if (body.kind === 'watch') {
+    // How much of a lesson video was actually played. This is the strongest delivery
+    // evidence we can produce: not "the page was open", but "these minutes were watched".
+    // Systeme has its own per-lecture session logging, but it is plan-gated - their player
+    // code flips lectureSessionLogging to false on a "locked" response - so we measure it
+    // ourselves off the <video> element.
+    const lectureId = body.lectureId;
+    const watched = Math.round(Number(body.watched));
+    const duration = Math.round(Number(body.duration));
+    if (!isInt(lectureId, 1, 1e12)) return json({ error: 'Bad lectureId' }, 400);
+    if (!isInt(watched, 1, 86400)) return json({ error: 'Bad watched' }, 400);
+    if (!isInt(duration, 0, 86400)) return json({ error: 'Bad duration' }, 400);
+    row = {
+      source: 'course',
+      event: 'lesson_watch',
+      ref: String(lectureId),
+      data: {
+        systeme_user_id: studentId,
+        watched_sec: watched,
+        duration_sec: duration || null,
+        course,
+        name,
+      },
+    };
+  } else {
+    const completed = body.completed;
+    const total = body.total;
+    if (!isInt(completed, 0, 1000)) return json({ error: 'Bad completed' }, 400);
+    if (!isInt(total, 0, 1000)) return json({ error: 'Bad total' }, 400);
+    if (completed > total) return json({ error: 'Bad counts' }, 400);
+    row = {
+      source: 'course',
+      event: 'course_progress',
+      ref: course,
+      data: { systeme_user_id: studentId, completed, total, name },
+    };
+  }
 
   try {
     const res = await fetch(`${supabaseUrl}/rest/v1/service_events`, {
@@ -84,12 +125,7 @@ export default async function handler(req) {
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal',
       },
-      body: JSON.stringify({
-        source: 'course',
-        event: 'course_progress',
-        ref: course,
-        data: { systeme_user_id: studentId, completed, total, name },
-      }),
+      body: JSON.stringify(row),
     });
     if (!res.ok) {
       console.error('[course-progress] insert non-OK:', res.status, await res.text());
