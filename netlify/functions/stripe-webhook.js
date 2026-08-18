@@ -42,9 +42,11 @@ const SIGNATURE_TOLERANCE_SECONDS = 300;
  * retry after a partial failure cannot produce a second enrollment or an error loop. (Make's
  * scenario used an Ignore error handler on the same call for the same reason.)
  *
- * Returns true when the buyer is enrolled (or already was), false on a transient failure —
- * the caller answers Stripe with 500 in that case so the event is retried. A paid order must
- * never be silently dropped: no course access without either an enrollment or a Stripe retry.
+ * Returns the Systeme CONTACT ID when the buyer is enrolled (or already was), and null on a
+ * transient failure — the caller answers Stripe with 500 in that case so the event is retried. A
+ * paid order must never be silently dropped: no course access without either an enrollment or a
+ * Stripe retry. The id is returned rather than a bare true because the operations board links
+ * straight to the student's Systeme page, and this is the only place that id is known.
  */
 async function enrollInCourse(email) {
   const key = process.env.SYSTEME_API_KEY;
@@ -69,7 +71,7 @@ async function enrollInCourse(email) {
       contactId = items[0]?.id || null;
     } else {
       console.error('enroll: contact lookup returned', list.status);
-      return false;
+      return null;
     }
 
     // 2) Create the contact if it does not exist. A 4xx here means a concurrent
@@ -95,7 +97,7 @@ async function enrollInCourse(email) {
       }
       if (!contactId) {
         console.error('enroll: could not create or find contact for paid order');
-        return false;
+        return null;
       }
     }
 
@@ -106,16 +108,16 @@ async function enrollInCourse(email) {
       headers,
       body: JSON.stringify({ contactId, accessType: 'full_access' }),
     });
-    if (enroll.ok) return true;
+    if (enroll.ok) return contactId;
     if (enroll.status >= 400 && enroll.status < 500) {
       console.log('enroll: enrollment call returned', enroll.status, '- treating as already enrolled');
-      return true;
+      return contactId;
     }
     console.error('enroll: enrollment call returned', enroll.status);
-    return false;
+    return null;
   } catch (err) {
     console.error('enrollInCourse failed:', err.message);
-    return false;
+    return null;
   }
 }
 
@@ -461,11 +463,17 @@ const MC = {
   payment: 'color_mm6bnx6y',
   access: 'color_mm6brrbj',
   app: 'color_mm6b804g',
-  country: 'text_mm6bfveb',
   refundedOn: 'date_mm6bxg4g',
   stripeCustomer: 'text_mm6br1nv',
-  chargeId: 'text_mm6bnn1j',
+  systeme: 'link_mm6b13pt',
+  progress: 'color_mm6bxg81',
+  refundStage: 'color_mm6b7dhw',
+  issue: 'color_mm6bf9at',
 };
+
+// Groups on the Customers board. A row's group is where the eye goes first, so the webhook puts
+// buyers where they belong and never leaves a refunded person sitting among the active ones.
+const MG = { active: 'topics', refundInProgress: 'group_mm6bsmhn' };
 const MM = {
   type: 'color_mm6bzp4h',
   date: 'date_mm6bdy5x',
@@ -536,7 +544,7 @@ function mondayProductLabel(amountCents) {
 async function mondayRecordPurchase(details) {
   if (!process.env.MONDAY_API_TOKEN) return;
   const { email, name, amountCents, currency, sessionId, chargeOrIntentId,
-          customerId, country, appProvisioned, livemode } = details;
+          customerId, systemeContactId, appProvisioned, livemode } = details;
   const today = new Date().toISOString().slice(0, 10);
   const dollars = Number(amountCents || 0) / 100;
 
@@ -548,10 +556,19 @@ async function mondayRecordPurchase(details) {
     [MC.payment]: { label: 'Paid' },
     [MC.access]: { label: 'Enrolled' },
     [MC.app]: { label: appProvisioned ? 'Provisioned' : 'Missing' },
-    [MC.country]: country || '',
     [MC.stripeCustomer]: customerId || '',
-    [MC.chargeId]: chargeOrIntentId || sessionId || '',
+    [MC.progress]: { label: 'Not started' },
+    [MC.refundStage]: { label: 'None' },
+    [MC.issue]: { label: 'None' },
   };
+  // The link to the student's own Systeme page. Mandatory on every row: without it, answering
+  // "did this person actually get the course" means searching Systeme by hand.
+  if (systemeContactId) {
+    customerValues[MC.systeme] = {
+      url: `https://systeme.io/dashboard/contacts/${systemeContactId}`,
+      text: `Systeme contact ${systemeContactId}`,
+    };
+  }
 
   let itemId = await mondayFindItem(MONDAY_BOARD_CUSTOMERS, MC.email, email);
   if (itemId) {
@@ -563,12 +580,13 @@ async function mondayRecordPurchase(details) {
     );
   } else {
     const created = await mondayCall(
-      `mutation ($board: ID!, $name: String!, $vals: JSON!) {
-         create_item(board_id: $board, item_name: $name, column_values: $vals,
+      `mutation ($board: ID!, $group: String!, $name: String!, $vals: JSON!) {
+         create_item(board_id: $board, group_id: $group, item_name: $name, column_values: $vals,
                      create_labels_if_missing: true) { id }
        }`,
       {
         board: MONDAY_BOARD_CUSTOMERS,
+        group: MG.active,
         name: name ? `${email} - ${name}` : email,
         vals: JSON.stringify(customerValues),
       }
@@ -630,8 +648,19 @@ async function mondayRecordRefund(details) {
           [MC.access]: { label: 'Revoked' },
           [MC.app]: { label: 'Missing' },
           [MC.refundedOn]: { date: today },
+          // "Sent", not "Closed - refunded": the money has left Stripe, but the row is only
+          // closed by a human after the client confirms they got it. That last step is the one
+          // that stops a refund from quietly turning into a chargeback.
+          [MC.refundStage]: { label: 'Sent' },
         }),
       }
+    );
+    await mondayCall(
+      // move_item_to_group takes no board_id - passing one is a hard GraphQL error, not a warning.
+      `mutation ($item: ID!, $group: String!) {
+         move_item_to_group(item_id: $item, group_id: $group) { id }
+       }`,
+      { item: itemId, group: MG.refundInProgress }
     );
   } else {
     console.warn('[monday] refund for an email with no buyer row:', email);
@@ -846,8 +875,8 @@ export default async function handler(req) {
 
   // Open the course. This is the product — a failure here returns 500 so Stripe
   // retries the event until the enrollment lands; a paid order is never dropped.
-  const enrolled = await enrollInCourse(email);
-  if (!enrolled) {
+  const systemeContactId = await enrollInCourse(email);
+  if (!systemeContactId) {
     return new Response(JSON.stringify({ error: 'Enrollment failed' }), {
       status: 500,
       headers: baseHeaders,
@@ -887,7 +916,7 @@ export default async function handler(req) {
       sessionId: session.id,
       chargeOrIntentId: session.payment_intent || null,
       customerId: typeof session.customer === 'string' ? session.customer : null,
-      country: session.customer_details?.address?.country || null,
+      systemeContactId,
       appProvisioned,
       livemode: event.livemode !== false,
     });
