@@ -42,6 +42,13 @@ function buildSessionParams(priceId, baseUrl, withTosConsent) {
   // The `checkout.session.expired` webhook is what triggers the E18 abandoned-checkout
   // email — with the default expiry it would arrive a full day late.
   params.set('expires_at', String(Math.floor(Date.now() / 1000) + 2 * 60 * 60));
+  // Adaptive Pricing presents the price in the buyer's local currency, and the
+  // completed session then reports THAT currency and amount. stripe-webhook.js
+  // compares both against EXPECTED_AMOUNT_TOTAL / EXPECTED_CURRENCY and returns
+  // 200 (no retry) on a mismatch — so a non-USD buyer would pay and never be
+  // enrolled, silently. Off here rather than in the Dashboard: this cannot be
+  // undone by a stray click, and it shows up in a diff.
+  params.set('adaptive_pricing[enabled]', 'false');
   if (withTosConsent) {
     params.set('consent_collection[terms_of_service]', 'required');
     params.set('custom_text[terms_of_service_acceptance][message]', TOS_CONSENT_MESSAGE);
