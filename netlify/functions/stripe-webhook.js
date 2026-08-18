@@ -429,6 +429,237 @@ const baseHeaders = {
   'Content-Type': 'application/json',
 };
 
+// ---------------------------------------------------------------------------
+// monday.com operations board
+//
+// Every paid order and every refund is written to two boards: `ZeroFog - Customers`
+// (one row per buyer, carrying whether they actually got access) and `ZeroFog - Money`
+// (one row per money event). Before this, the only record that a person bought was
+// spread across Stripe, Systeme and Supabase, and a failed enrollment was a line in a
+// Netlify log that nobody reads.
+//
+// Contract, same as everything else in this file: bare fetch, no imports, and
+// BEST EFFORT ONLY. A bookkeeping board must never decide whether a paid order
+// succeeds, so every function here swallows its errors and returns quietly. If
+// MONDAY_API_TOKEN is not set the whole thing is a no-op — that is deliberate, so
+// this code can ship before the token exists.
+//
+// Idempotency matters because Stripe retries: the buyer row is looked up by email
+// before it is created, and the money row is looked up by its Stripe id. A retried
+// event updates the same two rows instead of growing duplicates.
+const MONDAY_API = 'https://api.monday.com/v2';
+const MONDAY_BOARD_CUSTOMERS = process.env.MONDAY_BOARD_CUSTOMERS || '5102474399';
+const MONDAY_BOARD_MONEY = process.env.MONDAY_BOARD_MONEY || '5102474401';
+
+// Column ids as created on 2026-08-18. They are stable for the life of the board;
+// if a column is ever recreated in the UI its id changes and these must be updated.
+const MC = {
+  email: 'email_mm6b303d',
+  bought: 'date_mm6b9tq0',
+  product: 'color_mm6b613s',
+  paid: 'numeric_mm6b153p',
+  payment: 'color_mm6bnx6y',
+  access: 'color_mm6brrbj',
+  app: 'color_mm6b804g',
+  country: 'text_mm6bfveb',
+  refundedOn: 'date_mm6bxg4g',
+  stripeCustomer: 'text_mm6br1nv',
+  chargeId: 'text_mm6bnn1j',
+};
+const MM = {
+  type: 'color_mm6bzp4h',
+  date: 'date_mm6bdy5x',
+  charged: 'numeric_mm6bffv',
+  currency: 'text_mm6brn15',
+  stripeId: 'text_mm6bxe8v',
+  liveMode: 'color_mm6bma3q',
+  note: 'long_text_mm6bm1t2',
+  customer: 'board_relation_mm6bwy62',
+};
+
+async function mondayCall(query, variables) {
+  const token = process.env.MONDAY_API_TOKEN;
+  if (!token) return null;
+  try {
+    const res = await fetch(MONDAY_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token,
+        'API-Version': '2024-10',
+      },
+      body: JSON.stringify({ query, variables }),
+    });
+    if (!res.ok) {
+      console.error('[monday] HTTP', res.status, await safeText(res));
+      return null;
+    }
+    const body = await res.json();
+    if (body.errors) {
+      console.error('[monday] API errors:', JSON.stringify(body.errors).slice(0, 400));
+      return null;
+    }
+    return body.data || null;
+  } catch (err) {
+    console.error('[monday] request error:', err);
+    return null;
+  }
+}
+
+// Find one item by an exact value in a text-ish column. Returns its id or null.
+async function mondayFindItem(boardId, columnId, value) {
+  const data = await mondayCall(
+    `query ($board: ID!, $col: String!, $val: String!) {
+       items_page_by_column_values(board_id: $board, limit: 1,
+         columns: [{ column_id: $col, column_values: [$val] }]) { items { id } }
+     }`,
+    { board: boardId, col: columnId, val: value }
+  );
+  return data?.items_page_by_column_values?.items?.[0]?.id || null;
+}
+
+function mondayProductLabel(amountCents) {
+  const dollars = Math.round(Number(amountCents || 0) / 100);
+  if (dollars === 67) return 'Course $67';
+  if (dollars === 167) return 'Course $167';
+  if (dollars === 250) return 'Course $250';
+  return 'Other';
+}
+
+/**
+ * Record a paid order. Creates the buyer row if this email has never bought before,
+ * otherwise updates it, and adds one Charge row to the money board.
+ *
+ * `appProvisioned` is what actually happened, not what we hoped: the board is only
+ * useful if it shows the gap between "paid" and "has access".
+ */
+async function mondayRecordPurchase(details) {
+  if (!process.env.MONDAY_API_TOKEN) return;
+  const { email, name, amountCents, currency, sessionId, chargeOrIntentId,
+          customerId, country, appProvisioned, livemode } = details;
+  const today = new Date().toISOString().slice(0, 10);
+  const dollars = Number(amountCents || 0) / 100;
+
+  const customerValues = {
+    [MC.email]: { email, text: email },
+    [MC.bought]: { date: today },
+    [MC.product]: { label: mondayProductLabel(amountCents) },
+    [MC.paid]: String(dollars),
+    [MC.payment]: { label: 'Paid' },
+    [MC.access]: { label: 'Enrolled' },
+    [MC.app]: { label: appProvisioned ? 'Provisioned' : 'Missing' },
+    [MC.country]: country || '',
+    [MC.stripeCustomer]: customerId || '',
+    [MC.chargeId]: chargeOrIntentId || sessionId || '',
+  };
+
+  let itemId = await mondayFindItem(MONDAY_BOARD_CUSTOMERS, MC.email, email);
+  if (itemId) {
+    await mondayCall(
+      `mutation ($board: ID!, $item: ID!, $vals: JSON!) {
+         change_multiple_column_values(board_id: $board, item_id: $item, column_values: $vals) { id }
+       }`,
+      { board: MONDAY_BOARD_CUSTOMERS, item: itemId, vals: JSON.stringify(customerValues) }
+    );
+  } else {
+    const created = await mondayCall(
+      `mutation ($board: ID!, $name: String!, $vals: JSON!) {
+         create_item(board_id: $board, item_name: $name, column_values: $vals,
+                     create_labels_if_missing: true) { id }
+       }`,
+      {
+        board: MONDAY_BOARD_CUSTOMERS,
+        name: name ? `${email} - ${name}` : email,
+        vals: JSON.stringify(customerValues),
+      }
+    );
+    itemId = created?.create_item?.id || null;
+  }
+
+  // The money row. Fees are deliberately left empty: the webhook payload does not carry
+  // them, they only exist on the balance transaction once Stripe has settled the charge.
+  const moneyKey = chargeOrIntentId || sessionId;
+  if (moneyKey && (await mondayFindItem(MONDAY_BOARD_MONEY, MM.stripeId, moneyKey))) return;
+
+  const moneyValues = {
+    [MM.type]: { label: 'Charge' },
+    [MM.date]: { date: today },
+    [MM.charged]: String(dollars),
+    [MM.currency]: String(currency || '').toUpperCase(),
+    [MM.stripeId]: moneyKey || '',
+    [MM.liveMode]: { label: livemode ? 'Live' : 'Test' },
+    [MM.note]: 'Written by stripe-webhook. Stripe fee and net settled are empty on purpose - they live on the balance transaction and are only known after settlement.',
+  };
+  if (itemId) moneyValues[MM.customer] = { item_ids: [Number(itemId)] };
+
+  await mondayCall(
+    `mutation ($board: ID!, $name: String!, $vals: JSON!) {
+       create_item(board_id: $board, item_name: $name, column_values: $vals,
+                   create_labels_if_missing: true) { id }
+     }`,
+    {
+      board: MONDAY_BOARD_MONEY,
+      name: `Charge $${dollars} - ${email}`,
+      vals: JSON.stringify(moneyValues),
+    }
+  );
+}
+
+/**
+ * Record a refund: flip the buyer's row to Refunded/Revoked and add a NEGATIVE money row.
+ * The negative is the convention the board's dashboard sums depend on - a refund entered
+ * as a positive number would read as revenue.
+ */
+async function mondayRecordRefund(details) {
+  if (!process.env.MONDAY_API_TOKEN) return;
+  const { email, chargeId, amountRefundedCents, currency, livemode } = details;
+  const today = new Date().toISOString().slice(0, 10);
+  const dollars = Number(amountRefundedCents || 0) / 100;
+
+  const itemId = await mondayFindItem(MONDAY_BOARD_CUSTOMERS, MC.email, email);
+  if (itemId) {
+    await mondayCall(
+      `mutation ($board: ID!, $item: ID!, $vals: JSON!) {
+         change_multiple_column_values(board_id: $board, item_id: $item, column_values: $vals) { id }
+       }`,
+      {
+        board: MONDAY_BOARD_CUSTOMERS,
+        item: itemId,
+        vals: JSON.stringify({
+          [MC.payment]: { label: 'Refunded' },
+          [MC.access]: { label: 'Revoked' },
+          [MC.app]: { label: 'Missing' },
+          [MC.refundedOn]: { date: today },
+        }),
+      }
+    );
+  } else {
+    console.warn('[monday] refund for an email with no buyer row:', email);
+  }
+
+  const refundKey = `refund:${chargeId}`;
+  if (await mondayFindItem(MONDAY_BOARD_MONEY, MM.stripeId, refundKey)) return;
+
+  const values = {
+    [MM.type]: { label: 'Refund' },
+    [MM.date]: { date: today },
+    [MM.charged]: String(-Math.abs(dollars)),
+    [MM.currency]: String(currency || '').toUpperCase(),
+    [MM.stripeId]: refundKey,
+    [MM.liveMode]: { label: livemode ? 'Live' : 'Test' },
+    [MM.note]: 'Written by stripe-webhook on charge.refunded. Entered negative on purpose so the dashboard sums stay true.',
+  };
+  if (itemId) values[MM.customer] = { item_ids: [Number(itemId)] };
+
+  await mondayCall(
+    `mutation ($board: ID!, $name: String!, $vals: JSON!) {
+       create_item(board_id: $board, item_name: $name, column_values: $vals,
+                   create_labels_if_missing: true) { id }
+     }`,
+    { board: MONDAY_BOARD_MONEY, name: `Refund $${dollars} - ${email}`, vals: JSON.stringify(values) }
+  );
+}
+
 export default async function handler(req) {
   // Stripe only POSTs. Any other method is rejected.
   if (req.method !== 'POST') {
@@ -535,6 +766,21 @@ export default async function handler(req) {
     }
 
     await revokeAppAccess(refundedEmail);
+
+    // The operations board, best effort: flip this buyer to Refunded/Revoked and add the
+    // negative money row. Never affects the response - access is already closed above.
+    try {
+      await mondayRecordRefund({
+        email: refundedEmail,
+        chargeId: charge.id,
+        amountRefundedCents: charge.amount_refunded ?? charge.amount,
+        currency: charge.currency,
+        livemode: event.livemode !== false,
+      });
+    } catch (err) {
+      console.error('[monday] refund record failed (ignored):', err);
+    }
+
     return received();
   }
 
@@ -613,9 +859,10 @@ export default async function handler(req) {
   // if it fails. Awaited so it completes within the function lifetime, but fully wrapped.
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseSecret = process.env.SUPABASE_SECRET_KEY;
+  let appProvisioned = false;
   if (supabaseUrl && supabaseSecret) {
     try {
-      await provisionAppUser(email, session.id, supabaseUrl, supabaseSecret);
+      appProvisioned = (await provisionAppUser(email, session.id, supabaseUrl, supabaseSecret)) === true;
     } catch (err) {
       // Defensive: provisionAppUser shouldn't throw, but never let it break the 200 response.
       console.error('[provision] unexpected error (ignored):', err);
@@ -627,6 +874,26 @@ export default async function handler(req) {
   // The purchase-welcome email (E14). Runs only after the enrollment succeeded, same contract
   // as provisioning above: awaited, best-effort, never affects the response.
   await sendPurchaseWelcome(email);
+
+  // The operations board. Last of the best-effort steps, and the only one that records what
+  // the earlier ones actually did: the buyer row carries whether the app account was really
+  // provisioned, so a silent provisioning failure becomes visible instead of staying a log line.
+  try {
+    await mondayRecordPurchase({
+      email,
+      name: session.customer_details?.name || null,
+      amountCents: session.amount_total,
+      currency: session.currency,
+      sessionId: session.id,
+      chargeOrIntentId: session.payment_intent || null,
+      customerId: typeof session.customer === 'string' ? session.customer : null,
+      country: session.customer_details?.address?.country || null,
+      appProvisioned,
+      livemode: event.livemode !== false,
+    });
+  } catch (err) {
+    console.error('[monday] purchase record failed (ignored):', err);
+  }
 
   return received();
 }
@@ -685,7 +952,7 @@ async function provisionAppUser(email, sessionId, supabaseUrl, secretKey) {
 
   if (!userId) {
     console.error('[provision] could not resolve user id for', email, '- profile not written');
-    return;
+    return false;
   }
 
   // 3) Upsert the profile row marking the buyer paid (idempotent on user_id).
@@ -706,9 +973,12 @@ async function provisionAppUser(email, sessionId, supabaseUrl, secretKey) {
     );
     if (!profRes.ok) {
       console.error('[provision] profile upsert non-OK:', profRes.status, await safeText(profRes));
+      return false;
     }
+    return true;
   } catch (err) {
     console.error('[provision] profile upsert error:', err);
+    return false;
   }
 }
 

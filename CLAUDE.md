@@ -265,6 +265,8 @@ Client-side integrations (consumed by `_data/env.js`):
 - `SYSTEME_REFUNDED_TAG_ID` — optional; the tag `stripe-webhook.js` puts on a contact after a full refund, which fires the Systeme `Refunded` workflow that unenrolls them. Defaults to `2134135` (`refunded`). Unset workflow = the tag still lands and access closes the moment it is switched on.
 - `EXPECTED_AMOUNT_TOTAL` — expected paid amount in cents (e.g. `6700`); `stripe-webhook.js` rejects (acknowledges without forwarding) any session whose `amount_total` differs.
 - `EXPECTED_CURRENCY` — expected currency (lowercase ISO code, e.g. `usd`); `stripe-webhook.js` compares case-insensitively before forwarding.
+- `MONDAY_API_TOKEN` — personal API token for the monday.com operations boards. `stripe-webhook.js` writes one buyer row (`ZeroFog - Customers`, board `5102474399`) and one money row (`ZeroFog - Money`, board `5102474401`) per paid order, and flips the buyer to Refunded/Revoked plus a **negative** money row on `charge.refunded`. Best-effort throughout: unset token, HTTP error or GraphQL error all log and move on — bookkeeping never decides whether a paid order succeeds. Lookups are by email (buyer) and by Stripe id (money), so a Stripe retry updates instead of duplicating.
+- `MONDAY_BOARD_CUSTOMERS`, `MONDAY_BOARD_MONEY` — optional board id overrides; default to the boards built 2026-08-18.
 
 `PUBLIC_SITE_URL` (listed above) is also consumed server-side by `create-checkout.js` to build the Stripe `success_url`/`cancel_url`.
 
