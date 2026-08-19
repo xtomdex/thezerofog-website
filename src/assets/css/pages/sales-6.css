@@ -168,6 +168,11 @@ h2 {
   margin-left: 50%;
   transform: translateX(-50%);
 }
+/* The section's own heading lives inside the breakout, not above it. When it sat outside, the
+   eyebrow and the H2 stayed on the 680px column's left edge while the questions started 115px
+   further left - two left edges in one section, which reads as a mistake because it is one. */
+.faq-section > .label { margin-bottom: 12px; }
+.faq-section > h2 { margin-bottom: 28px; }
 .faq-item {
   border-bottom: 1px solid var(--border);
 }
