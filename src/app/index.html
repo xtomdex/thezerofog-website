@@ -782,6 +782,30 @@
   .ghost-link:disabled{ opacity:.6; cursor:default; text-decoration:none; }
   .manage-err{ color:#c0392b; font-size:13px; margin-top:8px; min-height:1em; }
 
+  /* Erasure panel. Deletion used to be a browser confirm() saying "your sleep data and
+     account" - true about Supabase and silent about the four other places that held the
+     person's name. This panel names both sides, and it is two different panels: a buyer
+     keeps the course he paid for, and he has to be told that BEFORE he presses, not after. */
+  .dl-panel{ display:none; text-align:left; max-width:660px; margin:16px auto 0; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:18px 20px 16px; }
+  .dl-panel.on{ display:block; }
+  .dl-panel h4{ font-size:15px; font-weight:800; margin-bottom:6px; }
+  .dl-lead{ font-size:12.5px; color:var(--muted); line-height:1.5; margin-bottom:14px; }
+  .dl-cols{ display:flex; gap:12px; }
+  .dl-col{ flex:1; border:1px solid var(--line); border-radius:11px; padding:11px 13px; }
+  .dl-col h5{ font-size:10px; letter-spacing:.8px; text-transform:uppercase; font-weight:700; margin-bottom:7px; }
+  .dl-col.go h5{ color:#e06c5e; } .dl-col.stay h5{ color:var(--green,#39c47e); }
+  .dl-col ul{ list-style:none; margin:0; padding:0; }
+  .dl-col li{ font-size:12px; color:var(--muted); line-height:1.45; padding-left:13px; position:relative; margin-bottom:5px; }
+  .dl-col li:before{ content:''; position:absolute; left:0; top:6px; width:5px; height:5px; border-radius:50%; background:currentColor; opacity:.45; }
+  .dl-col li b{ color:var(--text); font-weight:600; }
+  .dl-ack{ display:flex; align-items:flex-start; gap:8px; font-size:12.5px; color:var(--text); margin:14px 0 12px; cursor:pointer; line-height:1.4; }
+  .dl-ack input{ margin-top:2px; flex:0 0 auto; }
+  .dl-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+  .dl-actions button{ font-size:13px; font-weight:600; border-radius:9px; padding:9px 15px; cursor:pointer; border:1px solid var(--line); background:transparent; color:var(--text); }
+  .dl-actions .go{ border-color:#c0392b; background:#c0392b; color:#fff; }
+  .dl-actions .go:disabled{ opacity:.45; cursor:default; }
+  @media (max-width:560px){ .dl-cols{ flex-direction:column; } }
+
   /* ===== PROTOCOL CARD ===== */
   .pc-body{ padding:18px 20px 30px; }
   .pc-head h2{ font-size:21px; font-weight:800; letter-spacing:-0.3px; }
@@ -1245,11 +1269,32 @@
       </aside>
       </div><!-- /diary-grid -->
     </div>
-    <!-- Manage my data - right to erasure (irreversible). -->
+    <!-- Manage my data - right to erasure (irreversible). The two lists inside the panel
+         are filled at open time, because what survives depends on whether this person
+         bought the course: a buyer keeps it. -->
     <div class="manage-data">
       <button class="ghost-link" id="exportData">Download my data</button>
       <button class="danger-link" id="deleteData">Delete my data</button>
       <div class="manage-err" id="deleteErr"></div>
+      <div class="dl-panel" id="deletePanel">
+        <h4>Before you delete</h4>
+        <p class="dl-lead" id="dlLead"></p>
+        <div class="dl-cols">
+          <div class="dl-col go">
+            <h5>Deleted, and we cannot bring it back</h5>
+            <ul id="dlGo"></ul>
+          </div>
+          <div class="dl-col stay">
+            <h5>Stays</h5>
+            <ul id="dlStay"></ul>
+          </div>
+        </div>
+        <label class="dl-ack"><input type="checkbox" id="dlAck"> I have read both lists and I want my data deleted.</label>
+        <div class="dl-actions">
+          <button id="dlCancel">Keep my account</button>
+          <button class="go" id="dlConfirm" disabled>Delete my data</button>
+        </div>
+      </div>
     </div>
     <div class="demo-bar">
       <button id="demoLoad">Load 30-day sample</button>
@@ -2616,17 +2661,90 @@ $('exportData').addEventListener('click', async () => {
   }
 });
 
+/* ---- Erasure: the panel, not a confirm() ----
+   The old browser confirm said "your sleep data and account", which was true about
+   Supabase and silent about the workshop registration, the opt-in lead, the MailerLite
+   subscriber and the Systeme contact - all four keyed by email, none of them touched by
+   the account delete. Those are all deleted now (netlify/functions/delete-account.js),
+   and the person is shown what goes and what stays before he presses.
+
+   Two editions, because the outcome genuinely differs. A buyer keeps his course: he paid
+   for it and did not ask for a refund, so erasing his Systeme contact would destroy the
+   thing he bought. Everything else of his goes either way. `?demo=1` reports paid, so the
+   preview rehearses the buyer edition. */
+const DL_ALWAYS_GO = [
+  'Your sleep diary - <b>every night you have logged</b>',
+  'Your assessment scores, and the history behind them',
+  'Your Protocol Card and your maintenance tracker',
+  'Your login to this app',
+  'Your workshop registration, if you have one',
+  'Your address on our mailing list - <b>you stop hearing from us</b>',
+];
+
+function dlFill(mode){
+  // 'local' is the anonymous visitor: FREE mode never signed in, so everything he typed
+  // sits in this browser and we hold nothing at all. Telling him his course stays open
+  // would be the buyer's screen shown to somebody who has no account.
+  if(mode === 'local'){
+    $('dlLead').innerHTML = 'You are not signed in, so everything below lives in this browser and nowhere else. If you want a copy first, close this and press <b>Download my data</b>.';
+    $('dlGo').innerHTML = ['Your sleep diary - <b>every night you have logged</b>',
+      'Your assessment scores', 'Your Protocol Card and your maintenance tracker']
+      .map(x => '<li>' + x + '</li>').join('');
+    $('dlStay').innerHTML = '<li>Nothing. You have no account with us, so there is nothing on our side to delete.</li>';
+    return;
+  }
+  const paid = mode === 'paid';
+  const go = DL_ALWAYS_GO.slice();
+  if(!paid) go.push('Your contact record on our course platform');
+  const stay = paid
+    ? ['<b>Your course.</b> You paid for it, so it stays open and you can keep watching the lessons.',
+       'The record of that payment. Tax law requires us to keep it, and it is used for nothing else.']
+    : ['Nothing with your name or your address on it.'];
+  $('dlLead').innerHTML = paid
+    ? 'This cannot be undone. If you want a copy of your nights first, close this and press <b>Download my data</b>. If you would rather close the course too, or ask for your money back, write to kirill@thezerofog.com - this button does neither.'
+    : 'This cannot be undone. If you want a copy of your nights first, close this and press <b>Download my data</b>.';
+  $('dlGo').innerHTML = go.map(x => '<li>' + x + '</li>').join('');
+  $('dlStay').innerHTML = stay.map(x => '<li>' + x + '</li>').join('');
+}
+
+function dlClose(){
+  $('deletePanel').classList.remove('on');
+  $('dlAck').checked = false;
+  $('dlConfirm').disabled = true;
+  $('deleteData').disabled = false;
+}
+
 $('deleteData').addEventListener('click', async () => {
   $('deleteErr').textContent = '';
-  // Deletion is irreversible - require explicit confirmation.
-  if(!window.confirm('Are you sure? This permanently deletes your sleep data and account. This cannot be undone.')) return;
+  if($('deletePanel').classList.contains('on')){ dlClose(); return; }
   $('deleteData').disabled = true;
+  // If the paid check fails we show the buyer edition: promising a person we will erase
+  // his course platform record and then keeping it is the worse of the two mistakes.
+  // PREVIEW deliberately gets the buyer edition - ?demo=1 is the rehearsal surface, and it
+  // mirrors production here the same way the export does.
+  let mode = 'paid';
+  if(FREE) mode = 'local';
+  else { try{ mode = (await DB.isPaid()) ? 'paid' : 'unpaid'; }catch(e){ mode = 'paid'; } }
+  dlFill(mode);
+  $('deletePanel').classList.add('on');
+  $('deletePanel').scrollIntoView({ behavior:'smooth', block:'nearest' });
+});
+
+$('dlAck').addEventListener('change', () => { $('dlConfirm').disabled = !$('dlAck').checked; });
+$('dlCancel').addEventListener('click', dlClose);
+
+$('dlConfirm').addEventListener('click', async () => {
+  if(!$('dlAck').checked) return;
+  $('deleteErr').textContent = '';
+  $('dlConfirm').disabled = true; $('dlCancel').disabled = true;
+  $('dlConfirm').textContent = 'Deleting...';
   try{
     await DB.deleteAccount();
     location.href = '/';
   }catch(e){
-    $('deleteErr').textContent = e.message || 'Could not complete deletion. Please contact support.';
-    $('deleteData').disabled = false;
+    $('deleteErr').textContent = e.message || 'Could not complete deletion. Write to kirill@thezerofog.com and it will be done by hand.';
+    $('dlConfirm').textContent = 'Delete my data';
+    $('dlConfirm').disabled = false; $('dlCancel').disabled = false;
   }
 });
 
