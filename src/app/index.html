@@ -778,6 +778,8 @@
   /* Manage my data (deletion) - subtle, destructive. */
   .manage-data{ text-align:center; margin:28px 0 8px; }
   .danger-link{ background:none; border:none; color:#c0392b; font-size:13px; text-decoration:underline; cursor:pointer; padding:4px; }
+  .ghost-link{ background:none; border:none; color:var(--ink,#2c3e50); font-size:13px; text-decoration:underline; cursor:pointer; padding:4px; margin-right:14px; }
+  .ghost-link:disabled{ opacity:.6; cursor:default; text-decoration:none; }
   .manage-err{ color:#c0392b; font-size:13px; margin-top:8px; min-height:1em; }
 
   /* ===== PROTOCOL CARD ===== */
@@ -1245,6 +1247,7 @@
     </div>
     <!-- Manage my data - right to erasure (irreversible). -->
     <div class="manage-data">
+      <button class="ghost-link" id="exportData">Download my data</button>
       <button class="danger-link" id="deleteData">Delete my data</button>
       <div class="manage-err" id="deleteErr"></div>
     </div>
@@ -2184,6 +2187,27 @@ const DB_SB = {
     if(error) throw error;
     return data ? (data.data || null) : null;   // null = no row yet (import logic depends on it)
   },
+
+  // ---- Export: everything this account holds, read under the user's own token ----
+  // The privacy policy promises the customer can take their Toolkit data with them. This is
+  // that promise. Every read below is RLS-scoped to the signed-in user, so it can only ever
+  // return their own rows, and nothing leaves the browser - the file is built client-side.
+  async exportAll(){
+    const { data, error } = await sb.from('diary_entries')
+      .select('entry_date, sleep_eff, data')
+      .eq('user_id', this._userId)
+      .order('entry_date', { ascending: true });
+    if(error) throw error;
+    const diary = (data || []).map(r => ({ entry_date: r.entry_date, sleep_eff: r.sleep_eff, ...(r.data || {}) }));
+    return {
+      exported_at: new Date().toISOString(),
+      account: this._email || null,
+      sleep_diary: diary,
+      sleep_assessments: await this.getAssessments(),
+      protocol_card: await this.getProtocol(),
+      maintenance_tracker: await this.getRecovery(),
+    };
+  },
 };
 
 /* ---- PREVIEW data layer: localStorage only, never touches Supabase. ----
@@ -2212,6 +2236,10 @@ const DB_LOCAL = {
   async getProtocol(){ try{ return JSON.parse(localStorage.getItem(this._protoKey()))||{}; }catch(e){ return {}; } },
   async saveRecovery(data){ localStorage.setItem(this._recoveryKey(), JSON.stringify(data)); },
   async getRecovery(){ try{ return JSON.parse(localStorage.getItem(this._recoveryKey()))||null; }catch(e){ return null; } },
+  async exportAll(){ return { exported_at:new Date().toISOString(), account:this._email,
+    sleep_diary:Object.values(this._allDiary()).sort((a,b)=>a.entry_date<b.entry_date?-1:1),
+    sleep_assessments:await this.getAssessments(), protocol_card:await this.getProtocol(),
+    maintenance_tracker:await this.getRecovery() }; },
 };
 
 // The rest of the app calls DB.* and never knows which backend it is.
@@ -2419,6 +2447,28 @@ $('signOut2').addEventListener('click', async () => {
 $('lockedSignOut').addEventListener('click', async () => {
   await AUTH.signOut(); location.reload();
 });
+$('exportData').addEventListener('click', async () => {
+  const btn = $('exportData');
+  const label = btn.textContent;
+  $('deleteErr').textContent = '';
+  btn.disabled = true; btn.textContent = 'Preparing...';
+  try{
+    const bundle = await DB.exportAll();
+    const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'zerofog-my-data-' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    btn.textContent = 'Downloaded';
+    setTimeout(() => { btn.textContent = label; btn.disabled = false; }, 2000);
+  }catch(e){
+    $('deleteErr').textContent = 'Could not build the file. Try again, or write to us and we will send it.';
+    btn.textContent = label; btn.disabled = false;
+  }
+});
+
 $('deleteData').addEventListener('click', async () => {
   $('deleteErr').textContent = '';
   // Deletion is irreversible - require explicit confirmation.
