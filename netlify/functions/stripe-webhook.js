@@ -41,6 +41,17 @@ const SIGNATURE_TOLERANCE_SECONDS = 300;
  * still makes exactly the network calls it made before. Never throws, and never changes a
  * response - an alert that fails is a notification lost, never a payment reprocessed.
  */
+/**
+ * How a person is named in an alert. The address alone answers "who paid" and not "who am I
+ * writing back to" - and since 2026-08-19 the schedule step asks for a first name, so most
+ * people arrive with one. Falls back to the bare address, which is what every alert carried
+ * before, so nothing is lost when Stripe hands us no name.
+ */
+function who(email, name) {
+  const n = (name || '').trim();
+  return n ? `${n} <${email}>` : String(email || '(no address)');
+}
+
 async function alertOperator(text) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -864,7 +875,7 @@ export default async function handler(req) {
     if (!revoked) {
       await alertOperator(
         'REFUND SENT, COURSE STILL OPEN\n\n' +
-          `Buyer: ${refundedEmail}\n` +
+          `Buyer: ${who(refundedEmail, charge.billing_details?.name)}\n` +
           `Charge: ${charge.id}\n` +
           'The money is back with the customer and removing their Systeme enrollment failed. ' +
           'Stripe will retry this event, so it may fix itself - but if no second alert says ' +
@@ -892,7 +903,7 @@ export default async function handler(req) {
       console.error('[monday] refund record failed (ignored):', err);
       await alertOperator(
         'BOOKKEEPING ONLY - refund not written to the board\n\n' +
-          `Buyer: ${refundedEmail}\n` +
+          `Buyer: ${who(refundedEmail, charge.billing_details?.name)}\n` +
           `Charge: ${charge.id}\n` +
           'The customer is fine: their money is back and their access is closed. The monday row ' +
           'still says Paid and the money board has no negative row. Fix both in the next sweep.'
@@ -983,7 +994,7 @@ export default async function handler(req) {
   if (!systemeContactId) {
     await alertOperator(
       'PAID, NO COURSE - enrollment failed\n\n' +
-        `Buyer: ${email}\n` +
+        `Buyer: ${who(email, session.customer_details?.name)}\n` +
         `Session: ${session.id}\n` +
         `Paid: ${session.amount_total} ${String(session.currency || '').toUpperCase()}\n` +
         'Stripe is retrying, so this can still land on its own. It gives up after about three ' +
@@ -1018,7 +1029,7 @@ export default async function handler(req) {
     // will open the Toolkit and be told they are not a customer. Silent until 2026-08-19.
     await alertOperator(
       'PAID, NO TOOLKIT - app account not provisioned\n\n' +
-        `Buyer: ${email}\n` +
+        `Buyer: ${who(email, session.customer_details?.name)}\n` +
         `Session: ${session.id}\n` +
         'The course itself is open, this is only the app. They will hit the "customers only" ' +
         'screen at thezerofog.com/app. Create the Supabase user and set is_paid on their ' +
@@ -1032,7 +1043,7 @@ export default async function handler(req) {
   if (!welcomed) {
     await alertOperator(
       'PAID, NO WELCOME EMAIL - E14 was not sent\n\n' +
-        `Buyer: ${email}\n` +
+        `Buyer: ${who(email, session.customer_details?.name)}\n` +
         'Systeme still sends its own access email, so they are not left with nothing, but our ' +
         'welcome never went. Add them to the MailerLite group wr-E14 by hand - joining the ' +
         'group is what fires the automation.'
@@ -1060,7 +1071,7 @@ export default async function handler(req) {
     console.error('[monday] purchase record failed (ignored):', err);
     await alertOperator(
       'BOOKKEEPING ONLY - sale not written to the board\n\n' +
-        `Buyer: ${email}\n` +
+        `Buyer: ${who(email, session.customer_details?.name)}\n` +
         `Session: ${session.id}\n` +
         'The customer is fine: course open, app and welcome as reported above. They have no row ' +
         'on the customers board and no row on the money board. Add both in the next sweep.'
@@ -1070,7 +1081,7 @@ export default async function handler(req) {
   if (isComp) {
     await alertOperator(
       'COMPED SEAT - course given, no money taken\n\n' +
-        `Person: ${email}\n` +
+        `Person: ${who(email, session.customer_details?.name)}\n` +
         `Session: ${session.id}\n` +
         'Opened through the comp link, not a sale. Their row is on the board under ' +
         'Internal - not a customer, and there is no money row, because no euros moved. ' +

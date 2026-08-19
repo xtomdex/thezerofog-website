@@ -51,6 +51,19 @@ permalink: /workshop/schedule/
              placeholder="you@example.com">
     </div>
 
+    {# First name, and only the first name - the merge token in E1's subject line puts it in front
+       of a sentence, and "Kirill Butov, confirming your seat" reads like a bank statement. Asked
+       here rather than at the opt-in on purpose: by this point the person has already given an
+       address and picked a time, so the cheap moment to ask for one more thing is now.
+
+       NOT marked required, and never label it optional - the label would invite skipping it, and
+       `required` would block the seat over a nicety. E1 carries a fallback for the empty case. #}
+    <div class="field">
+      <label for="scheduleName">First name</label>
+      <input type="text" id="scheduleName" name="first_name" autocomplete="given-name"
+             maxlength="40" placeholder="Kirill">
+    </div>
+
     {# Honeypot. Bots fill it, people never see it. #}
     <input type="text" name="website" id="scheduleWebsite" tabindex="-1" autocomplete="off"
            aria-hidden="true">

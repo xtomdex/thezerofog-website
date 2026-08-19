@@ -9,6 +9,7 @@
   var formEl = document.getElementById('scheduleForm');
   var emailRow = document.getElementById('emailRow');
   var emailInput = document.getElementById('scheduleEmail');
+  var nameInput = document.getElementById('scheduleName');
   var consentEl = document.getElementById('scheduleConsent');
   var consentText = document.getElementById('consentText');
   var btn = document.getElementById('scheduleBtn');
@@ -144,6 +145,9 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: email,
+        // Optional. wr-register.js already accepted `name` long before this field existed - it
+        // trims, caps at 120 and stores null when empty - so nothing downstream needed building.
+        name: nameInput ? nameInput.value.trim() : '',
         startsAt: selected.startsAt,
         kind: selected.kind,
         tz: timeZone,

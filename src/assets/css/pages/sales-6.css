@@ -142,6 +142,9 @@ h2 {
 }
 .guarantee h3 { font-size: 1rem; font-weight: 700; margin-bottom: 12px; }
 .guarantee p { font-size: 0.9rem; color: var(--text2); line-height: 1.6; }
+/* The refund-policy link had no colour rule anywhere - not here, not in shared.css - so the
+   browser painted it its own default blue, the one colour on the page that is not ours. */
+.guarantee a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; font-weight: 600; }
 .guarantee .guarantee-sign { margin-top: 14px; font-size: 0.85rem; font-weight: 600; color: var(--text); }
 
 /* === ALTERNATIVES === */
@@ -153,12 +156,61 @@ h2 {
 .alt-name { font-size: 0.9rem; color: var(--text2); }
 .alt-price { font-size: 0.9rem; font-weight: 600; color: var(--text); }
 
-/* === FAQ === */
-.faq-item { padding: 18px 0; border-bottom: 1px solid var(--border); }
+/* === FAQ ===
+   Three things were wrong here and they compounded. Every answer was open at once, so seven
+   long paragraphs sat between the reader and the button. The answers were 0.9rem in --text2,
+   which is the size and weight of a caption, not of prose somebody is meant to read. And they
+   ran inside the page's 680px column, which turns a five-line answer into a dense grey brick.
+   Now: closed by default, one open at a time is the reader's business, real body type, and the
+   section breaks out of the column to a width that fits a sentence instead of stacking it. */
+.faq-section {
+  width: min(920px, calc(100vw - 48px));
+  margin-left: 50%;
+  transform: translateX(-50%);
+}
+.faq-item {
+  border-bottom: 1px solid var(--border);
+}
 .faq-item:last-of-type { border-bottom: none; }
-.faq-item h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; color: var(--text); }
-.faq-item p { font-size: 0.9rem; color: var(--text2); line-height: 1.7; }
-.faq-item a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.faq-item > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px 0;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.45;
+}
+.faq-item > summary::-webkit-details-marker { display: none; }
+/* The marker is drawn rather than typed so it rotates, and so it never renders as a stray
+   character if the font is still loading. */
+.faq-item > summary::after {
+  content: "";
+  flex: 0 0 10px;
+  width: 10px; height: 10px;
+  margin-left: auto;
+  margin-top: 6px;
+  border-right: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
+  transform: rotate(45deg);
+  transition: transform 160ms ease;
+}
+.faq-item[open] > summary::after { transform: rotate(-135deg); }
+.faq-item > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.faq-item p {
+  font-size: 1rem;
+  color: var(--text);
+  line-height: 1.75;
+  margin: 0 0 22px;
+  max-width: 74ch;
+}
+.faq-item a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; font-weight: 600; }
+@media (prefers-reduced-motion: reduce) {
+  .faq-item > summary::after { transition: none; }
+}
 
 /* === DIVIDER === */
 .divider { width: 48px; height: 1px; background: var(--border-accent); margin: 48px auto; }
