@@ -122,7 +122,18 @@ export default async function handler(req) {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    return new Response(null, { status: 303, headers: { ...corsHeaders, Location: made.url } });
+    // NOT a 303. Netlify appends the incoming query string to a redirect Location, which put
+    // COMP_ACCESS_KEY inside the checkout.stripe.com URL - our admin key in a third party's
+    // logs and in the tester's history. A one-line page hands the browser the URL Stripe gave
+    // us and nothing else, and the visible link is there for anyone with scripts off.
+    const safe = made.url.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    return new Response(
+      `<!doctype html><meta charset="utf-8"><title>Opening checkout</title>` +
+      `<body style="font:16px/1.5 system-ui;padding:40px;text-align:center">` +
+      `<p>Opening checkout...</p><p><a href="${safe}">Continue to checkout</a></p>` +
+      `<script>location.replace(${JSON.stringify(made.url)})</script>`,
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8', 'Referrer-Policy': 'no-referrer' } }
+    );
   }
 
   if (req.method !== 'POST') {
