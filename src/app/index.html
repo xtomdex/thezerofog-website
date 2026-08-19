@@ -36,6 +36,21 @@
 
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html{scroll-behavior:smooth}
+  /* Inter's @font-face lives in shared.css, which neither of the two standalone pages
+     loads - so both preloaded this file, set font-family:'Inter' everywhere and then
+     rendered in the platform default sans. Declared inline rather than by pulling in
+     shared.css: these pages carry their own complete design and must not inherit it. */
+  @font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/assets/fonts/inter-var-latin.v1.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+      U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF,
+      U+FFFD;
+  }
+
   body{ font-family:'Inter',sans-serif; background:#0d0d0d; color:var(--text); line-height:1.5; }
   .app{ max-width:480px; margin:0 auto; min-height:100vh; background:var(--bg); position:relative; }
   /* mobile: desktop-only elements stay hidden */
@@ -1065,7 +1080,14 @@
 <!-- Generated public Supabase config (window globals) - must load before the app script. -->
 <script src="/app/config.js"></script>
 <!-- Supabase JS client (UMD bundle exposes global `supabase` with createClient). -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Pinned, not floating. `@2` resolved to whatever jsDelivr shipped that minute, so the code
+     running the sign-in and every read and write of a customer's sleep diary could change
+     without a deploy and without anyone looking at it. 2.112.3 is what `@2` served on
+     2026-08-19; bumping it is now a commit somebody can read.
+     STILL OUTSTANDING: this is a third party on the page that handles the personal data.
+     The real fix is to vendor the file into /assets/js/ so the app does not go down when
+     jsDelivr does - deliberately not done in the hour before an ad recording. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3" crossorigin="anonymous"></script>
 <!-- Shared Recovery tracker module (browser-global window.ZFRecoveryTracker); same file as /webinar-bonuses. -->
 <script src="/shared/recovery-tracker.js"></script>
 

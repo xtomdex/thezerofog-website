@@ -497,6 +497,49 @@
     startPlayback(state.positionSec);
   }
 
+  // Real questions to the host. Not a chat: nobody is sitting in the room pretending to be
+  // there, and a message box that answers nobody is worse than one that plainly forwards.
+  //
+  // Wired BEFORE the token guard below on purpose. This block used to sit after it, so a room
+  // opened without ?t= rendered the form, left it enabled, and never attached this handler -
+  // pressing Send did a native form submit, reloaded the page and threw the typed question
+  // away without a word. The form has no action and the textarea has no name, so nothing was
+  // sent anywhere; the person simply watched their question vanish.
+  if (els.questionForm) {
+    els.questionForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!token) {
+        els.questionNote.textContent = 'This link is missing its access code, so we cannot tell whose question this is. Email kirill@thezerofog.com instead.';
+        return;
+      }
+      var text = els.questionInput.value.trim();
+      if (!text) return;
+      var sending = text;
+      els.questionNote.textContent = 'Sending...';
+      fetch('/.netlify/functions/wr-question', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          t: token,
+          text: sending,
+          positionSec: Math.floor(els.video.currentTime || 0)
+        })
+      }).then(function (res) {
+        // The confirmation used to be written before the request was even made, and only a
+        // network-level failure ever corrected it - an expired token or a rejected body still
+        // told the attendee Kirill had their question. Say it only once the server agrees.
+        if (!res.ok) {
+          els.questionNote.textContent = 'That did not send. Email kirill@thezerofog.com instead.';
+          return;
+        }
+        els.questionInput.value = '';
+        els.questionNote.textContent = 'Sent. Kirill reads these himself.';
+      }).catch(function () {
+        els.questionNote.textContent = 'That did not send. Email kirill@thezerofog.com instead.';
+      });
+    });
+  }
+
   if (!token) {
     say('This link is missing its access code. Please use the link from your email.');
     return;
@@ -525,26 +568,4 @@
       say('We could not open this session. Please refresh the page.');
     });
 
-  // Real questions to the host. Not a chat: nobody is sitting in the room pretending to be
-  // there, and a message box that answers nobody is worse than one that plainly forwards.
-  if (els.questionForm) {
-    els.questionForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var text = els.questionInput.value.trim();
-      if (!text) return;
-      els.questionInput.value = '';
-      els.questionNote.textContent = 'Sent. Kirill reads these himself.';
-      fetch('/.netlify/functions/wr-question', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          t: token,
-          text: text,
-          positionSec: Math.floor(els.video.currentTime || 0)
-        })
-      }).catch(function () {
-        els.questionNote.textContent = 'That did not send. Email kirill@thezerofog.com instead.';
-      });
-    });
-  }
 })();

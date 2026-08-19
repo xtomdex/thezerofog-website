@@ -44,6 +44,20 @@
     font-weight:500; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; transition:all .3s;
   }
   .theme-toggle:hover{ color:var(--text); border-color:var(--purple); }
+  /* Inter's @font-face lives in shared.css, which this standalone page does not load - so
+     it preloaded the file, set font-family:'Inter' throughout, and then rendered the
+     whole article in the platform default sans. Declared inline rather than by pulling
+     in shared.css: this page carries its own complete design. */
+  @font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/assets/fonts/inter-var-latin.v1.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+      U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF,
+      U+FFFD;
+  }
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{

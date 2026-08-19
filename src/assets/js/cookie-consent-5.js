@@ -17,7 +17,7 @@
  * on first real scroll (it is a notice, not a consent gate); footer
  * "Cookie Settings" reopens it anytime.
  * v5 (2026-07-15): consent stored in a Domain=.thezerofog.com cookie (1y,
- * SameSite=Lax, Secure) so subdomains (course.thezerofog.com) can read the
+ * SameSite=Lax, Secure) so subdomains (platform.thezerofog.com) can read the
  * choice too. localStorage kept as write-through fallback + one-time
  * migration source for visitors who chose under v1-v4. The consent cookie
  * itself is strictly-necessary (stores the choice) - no consent needed to
@@ -39,7 +39,7 @@
   var REGIME_CACHE_KEY = 'zf_cookies_regime';
   var DISMISS_KEY = 'zf_cookies_dismissed';
 
-  // Consent choice lives in a domain-wide cookie so course.thezerofog.com
+  // Consent choice lives in a domain-wide cookie so platform.thezerofog.com
   // (Systeme, different origin - localStorage does NOT cross) sees it too.
   function readConsentCookie() {
     var m = document.cookie.match(/(?:^|;\s*)zf_cookies_consent=(all|essential)(?:;|$)/);
