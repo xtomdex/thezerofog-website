@@ -113,14 +113,16 @@ export default async function handler(req) {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    const url = await createSession(secretKey, priceId, baseUrl, coupon);
-    if (!url) {
-      return new Response(JSON.stringify({ error: 'Could not create checkout session' }), {
+    const made = await createSession(secretKey, priceId, baseUrl, coupon);
+    if (!made.url) {
+      // Whoever holds the key is us, and a silent 500 on an admin link is a dead end -
+      // Stripe's own sentence is what tells you which dashboard switch is off.
+      return new Response(JSON.stringify({ error: 'Comp link failed', stripe: made.error }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    return new Response(null, { status: 303, headers: { ...corsHeaders, Location: url } });
+    return new Response(null, { status: 303, headers: { ...corsHeaders, Location: made.url } });
   }
 
   if (req.method !== 'POST') {
@@ -130,7 +132,7 @@ export default async function handler(req) {
     });
   }
 
-  const url = await createSession(secretKey, priceId, baseUrl, null);
+  const { url } = await createSession(secretKey, priceId, baseUrl, null);
   if (!url) {
     return new Response(JSON.stringify({ error: 'Could not create checkout session' }), {
       status: 500,
@@ -151,12 +153,18 @@ export default async function handler(req) {
  * in full server-side and never leak to the caller.
  */
 async function createSession(secretKey, priceId, baseUrl, compCoupon) {
+  // A zero-total session needs Stripe API 2023-08-16 or later ("no-cost orders"); this
+  // account predates that, so its default version would reject the comp. Pinned on the comp
+  // call ONLY - the selling path keeps the exact version that has already taken a real sale,
+  // and is not moved for the sake of a tester.
+  const versionHeader = compCoupon ? { 'Stripe-Version': '2023-08-16' } : {};
   try {
     let stripeRes = await fetch(STRIPE_CHECKOUT_ENDPOINT, {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + secretKey,
         'Content-Type': 'application/x-www-form-urlencoded',
+        ...versionHeader,
       },
       body: buildSessionParams(priceId, baseUrl, true, compCoupon).toString(),
     });
@@ -181,16 +189,16 @@ async function createSession(secretKey, priceId, baseUrl, compCoupon) {
 
     if (!stripeRes.ok || session.error) {
       console.error('Stripe checkout session error:', stripeRes.status, session.error || session);
-      return null;
+      return { error: session.error?.message || `Stripe returned ${stripeRes.status}` };
     }
     if (!session.url) {
       console.error('Stripe response missing session url:', session);
-      return null;
+      return { error: 'Stripe returned a session with no url' };
     }
-    return session.url;
+    return { url: session.url };
   } catch (err) {
     console.error('Failed to create Stripe checkout session:', err);
-    return null;
+    return { error: err.message };
   }
 }
 
