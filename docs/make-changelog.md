@@ -15,6 +15,54 @@ Rules for anyone adding an entry:
 
 ---
 
+## 2026-08-19 - a half-landed order now alerts a human: seven Telegram alerts in `stripe-webhook.js`
+
+**Decided by:** Kirill, same day. **Done by:** Claude. **Nothing was changed inside Make** - no
+blueprint edit, no module touched, no scenario enabled or disabled. Recorded here because this file
+is where the payment path's changes are written for Dmitrii, and because the previous entries on
+that path (E14's trigger, the enrollment move off scenario 6209692) live here too.
+
+**The problem.** Since enrollment moved into the site, every way a paid order could half-land ended
+in a `console.error` and nowhere else, which in practice means a Netlify log nobody opens. The
+customer had paid and had nothing, and no person found out.
+
+**What changed** (commit `7d8d7fe`, production deploy `6a856e6dcef4d300081f37cb`): a local
+`alertOperator()` and seven call sites, every one of them inside a failure branch.
+
+| Alert | Fires when | What the customer is missing |
+|---|---|---|
+| `PAID, NO COURSE` | `enrollInCourse` returned null | Everything. Stripe retries ~3 days, so this one repeats until fixed |
+| `PAID, NO TOOLKIT` | `provisionAppUser` returned false | The app only; the course is open |
+| `PAID, NO WELCOME EMAIL` | E14's MailerLite group add failed | Our welcome; Systeme's own access email still goes |
+| `REFUND SENT, COURSE STILL OPEN` | `revokeCourseAccess` failed after a refund | Nothing - but we are paying for access they no longer own |
+| `REFUND WITH NO EMAIL` | `charge.refunded` with no address on the charge | Nothing - no retry can find them, it needs hands |
+| `BOOKKEEPING ONLY` (sale) | the monday write failed on a purchase | Nothing; the board is wrong, not the delivery |
+| `BOOKKEEPING ONLY` (refund) | the monday write failed on a refund | Nothing; same |
+
+**Before/after on the one function whose contract changed:** `sendPurchaseWelcome(email)` returned
+`undefined` on every path; it now returns `true` only when MailerLite accepted the group add and
+`false` on each of its five failure exits. Nothing else reads it, and it still never throws.
+
+**Channel:** the existing Telegram bot `@zerofog_alerts_bot`, the same one `wr-question.js` uses,
+via `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` - both of which exist **only in the production
+context**, so previews and local runs log a warning and send nothing. `alertOperator` is a copy of
+`notifyOperator` from `lib/wr-telegram.js` rather than an import: `stripe-webhook.js` states in its
+own header that it imports nothing but `node:crypto`, being the one endpoint reachable without a
+token. **Change one, change both.**
+
+**What this makes newly possible to break.** Nothing on the happy path - every call site is inside
+a failure branch, so a successful order makes exactly the network calls it made before. The one new
+behaviour is alert volume: a persistently failing enrollment will alert on each Stripe retry, about
+a dozen times over three days. That is deliberate escalation, not a bug, and it stops when the
+order lands.
+
+**Verified:** unsigned POST to the live webhook still answers `400 Invalid signature`, so the module
+parses and loads in production; and the transport was fired end to end through `wr-question.js`
+(`wr_events` id 73) and the message arrived. The seven call sites themselves remain unfired - each
+needs a signed Stripe event, and no real one has occurred since the change.
+
+---
+
 ## 2026-08-16 (later) - Webinar Opt-In (5275566) retired: lead capture moved into the site
 
 **Raised by:** Dmitrii - "why keep Make at all if it is only in the opt-in now". **Decided by:**
