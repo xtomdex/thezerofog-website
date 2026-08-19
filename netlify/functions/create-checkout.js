@@ -26,7 +26,7 @@ const TOS_CONSENT_MESSAGE =
   'thereby lose my EU 14-day right of withdrawal. This does not affect the ' +
   '30-day guarantee described in the [Refund Policy](https://thezerofog.com/refunds/).';
 
-function buildSessionParams(priceId, baseUrl, withTosConsent) {
+function buildSessionParams(priceId, baseUrl, withTosConsent, compCoupon) {
   // Stripe expects bracket notation for nested and array params. URLSearchParams
   // encodes the literal {CHECKOUT_SESSION_ID} template braces as %7B...%7D,
   // which Stripe accepts and replaces server-side.
@@ -53,6 +53,15 @@ function buildSessionParams(priceId, baseUrl, withTosConsent) {
     params.set('consent_collection[terms_of_service]', 'required');
     params.set('custom_text[terms_of_service_acceptance][message]', TOS_CONSENT_MESSAGE);
   }
+  // A comped seat - see the GET branch in the handler. The coupon takes the price to zero,
+  // and the metadata marker is what stripe-webhook.js checks before it lets a zero-amount
+  // session through its amount guard. The marker is written HERE, server-side, on a session
+  // Stripe then signs, so it cannot be forged by whoever opens the link.
+  if (compCoupon) {
+    params.set('discounts[0][coupon]', compCoupon);
+    params.set('metadata[zf_comp]', 'granted');
+    params.set('metadata[source]', 'comp_link');
+  }
   return params;
 }
 
@@ -60,13 +69,6 @@ export default async function handler(req) {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 200, headers: corsHeaders });
-  }
-
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
   }
 
   // Validate required server-side configuration.
@@ -90,6 +92,65 @@ export default async function handler(req) {
   // Normalize base URL (strip any trailing slash) so we build clean paths.
   const baseUrl = siteUrl.replace(/\/$/, '');
 
+  // ---------------------------------------------------------------- comp link
+  // One clickable link that opens a checkout already discounted to zero, for a person we
+  // are giving the course to rather than selling it: a tester walking the funnel, or a
+  // guest seat. It is a GET so it can be pasted into a message, and it redirects straight
+  // into Stripe's own checkout - so the tester sees the real page, presses the real button
+  // and travels the real webhook, with no card and no money.
+  //
+  // Gated on COMP_ACCESS_KEY, compared in full. Nothing about the normal POST path changes,
+  // and no promotion-code field ever appears for a real buyer.
+  if (req.method === 'GET') {
+    const key = new URL(req.url).searchParams.get('key') || '';
+    const expected = process.env.COMP_ACCESS_KEY || '';
+    const coupon = process.env.COMP_COUPON_ID || '';
+    if (!expected || !coupon || key !== expected) {
+      // Deliberately the same answer as a wrong method: a probe learns nothing about
+      // whether comp links exist at all.
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+        status: 405,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const url = await createSession(secretKey, priceId, baseUrl, coupon);
+    if (!url) {
+      return new Response(JSON.stringify({ error: 'Could not create checkout session' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    return new Response(null, { status: 303, headers: { ...corsHeaders, Location: url } });
+  }
+
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  const url = await createSession(secretKey, priceId, baseUrl, null);
+  if (!url) {
+    return new Response(JSON.stringify({ error: 'Could not create checkout session' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+  return new Response(JSON.stringify({ ok: true, url }), {
+    status: 200,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
+/**
+ * Ask Stripe for a checkout session and return its URL, or null on any failure.
+ *
+ * One body for both entrances - the sales page's POST and the comp link's GET - so the
+ * tester travels the same session shape a buyer does, minus the price. Errors are logged
+ * in full server-side and never leak to the caller.
+ */
+async function createSession(secretKey, priceId, baseUrl, compCoupon) {
   try {
     let stripeRes = await fetch(STRIPE_CHECKOUT_ENDPOINT, {
       method: 'POST',
@@ -97,7 +158,7 @@ export default async function handler(req) {
         'Authorization': 'Bearer ' + secretKey,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: buildSessionParams(priceId, baseUrl, true).toString(),
+      body: buildSessionParams(priceId, baseUrl, true, compCoupon).toString(),
     });
 
     let session = await stripeRes.json();
@@ -113,39 +174,23 @@ export default async function handler(req) {
           'Authorization': 'Bearer ' + secretKey,
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: buildSessionParams(priceId, baseUrl, false).toString(),
+        body: buildSessionParams(priceId, baseUrl, false, compCoupon).toString(),
       });
       session = await stripeRes.json();
     }
 
-    // Non-2xx or a Stripe error payload → log detail server-side, return a
-    // generic message to the client (never leak Stripe internals).
     if (!stripeRes.ok || session.error) {
       console.error('Stripe checkout session error:', stripeRes.status, session.error || session);
-      return new Response(JSON.stringify({ error: 'Could not create checkout session' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return null;
     }
-
     if (!session.url) {
       console.error('Stripe response missing session url:', session);
-      return new Response(JSON.stringify({ error: 'Could not create checkout session' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      return null;
     }
-
-    return new Response(JSON.stringify({ ok: true, url: session.url }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return session.url;
   } catch (err) {
     console.error('Failed to create Stripe checkout session:', err);
-    return new Response(JSON.stringify({ error: 'Could not create checkout session' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return null;
   }
 }
 

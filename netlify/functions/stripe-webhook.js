@@ -533,7 +533,7 @@ const MC = {
 
 // Groups on the Customers board. A row's group is where the eye goes first, so the webhook puts
 // buyers where they belong and never leaves a refunded person sitting among the active ones.
-const MG = { active: 'topics', refundInProgress: 'group_mm6bsmhn' };
+const MG = { active: 'topics', refundInProgress: 'group_mm6bsmhn', internal: 'group_mm6bxbfd' };
 const MM = {
   type: 'color_mm6bzp4h',
   date: 'date_mm6bdy5x',
@@ -604,16 +604,16 @@ function mondayProductLabel(amountCents) {
 async function mondayRecordPurchase(details) {
   if (!process.env.MONDAY_API_TOKEN) return;
   const { email, name, amountCents, currency, sessionId, chargeOrIntentId,
-          customerId, systemeContactId, appProvisioned, livemode } = details;
+          customerId, systemeContactId, appProvisioned, livemode, comp } = details;
   const today = new Date().toISOString().slice(0, 10);
   const dollars = Number(amountCents || 0) / 100;
 
   const customerValues = {
     [MC.email]: { email, text: email },
     [MC.bought]: { date: today },
-    [MC.product]: { label: mondayProductLabel(amountCents) },
+    [MC.product]: { label: comp ? 'Other' : mondayProductLabel(amountCents) },
     [MC.paid]: String(dollars),
-    [MC.payment]: { label: 'Paid' },
+    [MC.payment]: { label: comp ? 'Comped' : 'Paid' },
     [MC.access]: { label: 'Enrolled' },
     [MC.app]: { label: appProvisioned ? 'Provisioned' : 'Missing' },
     [MC.stripeCustomer]: customerId || '',
@@ -646,13 +646,19 @@ async function mondayRecordPurchase(details) {
        }`,
       {
         board: MONDAY_BOARD_CUSTOMERS,
-        group: MG.active,
+        // A comped seat is not a customer and must never be counted as one - SOP, the group
+        // that exists because the first charge this business took was Dima's own.
+        group: comp ? MG.internal : MG.active,
         name: name ? `${email} - ${name}` : email,
         vals: JSON.stringify(customerValues),
       }
     );
     itemId = created?.create_item?.id || null;
   }
+
+  // A comp moves no euros, so it gets no money row. A zero-value Charge on the ledger would
+  // have to be excluded by hand from every sum computed off that board later.
+  if (comp) return;
 
   // The money row. Fees are deliberately left empty: the webhook payload does not carry
   // them, they only exist on the balance transaction once Stripe has settled the charge.
@@ -904,30 +910,45 @@ export default async function handler(req) {
 
   const session = event.data?.object || {};
 
+  // A comped seat - a course we are GIVING to someone (a tester walking the funnel, a guest).
+  // create-checkout.js builds it behind COMP_ACCESS_KEY, discounts it to zero and stamps
+  // `metadata.zf_comp`. That stamp is written by our own server on a session Stripe then
+  // signs, so it cannot be forged from outside; and it is only honoured when the total really
+  // is zero, so it can never wave a short payment through.
+  //
+  // The three guards below cannot apply to it: a zero-amount session has payment_status
+  // `no_payment_required` and amount_total 0. Everything AFTER this point is identical to a
+  // paid order on purpose - the whole point of a comp is to travel the real path.
+  const isComp = session.metadata?.zf_comp === 'granted' && Number(session.amount_total) === 0;
+
   // Validate that this is a real, fully-paid order for OUR product. A
   // signature-valid event that fails these checks is acknowledged (200, no retry)
   // but NOT forwarded — we don't want to enroll, nor have Stripe retry.
-  if (session.payment_status !== 'paid') {
-    console.error('Payment validation failed: payment_status is', session.payment_status);
-    return received();
-  }
-  if (String(session.amount_total) !== expectedAmount) {
-    console.error(
-      'Payment validation failed: amount_total',
-      session.amount_total,
-      'expected',
-      expectedAmount
-    );
-    return received();
-  }
-  if (String(session.currency).toLowerCase() !== expectedCurrency.toLowerCase()) {
-    console.error(
-      'Payment validation failed: currency',
-      session.currency,
-      'expected',
-      expectedCurrency
-    );
-    return received();
+  if (!isComp) {
+    if (session.payment_status !== 'paid') {
+      console.error('Payment validation failed: payment_status is', session.payment_status);
+      return received();
+    }
+    if (String(session.amount_total) !== expectedAmount) {
+      console.error(
+        'Payment validation failed: amount_total',
+        session.amount_total,
+        'expected',
+        expectedAmount
+      );
+      return received();
+    }
+    if (String(session.currency).toLowerCase() !== expectedCurrency.toLowerCase()) {
+      console.error(
+        'Payment validation failed: currency',
+        session.currency,
+        'expected',
+        expectedCurrency
+      );
+      return received();
+    }
+  } else {
+    console.log('[comp] zero-amount comped seat, session', session.id);
   }
 
   // Build the normalized payload — NOT the raw Stripe object.
@@ -1033,6 +1054,7 @@ export default async function handler(req) {
       systemeContactId,
       appProvisioned,
       livemode: event.livemode !== false,
+      comp: isComp,
     });
   } catch (err) {
     console.error('[monday] purchase record failed (ignored):', err);
@@ -1042,6 +1064,17 @@ export default async function handler(req) {
         `Session: ${session.id}\n` +
         'The customer is fine: course open, app and welcome as reported above. They have no row ' +
         'on the customers board and no row on the money board. Add both in the next sweep.'
+    );
+  }
+
+  if (isComp) {
+    await alertOperator(
+      'COMPED SEAT - course given, no money taken\n\n' +
+        `Person: ${email}\n` +
+        `Session: ${session.id}\n` +
+        'Opened through the comp link, not a sale. Their row is on the board under ' +
+        'Internal - not a customer, and there is no money row, because no euros moved. ' +
+        'If this address was NOT one you handed a comp link to, revoke the link key now.'
     );
   }
 
