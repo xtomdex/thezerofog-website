@@ -23,6 +23,58 @@ import crypto from 'node:crypto';
 const SIGNATURE_TOLERANCE_SECONDS = 300;
 
 /**
+ * Tell the operator, over Telegram, that a paid order did not fully land.
+ *
+ * Everything below this line that can fail on a real customer used to fail into `console.error`
+ * and nowhere else, which means into a Netlify log nobody opens. The failures are not
+ * hypothetical and they are not equal: an enrollment that never happened is a person who paid
+ * and has no course; a revocation that never happened is a person whose money went back while
+ * their access stayed open. Both need a human the same hour, and neither has any other way of
+ * reaching one.
+ *
+ * A duplicate of `notifyOperator` in lib/wr-telegram.js rather than an import, and deliberately.
+ * This file's stated contract is that it imports nothing but node:crypto - it is the one endpoint
+ * an attacker can reach without a token, and its dependency surface is kept minimal on purpose.
+ * The same reason already produced bare-fetch copies of the Supabase and MailerLite calls here.
+ *
+ * Costs the happy path nothing: every call site is inside a failure branch, so a successful order
+ * still makes exactly the network calls it made before. Never throws, and never changes a
+ * response - an alert that fails is a notification lost, never a payment reprocessed.
+ */
+async function alertOperator(text) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) {
+    console.warn('alertOperator: TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID unset - alert not sent');
+    return false;
+  }
+
+  const base = process.env.TELEGRAM_API_BASE || 'https://api.telegram.org';
+  try {
+    // No parse_mode: the body carries an email address a stranger typed, and one unbalanced
+    // `_` in Markdown mode makes Telegram reject the whole message. Plain text cannot be
+    // broken by its own content. 4096 is Telegram's hard limit.
+    const res = await fetch(`${base}/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: String(text).slice(0, 4096),
+        disable_web_page_preview: true,
+      }),
+    });
+    if (!res.ok) {
+      console.error('alertOperator: Telegram returned', res.status);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('alertOperator failed:', err.message);
+    return false;
+  }
+}
+
+/**
  * Stamp `purchased_at` on this person's workshop registration, if they have one.
  *
  * Written with a bare fetch rather than through lib/wr-db.js so this handler keeps its property
@@ -296,12 +348,15 @@ async function markWorkshopBuyer(email) {
  *
  * Best effort, never throws: a failed welcome email must not 500 a correctly processed payment
  * (Stripe would retry the whole event). A failure lands in the function log and support fixes it.
+ *
+ * Returns true only when MailerLite accepted the group add - the caller alerts the operator on
+ * false, because a buyer with no welcome email has no idea what they just bought or where it is.
  */
 async function sendPurchaseWelcome(email) {
   const key = process.env.MAILERLITE_API_KEY;
   if (!key || !email) {
     if (!key) console.error('E14 skipped: MAILERLITE_API_KEY is not set');
-    return;
+    return false;
   }
   const base = process.env.MAILERLITE_API_BASE || 'https://connect.mailerlite.com/api';
   const headers = {
@@ -314,13 +369,13 @@ async function sendPurchaseWelcome(email) {
     const gRes = await fetch(`${base}/groups?filter[name]=wr-E14`, { headers });
     if (!gRes.ok) {
       console.error('E14: group lookup returned', gRes.status);
-      return;
+      return false;
     }
     const groups = (await gRes.json())?.data || [];
     const gid = groups.find((g) => g.name === 'wr-E14')?.id;
     if (!gid) {
       console.error('E14: no MailerLite group named wr-E14');
-      return;
+      return false;
     }
 
     const up = await fetch(`${base}/subscribers`, {
@@ -330,21 +385,26 @@ async function sendPurchaseWelcome(email) {
     });
     if (!up.ok) {
       console.error('E14: subscriber upsert returned', up.status);
-      return;
+      return false;
     }
     const subscriberId = (await up.json())?.data?.id;
     if (!subscriberId) {
       console.error('E14: subscriber upsert returned no id');
-      return;
+      return false;
     }
 
     const add = await fetch(`${base}/subscribers/${subscriberId}/groups/${gid}`, {
       method: 'POST',
       headers,
     });
-    if (!add.ok) console.error('E14: group add returned', add.status);
+    if (!add.ok) {
+      console.error('E14: group add returned', add.status);
+      return false;
+    }
+    return true;
   } catch (err) {
     console.error('sendPurchaseWelcome failed:', err.message);
+    return false;
   }
 }
 
@@ -783,11 +843,27 @@ export default async function handler(req) {
       // Nothing to act on, and no retry will conjure an address. Acknowledge and log loudly —
       // this one needs a human to close the access by hand.
       console.error('refund: no email on refunded charge', charge.id, '- revoke by hand');
+      await alertOperator(
+        'REFUND WITH NO EMAIL - close the access by hand\n\n' +
+          `Charge: ${charge.id}\n` +
+          'Stripe sent charge.refunded with no address on the charge, so nothing here can find ' +
+          'the person. Their money is back and their course is still open. Open the charge in ' +
+          'Stripe, take the email off the payment, then remove the Systeme enrollment and clear ' +
+          'is_paid in Supabase.'
+      );
       return received();
     }
 
     const revoked = await revokeCourseAccess(refundedEmail);
     if (!revoked) {
+      await alertOperator(
+        'REFUND SENT, COURSE STILL OPEN\n\n' +
+          `Buyer: ${refundedEmail}\n` +
+          `Charge: ${charge.id}\n` +
+          'The money is back with the customer and removing their Systeme enrollment failed. ' +
+          'Stripe will retry this event, so it may fix itself - but if no second alert says ' +
+          'otherwise within the hour, remove the enrollment by hand.'
+      );
       return new Response(JSON.stringify({ error: 'Revocation failed' }), {
         status: 500,
         headers: baseHeaders,
@@ -808,6 +884,13 @@ export default async function handler(req) {
       });
     } catch (err) {
       console.error('[monday] refund record failed (ignored):', err);
+      await alertOperator(
+        'BOOKKEEPING ONLY - refund not written to the board\n\n' +
+          `Buyer: ${refundedEmail}\n` +
+          `Charge: ${charge.id}\n` +
+          'The customer is fine: their money is back and their access is closed. The monday row ' +
+          'still says Paid and the money board has no negative row. Fix both in the next sweep.'
+      );
     }
 
     return received();
@@ -877,6 +960,15 @@ export default async function handler(req) {
   // retries the event until the enrollment lands; a paid order is never dropped.
   const systemeContactId = await enrollInCourse(email);
   if (!systemeContactId) {
+    await alertOperator(
+      'PAID, NO COURSE - enrollment failed\n\n' +
+        `Buyer: ${email}\n` +
+        `Session: ${session.id}\n` +
+        `Paid: ${session.amount_total} ${String(session.currency || '').toUpperCase()}\n` +
+        'Stripe is retrying, so this can still land on its own. It gives up after about three ' +
+        'days, and until then the buyer has paid and has nothing. If no "enrollment recovered" ' +
+        'follows, open Systeme and enroll them by hand.'
+    );
     return new Response(JSON.stringify({ error: 'Enrollment failed' }), {
       status: 500,
       headers: baseHeaders,
@@ -900,9 +992,31 @@ export default async function handler(req) {
     console.warn('[provision] SUPABASE_URL or SUPABASE_SECRET_KEY not set — skipping app provisioning');
   }
 
+  if (supabaseUrl && supabaseSecret && !appProvisioned) {
+    // The course is already open at this point, so this is not a lost sale - it is a buyer who
+    // will open the Toolkit and be told they are not a customer. Silent until 2026-08-19.
+    await alertOperator(
+      'PAID, NO TOOLKIT - app account not provisioned\n\n' +
+        `Buyer: ${email}\n` +
+        `Session: ${session.id}\n` +
+        'The course itself is open, this is only the app. They will hit the "customers only" ' +
+        'screen at thezerofog.com/app. Create the Supabase user and set is_paid on their ' +
+        'profile. The board row for this buyer says App account: Missing.'
+    );
+  }
+
   // The purchase-welcome email (E14). Runs only after the enrollment succeeded, same contract
   // as provisioning above: awaited, best-effort, never affects the response.
-  await sendPurchaseWelcome(email);
+  const welcomed = await sendPurchaseWelcome(email);
+  if (!welcomed) {
+    await alertOperator(
+      'PAID, NO WELCOME EMAIL - E14 was not sent\n\n' +
+        `Buyer: ${email}\n` +
+        'Systeme still sends its own access email, so they are not left with nothing, but our ' +
+        'welcome never went. Add them to the MailerLite group wr-E14 by hand - joining the ' +
+        'group is what fires the automation.'
+    );
+  }
 
   // The operations board. Last of the best-effort steps, and the only one that records what
   // the earlier ones actually did: the buyer row carries whether the app account was really
@@ -922,6 +1036,13 @@ export default async function handler(req) {
     });
   } catch (err) {
     console.error('[monday] purchase record failed (ignored):', err);
+    await alertOperator(
+      'BOOKKEEPING ONLY - sale not written to the board\n\n' +
+        `Buyer: ${email}\n` +
+        `Session: ${session.id}\n` +
+        'The customer is fine: course open, app and welcome as reported above. They have no row ' +
+        'on the customers board and no row on the money board. Add both in the next sweep.'
+    );
   }
 
   return received();
