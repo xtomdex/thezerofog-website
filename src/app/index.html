@@ -2447,6 +2447,153 @@ $('signOut2').addEventListener('click', async () => {
 $('lockedSignOut').addEventListener('click', async () => {
   await AUTH.signOut(); location.reload();
 });
+/* ---- Export as a document a person can actually read ----
+   A JSON dump is a file for programmers. What a customer wants is something that opens on a
+   double-click, reads like a record of their own nights, prints to PDF for a doctor, and whose
+   tables paste straight into Excel or Sheets. So the export is a self-contained HTML document:
+   no scripts, no external fonts, nothing to load - it works offline and forever.
+   Every label below is the exact wording the person saw in the app when they typed the value;
+   the chip values are stored as minute buckets (7 / 22 / 45 / 75) and are mapped back here. */
+const EX_BUCKET = { '0':'0', '7':'under 15 min', '22':'15-30 min', '45':'30-60 min', '75':'60+ min' };
+const EX_NAP    = { 'none':'None', '<20':'under 20 min', '20-40':'20-40 min', '40+':'40+ min' };
+const exCap = v => !v ? '' : (String(v) === 'none' ? 'None' : String(v).charAt(0).toUpperCase() + String(v).slice(1));
+const exBucket = v => (v === null || v === undefined || v === '') ? '' : (EX_BUCKET[String(v)] || String(v));
+const EX_QUALITY = { '1':'1 - poor', '3':'3 - ok', '5':'5 - great' };
+
+const EX_DIARY_COLS = [
+  { k:'entry_date',  h:'Date' },
+  { k:'intoBed',     h:'Into bed' },
+  { k:'tried',       h:'Lights out' },
+  { k:'sol',         h:'Time to fall asleep', f:exBucket },
+  { k:'wakings',     h:'Times woke up' },
+  { k:'waso',        h:'Total time awake',    f:exBucket },
+  { k:'finalWake',   h:'Final wake-up' },
+  { k:'outBed',      h:'Out of bed' },
+  { k:'targetWake',  h:'Target wake time' },
+  { k:'quality',     h:'Sleep quality', f:v => v ? (EX_QUALITY[String(v)] || String(v)) : '' },
+  { k:'sleep_eff',   h:'Sleep efficiency', f:v => (v === null || v === undefined || v === '') ? '' : v + '%' },
+  { k:'caffeine',    h:'Last caffeine', f:v => (!v || v === 'none') ? 'None' : String(v) },
+  { k:'alcohol',     h:'Alcohol',      f:exCap },
+  { k:'nap',         h:'Daytime nap',  f:v => !v ? '' : (EX_NAP[String(v)] || String(v)) },
+  { k:'exercise',    h:'Exercise',     f:exCap },
+  { k:'aid',         h:'Sleep aid',    f:exCap },
+  { k:'notes',       h:'Notes' },
+];
+
+const EX_PC_LABELS = {
+  wake:'My wake window', sleep:'My sleep window', caffeine:'My caffeine cutoff',
+  morning:'My morning routine', meal:'My last meal', winddown:'My wind-down window',
+  screen:'My evening runway', breathing:'My breathing', exercise:'My exercise window',
+  worry:'My worry time', night:'My night protocol', reset:'My reset plan',
+  smoking:'My smoking rule', triggers:'My triggers + solutions',
+};
+const EX_PC_ORDER = ['wake','sleep','caffeine','morning','meal','winddown','screen','breathing','exercise','worry','night','reset','smoking','triggers'];
+
+function exEsc(v){
+  return String(v === null || v === undefined ? '' : v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function exNl(v){ return exEsc(v).replace(/\n/g,'<br>'); }
+
+function exDiaryTable(rows){
+  if(!rows.length) return '<p class="empty">No nights logged yet.</p>';
+  // Only show columns that actually carry something - an empty column is noise on a printout.
+  const cols = EX_DIARY_COLS.filter(c => rows.some(r => {
+    const v = r[c.k]; return v !== null && v !== undefined && v !== '';
+  }));
+  const head = cols.map(c => '<th>' + exEsc(c.h) + '</th>').join('');
+  const body = rows.map(r => '<tr>' + cols.map(c => {
+    const raw = r[c.k];
+    const val = c.f ? c.f(raw) : (raw === null || raw === undefined ? '' : String(raw));
+    return '<td' + (c.k === 'notes' ? ' class="notes"' : '') + '>' + exNl(val) + '</td>';
+  }).join('') + '</tr>').join('');
+  return '<div class="scroll"><table><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table></div>';
+}
+
+function exAssessTable(rows){
+  if(!rows || !rows.length) return '<p class="empty">No assessments taken yet.</p>';
+  const body = rows.map(r =>
+    '<tr><td>' + exEsc(r.taken_on) + '</td><td>' + exEsc(r.score_total) + '</td><td>' +
+    exEsc(r.score_clock) + '</td><td>' + exEsc(r.score_battery) + '</td><td>' +
+    exEsc(r.score_offswitch) + '</td></tr>').join('');
+  return '<div class="scroll"><table><thead><tr><th>Date</th><th>Total</th><th>The Clock</th>' +
+         '<th>The Battery</th><th>The Off-Switch</th></tr></thead><tbody>' + body + '</tbody></table></div>';
+}
+
+function exWindow(v){
+  if(v && typeof v === 'object' && (v.from || v.to)) return exEsc(v.from || '') + ' to ' + exEsc(v.to || '');
+  return exNl(v);
+}
+function exCard(card){
+  const keys = EX_PC_ORDER.filter(k => {
+    const v = card && card[k];
+    return v && (typeof v !== 'object' || v.from || v.to);
+  });
+  if(!keys.length) return '<p class="empty">The Protocol Card is still empty.</p>';
+  return '<dl class="card">' + keys.map(k =>
+    '<dt>' + exEsc(EX_PC_LABELS[k] || k) + '</dt><dd>' + exWindow(card[k]) + '</dd>').join('') + '</dl>';
+}
+
+function exTracker(t){
+  if(!t || !t.units || !t.units.length) return '<p class="empty">Nothing in the maintenance tracker yet.</p>';
+  return '<ul class="plain">' + t.units.map(u => {
+    const name = exEsc((u && (u.name || u.title)) || 'Room');
+    const done = (u && u.done && typeof u.done === 'object') ? Object.keys(u.done).filter(x => u.done[x]).length : null;
+    return '<li>' + name + (done === null ? '' : ' - ' + done + ' item' + (done === 1 ? '' : 's') + ' ticked') + '</li>';
+  }).join('') + '</ul>';
+}
+
+function exBuildDocument(b){
+  const when = new Date(b.exported_at);
+  const nice = when.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
+  const nights = b.sleep_diary.length;
+  const first = nights ? b.sleep_diary[0].entry_date : null;
+  const last  = nights ? b.sleep_diary[nights - 1].entry_date : null;
+  const range = nights ? (nights === 1 ? first : first + ' to ' + last) : 'nothing logged yet';
+  const css = [
+    ':root{color-scheme:light}',
+    '*{box-sizing:border-box}',
+    'body{margin:0;background:#fbfbfa;color:#16181d;',
+    'font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}',
+    '.page{max-width:1000px;margin:0 auto;padding:48px 28px 80px}',
+    'header{border-bottom:2px solid #16181d;padding-bottom:20px;margin-bottom:8px}',
+    'h1{font-size:30px;line-height:1.15;margin:0 0 10px;letter-spacing:-.02em}',
+    '.meta{color:#5c6572;font-size:14px;margin:0}',
+    '.meta b{color:#16181d;font-weight:600}',
+    'h2{font-size:19px;margin:44px 0 14px;padding-bottom:7px;border-bottom:1px solid #dfe3e9;letter-spacing:-.01em}',
+    '.scroll{overflow-x:auto;border:1px solid #dfe3e9;border-radius:3px;background:#fff}',
+    'table{border-collapse:collapse;width:100%;font-size:13.5px}',
+    'th,td{text-align:left;padding:9px 12px;border-bottom:1px solid #eceff3;white-space:nowrap;vertical-align:top}',
+    'th{background:#f2f4f7;font-weight:600;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:#5c6572}',
+    'td.notes{white-space:normal;min-width:240px;color:#3d4552}',
+    'tr:last-child td{border-bottom:none}',
+    'tbody tr:nth-child(even){background:#fafbfc}',
+    'dl.card{margin:0;border:1px solid #dfe3e9;border-radius:3px;background:#fff}',
+    'dl.card dt{font-weight:600;padding:14px 16px 0;font-size:14px}',
+    'dl.card dd{margin:0;padding:4px 16px 14px;border-bottom:1px solid #eceff3;color:#3d4552;white-space:pre-wrap}',
+    'dl.card dd:last-child{border-bottom:none}',
+    'ul.plain{margin:0;padding-left:20px}',
+    '.empty{color:#78828f;font-style:italic;margin:0}',
+    'footer{margin-top:52px;padding-top:16px;border-top:1px solid #dfe3e9;color:#78828f;font-size:13px}',
+    '@media print{body{background:#fff}.page{max-width:none;padding:0}',
+    'h2{page-break-after:avoid}.scroll{overflow:visible;border:none}th{background:#eee}}',
+  ].join('');
+  return '<!doctype html><html lang="en"><head><meta charset="utf-8">' +
+    '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<title>My ZeroFog data - ' + exEsc(b.exported_at.slice(0,10)) + '</title>' +
+    '<style>' + css + '</style></head><body><div class="page">' +
+    '<header><h1>My ZeroFog data</h1>' +
+    '<p class="meta">Account <b>' + exEsc(b.account || 'preview') + '</b> &middot; exported ' + exEsc(nice) +
+    ' &middot; <b>' + nights + '</b> night' + (nights === 1 ? '' : 's') + ' logged &middot; ' + exEsc(range) + '</p></header>' +
+    '<h2>Sleep diary</h2>' + exDiaryTable(b.sleep_diary) +
+    '<h2>Sleep assessment</h2>' + exAssessTable(b.sleep_assessments) +
+    '<h2>Protocol Card</h2>' + exCard(b.protocol_card) +
+    '<h2>Maintenance tracker</h2>' + exTracker(b.maintenance_tracker) +
+    '<footer>This is everything ZeroFog holds for this account. Open it in any browser, print it, ' +
+    'or copy a table straight into a spreadsheet. Nothing here was sent anywhere - the file was ' +
+    'built on your own device.</footer></div></body></html>';
+}
+
 $('exportData').addEventListener('click', async () => {
   const btn = $('exportData');
   const label = btn.textContent;
@@ -2454,11 +2601,11 @@ $('exportData').addEventListener('click', async () => {
   btn.disabled = true; btn.textContent = 'Preparing...';
   try{
     const bundle = await DB.exportAll();
-    const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
+    const blob = new Blob([exBuildDocument(bundle)], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'zerofog-my-data-' + new Date().toISOString().slice(0,10) + '.json';
+    a.download = 'my-zerofog-data-' + new Date().toISOString().slice(0,10) + '.html';
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     btn.textContent = 'Downloaded';
