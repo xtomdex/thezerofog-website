@@ -164,6 +164,42 @@ h2 {
 .alt-name { font-size: 0.9rem; color: var(--text2); }
 .alt-price { font-size: 0.9rem; font-weight: 600; color: var(--text); }
 
+/* Alternatives as a table: a list reads as opinion, a table reads as data and invites
+   checking. Every figure in it is substantiated - see _Research/PRICING-ALTERNATIVES-
+   SUBSTANTIATION-2026-08-20.md - so the invitation is one we can accept. */
+.alt-table-wrap { overflow-x: auto; margin: 24px 0 4px; }
+.alt-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.alt-table th {
+  text-align: left; padding: 0 0 10px; border-bottom: 1px solid var(--border);
+  font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted); font-weight: 700;
+}
+.alt-table td {
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+  color: var(--text2); line-height: 1.55; vertical-align: top;
+}
+.alt-table th + th, .alt-table td + td { padding-left: 18px; }
+.alt-table tr:last-child td { border-bottom: none; }
+.alt-table b { color: var(--text); font-weight: 700; }
+.alt-table td:last-child { color: var(--text); font-weight: 600; }
+.alt-ours td { color: var(--text); }
+.alt-ours td:last-child { color: var(--accent); }
+
+/* Phones: the three columns stop being a table and become one labelled block per option,
+   so nothing scrolls sideways and the price still reads as the answer. */
+@media (max-width: 560px) {
+  .alt-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .alt-table, .alt-table tbody, .alt-table tr, .alt-table td { display: block; width: 100%; }
+  .alt-table tr { padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .alt-table tr:last-child { border-bottom: none; }
+  .alt-table td { border-bottom: none; padding: 2px 0; }
+  .alt-table th + th, .alt-table td + td { padding-left: 0; }
+  .alt-table td:last-child { margin-top: 6px; }
+  .alt-table td[data-th="What it costs"]::before {
+    content: attr(data-th) ": "; color: var(--muted); font-weight: 400;
+  }
+}
+
 /* === FAQ ===
    Three things were wrong here and they compounded. Every answer was open at once, so seven
    long paragraphs sat between the reader and the button. The answers were 0.9rem in --text2,
