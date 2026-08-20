@@ -135,6 +135,14 @@ h2 {
 .price-note { font-size: 0.85rem; color: var(--text2); margin-bottom: 16px; }
 .price-window { font-size: 0.8rem; color: var(--muted); line-height: 1.6; max-width: 400px; margin: 0 auto 24px; }
 
+/* Proof block - body prose, so it sits at the readable floor the sales-page SOP sets
+   (1rem, --text), not at .body-text's 0.95rem/--text2 caption weight. */
+.proof p:not(.label) { font-size: 1rem; color: var(--text); line-height: 1.75; margin-bottom: 18px; }
+.proof p:last-child { margin-bottom: 0; }
+
+/* The reason for the founding price, restated inside the price box. */
+.price-reason { font-size: 0.9rem; color: var(--text); line-height: 1.6; max-width: 420px; margin: 0 auto 20px; }
+
 /* === GUARANTEE === */
 .guarantee {
   background: var(--bg2); border: 1px solid var(--border);
