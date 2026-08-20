@@ -46,9 +46,13 @@ h2 {
 }
 .week-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
 .week-card p { font-size: 0.9rem; color: var(--text2); line-height: 1.6; }
+/* The payoff line of each week. It used to be 0.8rem in var(--cta) - the button green,
+   which is #2ecc71 in the light theme and unreadable on white at that size, and which also
+   spent the one colour that is supposed to mean "this is the button". Full-contrast text,
+   body size, weight doing the emphasis instead of hue. */
 .week-card .result {
-  margin-top: 10px; font-size: 0.8rem; color: var(--cta);
-  font-weight: 600;
+  margin-top: 10px; font-size: 0.9rem; color: var(--text);
+  font-weight: 600; line-height: 1.6;
 }
 
 /* === INCLUDES LIST === */
