@@ -36,6 +36,7 @@
     stage: document.getElementById('roomStage'),
     video: document.getElementById('roomVideo'),
     joinBtn: document.getElementById('roomJoin'),
+    fsBtn: document.getElementById('roomFs'),
     endedPlate: document.getElementById('roomEnded'),
     countdown: document.getElementById('roomCountdown'),
     notice: document.getElementById('roomNotice'),
@@ -234,6 +235,40 @@
   // The blur has to be heavy enough that nothing on the slide can be read. This is not a poster
   // frame - the 2026-07-25 rule stands, and a still frame with a play button would break it. A
   // picture that is visibly moving says the opposite of "recording".
+  // ---- Fullscreen (container-level, Dima's request 2026-08-21) ----
+  // The wrapper is the fullscreen element so the blur filter, the join plate and the ended
+  // plate all keep working. No fallback to the native video player where the API is missing
+  // (iPhone before Safari 17.2): that player has a seek bar, and a session must not be
+  // scrubbable - the button simply stays hidden there.
+  var fsWrap = els.video ? els.video.parentElement : null;
+  function fsSupported() {
+    return !!(fsWrap && (fsWrap.requestFullscreen || fsWrap.webkitRequestFullscreen));
+  }
+  function fsShowIfSupported() {
+    if (els.fsBtn && fsSupported()) els.fsBtn.hidden = false;
+  }
+  function fsElement() {
+    return document.fullscreenElement || document.webkitFullscreenElement || null;
+  }
+  function fsToggle() {
+    if (fsElement()) {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    } else if (fsWrap.requestFullscreen) {
+      fsWrap.requestFullscreen().catch(function () {});
+    } else if (fsWrap.webkitRequestFullscreen) {
+      fsWrap.webkitRequestFullscreen();
+    }
+  }
+  if (els.fsBtn) {
+    els.fsBtn.addEventListener('click', fsToggle);
+    ['fullscreenchange', 'webkitfullscreenchange'].forEach(function (ev) {
+      document.addEventListener(ev, function () {
+        els.fsBtn.innerHTML = fsElement() ? '&#x2923;' : '&#x2922;';
+        els.fsBtn.setAttribute('aria-label', fsElement() ? 'Exit fullscreen' : 'Fullscreen');
+      });
+    });
+  }
+
   function join() {
     if (joined) return;
     joined = true;
@@ -241,6 +276,7 @@
     els.joinBtn.hidden = true;
     els.stage.classList.remove('room-stage--preroll');
     els.video.muted = false;
+    fsShowIfSupported();
 
     if (phase === 'replay') {
       // A replay never ran behind a blur - nothing is loaded yet. It opens at the furthest

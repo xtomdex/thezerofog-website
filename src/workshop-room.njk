@@ -61,6 +61,12 @@ permalink: /workshop/room/
          from the email. Wording obeys the 2026-07-25 rule - "never assert live, never deny it" -
          so it says session, never broadcast and never stream. #}
       <div class="room-ended" id="roomEnded" hidden>The workshop has ended.<span>Thanks for being here.</span></div>
+      {# Fullscreen goes on the WRAPPER, not the video: the blur is a CSS filter and the join /
+         ended plates are siblings - fullscreening the container keeps all of it working. Hidden
+         until joined, and hidden entirely where the Fullscreen API is absent (iPhone before
+         Safari 17.2 - falling back to the native video player there would expose a seek bar,
+         which the room must never show during a session). #}
+      <button type="button" class="room-fs" id="roomFs" hidden aria-label="Fullscreen">&#x2922;</button>
     </div>
   </div>
 
