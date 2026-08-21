@@ -101,7 +101,13 @@ html:not(.dark) {
   --glass: rgba(0,0,0,0.02);
 }
 
-html { font-size: 16px; scroll-behavior: smooth; }
+/* No scroll-behavior: smooth. It silently broke in-page anchors on /sales/ -
+   both the CTA click and a direct load of /sales/#enroll left the page at the
+   top, because the smooth scroll to a fragment never completed on a page that
+   long. Verified in a clean tab: with smooth the target stayed at scrollY 0,
+   with auto it lands exactly on its scroll-margin. An animation is not worth a
+   dead CTA on the money path. */
+html { font-size: 16px; }
 
 body {
   background: var(--bg);
