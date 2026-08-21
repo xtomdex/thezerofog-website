@@ -277,3 +277,7 @@ h2 {
   .bonus-card { flex-direction: column; align-items: stretch; }
   .bonus-cover { flex-basis: auto; }
 }
+
+/* Anchor landing: the brand is position:fixed, and #enroll is a CTA target.
+   Without this the price box tucks under it after a smooth scroll. */
+#enroll { scroll-margin-top: 72px; }
