@@ -127,9 +127,16 @@ permalink: /welcome/
     if (t) t.mode = on ? 'showing' : 'disabled';
   }
 
+  // The initial play() promise can reject LATE - after the user has already
+  // clicked to unmute (the rejection lands once media data arrives). Without
+  // this flag the catch below re-mutes the video right over the user's click,
+  // which is exactly the "no sound at all" bug caught live on 2026-08-21.
+  var userUnmuted = false;
+
   var attempt = v.play();
   if (attempt && attempt.catch) {
     attempt.catch(function () {
+      if (userUnmuted) return; // user already turned sound on - never override
       // Sound blocked by autoplay policy: start muted with captions instead.
       v.muted = true;
       captions(true);
@@ -142,6 +149,7 @@ permalink: /welcome/
   }
 
   function unmuteFromStart() {
+    userUnmuted = true;
     v.muted = false;
     v.currentTime = 0;
     captions(false);
