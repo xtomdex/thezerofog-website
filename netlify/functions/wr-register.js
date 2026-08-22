@@ -173,6 +173,12 @@ function buildQueue({ registrationId, sessionStart, durationSec, config, recipie
     const windowBrokeThePromise =
       entry.offsetMin < 0 && scheduledFor.getTime() !== raw.getTime();
 
+    // E1-JIT already handed this person the door, seconds ago. E4 is the fifteen-minute
+    // countdown, and for someone who registered eighteen minutes out that lands three minutes
+    // after the welcome - two emails in a row saying the same thing. Their second touch is E5
+    // at start time, which is the one that matters and cannot be skipped.
+    const redundantCountdown = startsImmediately && entry.template === 'E4';
+
     return {
       registration_id: registrationId,
       template:
@@ -180,7 +186,8 @@ function buildQueue({ registrationId, sessionStart, durationSec, config, recipie
       segments: entry.segments,
       scheduled_for: scheduledFor.toISOString(),
       status:
-        entry.anchor !== 'register' && (alreadyPast || windowBrokeThePromise)
+        entry.anchor !== 'register' &&
+        (alreadyPast || windowBrokeThePromise || redundantCountdown)
           ? 'skipped'
           : 'pending',
     };
