@@ -112,9 +112,26 @@ async function ensureSession(instant, kind) {
  * segmentation auditable: you can look at the rows and see exactly what this person is going to
  * receive and when, instead of trusting a chain of automation steps inside an email platform.
  */
+// How close the start has to be for the welcome to become E1-JIT. Chosen at 30: under an hour
+// the one-hour reminder is already skipped, so anything below that would otherwise wait for the
+// fifteen-minute one to show a door.
+const JIT_WELCOME_MINUTES = 30;
+
 function buildQueue({ registrationId, sessionStart, durationSec, config, recipientZone, now }) {
   const sessionEnd = new Date(sessionStart.getTime() + durationSec * 1000);
   const window = config.notifications.deliveryWindow;
+
+  // The nearest slot is always minutes away (`jit.intervalMin` is 15, `minLeadMinutes` 5) and it
+  // sits first in the list marked `urgent`, so ad traffic takes it. For that person the normal
+  // welcome is a lie twice over: it promises the link "as we get close to the start" and hands
+  // over a calendar button, with the start eight minutes off. Their E2-E4 countdowns are all
+  // skipped below, so the door would not appear until E5 at start time.
+  //
+  // E1-JIT is that person's welcome instead - same slot, same merge fields, but it carries the
+  // room link. Safe to send early: `wr-room.js` answers `state: 'early'` before the session with
+  // a countdown and no video url.
+  const minutesToStart = (sessionStart.getTime() - now.getTime()) / 60000;
+  const startsImmediately = minutesToStart < JIT_WELCOME_MINUTES;
 
   return config.notifications.schedule.map((entry) => {
     let base;
@@ -158,7 +175,8 @@ function buildQueue({ registrationId, sessionStart, durationSec, config, recipie
 
     return {
       registration_id: registrationId,
-      template: entry.template,
+      template:
+        entry.template === 'E1' && startsImmediately ? 'E1-JIT' : entry.template,
       segments: entry.segments,
       scheduled_for: scheduledFor.toISOString(),
       status:
