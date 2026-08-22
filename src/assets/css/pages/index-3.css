@@ -63,14 +63,18 @@ html:not(.dark) {
   --glass: rgba(0,0,0,0.02);
 }
 
-html { font-size: 16px; scroll-behavior: smooth; }
+/* No scroll-behavior: smooth - removed 2026-08-22. It was dropped from shared.css in a11299a
+   because it silently killed in-page anchors, but this page-level copy outlived that fix and
+   kept re-enabling it here. Same defect, second file. */
+html { font-size: 16px; }
 
 body {
   background: var(--bg);
   color: var(--text);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
+  /* Smoothing is set per theme in shared.css. The copy that used to sit here was dead weight
+     that contradicted it - shared's html:not(.dark) body outranks a bare body selector anyway. */
   transition: background 0.3s, color 0.3s;
 }
 

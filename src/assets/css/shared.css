@@ -67,6 +67,8 @@
   --input-border: rgba(255,255,255,0.12);
   --input-focus: #bd93f9;
   --glass: rgba(255,255,255,0.03);
+  /* Light text on a dark ground optically gains weight, so the dark theme keeps Inter Regular. */
+  --body-weight: 400;
 }
 
 /* === LIGHT THEME === */
@@ -99,6 +101,10 @@ html:not(.dark) {
   --input-border: #cccccc;
   --input-focus: #7c5cbf;
   --glass: rgba(0,0,0,0.02);
+  /* 2026-08-22: dark ink on a bright ground optically LOSES weight - the same 400 that reads
+     solid in the dark theme shimmers on white, especially next to headings set at 800-900.
+     Contrast was never the problem (#444 on #fafafa measures 9.3:1); weight was. */
+  --body-weight: 500;
 }
 
 /* No scroll-behavior: smooth. It silently broke in-page anchors on /sales/ -
@@ -114,8 +120,16 @@ body {
   color: var(--text);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.6;
+  font-weight: var(--body-weight);
+  /* antialiased thins glyphs. That is right on a dark ground and wrong on a bright one, where it
+     is the direct cause of the shimmer. Subpixel rendering is restored for the light theme below. */
   -webkit-font-smoothing: antialiased;
   transition: background 0.3s, color 0.3s;
+}
+
+html:not(.dark) body {
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
 }
 
 /* === THEME TOGGLE === */

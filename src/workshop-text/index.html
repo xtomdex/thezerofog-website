@@ -26,6 +26,10 @@
     --purple:#6d28d9; --pink:#be185d; --cyan:#0e7490; --green:#15803d; --red:#dc2626; --orange:#b45309;
     /* long-form reading: ~600px of text at 18px lands around 62-68 characters a line */
     --measure:648px; --gutter:24px;
+    /* 2026-08-22: dark ink on a bright ground optically loses weight, so long-form reading here
+       runs at 500. The dark theme below drops back to 400. Mirrors shared.css --body-weight;
+       this page is standalone by design and does not inherit it. */
+    --body-weight:500;
     --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
   }
   /* DARK (html.dark) - the original look */
@@ -33,6 +37,7 @@
     --bg:#1a1a1a; --surface:#222222; --surface2:#1e1e1e; --line:rgba(255,255,255,0.08);
     --text:#f8f8f2; --muted:#b0b0b0; --dim:#777; --btn-text:#1a1a1a;
     --purple:#bd93f9; --pink:#ff79c6; --cyan:#8be9fd; --green:#50fa7b; --red:#ff5555; --orange:#ffb86c;
+    --body-weight:400;
   }
   body{ transition:background .3s, color .3s; }
 
@@ -62,7 +67,9 @@
   html{scroll-behavior:smooth}
   body{
     font-family:'Inter',sans-serif; background:var(--bg); color:var(--text);
-    line-height:1.8; -webkit-font-smoothing:antialiased; font-size:18px;
+    line-height:1.8; font-size:18px; font-weight:var(--body-weight);
+    /* antialiased thins glyphs - right on a dark ground, and the direct cause of shimmer on a
+       bright one. Applied to the dark theme only, just below. */
     overflow-x:hidden;
   }
   /* .wrap is the single element that holds the whole article - the expiry gate at the
@@ -221,6 +228,7 @@
     .compare .row{flex-direction:column;gap:4px}
     .compare .row .v{white-space:normal}
   }
+  html.dark body{ -webkit-font-smoothing:antialiased; }
   @media(prefers-reduced-motion:reduce){ html{scroll-behavior:auto} }
 </style>
 </head>

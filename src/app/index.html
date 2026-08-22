@@ -16,6 +16,8 @@
     --bg:#161616; --panel:#202020; --panel2:#1b1b1b; --line:rgba(255,255,255,0.08);
     --text:#f8f8f2; --muted:#9a9a9a; --dim:#6a6a6a;
     --purple:#bd93f9; --cyan:#8be9fd; --green:#50fa7b; --orange:#ffb86c; --pink:#ff79c6; --red:#ff5555; --yellow:#f1fa8c;
+    /* Light ink on a dark ground optically gains weight, so the dark theme stays at Regular. */
+    --body-weight:400;
   }
   /* ===== LIGHT THEME (toggle) ===== */
   body.light{
@@ -23,6 +25,9 @@
     --bg:#f3f3f6; --panel:#ffffff; --panel2:#eceef1; --line:rgba(0,0,0,0.10);
     --text:#1a1a1a; --muted:#555555; --dim:#8a8a8a;
     --purple:#6d28d9; --cyan:#0e7490; --green:#15803d; --orange:#b45309; --pink:#be185d; --red:#dc2626; --yellow:#a16207;
+    /* 2026-08-22: dark ink on a bright ground loses weight and shimmers at 400. This page is
+       standalone and does not load shared.css, so it carries its own copy of --body-weight. */
+    --body-weight:500;
   }
   body.light .top,body.light .a-progress{ background:rgba(243,243,246,0.94); }
   body.light .live{ background:var(--panel); }
@@ -51,7 +56,7 @@
       U+FFFD;
   }
 
-  body{ font-family:'Inter',sans-serif; background:#0d0d0d; color:var(--text); line-height:1.5; }
+  body{ font-family:'Inter',sans-serif; background:#0d0d0d; color:var(--text); line-height:1.5; font-weight:var(--body-weight,400); }
   .app{ max-width:480px; margin:0 auto; min-height:100vh; background:var(--bg); position:relative; }
   /* mobile: desktop-only elements stay hidden */
   .side{ display:none; }
