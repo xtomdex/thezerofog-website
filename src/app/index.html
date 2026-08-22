@@ -240,8 +240,10 @@
   .up-btn{ display:inline-block; background:var(--purple); color:#fff; text-decoration:none;
     border-radius:9px; padding:9px 16px; font-size:13.5px; font-weight:700; }
   .up-btn:hover{ opacity:.9; }
-  .up-link{ background:none; border:none; color:var(--muted); font-size:13px; font-family:inherit;
-    cursor:pointer; text-decoration:underline; margin-left:12px; padding:9px 0; }
+  /* Accent, never muted: this is the buyer's way back in, and grey-on-dark made it
+     unreadable on the phone (CEO, 2026-08-22, watching the Toolkit video). */
+  .up-link{ background:none; border:none; color:var(--purple); font-size:13px; font-family:inherit;
+    font-weight:600; cursor:pointer; text-decoration:underline; margin-left:12px; padding:9px 0; }
   .up-link:hover{ color:var(--text); }
   .navi.locked .nlb::after, .tab.locked::after{ content:"\00a0\1F512"; font-size:11px; opacity:.65; }
   /* Nothing to sign out of when nobody is signed in. */
@@ -582,7 +584,10 @@
         font-family:inherit; font-size:14px; padding:12px 14px; border-radius:10px; resize:vertical; min-height:62px; }
   textarea::placeholder{ color:var(--dim); }
   .chips{ display:flex; gap:8px; flex-wrap:wrap; }
-  .chip{ flex:1; min-width:60px; text-align:center; background:var(--panel2); border:1px solid var(--line);
+  /* flex-shrink 0 with an auto basis: a one-word label like Magnesium cannot be squeezed
+     narrower than itself, and a row that no longer fits wraps instead of spilling.
+     min-width only holds the short labels (3+, 40+) to a tappable size. */
+  .chip{ flex:1 0 auto; min-width:60px; text-align:center; background:var(--panel2); border:1px solid var(--line);
         color:var(--muted); font-family:inherit; font-size:13px; font-weight:600; padding:11px 6px; border-radius:10px; cursor:pointer; transition:.12s; }
   .chip.on{ background:rgba(189,147,249,0.16); border-color:var(--purple); color:var(--text); }
   .stepper{ display:flex; align-items:center; gap:14px; }
