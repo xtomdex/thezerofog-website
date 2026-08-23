@@ -794,7 +794,133 @@
       navigator.clipboard.writeText(t); note("Copied.");
     }
   };
-  window.dl=function(){ note("Image export runs on the live page. Previews cannot save files."); };
+  /* ---- the card as a real file ----
+     Drawn on canvas rather than rasterised out of the DOM: no library, nothing
+     fetched, and the artifact host's CSP has nothing to block. Every colour is
+     read back out of the stylesheet, so a re-skin moves the image with it and
+     the two cannot drift.
+
+     Canvas has no letter-spacing, so the small uppercase labels are drawn a
+     character at a time - the label rows are what make it read as an instrument
+     instead of a screenshot, and squashing them loses that. */
+  var CARD_W=1200, CARD_H=675, SCALE=2;
+
+  function css(name){
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+  function txt(id){
+    var el=document.getElementById(id);
+    return el ? el.textContent.trim() : "";
+  }
+  function tracked(c,s,x,y,gap){
+    for(var i=0;i<s.length;i++){ c.fillText(s[i],x,y); x+=c.measureText(s[i]).width+gap; }
+  }
+  function trackedWidth(c,s,gap){
+    var w=0;
+    for(var i=0;i<s.length;i++){ w+=c.measureText(s[i]).width+gap; }
+    return w-gap;
+  }
+  function roundRect(c,x,y,w,h,r){
+    c.beginPath();
+    c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r);
+    c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath();
+  }
+
+  function drawCard(){
+    var cv=document.createElement("canvas");
+    cv.width=CARD_W*SCALE; cv.height=CARD_H*SCALE;
+    var c=cv.getContext("2d"); c.scale(SCALE,SCALE);
+
+    var ink=css("--ink"), card=css("--card"), cream=css("--cream"),
+        accent=css("--accent"), slate=css("--slate"), line=css("--line");
+    var mono=getComputedStyle(document.getElementById("hero")).fontFamily;
+    var sans=getComputedStyle(document.body).fontFamily;
+
+    c.fillStyle=ink; c.fillRect(0,0,CARD_W,CARD_H);
+    var bloom=c.createRadialGradient(CARD_W-140,-60,0,CARD_W-140,-60,760);
+    bloom.addColorStop(0,accent); bloom.addColorStop(1,"rgba(0,0,0,0)");
+    c.globalAlpha=0.16; c.fillStyle=bloom; c.fillRect(0,0,CARD_W,CARD_H); c.globalAlpha=1;
+
+    roundRect(c,90,80,1020,515,18);
+    c.fillStyle=card; c.fill();
+    c.strokeStyle=line; c.lineWidth=1; c.stroke();
+
+    /* the lit top edge the page draws with a gradient border */
+    var edge=c.createLinearGradient(90,0,1110,0);
+    edge.addColorStop(0,"rgba(0,0,0,0)"); edge.addColorStop(0.4,accent);
+    edge.addColorStop(1,"rgba(0,0,0,0)");
+    c.strokeStyle=edge; c.lineWidth=2;
+    c.beginPath(); c.moveTo(108,81); c.lineTo(1092,81); c.stroke();
+
+    var L=146;
+
+    var avatar=txt("ava")||"Y";
+    roundRect(c,L,128,58,58,4); c.fillStyle=accent; c.fill();
+    c.fillStyle=ink; c.font="700 28px "+sans; c.textBaseline="middle"; c.textAlign="center";
+    c.fillText(avatar,L+29,158);
+    c.textAlign="left"; c.textBaseline="alphabetic";
+
+    c.fillStyle=cream; c.font="700 27px "+sans;
+    c.fillText(txt("nm")||"You",L+80,152);
+    c.fillStyle=slate; c.font="400 21px "+sans;
+    c.fillText(txt("whosub"),L+80,183);
+
+    var badge=(txt("badge")||"").toUpperCase();
+    if(badge){
+      c.font="700 17px "+mono;
+      var bw=trackedWidth(c,badge,2.2)+40;
+      roundRect(c,1064-bw,132,bw,42,4);
+      c.strokeStyle=line; c.lineWidth=1; c.stroke();
+      c.fillStyle=accent;
+      tracked(c,badge,1064-bw+20,159,2.2);
+    }
+
+    c.fillStyle=slate; c.font="600 17px "+mono;
+    tracked(c,document.querySelector("#s7 .caplabel").textContent.toUpperCase(),L,258,3.4);
+
+    c.fillStyle=cream; c.font="800 96px "+mono;
+    c.fillText(txt("hero"),L,362);
+
+    c.strokeStyle=line; c.lineWidth=1;
+    c.beginPath(); c.moveTo(L,412); c.lineTo(1064,412); c.stroke();
+
+    var stats=[["HOURS / DAY",txt("st1"),cream],
+               ["HOURS / YEAR",txt("st2"),cream],
+               ["PER MONTH",txt("st3"),accent]];
+    for(var i=0;i<stats.length;i++){
+      var x=L+i*306;
+      c.fillStyle=slate; c.font="600 15px "+mono;
+      tracked(c,stats[i][0],x,452,3.0);
+      c.fillStyle=stats[i][2]; c.font="700 38px "+mono;
+      c.fillText(stats[i][1],x,500);
+    }
+
+    c.fillStyle=accent; c.font="600 20px "+mono;
+    c.fillText("thezerofog.com/hours",L,556);
+
+    return cv;
+  }
+
+  function cardBlob(cb){
+    /* The webfonts are what make it look like the page. Without this the first
+       export lands in a fallback face, because canvas does not wait for them. */
+    var go=function(){ drawCard().toBlob(cb,"image/png"); };
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(go, go); else go();
+  }
+
+  window.dl=function(){
+    try{
+      cardBlob(function(blob){
+        if(!blob){ note("Could not build the image."); return; }
+        var url=URL.createObjectURL(blob);
+        var a=document.createElement("a");
+        a.href=url; a.download="locked-income.png";
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function(){ URL.revokeObjectURL(url); },4000);
+        note("Saved. Attach it to your post.");
+      });
+    }catch(e){ note("This preview cannot save files. The live page can."); }
+  };
 })();
 </script>
 
