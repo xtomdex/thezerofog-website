@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="canonical" href="https://thezerofog.com/hours">
+<meta name="description" content="Just 4 questions. You get the money and a name for what is eating it.">
+<meta property="og:title" content="How much income is locked inside your week?">
+<meta property="og:description" content="Just 4 questions. You get the money and a name for what is eating it.">
+<meta property="og:url" content="https://thezerofog.com/hours">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The Zero Fog">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="How much income is locked inside your week?">
+<meta name="twitter:description" content="Just 4 questions. You get the money and a name for what is eating it.">
+<title>Locked Income</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600;800&display=swap');
+  :root{
+    --ink:#070a10; --card:#0c1017; --cream:#e8eff7; --accent:#57c9ff;
+    --slate:#54626f; --line:#161e28; --dim:#8ea0b2;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--ink); color:var(--cream); position:relative; overflow-x:hidden;
+    font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* ---- the field: a lit scene, not a flat background ----
+     three lights with their own slow drift, three halos that chase the pointer,
+     other people's results breathing behind everything, a vignette over the lot. */
+  .field{position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; background:var(--ink)}
+  .glow-layer{position:absolute; inset:0; will-change:transform}
+  .glow{position:absolute; border-radius:50%; filter:blur(90px); will-change:transform}
+  .glow-a{width:52vmax; height:52vmax; top:-18%; left:-8%;
+    background:radial-gradient(circle, rgba(217,176,96,.42) 0%, rgba(217,176,96,0) 68%);
+    animation:drift-a 26s ease-in-out infinite}
+  .glow-b{width:50vmax; height:50vmax; bottom:-18%; right:-12%;
+    background:radial-gradient(circle, rgba(176,132,66,.34) 0%, rgba(176,132,66,0) 70%);
+    animation:drift-b 34s ease-in-out infinite}
+  .glow-c{width:46vmax; height:46vmax; top:-12%; right:-5%;
+    background:radial-gradient(circle, rgba(104,140,178,.26) 0%, rgba(104,140,178,0) 70%);
+    animation:drift-c 44s ease-in-out infinite}
+  @keyframes drift-a{0%,100%{transform:translate(0) scale(1)}   50%{transform:translate(18vw,13vh) scale(1.30)}}
+  @keyframes drift-b{0%,100%{transform:translate(0) scale(1.1)} 50%{transform:translate(-20vw,-15vh) scale(.86)}}
+  @keyframes drift-c{0%,100%{transform:translate(-20%) scale(1)}50%{transform:translate(28%,-17vh) scale(1.38)}}
+
+  .halo{position:absolute; top:0; left:0; border-radius:50%; opacity:0;
+        mix-blend-mode:plus-lighter; will-change:transform,opacity; pointer-events:none}
+  .halo-near{width:320px; height:320px; margin:-160px 0 0 -160px; filter:blur(22px);
+    background:radial-gradient(circle, rgba(255,195,100,.34) 0%, rgba(255,195,100,0) 64%)}
+  .halo-mid{width:560px; height:560px; margin:-280px 0 0 -280px; filter:blur(40px);
+    background:radial-gradient(circle, rgba(217,176,96,.22) 0%, rgba(217,176,96,0) 66%)}
+  .halo-far{width:860px; height:860px; margin:-430px 0 0 -430px; filter:blur(60px);
+    background:radial-gradient(circle, rgba(104,140,178,.20) 0%, rgba(104,140,178,0) 68%)}
+
+  .val-wrap{position:absolute; display:block; opacity:.45; will-change:transform,opacity}
+  .val{
+    display:block; font-weight:800; letter-spacing:-.05em; white-space:nowrap; line-height:1;
+    font-variant-numeric:tabular-nums; opacity:0; will-change:transform,opacity;
+    background-image:linear-gradient(170deg, #f2efe9 0%, #f2efe9 28%, #6f6b64 100%);
+    -webkit-background-clip:text; background-clip:text;
+    color:transparent; -webkit-text-fill-color:transparent;
+  }
+  @keyframes val-a{0%,100%{opacity:.19; transform:translate(0)}      50%{opacity:.51; transform:translate(3vw,-4vh)}}
+  @keyframes val-b{0%,100%{opacity:.47; transform:translate(0)}      50%{opacity:.17; transform:translate(-4vw,3vh)}}
+  @keyframes val-c{0%,100%{opacity:.26; transform:translateY(2vh)}   50%{opacity:.58; transform:translate(2vw,-3vh)}}
+
+  /* wherever text is read, the field is cleared under it. Edgeless, so it is not a box. */
+  .plate{position:relative}
+  .plate::before{
+    content:""; position:absolute; inset:-56px -44px; z-index:-1; pointer-events:none;
+    background:radial-gradient(ellipse 64% 62% at 50% 50%,
+      rgba(10,9,8,.98) 0%, rgba(10,9,8,.95) 46%, rgba(10,9,8,.72) 72%, rgba(10,9,8,0) 100%);
+  }
+  /* the interstitial - the arithmetic showing its working, one line at a time */
+  .loadbox{max-width:420px; margin:0 auto; padding:22vh 0 0}
+  .loadcap{
+    font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--slate); margin:0 0 22px;
+  }
+  .loadlist{list-style:none; margin:0; padding:0}
+  .loadlist li{
+    display:flex; align-items:center; gap:12px; padding:9px 0;
+    font-size:15.5px; line-height:1.35; color:var(--slate);
+    opacity:0; transform:translateY(6px); animation:load-in .55s forwards;
+  }
+  .loadlist li .dot{
+    width:7px; height:7px; border-radius:50%; flex:0 0 7px;
+    background:var(--slate); transition:background .3s;
+  }
+  .loadlist li.now{color:var(--cream)}
+  .loadlist li.now .dot{background:var(--accent); animation:load-pulse 1.6s ease-in-out infinite}
+  .loadlist li.done .dot{background:var(--accent); opacity:.5}
+  @keyframes load-in{to{opacity:1; transform:translateY(0)}}
+  @keyframes load-pulse{0%,100%{opacity:1}50%{opacity:.25}}
+
+  .vignette{position:absolute; inset:0;
+    background:radial-gradient(52% 42% at 50% 47%, rgba(10,9,8,.86) 0%, rgba(10,9,8,.55) 45%, rgba(10,9,8,0) 100%)}
+
+  .wrap{max-width:520px; margin:0 auto; padding:28px 18px 90px; position:relative; z-index:1}
+  h1{
+    font-weight:800; font-size:clamp(38px,6.2vw,66px); line-height:1.02;
+    margin:0 0 16px; letter-spacing:-.038em; text-wrap:balance;
+  }
+  h1 em{font-style:normal; color:var(--accent)}
+  .sub{color:var(--dim); font-size:clamp(15px,1.5vw,18px); line-height:1.45; margin:0 0 26px}
+  .what{color:var(--slate); font-size:14.5px; line-height:1.5; margin:0 0 24px; max-width:34em}
+  .undersub{color:var(--slate); font-size:13px; line-height:1.5; margin:12px 0 0}
+
+  /* hero: the question on the left with its button under it, the object on the right */
+  .heroblock{display:block}
+  .heroblock .col-copy{padding-top:8px}
+  .heroblock .btn.primary{width:auto; min-width:210px; padding:16px 34px; display:inline-block}
+  .demo{margin-top:38px}
+  .demo-frame{position:relative}
+  .demo-slide{transition:opacity .45s linear}
+  .demo-slide.off{position:absolute; inset:0; opacity:0; pointer-events:none}
+  .demo-cap{
+    margin:16px 2px 0; font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--slate);
+  }
+  @media (min-width:920px){
+    .wrap{max-width:1180px; padding:0 32px 90px}
+    .heroblock{
+      display:grid; grid-template-columns:1.02fr .98fr; gap:60px;
+      align-items:center; min-height:92vh;
+    }
+    .demo{margin-top:0}
+    /* the quiz itself stays a narrow column - a wide form is a worse form */
+    .step:not(#s0){max-width:560px; margin:0 auto; padding-top:56px}
+  }
+
+  .step{display:none}
+  .step.on{display:block}
+  .qnum{font-size:11px; letter-spacing:.18em; color:var(--slate); text-transform:uppercase; margin-bottom:10px}
+  .q{font-weight:700; font-size:23px; line-height:1.3; letter-spacing:-.015em; margin:0 0 20px}
+  .opt{
+    display:block; width:100%; text-align:left; cursor:pointer;
+    background:#1e1e1e; color:var(--cream); border:1px solid var(--line);
+    border-radius:14px; padding:15px 16px; margin-bottom:10px;
+    font-size:15px; line-height:1.35; font-family:inherit;
+    transition:border-color .15s, background .15s;
+  }
+  .opt:hover{border-color:#3a3a3a; background:#232323}
+  .opt .hint{display:block; color:var(--slate); font-size:13px; margin-top:4px}
+  .chips{display:flex; flex-wrap:wrap; gap:10px}
+  .chip{
+    flex:1 1 40%; cursor:pointer; background:#1e1e1e; color:var(--cream);
+    border:1px solid var(--line); border-radius:14px; padding:16px 10px;
+    font-size:19px; font-weight:700; font-family:inherit; text-align:center;
+  }
+  .chip small{display:block; font-size:11px; font-weight:400; color:var(--slate); margin-top:3px}
+  .chip:hover{border-color:#3a3a3a; background:#232323}
+  .bar{height:2px; background:var(--line); border-radius:2px; margin:0 0 22px; overflow:hidden}
+  .bar i{display:block; height:100%; background:var(--accent)}
+
+  .cardwrap{position:relative; padding:14px 0 6px}
+  .tilt{will-change:transform; transform:perspective(1100px) rotateX(3deg) rotateY(-8deg)}
+  /* the light the card sits in - it lifts off the page instead of being pasted on it */
+  .bevel{
+    position:absolute; left:6%; right:6%; top:24%; bottom:-6%;
+    background:radial-gradient(ellipse at 50% 50%, rgba(217,176,96,.16) 0%, rgba(0,0,0,0) 70%);
+    filter:blur(26px); pointer-events:none;
+  }
+  .card{
+    position:relative; background:linear-gradient(168deg,#191919 0%, #101010 60%, #0d0d0d 100%);
+    border:1px solid #232323; border-radius:18px; padding:22px 20px 18px;
+    box-shadow:0 40px 100px -25px rgba(0,0,0,.95), 0 2px 0 rgba(255,255,255,.03) inset;
+  }
+  /* the lit top edge - brighter where the light falls, fading across the card */
+  .card::before{
+    content:""; position:absolute; left:0; right:0; top:0; height:2px;
+    border-radius:18px 18px 0 0;
+    background:linear-gradient(90deg, rgba(217,176,96,.35) 0%, #f0d79b 34%, #d9c08a 72%, rgba(217,176,96,.28) 100%);
+    box-shadow:0 0 14px rgba(240,215,155,.42);
+  }
+  /* the highlight that follows the pointer across the face of the card */
+  .glare{
+    position:absolute; inset:0; border-radius:18px; opacity:0; pointer-events:none;
+    mix-blend-mode:plus-lighter; will-change:opacity;
+    background:radial-gradient(circle at calc(var(--gx,50) * 1%) calc(var(--gy,50) * 1%),
+      rgba(255,226,170,.26) 0%, rgba(255,226,170,.08) 26%, rgba(255,226,170,0) 58%);
+  }
+  .idrow{display:flex; align-items:center; gap:11px; margin-bottom:16px}
+  .ava{
+    width:42px; height:42px; border-radius:50%; flex:0 0 42px;
+    background:var(--accent); color:#1a1a1a; font-weight:700; font-size:19px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .who{flex:1; min-width:0}
+  .who b{display:block; font-size:15px; font-weight:600; line-height:1.2}
+  .who span{display:block; font-size:13px; color:var(--slate); line-height:1.3}
+  .badge{
+    border:1px solid var(--accent); color:var(--accent); border-radius:999px;
+    padding:6px 12px; font-size:10.5px; font-weight:600; letter-spacing:.10em; white-space:nowrap;
+  }
+  .caplabel{font-size:10.5px; letter-spacing:.16em; color:var(--slate); text-transform:uppercase; margin-bottom:2px}
+  .hero{font-weight:800; font-size:60px; line-height:1.02; letter-spacing:-.04em; margin:2px 0 18px; font-variant-numeric:tabular-nums}
+  .gloss{font-size:14.5px; color:var(--dim); margin:16px 2px 0; line-height:1.45}
+  .rule{height:1px; background:#262626; margin:0 0 14px}
+  .stats{display:flex; gap:10px}
+  .stat{flex:1; min-width:0}
+  .stat span{display:block; font-size:9px; letter-spacing:.10em; color:var(--slate); text-transform:uppercase; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .stat b{display:block; font-size:17px; font-weight:700; line-height:1.15; font-variant-numeric:tabular-nums}
+  .stat b.acc{color:var(--accent)}
+  .mark{display:block; margin-top:16px; font-size:11px; letter-spacing:.04em;
+        color:var(--accent); text-decoration:none}
+  .mark:hover{text-decoration:underline}
+
+  .acts{margin-top:18px}
+  .btn{
+    display:block; width:100%; text-align:center; cursor:pointer;
+    border-radius:14px; padding:16px; font-size:16px; font-weight:600;
+    font-family:inherit; margin-bottom:10px; text-decoration:none;
+    border:1px solid var(--line); background:#1c1c1c; color:var(--cream);
+  }
+  .btn.primary{
+    background:linear-gradient(180deg,#ffffff 0%, #ece7dd 100%);
+    color:#141414; border:none; font-weight:700; box-shadow:0 6px 20px rgba(255,255,255,.10);
+  }
+  .redo{background:none; border:none; color:var(--slate); font-size:13px; padding:14px 0; cursor:pointer; font-family:inherit; width:100%}
+  .offer{margin:14px 0 0; text-align:center}
+  .offer p{margin:0 0 6px; font-size:14.5px; line-height:1.4; color:var(--cream)}
+  .offer a{
+    display:inline-block; font-size:14.5px; font-weight:600;
+    color:var(--accent); text-decoration:none;
+  }
+  .offer a:hover{text-decoration:underline}
+  .note{font-size:13px; color:var(--accent); text-align:center; min-height:18px; margin:2px 0 0; opacity:0; transition:opacity .25s}
+
+  .why{margin-top:34px; border-top:1px solid var(--line); padding-top:22px}
+  .why h2{font-size:11px; letter-spacing:.18em; color:var(--slate); text-transform:uppercase; margin:0 0 14px; font-weight:600}
+  .why p{font-size:14px; line-height:1.6; color:var(--dim); margin:0 0 12px}
+  .why table{width:100%; border-collapse:collapse; font-size:13.5px; margin:4px 0 14px}
+  .why td{padding:8px 0; border-bottom:1px solid #232323; color:var(--dim)}
+  .why td:last-child{text-align:right; color:var(--cream); white-space:nowrap; font-variant-numeric:tabular-nums}
+  .why .src{font-size:12.5px; color:var(--slate); line-height:1.55}
+
+  .opt:focus-visible,.btn:focus-visible,.chip:focus-visible,.redo:focus-visible,.nameline input:focus-visible{
+    outline:2px solid var(--accent); outline-offset:2px;
+  }
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important} }
+
+  /* ---- PANEL: a readout on a machine ---- */
+  body{font-family:"Space Grotesk",system-ui,sans-serif}
+  .glow-a{background:radial-gradient(circle, rgba(87,201,255,.16) 0%, rgba(87,201,255,0) 68%)}
+  .glow-b{background:radial-gradient(circle, rgba(40,90,140,.22) 0%, rgba(40,90,140,0) 70%)}
+  .glow-c{background:radial-gradient(circle, rgba(120,255,220,.08) 0%, rgba(120,255,220,0) 70%)}
+  .halo-near{background:radial-gradient(circle, rgba(87,201,255,.20) 0%, rgba(87,201,255,0) 64%)}
+  .halo-mid{background:radial-gradient(circle, rgba(87,201,255,.10) 0%, rgba(87,201,255,0) 66%)}
+  .halo-far{background:radial-gradient(circle, rgba(40,90,140,.16) 0%, rgba(40,90,140,0) 68%)}
+  /* the grid the instrument is printed on */
+  .vignette{
+    background:
+      radial-gradient(56% 44% at 50% 46%, rgba(7,10,16,.90) 0%, rgba(7,10,16,.55) 48%, rgba(7,10,16,0) 100%),
+      repeating-linear-gradient(0deg, rgba(232,239,247,.030) 0 1px, rgba(0,0,0,0) 1px 46px),
+      repeating-linear-gradient(90deg, rgba(232,239,247,.030) 0 1px, rgba(0,0,0,0) 1px 46px);
+  }
+  .val{font-family:"JetBrains Mono",monospace; letter-spacing:-.02em;
+       background-image:linear-gradient(170deg,#e8eff7 0%,#e8eff7 24%,#3c4a58 100%)}
+  h1{font-family:"Space Grotesk",sans-serif; font-weight:700; letter-spacing:-.03em}
+  .q{font-family:"Space Grotesk",sans-serif; font-weight:500}
+  .qnum,.caplabel,.stat span,.loadcap,.demo-cap{font-family:"JetBrains Mono",monospace; letter-spacing:.14em}
+  .opt,.chip,.btn,.nameline input{border-radius:3px; background:#0d131b; border-color:var(--line)}
+  .opt:hover,.chip:hover{background:#121a24; border-color:#25313f}
+  .btn.primary{background:var(--accent); color:#04121c; box-shadow:0 0 24px rgba(87,201,255,.28); border-radius:3px}
+  .tilt{transform:perspective(1100px) rotateX(2.4deg) rotateY(-5deg)}
+  .bevel{background:radial-gradient(ellipse at 50% 50%, rgba(87,201,255,.14) 0%, rgba(0,0,0,0) 70%)}
+  .card{
+    background:linear-gradient(180deg,#101720 0%, #0a0f16 100%);
+    border:1px solid #1b2530; border-radius:4px;
+    box-shadow:0 30px 70px -30px rgba(0,0,0,.9), 0 0 0 1px rgba(87,201,255,.06) inset;
+  }
+  .card::before{height:1px; border-radius:0;
+    background:linear-gradient(90deg, rgba(87,201,255,0) 0%, var(--accent) 40%, rgba(87,201,255,.3) 100%);
+    box-shadow:0 0 10px rgba(87,201,255,.5)}
+  .glare{border-radius:4px; background:radial-gradient(circle at calc(var(--gx,50) * 1%) calc(var(--gy,50) * 1%),
+    rgba(87,201,255,.16) 0%, rgba(87,201,255,0) 55%)}
+  .hero{font-family:"JetBrains Mono",monospace; font-weight:800; letter-spacing:-.045em}
+  .stat b{font-family:"JetBrains Mono",monospace}
+  .ava{border-radius:3px; background:var(--accent); color:#04121c}
+  .badge{border-radius:3px}
+  .why table,.loadlist li{font-family:"JetBrains Mono",monospace}
+  .loadlist li .dot{border-radius:1px}
+  
+</style>
+</head>
+<body>
+
+
+<div class="field" aria-hidden="true">
+  <div class="glow-layer"><div class="glow glow-a"></div></div>
+  <div class="glow-layer"><div class="glow glow-b"></div></div>
+  <div class="glow-layer"><div class="glow glow-c"></div></div>
+  <div class="halo halo-far"></div>
+  <div class="halo halo-mid"></div>
+  <div class="halo halo-near"></div>
+  <div id="vals"></div>
+  <div class="vignette"></div>
+</div>
+
+<div class="wrap">
+
+  <div id="s0" class="step on">
+    <div class="heroblock">
+      <div class="col-copy plate">
+        <h1>How much income is <em>locked inside</em> your week?</h1>
+        <p class="sub">Counted from the shape of your day, not from how hard you work.</p>
+        <p class="what">Just 4 questions. You get the money and a name for what is eating it.</p>
+        <button class="btn primary" onclick="go(1)">Start</button>
+          </div>
+      <div class="demo">
+        <div class="cardwrap">
+          <div class="bevel"></div>
+          <div class="tilt" id="tiltdemo">
+            <div class="demo-frame" id="demoframe"></div>
+          </div>
+        </div>
+        <p class="demo-cap">Four ways a week goes</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="s1" class="step plate">
+    <div class="bar"><i style="width:20%"></i></div>
+    <div class="qnum">Question 1 of 5</div>
+    <p class="q">Between waking up and starting work, how much happens?</p>
+    <button class="opt" onclick="pick('a',0)">Work starts in bed<span class="hint">First message or first call goes out horizontal</span></button>
+    <button class="opt" onclick="pick('a',1)">Fifteen minutes, tops<span class="hint">Up, laptop, in</span></button>
+    <button class="opt" onclick="pick('a',2)">Twenty to sixty minutes of chores and coffee<span class="hint">Not a ritual, just getting moving</span></button>
+    <button class="opt" onclick="pick('a',3)">A deliberate hour or more that is mine<span class="hint">Protected on purpose</span></button>
+  </div>
+
+  <div id="s2" class="step plate">
+    <div class="bar"><i style="width:40%"></i></div>
+    <div class="qnum">Question 2 of 5</div>
+    <p class="q">Once you sit down, when does the work actually start moving?</p>
+    <button class="opt" onclick="pick('b',0)">Straight away</button>
+    <button class="opt" onclick="pick('b',1)">After about an hour of warming up</button>
+    <button class="opt" onclick="pick('b',2)">Not until the afternoon</button>
+    <button class="opt" onclick="pick('b',3)">Some days it never does</button>
+  </div>
+
+  <div id="s3" class="step plate">
+    <div class="bar"><i style="width:60%"></i></div>
+    <div class="qnum">Question 3 of 5</div>
+    <p class="q">When it stops moving, what do you do?</p>
+    <button class="opt" onclick="pick('c',0)">Stop and take the loss<span class="hint">Close it, do something else</span></button>
+    <button class="opt" onclick="pick('c',1)">Switch to the easy tasks<span class="hint">Inbox, admin, anything that does not need a head</span></button>
+    <button class="opt" onclick="pick('c',2)">Push through anyway<span class="hint">Same chair, same screen, slower</span></button>
+    <button class="opt" onclick="pick('c',3)">Stay late to make up for it<span class="hint">Evening, weekend, whatever it takes</span></button>
+  </div>
+
+  <div id="s4" class="step plate">
+    <div class="bar"><i style="width:80%"></i></div>
+    <div class="qnum">Question 4 of 5</div>
+    <p class="q">What time do you close the laptop, against the time you meant to?</p>
+    <button class="opt" onclick="pick('d',0)">The time I meant to</button>
+    <button class="opt" onclick="pick('d',1)">Half an hour, an hour later</button>
+    <button class="opt" onclick="pick('d',2)">One to three hours later</button>
+    <button class="opt" onclick="pick('d',3)">There is no closing time<span class="hint">It just fades into the evening</span></button>
+  </div>
+
+  <div id="s5" class="step plate">
+    <div class="bar"><i style="width:100%"></i></div>
+    <div class="qnum">Question 5 of 5</div>
+    <p class="q">What is one hour of your work worth?</p>
+    <div class="chips">
+      <button class="chip" onclick="rate(15)">Up to $20</button>
+      <button class="chip" onclick="rate(30)">$20-40</button>
+      <button class="chip" onclick="rate(55)">$40-70</button>
+      <button class="chip" onclick="rate(95)">$70-120</button>
+      <button class="chip" onclick="rate(150)">$120 and up</button>
+      <button class="chip" onclick="rate(30)">Not sure<small>we will use $30</small></button>
+    </div>
+  </div>
+
+  <div id="s6" class="step plate">
+    <div class="loadbox">
+      <p class="loadcap">Working it out</p>
+      <ul class="loadlist" id="loadlist"></ul>
+    </div>
+  </div>
+
+  <div id="s7" class="step">
+    <div class="cardwrap">
+      <div class="bevel"></div>
+      <div class="tilt" id="tilt">
+      <div class="card">
+        <div class="glare"></div>
+        <div class="idrow">
+          <div class="ava" id="ava">Y</div>
+          <div class="who"><b id="nm">You</b><span id="whosub">@remote</span></div>
+          <div class="badge" id="badge">SLOW BOOT</div>
+        </div>
+        <div class="caplabel">Locked inside your year</div>
+        <div class="hero"><span id="hero">0</span></div>
+        <div class="rule"></div>
+        <div class="stats">
+          <div class="stat"><span>Hours / day</span><b id="st1">0</b></div>
+          <div class="stat"><span>Hours / year</span><b id="st2">0</b></div>
+          <div class="stat"><span>Per month</span><b class="acc" id="st3">0</b></div>
+        </div>
+        <a class="mark" href="https://thezerofog.com/hours" target="_blank" rel="noopener">thezerofog.com/hours</a>
+      </div>
+      </div>
+    </div>
+
+    <p class="gloss" id="gloss"></p>
+
+    <div class="acts">
+      <a class="btn primary" id="postx" href="#" target="_blank" rel="noopener">Post on X</a>
+      <button class="btn" onclick="dl()">Download image</button>
+      <button class="btn" onclick="cp()">Copy text</button>
+      <p class="note" id="note"></p>
+      <div class="offer">
+        <p>Want them back? It took me four weeks.</p>
+        <a href="https://thezerofog.com/?from=hours" target="_blank" rel="noopener">Save my spot in the free workshop</a>
+      </div>
+      <button class="redo" onclick="go(0)">Start over</button>
+    </div>
+
+    <div class="why">
+      <h2>Why this number</h2>
+      <p>No guessing and no model. Your four answers subtract from an eight hour day, and the hours that are left over are priced at your own rate across 252 working days.</p>
+      <table id="whytable"></table>
+      <p class="src" id="src"></p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ---- the field and the card react to the pointer. One rAF loop, frame-rate
+   independent easing, and it parks itself the moment everything has settled. ---- */
+(function(){
+  var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // other people's results. Positions are fixed on purpose - a random layout
+  // reshuffles on every reload and stops reading as one place.
+  var VALUES=[
+    {v:"$121k", top:4,  left:-4, size:15, variant:"a", dur:19, delay:0},
+    {v:"$18.4k",top:11, left:66, size:11, variant:"b", dur:23, delay:2},
+    {v:"$4.9k", top:33, left:36, size:9,  variant:"c", dur:17, delay:5},
+    {v:"$62.4k",top:57, left:-7, size:17, variant:"b", dur:26, delay:1},
+    {v:"$7.2k", top:71, left:64, size:12, variant:"a", dur:21, delay:4},
+    {v:"$250",  top:88, left:24, size:20, variant:"c", dur:29, delay:3}
+  ];
+  var host=document.getElementById("vals");
+  var wraps=[];
+  for(var i=0;i<VALUES.length;i++){
+    var d=VALUES[i];
+    var w=document.createElement("span"); w.className="val-wrap";
+    w.style.top=d.top+"%"; w.style.left=d.left+"%";
+    var v=document.createElement("span"); v.className="val";
+    v.style.fontSize=d.size+"vw"; v.textContent=d.v;
+    if(still){ v.style.opacity=".14"; }
+    else{
+      v.style.animationName="val-"+d.variant;
+      v.style.animationDuration=d.dur+"s";
+      v.style.animationDelay=d.delay+"s";
+      v.style.animationIterationCount="infinite";
+      v.style.animationTimingFunction="ease-in-out";
+    }
+    w.appendChild(v); host.appendChild(w); wraps.push(w);
+  }
+  if(still) return;
+
+  var layers=[].slice.call(document.querySelectorAll(".glow-layer"));
+  var halos=[].slice.call(document.querySelectorAll(".halo"));
+  var LAYER_DEPTH=[26,-18,12], WRAP_DEPTH=[34,-22,18,-30,24,-14];
+  var HALO_LAG=[.34,.16,.09];
+
+  var ptr={x:innerWidth/2,y:innerHeight/2}, inside=false;
+  var norm={x:0,y:0};
+  var layerNow=layers.map(function(){return{x:0,y:0}});
+  var wrapNow=wraps.map(function(){return{x:0,y:0}});
+  var haloNow=halos.map(function(){return{x:innerWidth/2,y:innerHeight/2}});
+  var haloOp=halos.map(function(){return 0});
+
+  var tiltEl=null, glareEl=null, rect=null;
+  var rest={rx:3,ry:-8,sc:1,gx:50,gy:50,gl:0};
+  var now={rx:3,ry:-8,sc:1,gx:50,gy:50,gl:0};
+  var want={rx:3,ry:-8,sc:1,gx:50,gy:50,gl:0};
+  var near=false;
+
+  window.zfBindTilt=function(id){
+    tiltEl=document.getElementById(id||"tilt");
+    glareEl=tiltEl?tiltEl.querySelector(".glare"):null;
+    if(tiltEl) rect=tiltEl.getBoundingClientRect();
+    kick();
+  };
+
+  function retarget(){
+    norm.x = ptr.x/innerWidth - .5;
+    norm.y = ptr.y/innerHeight - .5;
+    if(tiltEl){
+      if(!rect || !rect.width) rect=tiltEl.getBoundingClientRect();
+      var pad=70;
+      near = inside && ptr.x>=rect.left-pad && ptr.x<=rect.right+pad
+                    && ptr.y>=rect.top-pad  && ptr.y<=rect.bottom+pad;
+      if(near){
+        var ex=clamp((ptr.x-(rect.left+rect.width/2))/(rect.width/2),-1,1);
+        var ey=clamp((ptr.y-(rect.top+rect.height/2))/(rect.height/2),-1,1);
+        want.ry=-15*ex; want.rx=-15*ey; want.sc=1.035; want.gl=1;
+        want.gx=(ptr.x-rect.left)/rect.width*100;
+        want.gy=(ptr.y-rect.top)/rect.height*100;
+      }else{
+        want.ry=rest.ry+norm.x*10; want.rx=rest.rx-norm.y*10;
+        want.sc=1; want.gl=0;
+      }
+    }
+  }
+  function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+
+  var raf=0, running=false, last=0;
+  function kick(){ if(!running){ running=true; last=performance.now(); raf=requestAnimationFrame(step); } }
+
+  function step(t){
+    var dt=Math.min((t-last)/1000,.05); last=t;
+    var kSlow=1-Math.exp(-dt/.70), kFast=1-Math.exp(-dt/.16), kHalo=1-Math.exp(-dt/.12);
+    var busy=false, i, tx, ty, p;
+
+    for(i=0;i<layers.length;i++){
+      tx=norm.x*LAYER_DEPTH[i]; ty=norm.y*LAYER_DEPTH[i]; p=layerNow[i];
+      p.x+=(tx-p.x)*kSlow; p.y+=(ty-p.y)*kSlow;
+      if(Math.abs(tx-p.x)>.08||Math.abs(ty-p.y)>.08) busy=true;
+      layers[i].style.transform="translate3d("+p.x.toFixed(1)+"px,"+p.y.toFixed(1)+"px,0)";
+    }
+    for(i=0;i<wraps.length;i++){
+      var d=WRAP_DEPTH[i%WRAP_DEPTH.length];
+      tx=norm.x*d; ty=norm.y*d; p=wrapNow[i];
+      p.x+=(tx-p.x)*kSlow; p.y+=(ty-p.y)*kSlow;
+      if(Math.abs(tx-p.x)>.08||Math.abs(ty-p.y)>.08) busy=true;
+      wraps[i].style.transform="translate3d("+p.x.toFixed(1)+"px,"+p.y.toFixed(1)+"px,0)";
+    }
+    for(i=0;i<halos.length;i++){
+      p=haloNow[i];
+      p.x+=(ptr.x-p.x)*(kHalo*HALO_LAG[i]*3); p.y+=(ptr.y-p.y)*(kHalo*HALO_LAG[i]*3);
+      var wantOp=inside?1:0;
+      haloOp[i]+=(wantOp-haloOp[i])*kSlow;
+      if(Math.abs(ptr.x-p.x)>.5||Math.abs(ptr.y-p.y)>.5||Math.abs(wantOp-haloOp[i])>.002) busy=true;
+      halos[i].style.transform="translate3d("+p.x.toFixed(1)+"px,"+p.y.toFixed(1)+"px,0)";
+      halos[i].style.opacity=haloOp[i].toFixed(3);
+    }
+    if(tiltEl){
+      var k=near?kFast:kSlow, keys=["rx","ry","sc","gx","gy","gl"];
+      for(i=0;i<keys.length;i++){
+        var key=keys[i], diff=want[key]-now[key];
+        now[key]+=diff*k;
+        if(Math.abs(diff)>.004) busy=true;
+      }
+      tiltEl.style.transform="perspective(1100px) rotateX("+now.rx.toFixed(2)+"deg) rotateY("
+        +now.ry.toFixed(2)+"deg) scale("+now.sc.toFixed(4)+")";
+      if(glareEl){
+        glareEl.style.opacity=now.gl.toFixed(3);
+        glareEl.style.setProperty("--gx", now.gx.toFixed(1));
+        glareEl.style.setProperty("--gy", now.gy.toFixed(1));
+      }
+    }
+    if(busy) raf=requestAnimationFrame(step); else running=false;
+  }
+
+  window.addEventListener("pointermove",function(e){
+    if(e.pointerType==="touch") return;
+    ptr.x=e.clientX; ptr.y=e.clientY; inside=true; retarget(); kick();
+  },{passive:true});
+  document.addEventListener("pointerleave",function(){
+    inside=false; near=false;
+    want.rx=rest.rx; want.ry=rest.ry; want.sc=1; want.gl=0;
+    kick();
+  });
+  window.addEventListener("resize",function(){
+    if(tiltEl) rect=tiltEl.getBoundingClientRect();
+    retarget(); kick();
+  },{passive:true});
+  window.addEventListener("scroll",function(){
+    if(tiltEl) rect=tiltEl.getBoundingClientRect();
+    retarget(); kick();
+  },{passive:true});
+  kick();
+})();
+
+(function(){
+  var A={a:null,b:null,c:null,d:null}, RATE=0;
+
+  var COST={
+    a:[1.00,0.75,0.40,0.15],
+    b:[0.00,0.50,1.50,2.50],
+    c:[0.50,0.75,1.00,1.25],
+    d:[0.00,0.30,0.70,1.20]
+  };
+  var LABEL={
+    a:["Work starts in bed","Fifteen minutes","Twenty to sixty minutes","A deliberate hour"],
+    b:["Moving straight away","An hour to warm up","Not until the afternoon","Some days it never does"],
+    c:["Stop and take the loss","Switch to easy tasks","Push through anyway","Stay late to make up"],
+    d:["Closed on time","Half an hour over","One to three hours over","No closing time"]
+  };
+  var MORNING=[{s:"In bed",n:93},{s:"Under 15 min",n:93},{s:"20-60 min",n:35},{s:"Deliberate",n:78}];
+  var BADGE={
+    a:{tag:"SLOW BOOT",        line:"Most of what you lose is gone before you sit down."},
+    b:{tag:"AFTERNOON ENGINE", line:"Nothing moves until the day is already half spent."},
+    c:{tag:"MAKE-UP SHIFT",    line:"The hours that stalled get paid back at night."},
+    d:{tag:"NO CLOSING TIME",  line:"The day never ends. It fades."}
+  };
+
+  var lostDay=0, hoursYear=0, moneyYear=0, moneyMonth=0, badgeTag="";
+
+  // the single source of the numbers - the result screen and the demo cards both run it
+  function compute(ans, r){
+    var ld=COST.a[ans.a]+COST.b[ans.b]+COST.c[ans.c]+COST.d[ans.d];
+    if(ld>6.5) ld=6.5;
+    var hy=Math.round(ld*252);
+    var my=Math.round(hy*r/100)*100;
+    var big="a", bv=COST.a[ans.a];
+    var pr=[["b",COST.b[ans.b]],["c",COST.c[ans.c]],["d",COST.d[ans.d]]];
+    for(var i=0;i<pr.length;i++){ if(pr[i][1]>bv){ bv=pr[i][1]; big=pr[i][0]; } }
+    return {lostDay:ld, hoursYear:hy, moneyYear:my,
+            moneyMonth:Math.round(my/12/10)*10, weeks:Math.round(hy/40),
+            key:big, badge:BADGE[big].tag, gloss:BADGE[big].line, rate:r};
+  }
+
+  function cardHTML(o, who, sub){
+    return '<div class="card">'
+      + '<div class="glare"></div>'
+      + '<div class="idrow"><div class="ava">'+who.charAt(0)+'</div>'
+      + '<div class="who"><b>'+who+'</b><span>'+sub+'</span></div>'
+      + '<div class="badge">'+o.badge+'</div></div>'
+      + '<div class="caplabel">Locked inside your year</div>'
+      + '<div class="hero">+$'+money(o.moneyYear)+'</div>'
+      + '<div class="rule"></div>'
+      + '<div class="stats">'
+      + '<div class="stat"><span>Hours / day</span><b>'+(Math.round(o.lostDay*10)/10).toFixed(1)+'</b></div>'
+      + '<div class="stat"><span>Hours / year</span><b>'+money(o.hoursYear)+'</b></div>'
+      + '<div class="stat"><span>Per month</span><b class="acc">$'+money(o.moneyMonth)+'</b></div>'
+      + '</div><div class="mark">thezerofog.com/hours</div></div>';
+  }
+
+  // four real outputs of the engine above, one per verdict. No invented people.
+  var DEMOS=[
+    {ans:{a:3,b:0,c:0,d:3}, rate:50,  who:"A remote worker", sub:"$50 an hour"},
+    {ans:{a:0,b:1,c:1,d:1}, rate:30,  who:"A freelancer",    sub:"$30 an hour"},
+    {ans:{a:2,b:3,c:0,d:0}, rate:150, who:"A consultant",    sub:"$150 an hour"},
+    {ans:{a:1,b:0,c:3,d:1}, rate:25,  who:"A contractor",    sub:"$25 an hour"}
+  ];
+
+  window.go=function(n){
+    if(n===0){ A={a:null,b:null,c:null,d:null}; RATE=0; }
+    for(var i=0;i<=7;i++){
+      var el=document.getElementById("s"+i);
+      if(el) el.className="step"+(i===n?" on":"");
+    }
+    window.scrollTo(0,0);
+  };
+  window.pick=function(k,v){
+    A[k]=v;
+    var order=["a","b","c","d"], idx=order.indexOf(k);
+    go(idx+2);
+  };
+  window.rate=function(v){
+    RATE=v; render();
+    var quick = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    go(6);
+    runLoader(quick, function(){
+      go(7);
+      if(window.zfBindTilt) window.zfBindTilt("tilt");
+    });
+  };
+
+  // what the loader says is what the code actually did, in the order it did it
+  function runLoader(quick, done){
+    var list=document.getElementById("loadlist");
+    var steps=[
+      "Reading the shape of your day",
+      "Subtracting it from an eight hour day",
+      "Pricing what is left at $"+RATE+" an hour",
+      "Placing you against 206 remote workers",
+      "Naming what is taking it"
+    ];
+    list.innerHTML="";
+    var nodes=[], i;
+    for(i=0;i<steps.length;i++){
+      var li=document.createElement("li");
+      li.style.animationDelay=(quick?0:i*0.34)+"s";
+      li.innerHTML='<span class="dot"></span><span>'+steps[i]+'</span>';
+      list.appendChild(li); nodes.push(li);
+    }
+    if(quick){ for(i=0;i<nodes.length;i++) nodes[i].className="done"; setTimeout(done,250); return; }
+    var at=0;
+    nodes[0].className="now";
+    var tick=setInterval(function(){
+      nodes[at].className="done";
+      at++;
+      if(at<nodes.length){ nodes[at].className="now"; }
+      else{ clearInterval(tick); setTimeout(done,340); }
+    },340);
+  }
+
+  (function(){
+    var frame=document.getElementById("demoframe");
+    if(!frame) return;
+    var nodes=[];
+    for(var i=0;i<DEMOS.length;i++){
+      var d=DEMOS[i], el=document.createElement("div");
+      el.className="demo-slide"+(i?" off":"");
+      el.innerHTML=cardHTML(compute(d.ans,d.rate), d.who, d.sub);
+      frame.appendChild(el); nodes.push(el);
+    }
+    if(window.zfBindTilt) window.zfBindTilt("tiltdemo");
+    var still=window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if(still || nodes.length<2) return;
+    var at=0;
+    setInterval(function(){
+      var next=(at+1)%nodes.length;
+      nodes[next].className="demo-slide";
+      nodes[at].className="demo-slide off";
+      at=next;
+    },2400);
+  })();
+
+  function money(n){ return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+
+  function render(){
+    var o=compute(A,RATE);
+    lostDay=o.lostDay; hoursYear=o.hoursYear; moneyYear=o.moneyYear; moneyMonth=o.moneyMonth;
+    var biggest=o.key; badgeTag=o.badge;
+
+    document.getElementById("badge").textContent = badgeTag;
+    document.getElementById("gloss").textContent = BADGE[biggest].line + " "
+      + MORNING[A.a].n + " of the 206 remote workers we read start the day the same way you do.";
+    document.getElementById("whosub").textContent = "$" + RATE + " an hour";
+    document.getElementById("st1").textContent = (Math.round(lostDay*10)/10).toFixed(1);
+    document.getElementById("st2").textContent = money(hoursYear);
+    document.getElementById("st3").textContent = "$" + money(moneyMonth);
+    countTo(moneyYear);
+    buildWhy();
+    buildShare();
+  }
+
+  function countTo(target){
+    var el=document.getElementById("hero");
+    var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if(still){ el.textContent = "+$" + money(target); return; }
+    var t0=Date.now(), dur=800;
+    var timer=setInterval(function(){
+      var q=Math.min(1,(Date.now()-t0)/dur);
+      var v=Math.round(target*(1-Math.pow(1-q,3))/100)*100;
+      el.textContent = "+$" + money(v);
+      if(q>=1){ el.textContent = "+$" + money(target); clearInterval(timer); }
+    },33);
+  }
+
+  function row(a,b){ return "<tr><td>"+a+"</td><td>"+b+"</td></tr>"; }
+  function buildWhy(){
+    var h="";
+    h+=row("Eight hours on the clock","8.00");
+    h+=row(LABEL.a[A.a],"-"+COST.a[A.a].toFixed(2));
+    h+=row(LABEL.b[A.b],"-"+COST.b[A.b].toFixed(2));
+    h+=row(LABEL.c[A.c],"-"+COST.c[A.c].toFixed(2));
+    h+=row(LABEL.d[A.d],"-"+COST.d[A.d].toFixed(2));
+    h+=row("<b>Hours that go nowhere, a day</b>","<b>"+(Math.round(lostDay*10)/10).toFixed(1)+"</b>");
+    h+=row("Across 252 working days",money(hoursYear)+" h");
+    h+=row("<b>At $"+RATE+" an hour</b>","<b>+$"+money(moneyYear)+"</b>");
+    document.getElementById("whytable").innerHTML=h;
+    document.getElementById("src").innerHTML =
+      "The morning comparison is not an estimate. It comes from one r/WFH thread with 450 named "
+      + "authors, 206 of whom described the shape of their morning: 93 roll straight out of bed, "
+      + "78 keep a deliberate buffer, about 35 take a short functional one. Your answer puts you "
+      + "with " + MORNING[A.a].n + " of those 206.";
+  }
+
+  function shareText(){
+    return "My income potential is +${money} a year, sitting inside hours I already work. {badge}.".replace("{money}", money(moneyYear)).replace("{badge}", badgeTag);
+  }
+  function buildShare(){
+    document.getElementById("postx").href =
+      "https://x.com/intent/post?text=" + encodeURIComponent(shareText() + "\n\nthezerofog.com/hours");
+  }
+
+  function note(t){
+    var n=document.getElementById("note");
+    n.textContent=t; n.style.opacity="1";
+    setTimeout(function(){ n.style.opacity="0"; },3200);
+  }
+  window.cp=function(){
+    var t=shareText()+"\n\nthezerofog.com/hours";
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t); note("Copied.");
+    }
+  };
+  window.dl=function(){ note("Image export runs on the live page. Previews cannot save files."); };
+})();
+</script>
+
+<!-- Footer. Inlined because a passthrough page cannot reach the njk partials - keep in
+     sync with src/_includes/partials/cookie-banner.njk's neighbour,
+     src/_includes/partials/footer.njk. Styled locally rather than by pulling in
+     shared.css, which would drag the whole site theme onto a page that has its own. -->
+<style>
+  .zf-foot{position:relative; z-index:1; text-align:center; padding:40px 24px;
+           border-top:1px solid var(--line); margin-top:20px}
+  .zf-foot p{font-size:12px; color:var(--dim); line-height:2; margin:0}
+  .zf-foot a{color:var(--dim); text-decoration:underline}
+  .zf-foot a:hover{color:var(--cream)}
+</style>
+<footer class="zf-foot">
+  <p>
+    &copy; 2026 The Zero Fog. All rights reserved.<br>
+    <a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/refunds/">Refunds</a> &middot; <a href="/disclaimer/">Disclaimer</a> &middot; <a href="/contact/">Contact</a> &middot; <a href="#" onclick="zfShowCookieBanner(); return false;">Cookie Settings</a><br>
+    This site is not a part of the Facebook website or Facebook Inc.
+  </p>
+</footer>
+
+<!-- Cookie consent + consent-gated tracking (PostHog / Meta Pixel). Served verbatim
+     (11ty passthrough), so banner markup is inlined (keep in sync with
+     src/_includes/partials/cookie-banner.njk) and tracking config comes from the
+     generated /zf-env.js instead of pixel-meta.njk. -->
+<link rel="stylesheet" href="/assets/css/cookie-consent-3.css">
+<div id="zf-cookie-banner" role="dialog" aria-label="Cookie consent">
+  <button type="button" class="zf-cb-close" aria-label="Close" onclick="zfDismissBanner()">&times;</button>
+  <div class="zf-cb-inner">
+    <div class="zf-cb-text zf-v-optin">
+      <strong>We use cookies.</strong> Essential cookies keep this site working. With your consent we also use analytics and advertising cookies. Details in our <a href="/privacy/">Privacy Policy</a>.
+    </div>
+    <div class="zf-cb-text zf-v-optout">
+      <strong>We use cookies</strong> for analytics and advertising. You can opt out anytime. Details in our <a href="/privacy/">Privacy Policy</a>.
+    </div>
+    <div class="zf-cb-actions zf-v-optin">
+      <button type="button" class="zf-cb-btn-essential" onclick="zfSetConsent('essential')">Essential Only</button>
+      <button type="button" class="zf-cb-btn-accept" onclick="zfSetConsent('all')">Accept All</button>
+    </div>
+    <div class="zf-cb-actions zf-v-optout">
+      <button type="button" class="zf-cb-btn-essential" onclick="zfSetConsent('essential')">Opt out</button>
+      <button type="button" class="zf-cb-btn-accept" onclick="zfSetConsent('all')">OK</button>
+    </div>
+  </div>
+</div>
+<script src="/zf-env.js"></script>
+<script src="/assets/js/cookie-consent-5.js" defer></script>
+
+<script>
+/* Site wiring. Reads the result out of the DOM instead of the calculator's
+   closure, so the shared body stays untouched and cannot drift. */
+(function(){
+  /* The number travels in sessionStorage, never in the URL - it is an estimate of
+     what this person earns, and a query string lands in history and in referers.
+     Same-origin is what makes this work, and it is why the page had to leave the
+     artifact host. from=hours stays on the link as a plain source tag. */
+  var link = document.querySelector(".offer a");
+  if (link) {
+    link.setAttribute("href", "/?from=hours");
+    link.removeAttribute("target");
+    link.removeAttribute("rel");
+    link.addEventListener("click", function(){
+      try {
+        var h = document.getElementById("st2");
+        if (h && h.textContent) sessionStorage.setItem("zf_hours_year", h.textContent.trim());
+      } catch (e) { /* private mode refuses storage; the opt-in just stays generic */ }
+    });
+  }
+
+  /* Everyone who reaches the result becomes a retargeting audience. No parameters
+     are sent: the event is the audience, and the money figure is this person's own
+     income estimate - it has no business leaving the browser. fbq and posthog only
+     exist after consent === 'all', so the guards ARE the consent gate. */
+  var fired = false;
+  var inner = window.go;
+  window.go = function(n){
+    inner(n);
+    if (n === 7 && !fired) {
+      fired = true;
+      try { if (window.fbq) fbq("trackCustom", "CalculatorCompleted"); } catch (e) {}
+      try { if (window.posthog) window.posthog.capture("calculator_completed"); } catch (e) {}
+    }
+  };
+})();
+</script>
+</body>
+</html>

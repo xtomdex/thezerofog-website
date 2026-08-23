@@ -36,6 +36,12 @@ canonical: "https://thezerofog.com/"
 <!-- ===== OPT-IN PAGE ===== -->
 <section class="hero" id="hero">
 
+  {# Continuity strip for people arriving from /hours. Hidden until JS finds a number
+     in sessionStorage, so ad traffic and crawlers never see it. Hours, never money:
+     this page is the destination of the three ads, and a dollar figure here would
+     read as an income claim - see APPROVED-COPY 2026-08-23. #}
+  <p class="counted-strip" id="countedStrip" hidden>You just counted <span id="countedHours"></span> hours a year.</p>
+
   <p class="pre-headline">Free Workshop For People Who Work From Home</p>
 
   <h1 class="headline">The 4-Week Process That Got My Sharp Hours Back</h1>
@@ -98,4 +104,21 @@ canonical: "https://thezerofog.com/"
 
 {% block page_scripts %}
 <script src="{{ '/assets/js/pages/index.js' | v }}" defer></script>
+<script>
+/* Handover from /hours. The number never travels in the URL - it is an estimate of
+   what this person earns, and a query string lands in browser history and referers.
+   Same-origin sessionStorage carries it instead. Read once, then dropped, so a
+   later visit does not replay a stale figure. */
+(function(){
+  var n;
+  try { n = sessionStorage.getItem("zf_hours_year"); sessionStorage.removeItem("zf_hours_year"); }
+  catch (e) { return; }
+  if (!n || !/^[\d,]{1,7}$/.test(n)) return;
+  var strip = document.getElementById("countedStrip");
+  var slot = document.getElementById("countedHours");
+  if (!strip || !slot) return;
+  slot.textContent = n;
+  strip.hidden = false;
+})();
+</script>
 {% endblock %}

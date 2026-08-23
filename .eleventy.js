@@ -22,6 +22,12 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.ignores.add("src/webinar-bonuses/**");
   eleventyConfig.addPassthroughCopy("src/webinar-bonuses");
 
+  // The hours calculator (self-contained HTML+CSS+JS, served verbatim at /hours).
+  // Generated - the source of truth is _Marketing/viral-assets/build-assets.py in the
+  // sandbox repo, which writes src/hours/index.html. Edit the generator, never this file.
+  eleventyConfig.ignores.add("src/hours/**");
+  eleventyConfig.addPassthroughCopy("src/hours");
+
   // Shared no-build JS modules (e.g. recovery tracker) served verbatim at /shared/*
   eleventyConfig.addPassthroughCopy("src/shared");
 
