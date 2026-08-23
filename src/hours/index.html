@@ -36,7 +36,13 @@
      other people's results breathing behind everything, a vignette over the lot. */
   .field{position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; background:var(--ink)}
   .glow-layer{position:absolute; inset:0; will-change:transform}
-  .glow{position:absolute; border-radius:50%; filter:blur(90px); will-change:transform}
+  /* No blur filter here on purpose. Every gradient below already reaches full
+     transparency at 64-70% of its radius, so the blur was invisible and cost a
+     large-radius re-raster on every frame of the drift - the drift scales, and a
+     scaled filtered layer cannot be reused by the compositor. Reported as "the
+     site lags on my laptop" and that was the whole of it. The static .bevel
+     behind the card keeps its blur: rasterised once, it costs nothing. */
+  .glow{position:absolute; border-radius:50%; will-change:transform}
   .glow-a{width:52vmax; height:52vmax; top:-18%; left:-8%;
     background:radial-gradient(circle, rgba(217,176,96,.42) 0%, rgba(217,176,96,0) 68%);
     animation:drift-a 26s ease-in-out infinite}
@@ -52,11 +58,11 @@
 
   .halo{position:absolute; top:0; left:0; border-radius:50%; opacity:0;
         mix-blend-mode:plus-lighter; will-change:transform,opacity; pointer-events:none}
-  .halo-near{width:320px; height:320px; margin:-160px 0 0 -160px; filter:blur(22px);
+  .halo-near{width:320px; height:320px; margin:-160px 0 0 -160px;
     background:radial-gradient(circle, rgba(255,195,100,.34) 0%, rgba(255,195,100,0) 64%)}
-  .halo-mid{width:560px; height:560px; margin:-280px 0 0 -280px; filter:blur(40px);
+  .halo-mid{width:560px; height:560px; margin:-280px 0 0 -280px;
     background:radial-gradient(circle, rgba(217,176,96,.22) 0%, rgba(217,176,96,0) 66%)}
-  .halo-far{width:860px; height:860px; margin:-430px 0 0 -430px; filter:blur(60px);
+  .halo-far{width:860px; height:860px; margin:-430px 0 0 -430px;
     background:radial-gradient(circle, rgba(104,140,178,.20) 0%, rgba(104,140,178,0) 68%)}
 
   .val-wrap{position:absolute; display:block; opacity:.45; will-change:transform,opacity}
@@ -246,7 +252,11 @@
   .opt:focus-visible,.btn:focus-visible,.chip:focus-visible,.redo:focus-visible,.nameline input:focus-visible{
     outline:2px solid var(--accent); outline-offset:2px;
   }
-  @media (prefers-reduced-motion: reduce){ *{transition:none !important} }
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; animation:none !important}
+    .val{opacity:.38}
+    .halo{display:none}
+  }
 
   /* ---- PANEL: a readout on a machine ---- */
   body{font-family:"Space Grotesk",system-ui,sans-serif}
