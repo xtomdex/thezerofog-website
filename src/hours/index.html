@@ -10,7 +10,12 @@
 <meta property="og:url" content="https://thezerofog.com/hours">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="The Zero Fog">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://thezerofog.com/assets/og/hours.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="How much income is locked inside your week?">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://thezerofog.com/assets/og/hours.png">
 <meta name="twitter:title" content="How much income is locked inside your week?">
 <meta name="twitter:description" content="Just 4 questions. You get the money and a name for what is eating it.">
 <title>Locked Income</title>
@@ -847,6 +852,16 @@
      what this person earns, and a query string lands in history and in referers.
      Same-origin is what makes this work, and it is why the page had to leave the
      artifact host. from=hours stays on the link as a plain source tag. */
+  /* fbq and posthog only exist after consent === 'all', so these guards ARE the
+     consent gate - there is no second check anywhere and there should not be. */
+  function meta(name){ try { if (window.fbq) fbq("trackCustom", name); } catch (e) {} }
+  function ph(name, props){ try { if (window.posthog) window.posthog.capture(name, props); } catch (e) {} }
+
+  function hoursYear(){
+    var h = document.getElementById("st2");
+    return h && h.textContent ? h.textContent.trim() : null;
+  }
+
   var link = document.querySelector(".offer a");
   if (link) {
     link.setAttribute("href", "/?from=hours");
@@ -854,24 +869,42 @@
     link.removeAttribute("rel");
     link.addEventListener("click", function(){
       try {
-        var h = document.getElementById("st2");
-        if (h && h.textContent) sessionStorage.setItem("zf_hours_year", h.textContent.trim());
+        var h = hoursYear();
+        if (h) sessionStorage.setItem("zf_hours_year", h);
       } catch (e) { /* private mode refuses storage; the opt-in just stays generic */ }
+      /* Two Meta events, not one, so the account can build the audience that matters:
+         reached the result and did NOT take the offer. */
+      meta("CalculatorOfferClick");
+      ph("calculator_offer_click", { hours_year: hoursYear() });
     });
   }
 
-  /* Everyone who reaches the result becomes a retargeting audience. No parameters
-     are sent: the event is the audience, and the money figure is this person's own
-     income estimate - it has no business leaving the browser. fbq and posthog only
-     exist after consent === 'all', so the guards ARE the consent gate. */
-  var fired = false;
+  /* The share buttons. PostHog only - which of the three routes people actually use
+     is our own question, and the answer decides what the result screen leads with. */
+  [["postx", "x"], ["dl", "download"], ["cp", "copy"]].forEach(function(pair){
+    var el = pair[0] === "postx"
+      ? document.getElementById("postx")
+      : document.querySelector('.acts .btn[onclick^="' + pair[0] + '"]');
+    if (el) el.addEventListener("click", function(){ ph("calculator_share", { route: pair[1] }); });
+  });
+
+  /* Started, and finished. Two events make the drop-off inside the quiz visible;
+     one only shows who survived it. hours_year rides along on our own store and
+     nowhere else - it is hours, never money, the same line the opt-in strip draws. */
+  var started = false, done = false;
+  var innerPick = window.pick;
+  window.pick = function(k, v){
+    if (!started) { started = true; ph("calculator_started"); }
+    innerPick(k, v);
+  };
+
   var inner = window.go;
   window.go = function(n){
     inner(n);
-    if (n === 7 && !fired) {
-      fired = true;
-      try { if (window.fbq) fbq("trackCustom", "CalculatorCompleted"); } catch (e) {}
-      try { if (window.posthog) window.posthog.capture("calculator_completed"); } catch (e) {}
+    if (n === 7 && !done) {
+      done = true;
+      meta("CalculatorCompleted");
+      ph("calculator_completed", { hours_year: hoursYear() });
     }
   };
 })();
