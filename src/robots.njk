@@ -1,0 +1,10 @@
+---
+permalink: /robots.txt
+eleventyExcludeFromCollections: true
+---
+{#- Everything not in the sitemap carries noindex in its own head, which is the
+    authority. This file only points crawlers at the sitemap. -#}
+User-agent: *
+Allow: /
+
+Sitemap: {{ site.url }}/sitemap.xml

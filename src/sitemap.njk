@@ -1,0 +1,18 @@
+---
+permalink: /sitemap.xml
+eleventyExcludeFromCollections: true
+---
+{#- Explicit list, not a collection sweep. Most pages on this site carry noindex on
+    purpose - the funnel steps (/confirmation/, /welcome/, /replay/, /no-thanks/, the
+    workshop room and schedule), the sales page, and the verbatim long-reads. A sweep
+    would either publish them or need a second source of truth for which are private.
+    Seven URLs is small enough to keep honest by hand.
+
+    When adding a page: if it has no noindex, add it here. If it has one, do not. -#}
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{%- set pages = ["/", "/hours/", "/contact/", "/privacy/", "/terms/", "/refunds/", "/disclaimer/"] %}
+{%- for p in pages %}
+  <url><loc>{{ site.url }}{{ p }}</loc></url>
+{%- endfor %}
+</urlset>
