@@ -224,6 +224,7 @@
     background:linear-gradient(180deg,#ffffff 0%, #ece7dd 100%);
     color:#141414; border:none; font-weight:700; box-shadow:0 6px 20px rgba(255,255,255,.10);
   }
+  .btn[hidden]{display:none}
   .redo{background:none; border:none; color:var(--slate); font-size:13px; padding:14px 0; cursor:pointer; font-family:inherit; width:100%}
   .offer{margin:14px 0 0; text-align:center}
   .offer p{margin:0 0 6px; font-size:14.5px; line-height:1.4; color:var(--cream)}
@@ -415,6 +416,7 @@
     <p class="gloss" id="gloss"></p>
 
     <div class="acts">
+      <button class="btn primary" id="nativeshare" onclick="sh()" hidden>Share</button>
       <a class="btn primary" id="postx" href="#" target="_blank" rel="noopener">Post on X</a>
       <button class="btn" onclick="dl()">Download image</button>
       <button class="btn" onclick="cp()">Copy text</button>
@@ -670,6 +672,7 @@
     runLoader(quick, function(){
       go(7);
       if(window.zfBindTilt) window.zfBindTilt("tilt");
+      buildCardFile();
     });
   };
 
@@ -908,6 +911,51 @@
     if(document.fonts && document.fonts.ready) document.fonts.ready.then(go, go); else go();
   }
 
+  /* ---- the native share sheet ----
+     The only route by which the card and the text travel together in one tap, and
+     it exists on phones only. X cannot take media through a share intent, so on a
+     desktop the honest flow stays two steps: download, then attach.
+
+     The file is built when the result appears rather than when the button is
+     pressed: Safari treats an await as the end of the user gesture, and
+     navigator.share refuses without one. */
+  var cardFile=null;
+  function buildCardFile(){
+    try{
+      cardBlob(function(blob){
+        if(blob) cardFile=new File([blob],"locked-income.png",{type:"image/png"});
+      });
+    }catch(e){}
+  }
+
+  window.sh=function(){
+    var text=shareText()+"\n\nthezerofog.com/hours";
+    var data=cardFile ? {files:[cardFile], text:text} : {text:text};
+    if(!navigator.share){ note("This device cannot share. Use Download image."); return; }
+    navigator.share(data).catch(function(){ /* the user backed out; say nothing */ });
+  };
+
+  /* Two conditions, and the second one is not pedantry. canShare({files}) needs a
+     real File to answer, and desktop Chrome on a Mac answers yes - but its share
+     sheet offers Mail and AirDrop, not X, so promoting it there would replace a
+     working button with a worse one. A coarse pointer is what separates the phone,
+     where the sheet holds the apps people actually post to. */
+  (function(){
+    var btn=document.getElementById("nativeshare");
+    if(!btn) return;
+    var touch = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    if(!touch) return;
+    var ok=false;
+    try{
+      ok=!!(navigator.canShare && navigator.canShare(
+        {files:[new File([new Uint8Array(1)],"probe.png",{type:"image/png"})]}));
+    }catch(e){}
+    if(!ok) return;
+    btn.hidden=false;
+    var px=document.getElementById("postx");
+    if(px) px.className="btn";
+  })();
+
   window.dl=function(){
     try{
       cardBlob(function(blob){
@@ -1007,10 +1055,9 @@
 
   /* The share buttons. PostHog only - which of the three routes people actually use
      is our own question, and the answer decides what the result screen leads with. */
-  [["postx", "x"], ["dl", "download"], ["cp", "copy"]].forEach(function(pair){
-    var el = pair[0] === "postx"
-      ? document.getElementById("postx")
-      : document.querySelector('.acts .btn[onclick^="' + pair[0] + '"]');
+  [["postx", "x"], ["nativeshare", "native"], ["dl", "download"], ["cp", "copy"]].forEach(function(pair){
+    var el = document.getElementById(pair[0])
+      || document.querySelector('.acts .btn[onclick^="' + pair[0] + '"]');
     if (el) el.addEventListener("click", function(){ ph("calculator_share", { route: pair[1] }); });
   });
 
