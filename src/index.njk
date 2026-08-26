@@ -42,10 +42,10 @@ canonical: "https://thezerofog.com/"
      read as an income claim - see APPROVED-COPY 2026-08-23. #}
   <p class="counted-strip" id="countedStrip" hidden>You just counted <span id="countedHours"></span> hours a year.</p>
 
-  {# DRAFT - hook callback. Three ads, three different doors, one landing that
-     acknowledged none of them. This line repeats the ad's own opening so the
-     person can see they landed where they were going. Hidden unless utm_content
-     names a known hook, so organic and crawlers never see it. #}
+  {# LIVE since 2026-08-26. Hook callback: repeats the ad's own opening so the person
+     can see they landed where they were going. Hidden unless utm_content names a known
+     hook, so organic and crawlers never see it. a2 is deliberately absent - the H1
+     itself now carries "years" and "lazy". #}
   <p class="hook-callback" id="hookCallback" hidden></p>
 
   <p class="pre-headline">Free Workshop For People Who Work From Home</p>
@@ -127,9 +127,9 @@ canonical: "https://thezerofog.com/"
   strip.hidden = false;
 })();
 
-/* DRAFT - hook callback. Reads utm_content, which the three ads already carry,
-   and echoes that ad's own opening line. No promise is made here: the answer
-   stays inside the workshop, this line only confirms the door. */
+/* LIVE since 2026-08-26. Reads utm_content, which the ads already carry, and echoes
+   that ad's own opening line. No promise is made here: the answer stays inside the
+   workshop, this line only confirms the door. */
 (function(){
   var LINES = {
     a1:  "It was never a discipline problem.",
