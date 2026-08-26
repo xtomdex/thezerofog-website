@@ -136,6 +136,15 @@ body {
 }
 .counted-strip span { color: var(--text); font-weight: 700; }
 
+/* DRAFT - hook callback: quiet, above the pre-headline, reads as a nod not a headline */
+.hook-callback {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  font-style: italic;
+  color: var(--text2);
+  margin: 0 0 14px;
+}
+
 .pre-headline {
   font-size: 0.7rem;
   letter-spacing: 0.5em;
