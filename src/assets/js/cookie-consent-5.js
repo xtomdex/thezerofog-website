@@ -240,6 +240,50 @@
     if (t) zfCapture('checkout_clicked', { page: location.pathname });
   }, true);
 
+  /* Engaged40 - the pixel-warming event. LIVE 2026-08-27.
+     ---------------------------------------------------------------------------
+     WHY IT EXISTS. The leads objective was tried on 23.08 and died: the ad set was
+     told to buy `fb_pixel_lead`, an event this pixel had never once fired, so Meta
+     had nothing to look for and stopped delivering - 27 impressions in eight hours.
+     Optimisation needs a signal that actually happens. This is that signal: it says
+     "somebody stayed on the landing page for forty seconds", it fires dozens of
+     times a day, and it is meant to be REPLACED by the real Lead event once opt-ins
+     exist. It is scaffolding, not a metric - never report it as a result.
+
+     WHICH FORTY SECONDS. Measured 27.08 over four days of ad traffic, n=1095:
+     forty seconds of wall-clock reaches 280 sessions, forty seconds of PostHog
+     `active_seconds` reaches ONE. The two clocks differ by a factor of 280, so the
+     clock has to be named. This counts VISIBLE wall-clock time: a tab in the
+     background accumulates nothing, which is the one correction that keeps this
+     from counting parked tabs, but it does not pretend to measure attention.
+
+     WHY THE RETRY. Under the opt-in regime (EU/UK/CH) the pixel may not exist yet
+     at second forty - the visitor can accept cookies afterwards. The timer runs
+     regardless and the send waits for the pixel, up to thirty seconds. US traffic,
+     which is all our ads buy today, is opt-out and has the pixel from the first
+     frame. */
+  (function () {
+    if (location.pathname !== '/') return;
+
+    var THRESHOLD_S = 40;
+    var visibleS = 0;
+    var iv = setInterval(function () {
+      if (document.visibilityState !== 'visible') return;
+      if (++visibleS < THRESHOLD_S) return;
+      clearInterval(iv);
+      zfCapture('engaged_40s', { page: location.pathname });
+      var tries = 0;
+      (function push() {
+        if (window.zfPixelLoaded && typeof fbq === 'function') {
+          fbq('trackCustom', 'Engaged40');
+          return;
+        }
+        if (++tries > 15) return;
+        setTimeout(push, 2000);
+      })();
+    }, 1000);
+  })();
+
   var replayPlayed = false;
   document.addEventListener('play', function(e) {
     if (replayPlayed) return;
