@@ -270,6 +270,29 @@
     var visibleMs = 0;
     var last = Date.now();
 
+    /* Time alone is not enough. A tab left open in another window accumulates
+       visible seconds and tells Meta nothing about a person, and an audience
+       learned from parked tabs is no better than one learned from reflex
+       tappers - which is the whole reason we left the click objective.
+       So the event also requires that the visitor did SOMETHING here.
+       Measured 27.08 over four days of ad traffic, n=1095, per week:
+           40s alone .................... 490 events
+           40s AND one interaction ...... 147 events   <- this rule
+           40s AND 8s of activity ........ 21 events   (under Meta's ~50 floor)
+       The middle rule throws out parked tabs and still clears the floor
+       threefold. */
+    var interacted = false;
+    var MARKS = ['scroll', 'pointerdown', 'touchstart', 'keydown', 'click'];
+    function mark() {
+      interacted = true;
+      for (var j = 0; j < MARKS.length; j++) {
+        window.removeEventListener(MARKS[j], mark, true);
+      }
+    }
+    for (var k = 0; k < MARKS.length; k++) {
+      window.addEventListener(MARKS[k], mark, { capture: true, passive: true });
+    }
+
     /* Count elapsed TIME, not ticks. Chrome throttles setInterval in a
        backgrounded tab to roughly once a minute, so a tick counter reads forty
        seconds as forty minutes there - measured 27.08, forty-four real seconds
@@ -282,7 +305,9 @@
       last = now;
       if (document.visibilityState !== 'visible') return;
       visibleMs += Math.min(step, TICK_MS * 2);
-      if (visibleMs < THRESHOLD_MS) return;
+      // Both conditions, whichever lands last: a fast scroller still has to stay,
+      // and a long starer still has to touch the page.
+      if (visibleMs < THRESHOLD_MS || !interacted) return;
       clearInterval(iv);
       zfCapture('engaged_40s', { page: location.pathname });
       var tries = 0;
