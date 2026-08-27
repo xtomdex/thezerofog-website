@@ -48,11 +48,18 @@ canonical: "https://thezerofog.com/"
      itself now carries "years" and "lazy". #}
   <p class="hook-callback" id="hookCallback" hidden></p>
 
-  <p class="pre-headline">Free Workshop For People Who Work From Home</p>
+  <p class="pre-headline">100% Free Online Workshop</p>
 
   <h1 class="headline">The 4-Step Process That Ended Years Of Calling Myself Lazy In 28 Days</h1>
 
   <p class="without-block">(Without Strict Routines, Productivity Apps, or Willpower)</p>
+
+  {# LIVE since 2026-08-27. The nearest bookable session, read from wr-slots - the same
+     source the schedule step reads, so this page can never promise a session the next
+     screen does not offer. Stays hidden until the fetch answers: a countdown rendered
+     before it knows the time would show a wrong number for a second, and a crawler
+     would index a timer that is not running. #}
+  <p class="next-session" id="nextSession" hidden>Next session starts in <span class="next-session-clock" id="nextSessionClock"></span></p>
 
   <form class="cta-form" id="optinForm">
     <input type="email" name="email" placeholder="Your best email" required autocomplete="email">
@@ -62,6 +69,12 @@ canonical: "https://thezerofog.com/"
     <p class="cta-note">100% free. No credit card. Just your best email.</p>
     <p id="formError" style="color:var(--error);font-size:0.8rem;margin-top:8px;min-height:1.2em;"></p>
   </form>
+
+  {# LIVE since 2026-08-27. Ties the first-person ad ("How I found what was actually
+     running out") to the address they are about to hand over - the video says "I",
+     the form should say who. First name only: the site has used "Kirill" everywhere
+     since launch, and workshop-schedule.njk records why the surname was dropped. #}
+  <p class="hosted-by">Hosted by Kirill, founder of The Zero Fog</p>
 
   <div class="divider"></div>
 

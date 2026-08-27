@@ -88,3 +88,94 @@ document.getElementById('optinForm').addEventListener('submit', function(e) {
     document.querySelector('.without-block').textContent = withouts[w];
   }
 })();
+
+/* === NEXT SESSION COUNTDOWN =============================================
+   LIVE since 2026-08-27.
+
+   Reads the nearest bookable session from wr-slots - the same endpoint the schedule
+   step reads - and counts down to it. Nothing is hard-coded here: the schedule lives
+   in wr-config, and a change there moves this line with it.
+
+   Three traps this code is written around:
+
+   1. The visitor's clock. A machine running a few minutes fast would see a countdown
+      that is simply wrong, and one running slow would see a session it has already
+      missed. The response's own `Date` header fixes the offset once, the same way the
+      workshop room does it with serverNow().
+   2. Zero. The JIT slot repeats every fifteen minutes, so the countdown WILL reach
+      zero while somebody is still reading. It re-fetches instead of freezing on 00:00
+      or, worse, counting into the negative.
+   3. Silence. If the fetch fails, or the schedule is closed, or the next session is
+      more than a day out, the line stays hidden. An urgency device that shows a stale
+      or absurd number costs more trust than it buys.
+   ======================================================================== */
+(function () {
+  var line = document.getElementById('nextSession');
+  var clock = document.getElementById('nextSessionClock');
+  if (!line || !clock || !window.fetch) return;
+
+  var DAY_MS = 24 * 60 * 60 * 1000;
+  var skewMs = 0;          // server clock minus this browser's clock
+  var ticker = null;
+
+  function serverNow() { return Date.now() + skewMs; }
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function label(ms) {
+    var left = Math.floor(ms / 1000);
+    var h = Math.floor(left / 3600);
+    var m = Math.floor((left % 3600) / 60);
+    var s = left % 60;
+    return (h > 0 ? h + ':' + pad(m) : pad(m)) + ':' + pad(s);
+  }
+
+  function start(startsAt) {
+    var target = new Date(startsAt).getTime();
+    if (isNaN(target)) return;
+
+    if (ticker) clearInterval(ticker);
+
+    function tick() {
+      var left = target - serverNow();
+      if (left > DAY_MS) { line.hidden = true; return; }
+      if (left <= 0) {
+        clearInterval(ticker);
+        ticker = null;
+        line.hidden = true;
+        // The room opens on the quarter hour; give the server a moment to hand out
+        // the next one rather than racing it.
+        setTimeout(load, 5000);
+        return;
+      }
+      clock.textContent = label(left);
+      line.hidden = false;
+    }
+
+    tick();
+    ticker = setInterval(tick, 1000);
+  }
+
+  function load() {
+    var tz = '';
+    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+
+    fetch('/.netlify/functions/wr-slots?tz=' + encodeURIComponent(tz))
+      .then(function (res) {
+        if (!res.ok) throw new Error('slots');
+        var sent = res.headers.get('date');
+        if (sent) {
+          var t = new Date(sent).getTime();
+          if (!isNaN(t)) skewMs = t - Date.now();
+        }
+        return res.json();
+      })
+      .then(function (data) {
+        if (!data || !data.open || !data.slots || !data.slots.length) return;
+        start(data.slots[0].startsAt);
+      })
+      .catch(function () { /* stay silent - see trap 3 */ });
+  }
+
+  load();
+})();

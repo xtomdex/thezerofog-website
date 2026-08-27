@@ -174,6 +174,27 @@ body {
   font-weight: 500;
 }
 
+/* === NEXT SESSION COUNTDOWN ===
+   Sits directly above the form so the clock and the button are read in one glance.
+   The digits carry the accent; the sentence around them stays quiet, so the line
+   reads as information and not as a second headline. */
+.next-session {
+  font-size: 0.85rem;
+  color: var(--secondary);
+  letter-spacing: 0.04em;
+  font-weight: 500;
+  margin: -16px 0 22px;
+}
+.next-session[hidden] { display: none; }
+
+.next-session-clock {
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+
 /* === CTA FORM === */
 .cta-form {
   width: 100%;
@@ -220,6 +241,16 @@ body {
   color: var(--muted);
   margin-top: 10px;
   letter-spacing: 0.02em;
+}
+
+/* === HOSTED BY ===
+   Sits under the form, quieter than the note above it: it answers "who is this
+   from", it does not sell. */
+.hosted-by {
+  font-size: 0.78rem;
+  color: var(--secondary);
+  letter-spacing: 0.03em;
+  margin: -12px 0 28px;
 }
 
 /* === DIVIDER === */
