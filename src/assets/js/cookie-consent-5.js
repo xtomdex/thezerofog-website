@@ -275,6 +275,13 @@
       var tries = 0;
       (function push() {
         if (window.zfPixelLoaded && typeof fbq === 'function') {
+          // ViewContent is the one an ad set can be pointed at directly
+          // (promoted_object.custom_event_type = VIEW_CONTENT). It fires nowhere
+          // else on this site, so it means exactly one thing: read the landing
+          // page for forty seconds. Engaged40 goes out beside it so a named
+          // custom conversion can be built in Events Manager later without
+          // another deploy - it is not what the ad set buys.
+          fbq('track', 'ViewContent');
           fbq('trackCustom', 'Engaged40');
           return;
         }
