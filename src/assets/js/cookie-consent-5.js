@@ -265,11 +265,24 @@
   (function () {
     if (location.pathname !== '/') return;
 
-    var THRESHOLD_S = 40;
-    var visibleS = 0;
+    var THRESHOLD_MS = 40000;
+    var TICK_MS = 1000;
+    var visibleMs = 0;
+    var last = Date.now();
+
+    /* Count elapsed TIME, not ticks. Chrome throttles setInterval in a
+       backgrounded tab to roughly once a minute, so a tick counter reads forty
+       seconds as forty minutes there - measured 27.08, forty-four real seconds
+       produced no tick at all. Clamping each step to twice the tick size keeps
+       the opposite error out too: a laptop that slept for an hour must not wake
+       up and call it an hour of reading. */
     var iv = setInterval(function () {
+      var now = Date.now();
+      var step = now - last;
+      last = now;
       if (document.visibilityState !== 'visible') return;
-      if (++visibleS < THRESHOLD_S) return;
+      visibleMs += Math.min(step, TICK_MS * 2);
+      if (visibleMs < THRESHOLD_MS) return;
       clearInterval(iv);
       zfCapture('engaged_40s', { page: location.pathname });
       var tries = 0;
@@ -288,7 +301,7 @@
         if (++tries > 15) return;
         setTimeout(push, 2000);
       })();
-    }, 1000);
+    }, TICK_MS);
   })();
 
   var replayPlayed = false;

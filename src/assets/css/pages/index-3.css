@@ -248,7 +248,11 @@ body {
    from", it does not sell. */
 .hosted-by {
   font-size: 0.78rem;
-  color: var(--secondary);
+  /* --muted, not --secondary. On screen --secondary is the same pink the
+     without-block uses, and two pink lines bracketing the form made the
+     signature shout as loudly as the promise. This line answers "from whom",
+     it does not sell. */
+  color: var(--muted);
   letter-spacing: 0.03em;
   margin: -12px 0 28px;
 }
