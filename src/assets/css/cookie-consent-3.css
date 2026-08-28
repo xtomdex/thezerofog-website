@@ -114,3 +114,72 @@ html:not(.dark) #zf-cookie-banner .zf-cb-close:hover { background: rgba(124, 92,
   #zf-cookie-banner .zf-cb-actions { width: 100%; justify-content: stretch; }
   #zf-cookie-banner button { flex: 1 1 50%; padding: 12px 14px; }
 }
+
+
+/* --------------------------------------------------------------------------
+ * Short-viewport survival, added 2026-08-28.
+ * Measured that day: Meta's iOS in-app browser reports a viewport around 139px
+ * (356 of 380 pageviews over 7 days; Android and Safari never below 535px).
+ * We cannot change that height - the host app sets it via WKWebView's
+ * setMinimumViewportInset and no page-side API reaches it (WebKit bug 255852).
+ * What we can stop doing is filling the whole sliver with our own banner.
+ * ------------------------------------------------------------------------ */
+
+/* Never eat more than a third of whatever height we were given, and never
+   sit under the iOS home-indicator strip. */
+#zf-cookie-banner {
+  max-height: 34vh;
+  overflow-y: auto;
+  padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Reserve the banner's height so fixed positioning never covers page content -
+   this is what was cutting the CTA button in half on every phone. */
+body.zf-cb-open { padding-bottom: var(--zf-cb-h, 0px); }
+
+/* Very short viewports: compact everything so the headline stays on screen. */
+@media (max-height: 420px) {
+  #zf-cookie-banner {
+    font-size: 0.7rem; line-height: 1.3;
+    padding: 8px 40px 8px 12px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+  #zf-cookie-banner .zf-cb-inner { gap: 8px; }
+  #zf-cookie-banner .zf-cb-actions { width: auto; }
+  #zf-cookie-banner button { flex: 0 1 auto; padding: 6px 10px; }
+  #zf-cookie-banner .zf-cb-close { top: 4px; right: 6px; }
+}
+
+/* --------------------------------------------------------------------------
+ * Close button toned down, 2026-08-28. It was a filled accent-purple circle
+ * sitting next to OK and reading as the primary action - on the phone it was
+ * the first thing the eye went to, and dismissing without choosing is the one
+ * outcome that helps nobody: opt-in stays untracked, opt-out stays tracked,
+ * and the banner comes back next session. Smaller, grey, no fill.
+ * ------------------------------------------------------------------------ */
+#zf-cookie-banner .zf-cb-close {
+  width: 26px; height: 26px; margin-top: -13px; right: 10px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  color: rgba(200, 200, 210, 0.5);
+  font-size: 17px; font-weight: 300;
+}
+#zf-cookie-banner .zf-cb-close:hover {
+  background: transparent;
+  color: rgba(230, 230, 240, 0.85);
+  transform: none;
+}
+html:not(.dark) #zf-cookie-banner .zf-cb-close {
+  background: transparent;
+  border: 0;
+  color: rgba(90, 90, 100, 0.5);
+}
+html:not(.dark) #zf-cookie-banner .zf-cb-close:hover {
+  background: transparent;
+  color: rgba(40, 40, 50, 0.85);
+}
+@media (max-width: 640px) {
+  #zf-cookie-banner { padding-right: 44px; }
+}

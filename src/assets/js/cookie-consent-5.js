@@ -42,8 +42,14 @@
   // Consent choice lives in a domain-wide cookie so platform.thezerofog.com
   // (Systeme, different origin - localStorage does NOT cross) sees it too.
   function readConsentCookie() {
-    var m = document.cookie.match(/(?:^|;\s*)zf_cookies_consent=(all|essential)(?:;|$)/);
-    return m ? m[1] : null;
+    // Guarded 2026-08-28: the write sibling was already wrapped, this was not.
+    // document.cookie can throw in a storage-blocked webview, and a throw here
+    // killed the whole IIFE - no banner, no trackers, and zfSetConsent /
+    // zfDismissBanner left undefined, so every banner button threw on click.
+    try {
+      var m = document.cookie.match(/(?:^|;\s*)zf_cookies_consent=(all|essential)(?:;|$)/);
+      return m ? m[1] : null;
+    } catch (e) { return null; }
   }
 
   function writeConsentCookie(value) {
@@ -74,8 +80,38 @@
     'DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK',
     'SI','ES','SE','IS','LI','NO','GB','CH'];
 
-  function show() { if (banner) banner.classList.add('zf-show'); }
-  function hide() { if (banner) banner.classList.remove('zf-show'); }
+  // The banner is position:fixed over the bottom of the page. Without reserving
+  // its height the page keeps content underneath it - measured 2026-08-28: on a
+  // 390x535 phone it covered 26.5px of the 49px SAVE MY SPOT button, and inside
+  // Meta's iOS webview (viewport reported as ~139px) it covered 83-96% of
+  // everything visible. Reserve the measured height while it is up, release on hide.
+  function reserveSpace() {
+    if (!banner) return;
+    var h = banner.offsetHeight || 0;
+    document.documentElement.style.setProperty('--zf-cb-h', h + 'px');
+    document.body.classList.add('zf-cb-open');
+  }
+  function releaseSpace() {
+    document.body.classList.remove('zf-cb-open');
+    document.documentElement.style.removeProperty('--zf-cb-h');
+  }
+
+  function show() {
+    if (!banner) return;
+    banner.classList.add('zf-show');
+    // after the slide-in transition the height is final
+    setTimeout(reserveSpace, 400);
+    if (!show._armed) {
+      show._armed = true;
+      window.addEventListener('resize', function() {
+        if (banner && banner.classList.contains('zf-show')) reserveSpace();
+      }, { passive: true });
+    }
+  }
+  function hide() {
+    if (banner) banner.classList.remove('zf-show');
+    releaseSpace();
+  }
 
   // Close without choosing: remembered for this browser session only. Not
   // consent and not refusal - opt-in stays untracked, opt-out stays tracked.
@@ -89,7 +125,10 @@
   function armScrollHide() {
     var startY = window.scrollY;
     function onScroll() {
-      if (Math.abs(window.scrollY - startY) > 200) {
+      // 60px, lowered from 200 on 2026-08-28. At 200 the notice sat over the
+      // fold for 1.35 screenfuls on a 390x535 phone and covered half the
+      // SAVE MY SPOT button while the visitor was still reading it.
+      if (Math.abs(window.scrollY - startY) > 60) {
         window.removeEventListener('scroll', onScroll);
         if (banner && banner.classList.contains('zf-show')) dismiss();
       }
