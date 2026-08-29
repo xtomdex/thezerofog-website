@@ -13,6 +13,7 @@
 
 import { insert, json, preflight, selectOne, update, upsert } from './lib/wr-db.js';
 import { loadConfig, deriveSegments } from './lib/wr-config.js';
+import { sendMetaEvents, clientInfo, SITE_URL } from './lib/meta-capi.js';
 
 const EVENT_TYPES = new Set([
   'heartbeat',
@@ -51,7 +52,7 @@ export default async function handler(req) {
   let registration;
   try {
     registration = await selectOne('wr_registrations', {
-      select: 'id,session_id,wr_sessions(starts_at),wr_attendance(first_seen_at,watched_sec,max_position_sec,replay_watched_sec)',
+      select: 'id,email,session_id,wr_sessions(starts_at),wr_attendance(first_seen_at,watched_sec,max_position_sec,replay_watched_sec,segments)',
       token: `eq.${token}`,
     });
   } catch (err) {
@@ -156,6 +157,34 @@ export default async function handler(req) {
     );
   } catch (err) {
     console.error('wr-heartbeat: segment write failed:', err.message);
+  }
+
+  // Server-side Meta events: the watch ladder Meta can never see from a blocked browser.
+  // Stage transitions are read off the segment diff, so each fires once per registration
+  // (event_id is stable per stage, and repeats dedup inside Meta anyway). Awaited, best-effort.
+  try {
+    const prevSegments = Array.isArray(attendance?.segments) ? attendance.segments : [];
+    const gained = (name) => segments.includes(name) && !prevSegments.includes(name);
+    const attendedNow =
+      segments.some((s) => s.startsWith('SEG-B') || s.startsWith('SEG-C') || s === 'SEG-D-stayed') &&
+      !prevSegments.some((s) => s.startsWith('SEG-B') || s.startsWith('SEG-C') || s === 'SEG-D-stayed');
+
+    const { ip, userAgent } = clientInfo(req);
+    const base = {
+      email: registration.email,
+      sourceUrl: `${SITE_URL}/workshop/room/`,
+      ip,
+      userAgent,
+    };
+    const metaEvents = [];
+    if (event === 'join') metaEvents.push({ ...base, eventName: 'WorkshopJoin', eventId: `${registration.id}:join` });
+    if (event === 'offer_click') metaEvents.push({ ...base, eventName: 'WorkshopOfferClick', eventId: `${registration.id}:offer_click` });
+    if (attendedNow) metaEvents.push({ ...base, eventName: 'WorkshopAttended', eventId: `${registration.id}:attended` });
+    if (gained('SEG-SAW-REVEAL')) metaEvents.push({ ...base, eventName: 'WorkshopSawReveal', eventId: `${registration.id}:reveal` });
+    if (gained('SEG-D-stayed')) metaEvents.push({ ...base, eventName: 'WorkshopStayedToOffer', eventId: `${registration.id}:stayed` });
+    await sendMetaEvents(metaEvents);
+  } catch (err) {
+    console.error('wr-heartbeat: meta events failed:', err.message);
   }
 
   // The player does not need an answer, and waiting for one on a beacon is pointless.

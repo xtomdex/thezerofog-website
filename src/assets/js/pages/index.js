@@ -16,7 +16,24 @@ document.getElementById('optinForm').addEventListener('submit', function(e) {
   fetch('/.netlify/functions/optin', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email, website: website })
+    body: JSON.stringify({
+      email: email,
+      website: website,
+      // PostHog ids, when analytics consent gave us any - stored in wr_leads.data so a lead's
+      // email can be joined to their PostHog person and session replay. The link lives in our
+      // database on purpose: the address itself never goes to PostHog.
+      ph: (function () {
+        try {
+          if (window.posthog && window.posthog.get_distinct_id) {
+            return {
+              id: window.posthog.get_distinct_id(),
+              sid: window.posthog.get_session_id ? window.posthog.get_session_id() : null
+            };
+          }
+        } catch (err) { /* consent refused or PostHog absent - no link, no failure */ }
+        return null;
+      })()
+    })
   })
   .then(function(res) {
     if (!res.ok) throw new Error('error');

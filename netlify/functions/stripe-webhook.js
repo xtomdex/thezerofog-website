@@ -349,6 +349,58 @@ async function markWorkshopBuyer(email) {
 }
 
 /**
+ * Send the server-side Meta Purchase twin over the Conversions API.
+ *
+ * Written with bare fetch for the same reason as sendPurchaseWelcome below: this handler keeps
+ * its import surface at node:crypto only (the canonical sender lives in lib/meta-capi.js and the
+ * funnel functions use it; this is a deliberate inline twin, same as the MailerLite one).
+ *
+ * The browser pixel on /welcome/ fires Purchase with eventID = this same checkout session id
+ * (cookie-consent-5.js), so Meta collapses the pair; when the buyer's browser blocks the pixel -
+ * the common case - this call is the only Purchase Meta ever sees.
+ *
+ * Best effort, never throws: unset env is a silent no-op, and a failed ad-platform call must
+ * never 500 a correctly processed payment.
+ */
+async function sendMetaPurchase(email, session) {
+  const pixelId = process.env.META_PIXEL_ID;
+  const token = process.env.META_CAPI_TOKEN;
+  if (!pixelId || !token || !email) return;
+
+  const em = crypto.createHash('sha256').update(email.trim().toLowerCase()).digest('hex');
+  const body = {
+    data: [
+      {
+        event_name: 'Purchase',
+        event_time: Math.floor(Date.now() / 1000),
+        event_id: session.id,
+        action_source: 'website',
+        event_source_url: `${process.env.PUBLIC_SITE_URL || 'https://thezerofog.com'}/welcome/`,
+        user_data: { em: [em] },
+        custom_data: {
+          value: Number(session.amount_total || 0) / 100,
+          currency: String(session.currency || 'usd').toUpperCase(),
+        },
+      },
+    ],
+  };
+  if (process.env.META_CAPI_TEST_CODE) body.test_event_code = process.env.META_CAPI_TEST_CODE;
+
+  try {
+    const res = await fetch(
+      `https://graph.facebook.com/v21.0/${pixelId}/events?access_token=${encodeURIComponent(token)}`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+    );
+    if (!res.ok) {
+      const detail = await res.text().catch(() => '');
+      console.error(`meta purchase event: ${res.status}: ${detail.slice(0, 300)}`);
+    }
+  } catch (err) {
+    console.error('meta purchase event failed:', err.message);
+  }
+}
+
+/**
  * Send E14, the purchase-welcome email, by adding the buyer to the MailerLite group `wr-E14` —
  * the same join-fires-the-automation mechanism the whole workshop funnel uses (lib/wr-mailerlite.js).
  *
@@ -1077,6 +1129,11 @@ export default async function handler(req) {
         'on the customers board and no row on the money board. Add both in the next sweep.'
     );
   }
+
+  // Meta Conversions API twin of the browser Purchase (see sendMetaPurchase). Comped seats are
+  // excluded: a zero-euro internal grant must never teach the optimizer what a buyer looks like.
+  // Awaited, best-effort, never affects the response.
+  if (!isComp) await sendMetaPurchase(email, session);
 
   if (isComp) {
     await alertOperator(

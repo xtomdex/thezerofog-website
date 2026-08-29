@@ -154,7 +154,22 @@
         consent: consentEl.checked,
         website: honeypot.value,
         utm: utm,
-        source: 'schedule'
+        source: 'schedule',
+        // PostHog ids, when analytics consent gave us any. Stored server-side in the
+        // registration's data column - the join key that turns an email in wr_registrations
+        // into a person and a session replay in PostHog. The link lives in OUR database on
+        // purpose: the email address never goes to PostHog.
+        ph: (function () {
+          try {
+            if (window.posthog && window.posthog.get_distinct_id) {
+              return {
+                id: window.posthog.get_distinct_id(),
+                sid: window.posthog.get_session_id ? window.posthog.get_session_id() : null
+              };
+            }
+          } catch (err) { /* consent refused or PostHog absent - no link, no failure */ }
+          return null;
+        })()
       })
     })
       .then(function (res) {

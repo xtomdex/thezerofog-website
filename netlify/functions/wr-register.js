@@ -20,6 +20,7 @@ import {
   upsert,
 } from './lib/wr-db.js';
 import { loadConfig } from './lib/wr-config.js';
+import { sendMetaEvents, clientInfo, SITE_URL } from './lib/meta-capi.js';
 import {
   applyDeliveryWindow,
   describeSlot,
@@ -310,6 +311,14 @@ export default async function handler(req) {
       if (typeof value === 'string' && value) utmValues[key] = value.slice(0, 200);
     }
 
+    // PostHog join key, when the client had one (analytics consent given). Strings only,
+    // capped - public endpoint, trusted column.
+    const posthog = {};
+    if (body.ph && typeof body.ph === 'object') {
+      if (typeof body.ph.id === 'string' && body.ph.id) posthog.distinct_id = body.ph.id.slice(0, 120);
+      if (typeof body.ph.sid === 'string' && body.ph.sid) posthog.session_id = body.ph.sid.slice(0, 120);
+    }
+
     const registrationRow = {
       webinar_key: config.key,
       session_id: session.id,
@@ -322,7 +331,7 @@ export default async function handler(req) {
       source: typeof body.source === 'string' ? body.source.slice(0, 60) : 'landing',
       // No IP is stored. It would buy us nothing here and it is personal data we would then have
       // to declare, justify and delete.
-      data: { utm: utmValues },
+      data: Object.keys(posthog).length ? { utm: utmValues, posthog } : { utm: utmValues },
     };
 
     const saved = await upsert('wr_registrations', registrationRow, 'webinar_key,email', {
@@ -351,6 +360,25 @@ export default async function handler(req) {
     // drains. The registration itself lives in wr_registrations above, the emails are queued in
     // wr_notifications, and the list membership is MailerLite's. Nothing downstream was reading
     // Make's copy.
+
+    // Server-side Meta twin of the funnel's real "lead" moment - the booked slot. The browser
+    // pixel never fires here at all (no fbq call on the schedule step), so there is nothing to
+    // dedup against; event_id keeps a re-registration from counting twice. Awaited, best-effort.
+    try {
+      const { ip, userAgent } = clientInfo(req);
+      await sendMetaEvents([
+        {
+          eventName: 'CompleteRegistration',
+          eventId: `${registrationId}:registered`,
+          email: cleanEmail,
+          sourceUrl: `${SITE_URL}/workshop/schedule/`,
+          ip,
+          userAgent,
+        },
+      ]);
+    } catch (err) {
+      console.error('wr-register: meta event failed:', err.message);
+    }
 
     const described = describeSlot(instant, recipientZone, now);
 

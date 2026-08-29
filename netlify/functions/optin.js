@@ -78,6 +78,16 @@ export default async function handler(req) {
   const referrer = req.headers.get('referer');
   if (referrer) data.referrer = referrer;
 
+  // PostHog join key, when the client had one (analytics consent given). Strings only, capped -
+  // this is the body of a public endpoint and the column is trusted downstream.
+  const ph = body.ph;
+  if (ph && typeof ph === 'object') {
+    const posthog = {};
+    if (typeof ph.id === 'string' && ph.id) posthog.distinct_id = ph.id.slice(0, 120);
+    if (typeof ph.sid === 'string' && ph.sid) posthog.session_id = ph.sid.slice(0, 120);
+    if (Object.keys(posthog).length) data.posthog = posthog;
+  }
+
   // The upsert merges every column it is given, so a second opt-in from the same address must
   // not carry keys it has no value for - that would blank what the first one recorded.
   const row = { email: address, source: 'optin', updated_at: new Date().toISOString() };
