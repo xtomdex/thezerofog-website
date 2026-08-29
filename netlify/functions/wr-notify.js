@@ -130,7 +130,12 @@ export default async function handler() {
 
     const session = Array.isArray(reg.wr_sessions) ? reg.wr_sessions[0] : reg.wr_sessions;
 
-    const roomUrl = `${process.env.PUBLIC_SITE_URL || 'https://thezerofog.com'}/workshop/room/?t=${reg.token}`;
+    // Every link we mail carries its own utm (decided 2026-08-29, the attribution build):
+    // source=email names the channel, campaign names the exact template - so a return visit
+    // in the touch log reads "came back from E7", not "organic". The room page only consumes
+    // ?t= and ignores the rest.
+    const utm = `&utm_source=email&utm_medium=email&utm_campaign=${encodeURIComponent(row.template)}`;
+    const roomUrl = `${process.env.PUBLIC_SITE_URL || 'https://thezerofog.com'}/workshop/room/?t=${reg.token}${utm}`;
 
     // The same Google Calendar entry the confirmation page builds, rebuilt server-side so E1's
     // add-to-calendar button has somewhere real to point (it used to lean on EverWebinar's link,
@@ -164,8 +169,9 @@ export default async function handler() {
       calendar_url: calendarUrl,
       // The only door to the replay (see replay.js): /replay/?t= redirects into the room with
       // view=replay. Maps to [REPLAY_LINK] in E7-B / E8 / E8-B / E9 / E10-B.
-      replay_url: `${process.env.PUBLIC_SITE_URL || 'https://thezerofog.com'}/replay/?t=${reg.token}`,
+      replay_url: `${process.env.PUBLIC_SITE_URL || 'https://thezerofog.com'}/replay/?t=${reg.token}${utm}`,
       // Maps to [STOP_FOUNDING_EMAILS] in E13: the one-click opt-out from the sales cadence.
+      // Deliberately WITHOUT utm - an opt-out click is not a marketing touch to attribute.
       no_sales_url: `${process.env.PUBLIC_SITE_URL || 'https://thezerofog.com'}/no-thanks/?t=${reg.token}`,
       segments: personSegments,
       from: config.notifications.sender.from,

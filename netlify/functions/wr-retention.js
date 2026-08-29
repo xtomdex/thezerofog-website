@@ -28,6 +28,17 @@ export default async function handler() {
   const cutoff = new Date();
   cutoff.setMonth(cutoff.getMonth() - months);
 
+  // The attribution touch log lives 30 days - that promise is written into the privacy
+  // page and into touch.js, and this sweep is what keeps it true. Runs BEFORE the
+  // registration branch on purpose: that branch returns early on quiet days, and the
+  // touch log fills up on exactly those days too.
+  try {
+    const touchCutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    await remove('wr_touches', { created_at: `lt.${touchCutoff}` });
+  } catch (err) {
+    console.error('wr-retention: touch sweep failed:', err.message);
+  }
+
   try {
     // Counted before deleting, purely so the log says what happened. A silent retention sweep is
     // indistinguishable from one that never ran.
