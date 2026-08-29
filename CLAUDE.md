@@ -67,7 +67,7 @@ Templates pull global data from `src/_data/*.js`. Each file has a single semanti
 
 - `src/_data/site.js` — site identity: `brand`, `domain`, `url`, `legal.entity`, `email.{support,privacy,refunds,copyright}`. Most fields read from `PUBLIC_*` env vars with safe defaults; templates always reference the semantic name (e.g. `{{ site.email.support }}`) regardless of source.
 - `src/_data/env.js` — placeholder for future public client-side env (PUBLIC_* vars). Currently exports an empty object; populate as new client-side integrations land.
-- `src/_data/legal/*.md` — canonical markdown sources for legal pages. Eleventy ignores these (see `## Legal documents`).
+- (There is no `src/_data/legal/` any more — the legal pages are their own source, see `## Legal documents`.)
 - Server-only env vars (used in Netlify Functions) MUST NOT be exposed via `_data/`.
 
 Rule: every field declared in `_data/` must be used somewhere in templates. If a value is unused, remove it. If a value belongs in templates, route it through `_data/` rather than hardcoding.
@@ -285,30 +285,26 @@ Rule: when adding a new public var, declare it in `.env.example`, expose it via 
 
 ## Legal documents
 
-Privacy, Terms, Disclaimer, Refunds follow a two-tier structure:
+**The `.njk` pages ARE the canonical source. There is no markdown tier any more** — corrected
+2026-08-29, after this section had spent months describing a structure that no longer existed.
+The `src/_data/legal/*.md` sources were deleted in commit `01f455a` ("archive stale Paddle-era
+legal md drafts") and now sit, frozen and out of date, in `_old-versions/legal-md-april-2026/`.
+Read those only for history; never sync from them, and never treat a `.njk` legal page as a
+derived file that must not be edited directly.
 
-- **Sources** — `src/_data/legal/{privacy,terms,disclaimer,refunds}.md`. Canonical markdown with YAML frontmatter (`title`, `version`, `effective_date`, `last_updated`). Eleventy ignores these — they are reference docs, not templates.
-- **Rendered pages** — `src/{privacy,terms,disclaimer,refunds}.njk`. Extend `base.njk`, share `src/assets/css/pages/legal.css`, served at `/<slug>/`. Intentionally indexable (no `noindex`).
+- **Pages** — `src/{privacy,terms,disclaimer,refunds}.njk`. Extend `base.njk`, share
+  `src/assets/css/pages/legal.css`, served at `/<slug>/`. Intentionally indexable (no `noindex`).
 
-### Sync rules (`.md` → `.njk`)
+### Rules when editing a legal page
 
-1. Edit the source `.md` first — that is canonical. Then re-port changes to the matching `.njk`.
-2. Markdown → semantic HTML: `#` → `<h1>`, `##` → `<h2>`, `###` → `<h3>`, bullets → `<ul>`, ordered lists → `<ol>`, `**bold**` → `<strong>`, links → `<a>`.
-3. **Identity values MUST stay templated** — never inline. Use `{{ site.domain }}`, `{{ site.legal.entity }}`, `{{ site.email.{support,privacy,refunds,copyright} }}`. Driven by `PUBLIC_*` env vars.
-4. **Dates** — `effective_date` and `last_updated` live in the `.md` frontmatter. Copy the literal ISO value (e.g. `2026-04-28`) into the `.legal-meta` block of the `.njk`. The `[EFFECTIVE_DATE]` / `[LAST_UPDATED_DATE]` markers in the `.md` body are positional indicators — they are replaced by the frontmatter value during sync, never carried over to the `.njk`.
-5. Email addresses always render as `mailto:` links: `<a href="mailto:{{ site.email.support }}">{{ site.email.support }}</a>`.
-6. Cross-references between legal pages use absolute paths: `/privacy/`, `/terms/`, `/disclaimer/`, `/refunds/`.
-
-### Prompting Claude for a sync
-
-State which `.md` file(s) changed and the scope. Examples:
-
-- `Updated privacy.md frontmatter dates — sync privacy.njk` — date-only update.
-- `Edited section 5 in terms.md, port to terms.njk` — partial content change; name the section.
-- `Added new section "X" to disclaimer.md — port to disclaimer.njk` — additive change.
-- `Resync all 4 legal njk pages with their .md sources` — full rebuild after a batch edit.
-
-Claude reads the `.md`, locates the matching block in the `.njk`, and applies the sync rules above. Do not request inlined identity values or hardcoded emails — the templated form is enforced.
+1. Edit the `.njk` directly. It is the only carrier; there is nothing to sync from or to.
+2. **Identity values MUST stay templated** — never inline. Use `{{ site.domain }}`, `{{ site.legal.entity }}`, `{{ site.email.{support,privacy,refunds,copyright} }}`. Driven by `PUBLIC_*` env vars.
+3. **Dates** live in the `.legal-meta` block at the top of each page. Bump `Last Updated` in the same commit as any change to the body — a legal page whose date lies about its own content is worse than one that is simply old.
+4. Email addresses always render as `mailto:` links: `<a href="mailto:{{ site.email.support }}">{{ site.email.support }}</a>`.
+5. Cross-references between legal pages use absolute paths: `/privacy/`, `/terms/`, `/disclaimer/`, `/refunds/`.
+6. A legal page may only promise what the product actually does. Precedent: the data-export
+   wording, and the attribution-log disclosure added 2026-08-29 which had to describe the
+   hashing honestly because that is what the code does.
 
 ## Integrations (in progress)
 
