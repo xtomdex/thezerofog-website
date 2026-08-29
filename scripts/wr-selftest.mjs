@@ -72,7 +72,10 @@ try {
   eq('queue: one row per configured email', q.length, 19);
   const pending = q.filter(n=>n.status==='pending').map(n=>n.template);
   const skipped = q.filter(n=>n.status==='skipped').map(n=>n.template);
-  eq('queue: E1 is pending, not skipped', pending.includes('E1'), true);
+  // The test always picks the nearest slot, which is a JIT boundary minutes away - inside
+  // JIT_WELCOME_MINUTES - so since 2026-08-22 the welcome is queued as E1-JIT (same slot, but
+  // it carries the room link). A scheduled far-out slot would still queue plain E1.
+  eq('queue: welcome (E1-JIT) is pending, not skipped', pending.includes('E1-JIT') || pending.includes('E1'), true);
   // The session is minutes away, so the 6h/1h reminders are in the past and must never be sent late.
   eq('queue: E2 skipped as already past', skipped.includes('E2'), true);
   eq('queue: E3 skipped as already past', skipped.includes('E3'), true);
