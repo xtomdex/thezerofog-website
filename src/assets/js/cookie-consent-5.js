@@ -279,13 +279,15 @@
     if (t) zfCapture('checkout_clicked', { page: location.pathname });
   }, true);
 
-  /* Engaged40 - the pixel-warming event. LIVE 2026-08-27.
+  /* Engaged30 - the pixel-warming event. LIVE 2026-08-27 at 40s, CUT TO 30s 2026-08-30 by CEO.
+     The rename is deliberate: an event called Engaged40 that fires at 30 seconds would lie to
+     whoever reads it in six months. Anything measured before 30.08 was a 40-second bar.
      ---------------------------------------------------------------------------
      WHY IT EXISTS. The leads objective was tried on 23.08 and died: the ad set was
      told to buy `fb_pixel_lead`, an event this pixel had never once fired, so Meta
      had nothing to look for and stopped delivering - 27 impressions in eight hours.
      Optimisation needs a signal that actually happens. This is that signal: it says
-     "somebody stayed on the landing page for forty seconds", it fires dozens of
+     "somebody stayed on the landing page for thirty seconds", it fires dozens of
      times a day, and it is meant to be REPLACED by the real Lead event once opt-ins
      exist. It is scaffolding, not a metric - never report it as a result.
 
@@ -304,7 +306,7 @@
   (function () {
     if (location.pathname !== '/') return;
 
-    var THRESHOLD_MS = 40000;
+    var THRESHOLD_MS = 30000;
     var TICK_MS = 1000;
     var visibleMs = 0;
     var last = Date.now();
@@ -348,18 +350,18 @@
       // and a long starer still has to touch the page.
       if (visibleMs < THRESHOLD_MS || !interacted) return;
       clearInterval(iv);
-      zfCapture('engaged_40s', { page: location.pathname });
+      zfCapture('engaged_30s', { page: location.pathname });
       var tries = 0;
       (function push() {
         if (window.zfPixelLoaded && typeof fbq === 'function') {
           // ViewContent is the one an ad set can be pointed at directly
           // (promoted_object.custom_event_type = VIEW_CONTENT). It fires nowhere
           // else on this site, so it means exactly one thing: read the landing
-          // page for forty seconds. Engaged40 goes out beside it so a named
+          // page for thirty seconds. Engaged30 goes out beside it so a named
           // custom conversion can be built in Events Manager later without
           // another deploy - it is not what the ad set buys.
           fbq('track', 'ViewContent');
-          fbq('trackCustom', 'Engaged40');
+          fbq('trackCustom', 'Engaged30');
           return;
         }
         if (++tries > 15) return;
