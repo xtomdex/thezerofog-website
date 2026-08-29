@@ -64,17 +64,33 @@ jobs:
           check_code "https://thezerofog.com/.netlify/functions/wr-slots?tz=UTC" 200 "wr-slots"
 
           # Stripe live mode: prove it by minting a session, never by reading config.
-          CHECKOUT=$(curl -s --max-time 30 -X POST \
-            https://thezerofog.com/.netlify/functions/create-checkout \
-            -H 'Content-Type: application/json' \
-            -H 'Origin: https://thezerofog.com' \
-            -d '{}' || echo "")
-          if echo "$CHECKOUT" | grep -q 'cs_live_'; then
-            echo "checkout: cs_live_ ok"
-          else
-            echo "checkout: FAILED"
-            FAILURES="${FAILURES}
+          #
+          # But minting one every 30 minutes creates ~48 junk Checkout Sessions a day in the
+          # real Stripe account (~1,400 a month) and burns two Netlify function invocations
+          # each - create-checkout now, plus the checkout.session.expired webhook two hours
+          # later. On the day exhausted Netlify credits took the whole site down, a monitor
+          # that adds ~5,800 invocations a month is the wrong trade. So the cheap checks run
+          # every 30 minutes and this one runs on the even hour: outage detection stays at
+          # 30-minute granularity, Stripe junk drops fourfold.
+          #
+          # It sends no email, so the expired session cannot trigger the E18 recovery note
+          # (stripe-webhook.js only sends when the session captured an address).
+          HOUR=$(date -u +%H)
+          if [ $((10#$HOUR % 2)) -eq 0 ]; then
+            CHECKOUT=$(curl -s --max-time 30 -X POST \
+              https://thezerofog.com/.netlify/functions/create-checkout \
+              -H 'Content-Type: application/json' \
+              -H 'Origin: https://thezerofog.com' \
+              -d '{}' || echo "")
+            if echo "$CHECKOUT" | grep -q 'cs_live_'; then
+              echo "checkout: cs_live_ ok"
+            else
+              echo "checkout: FAILED"
+              FAILURES="${FAILURES}
           - create-checkout did not return a cs_live_ session (payments may be dead)"
+            fi
+          else
+            echo "checkout: skipped (odd hour - runs every 2h to keep Stripe clean)"
           fi
 
           if [ -n "$FAILURES" ]; then
@@ -121,8 +137,13 @@ jobs:
         env:
           TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # Passed through env, never interpolated straight into the shell string: a
+          # `${{ }}` expansion lands in the script before bash sees it, so any backtick or
+          # $(...) in it would execute. Ours is built from our own hardcoded URLs today, but
+          # the pattern is one edit away from being a hole.
+          DETAIL: ${{ steps.probe.outputs.detail }}
         run: |
-          TEXT="SITE DOWN - thezerofog.com${{ steps.probe.outputs.detail }}
+          TEXT="SITE DOWN - thezerofog.com${DETAIL}
 
           Checked from GitHub Actions at $(date -u '+%Y-%m-%d %H:%M UTC').
           If every check failed at once, look at Netlify billing first - plan credits

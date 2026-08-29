@@ -53,11 +53,28 @@ export default async function handler(req) {
     /* no URL, row still worth keeping for the email_field kind */
   }
 
+  // Referrers are stored WITHOUT their query string, and that is not cosmetic. On a same-origin
+  // navigation the browser sends the full previous URL as Referer, and our own funnel pages carry
+  // the join token in `?t=` - so `/confirmation/?t=<token>` -> `/workshop/room/?t=<token>` would
+  // have written that token into this log. The token is the credential that opens somebody's room
+  // and replay; it does not belong in an attribution row. Verified live before the fix: row 2 of
+  // wr_touches stored `https://thezerofog.com/?qa=1&utm_source=qa-selftest` in full.
+  const stripQuery = (u) => {
+    try {
+      const p = new URL(u);
+      return `${p.origin}${p.pathname}`.slice(0, 300);
+    } catch {
+      return null; // not a URL we can parse - drop it rather than store something unknown
+    }
+  };
+
   const referrer = req.headers.get('referer');
   if (kind === 'pageview' && typeof body.ref === 'string' && body.ref) {
-    params.ref = body.ref.slice(0, 300);
+    const clean = stripQuery(body.ref);
+    if (clean) params.ref = clean;
   } else if (referrer && kind === 'pageview') {
-    params.ref_header = referrer.slice(0, 300);
+    const clean = stripQuery(referrer);
+    if (clean) params.ref_header = clean;
   }
 
   const salt = process.env.TOUCH_SALT;
