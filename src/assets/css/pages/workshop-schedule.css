@@ -85,7 +85,13 @@
   color: var(--text2);
 }
 
-.schedule-form input[type='email'] {
+/* Covers the email row AND the first-name row. The name input is type="text" and for two
+   weeks rendered as a bare UA-default control (thin black border, white background) because
+   only [type='email'] was styled - it looked pasted in from another site. The honeypot is
+   also type="text" but keeps its own #scheduleWebsite off-screen rule; cosmetic styles
+   reaching it change nothing a person or bot can see. */
+.schedule-form input[type='email'],
+.schedule-form input[type='text'] {
   width: 100%;
   padding: 13px 14px;
   border-radius: 8px;
@@ -95,7 +101,8 @@
   font: inherit;
 }
 
-.schedule-form input[type='email']:focus {
+.schedule-form input[type='email']:focus,
+.schedule-form input[type='text']:focus {
   outline: none;
   border-color: var(--input-focus);
 }
