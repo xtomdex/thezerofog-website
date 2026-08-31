@@ -118,6 +118,21 @@
   status = 301
   force = true
 
+# X (Twitter) bio link. Same trick as /ig: the profile shows a clean /x and the
+# utm tail is added here, so no tracking string is visible in the bio.
+# Set on the profile 2026-08-31, the day the first article went out.
+[[redirects]]
+  from = "/x"
+  to = "/?utm_source=twitter&utm_medium=bio&utm_campaign=profile"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/x/"
+  to = "/?utm_source=twitter&utm_medium=bio&utm_campaign=profile"
+  status = 301
+  force = true
+
 # Legacy /social and retired /waitlist pages → home
 # (waitlist page removed 2026-07-09; sources archived in archive/waitlist-page/)
 [[redirects]]
