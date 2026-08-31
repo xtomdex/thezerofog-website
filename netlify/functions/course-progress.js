@@ -29,6 +29,8 @@
 // school account's. Setting it wrongly would stamp every student with our own address.
 // One real test student settles it; until then `id` is the key.
 
+import { notifyOperator } from './lib/wr-telegram.js';
+
 const ALLOWED_ORIGIN = 'https://platform.thezerofog.com';
 
 const corsHeaders = {
@@ -116,6 +118,13 @@ export default async function handler(req) {
     };
   }
 
+  // Has this student ever been seen before? Asked BEFORE the insert, because after it the
+  // answer is always yes. Only used to decide whether to alert - never to decide what to store.
+  let firstEver = false;
+  if (row.event === 'course_progress') {
+    firstEver = await neverSeenBefore(supabaseUrl, secretKey, studentId);
+  }
+
   try {
     const res = await fetch(`${supabaseUrl}/rest/v1/service_events`, {
       method: 'POST',
@@ -134,5 +143,50 @@ export default async function handler(req) {
     console.error('[course-progress] insert threw:', err && err.message);
   }
 
+  // The moment the CEO wants on his phone: a buyer just walked into the course, so a hello in
+  // the chat lands while they are still inside instead of sitting unread.
+  //
+  // Identified by NAME, not by address. The Systeme id in these rows maps to nothing we hold -
+  // their public API exposes no progress and their contact id is a different number entirely
+  // (checked on the first real buyer: contact 440760643, student 15118959). A name is enough to
+  // recognise a buyer in an alert; it would not be enough to automate anything, and nothing here
+  // does.
+  if (firstEver) {
+    await notifyOperator(
+      'COURSE OPENED\n\n' +
+        `${name || '(no name)'}\n` +
+        `${body.completed} of ${body.total} lessons done\n` +
+        (course ? `${course}\n` : '') +
+        '\nThey are in the course area right now. Crisp reaches them here.'
+    );
+  }
+
   return json({ ok: true });
+}
+
+/**
+ * True when this Systeme student has no course_progress row yet - i.e. this is the first time
+ * we have ever seen them open the course.
+ *
+ * Best effort, and it fails CLOSED: a Supabase hiccup returns false, so a wobble costs one
+ * missed alert rather than a repeated one on every page they open.
+ */
+async function neverSeenBefore(supabaseUrl, secretKey, studentId) {
+  try {
+    const endpoint = new URL(`${supabaseUrl}/rest/v1/service_events`);
+    endpoint.searchParams.set('event', 'eq.course_progress');
+    endpoint.searchParams.set('data->>systeme_user_id', `eq.${studentId}`);
+    endpoint.searchParams.set('select', 'id');
+    endpoint.searchParams.set('limit', '1');
+
+    const res = await fetch(endpoint, {
+      headers: { apikey: secretKey, Authorization: `Bearer ${secretKey}` },
+    });
+    if (!res.ok) return false;
+    const rows = await res.json();
+    return Array.isArray(rows) && rows.length === 0;
+  } catch (err) {
+    console.error('[course-progress] first-seen check threw:', err && err.message);
+    return false;
+  }
 }
