@@ -402,6 +402,78 @@ async function readClickIdentity(email) {
   }
 }
 
+/**
+ * The buyer's own history, for the sale alert: which ad they came from and how long they took.
+ *
+ * Stripe knows the money and nothing else. Everything that makes a sale readable - the ad, the
+ * opt-in moment, the timezone - lives in wr_registrations, written when they booked a slot.
+ *
+ * Best effort, never throws: no row just means a thinner alert, never a missing one.
+ */
+async function readSaleContext(email) {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SECRET_KEY;
+  if (!url || !key || !email) return {};
+
+  try {
+    const endpoint = new URL(`${url}/rest/v1/wr_registrations`);
+    endpoint.searchParams.set('email', `eq.${email.trim().toLowerCase()}`);
+    endpoint.searchParams.set('select', 'data,created_at,time_zone');
+    endpoint.searchParams.set('limit', '1');
+
+    const res = await fetch(endpoint, {
+      headers: { apikey: key, Authorization: `Bearer ${key}`, 'User-Agent': 'zerofog-stripe-webhook' },
+    });
+    if (!res.ok) return {};
+    const rows = await res.json();
+    const row = Array.isArray(rows) ? rows[0] : null;
+    if (!row) return {};
+    return { utm: row.data?.utm || null, registeredAt: row.created_at || null, timeZone: row.time_zone || null };
+  } catch (err) {
+    console.error('readSaleContext failed:', err.message);
+    return {};
+  }
+}
+
+/**
+ * The alert the CEO actually wants: a sale happened, here is who and from which ad.
+ *
+ * Every other alertOperator call in this file fires on a failure, which is why the first real
+ * outside sale (2026-08-31) was found by hand hours later instead of arriving on the phone.
+ * Sent last, after enrollment, provisioning and the welcome email, so it can report what each
+ * of them actually did rather than promising them.
+ */
+async function alertSale(email, session, { appProvisioned, welcomed }) {
+  const ctx = await readSaleContext(email);
+  const d = session.customer_details || {};
+  const a = d.address || {};
+
+  const money = `${(Number(session.amount_total || 0) / 100).toFixed(2)} ${String(session.currency || '').toUpperCase()}`;
+  const place = [a.city, a.state, a.country].filter(Boolean).join(', ');
+  const utm = ctx.utm || {};
+  const from = [utm.utm_source, utm.utm_content, utm.utm_campaign].filter(Boolean).join(' / ');
+
+  let took = '';
+  if (ctx.registeredAt) {
+    const mins = Math.round((Date.now() - Date.parse(ctx.registeredAt)) / 60000);
+    if (Number.isFinite(mins) && mins >= 0) {
+      took = mins < 60 ? `${mins} min after registering` : `${Math.floor(mins / 60)}h ${mins % 60}m after registering`;
+    }
+  }
+
+  await alertOperator(
+    `SALE - ${money}\n\n` +
+      `${who(email, d.name)}\n` +
+      (place ? `${place}${ctx.timeZone ? ` - ${ctx.timeZone}` : ''}\n` : '') +
+      (from ? `From: ${from}\n` : 'From: no utm on the registration\n') +
+      (took ? `${took}\n` : '') +
+      `\nCourse: open\n` +
+      `Toolkit: ${appProvisioned ? 'provisioned' : 'NOT provisioned'}\n` +
+      `Welcome email: ${welcomed ? 'sent' : 'NOT sent'}\n` +
+      `\n${session.id}`
+  );
+}
+
 /** Meta wants its match keys normalized before hashing, and drops the ones that are not. */
 function hashField(value, { digitsOnly = false, keep = 0 } = {}) {
   if (typeof value !== 'string') return null;
@@ -1218,6 +1290,10 @@ export default async function handler(req) {
   // excluded: a zero-euro internal grant must never teach the optimizer what a buyer looks like.
   // Awaited, best-effort, never affects the response.
   if (!isComp) await sendMetaPurchase(email, session);
+
+  // The one alert that is not about something being broken. Last, so it reports the outcome of
+  // every step above instead of firing before they ran.
+  if (!isComp) await alertSale(email, session, { appProvisioned, welcomed });
 
   if (isComp) {
     await alertOperator(
