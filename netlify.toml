@@ -133,6 +133,35 @@
   status = 301
   force = true
 
+# Reddit profile link. Same trick as /ig and /x: the profile shows a clean /r and
+# the utm tail is added here. Set 2026-08-31, when part 1 went to u/K-realB.
+# A link inside a post body is NOT this link - medium here is bio, so a body link
+# needs its own redirect, otherwise the report will call a post a profile click.
+[[redirects]]
+  from = "/r"
+  to = "/?utm_source=reddit&utm_medium=bio&utm_campaign=profile"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/r/"
+  to = "/?utm_source=reddit&utm_medium=bio&utm_campaign=profile"
+  status = 301
+  force = true
+
+# Quora profile link. Same rule as /r above.
+[[redirects]]
+  from = "/q"
+  to = "/?utm_source=quora&utm_medium=bio&utm_campaign=profile"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/q/"
+  to = "/?utm_source=quora&utm_medium=bio&utm_campaign=profile"
+  status = 301
+  force = true
+
 # Legacy /social and retired /waitlist pages → home
 # (waitlist page removed 2026-07-09; sources archived in archive/waitlist-page/)
 [[redirects]]
