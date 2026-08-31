@@ -42,9 +42,53 @@ export function clientInfo(req) {
 }
 
 /**
+ * The two Meta browser cookies, read from the request that carries them.
+ *
+ * `_fbp` is the browser id the pixel sets; `_fbc` is the click id Meta writes after a visitor
+ * arrives with `?fbclid=`. They are the strongest match keys we can hold, because they identify
+ * the CLICK, not just the person - without them Meta can tell that someone bought, but not that
+ * the buyer is the one it charged us for. Both are plain first-party cookies on our own domain,
+ * so they arrive on every POST our own pages make.
+ *
+ * Sent to Meta raw and NEVER hashed: they are already opaque ids, and hashing them destroys the
+ * match. That is the opposite of the rule for email, name and address.
+ */
+export function fbCookies(req) {
+  const jar = req.headers.get('cookie') || '';
+  const pick = (name) => {
+    const hit = jar.split(';').find((part) => part.trim().startsWith(`${name}=`));
+    if (!hit) return null;
+    const value = hit.trim().slice(name.length + 1).trim();
+    return value ? value.slice(0, 400) : null;
+  };
+  return { fbp: pick('_fbp'), fbc: pick('_fbc') };
+}
+
+/**
+ * Build an `_fbc` value out of a landing URL that carries `?fbclid=`.
+ *
+ * Meta's own format is `fb.<subdomain-index>.<creation-time-ms>.<fbclid>`, and `fb.1.<ts>.<id>`
+ * is what the pixel itself writes on a root domain. We need this because the cookie only exists
+ * if the pixel ran, and in this audience the pixel is blocked more often than not - but the
+ * `fbclid` is still sitting in the URL the browser sent us. Same click, one hop earlier.
+ */
+export function fbcFromUrl(url, whenMs) {
+  if (typeof url !== 'string' || !url) return null;
+  let fbclid = null;
+  try {
+    fbclid = new URL(url).searchParams.get('fbclid');
+  } catch {
+    return null;
+  }
+  if (!fbclid) return null;
+  return `fb.1.${Math.floor(whenMs || Date.now())}.${fbclid.slice(0, 400)}`;
+}
+
+/**
  * Send one or more server events to the pixel dataset.
  *
- * events: [{ eventName, eventId, email, sourceUrl?, ip?, userAgent?, customData?, eventTime? }]
+ * events: [{ eventName, eventId, email, sourceUrl?, ip?, userAgent?, fbp?, fbc?, externalId?,
+ *            customData?, eventTime? }]
  */
 export async function sendMetaEvents(events) {
   const pixelId = process.env.META_PIXEL_ID;
@@ -60,6 +104,11 @@ export async function sendMetaEvents(events) {
     const userData = { em: [em] };
     if (e.ip) userData.client_ip_address = e.ip;
     if (e.userAgent) userData.client_user_agent = e.userAgent;
+    // Raw, not hashed - see fbCookies above.
+    if (e.fbp) userData.fbp = e.fbp;
+    if (e.fbc) userData.fbc = e.fbc;
+    // A stable id for the same human across events. Hashed like the other identifiers.
+    if (e.externalId) userData.external_id = [sha256(String(e.externalId).trim().toLowerCase())];
 
     const row = {
       event_name: e.eventName,

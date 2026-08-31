@@ -20,7 +20,7 @@ import {
   upsert,
 } from './lib/wr-db.js';
 import { loadConfig } from './lib/wr-config.js';
-import { sendMetaEvents, clientInfo, SITE_URL } from './lib/meta-capi.js';
+import { sendMetaEvents, clientInfo, fbCookies, SITE_URL } from './lib/meta-capi.js';
 import {
   applyDeliveryWindow,
   describeSlot,
@@ -366,6 +366,10 @@ export default async function handler(req) {
     // dedup against; event_id keeps a re-registration from counting twice. Awaited, best-effort.
     try {
       const { ip, userAgent } = clientInfo(req);
+      // fbp/fbc identify the CLICK, not just the person - without them Meta can tell someone
+      // registered but not that it is the click it billed us for. They lift this event from
+      // 5.0 to the 7.7 the browser-fired Lead scores. Cookies are on this request already.
+      const { fbp, fbc } = fbCookies(req);
       await sendMetaEvents([
         {
           eventName: 'CompleteRegistration',
@@ -374,6 +378,9 @@ export default async function handler(req) {
           sourceUrl: `${SITE_URL}/workshop/schedule/`,
           ip,
           userAgent,
+          fbp,
+          fbc,
+          externalId: cleanEmail,
         },
       ]);
     } catch (err) {

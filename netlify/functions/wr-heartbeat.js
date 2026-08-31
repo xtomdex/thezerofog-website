@@ -13,7 +13,7 @@
 
 import { insert, json, preflight, selectOne, update, upsert } from './lib/wr-db.js';
 import { loadConfig, deriveSegments } from './lib/wr-config.js';
-import { sendMetaEvents, clientInfo, SITE_URL } from './lib/meta-capi.js';
+import { sendMetaEvents, clientInfo, fbCookies, SITE_URL } from './lib/meta-capi.js';
 
 const EVENT_TYPES = new Set([
   'heartbeat',
@@ -170,11 +170,18 @@ export default async function handler(req) {
       !prevSegments.some((s) => s.startsWith('SEG-B') || s.startsWith('SEG-C') || s === 'SEG-D-stayed');
 
     const { ip, userAgent } = clientInfo(req);
+    // The room POSTs from the visitor's own browser, so Meta's click cookies ride along. They
+    // are what separates "someone watched" from "the click we paid for watched" - see the same
+    // addition in wr-register.js.
+    const { fbp, fbc } = fbCookies(req);
     const base = {
       email: registration.email,
       sourceUrl: `${SITE_URL}/workshop/room/`,
       ip,
       userAgent,
+      fbp,
+      fbc,
+      externalId: registration.email,
     };
     const metaEvents = [];
     if (event === 'join') metaEvents.push({ ...base, eventName: 'WorkshopJoin', eventId: `${registration.id}:join` });

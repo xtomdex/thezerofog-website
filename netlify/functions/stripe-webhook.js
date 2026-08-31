@@ -362,12 +362,96 @@ async function markWorkshopBuyer(email) {
  * Best effort, never throws: unset env is a silent no-op, and a failed ad-platform call must
  * never 500 a correctly processed payment.
  */
+/**
+ * The click identity we stored when this person first gave us their address.
+ *
+ * This request comes from Stripe, not from the buyer: there are no cookies on it, no browser,
+ * no click. `_fbp` and `_fbc` were captured by optin.js at the top of the funnel and parked in
+ * `wr_leads.data.meta`, and this is the only way to get them back onto the Purchase.
+ *
+ * Best effort, never throws: no row, no keys, and the event still goes with the email alone.
+ */
+async function readClickIdentity(email) {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SECRET_KEY;
+  if (!url || !key || !email) return {};
+
+  try {
+    const endpoint = new URL(`${url}/rest/v1/wr_leads`);
+    endpoint.searchParams.set('email', `eq.${email.trim().toLowerCase()}`);
+    endpoint.searchParams.set('select', 'data');
+    endpoint.searchParams.set('limit', '1');
+
+    const res = await fetch(endpoint, {
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        'User-Agent': 'zerofog-stripe-webhook',
+      },
+    });
+    if (!res.ok) {
+      console.error('readClickIdentity: Supabase returned', res.status);
+      return {};
+    }
+    const rows = await res.json();
+    const meta = Array.isArray(rows) && rows[0]?.data?.meta ? rows[0].data.meta : {};
+    return { fbp: meta.fbp || null, fbc: meta.fbc || null };
+  } catch (err) {
+    console.error('readClickIdentity failed:', err.message);
+    return {};
+  }
+}
+
+/** Meta wants its match keys normalized before hashing, and drops the ones that are not. */
+function hashField(value, { digitsOnly = false, keep = 0 } = {}) {
+  if (typeof value !== 'string') return null;
+  let v = value.trim().toLowerCase();
+  v = digitsOnly ? v.replace(/\D/g, '') : v.replace(/[^a-z0-9]/g, '');
+  if (keep) v = v.slice(0, keep);
+  if (!v) return null;
+  return crypto.createHash('sha256').update(v).digest('hex');
+}
+
 async function sendMetaPurchase(email, session) {
   const pixelId = process.env.META_PIXEL_ID;
   const token = process.env.META_CAPI_TOKEN;
   if (!pixelId || !token || !email) return;
 
   const em = crypto.createHash('sha256').update(email.trim().toLowerCase()).digest('hex');
+
+  // Everything below the email is here because a Purchase carrying only `em` scored 3.2 out of
+  // 10 on Meta's own match quality on 2026-08-31 - the worst event on the pixel, on the one
+  // event that matters most. Lead scores 7.7 because the browser hands it fbp and fbc.
+  const userData = { em: [em] };
+
+  // Our own stable id for the same human, so Meta can join this Purchase to the Lead and the
+  // workshop events for the same address.
+  userData.external_id = [em];
+
+  const { fbp, fbc } = await readClickIdentity(email);
+  // Raw, never hashed - they are opaque ids already and hashing destroys the match.
+  if (fbp) userData.fbp = fbp;
+  if (fbc) userData.fbc = fbc;
+
+  // Stripe collected these at checkout and they cost us nothing to forward.
+  const details = session.customer_details || {};
+  const nameParts = typeof details.name === 'string' ? details.name.trim().split(/\s+/) : [];
+  const fn = hashField(nameParts[0]);
+  const ln = hashField(nameParts.length > 1 ? nameParts[nameParts.length - 1] : null);
+  if (fn) userData.fn = [fn];
+  if (ln) userData.ln = [ln];
+  const ph = hashField(details.phone, { digitsOnly: true });
+  if (ph) userData.ph = [ph];
+  const address = details.address || {};
+  const ct = hashField(address.city);
+  const st = hashField(address.state);
+  const zp = hashField(address.postal_code, { keep: 5 });
+  const country = hashField(address.country, { keep: 2 });
+  if (ct) userData.ct = [ct];
+  if (st) userData.st = [st];
+  if (zp) userData.zp = [zp];
+  if (country) userData.country = [country];
+
   const body = {
     data: [
       {
@@ -376,7 +460,7 @@ async function sendMetaPurchase(email, session) {
         event_id: session.id,
         action_source: 'website',
         event_source_url: `${process.env.PUBLIC_SITE_URL || 'https://thezerofog.com'}/welcome/`,
-        user_data: { em: [em] },
+        user_data: userData,
         custom_data: {
           value: Number(session.amount_total || 0) / 100,
           currency: String(session.currency || 'usd').toUpperCase(),

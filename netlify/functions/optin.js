@@ -15,6 +15,7 @@
 
 import { upsert, isValidEmail } from './lib/wr-db.js';
 import { addListSubscriber } from './lib/wr-mailerlite.js';
+import { fbCookies, fbcFromUrl } from './lib/meta-capi.js';
 
 const ALLOWED_ORIGIN = 'https://thezerofog.com';
 
@@ -87,6 +88,25 @@ export default async function handler(req) {
     if (typeof ph.sid === 'string' && ph.sid) posthog.session_id = ph.sid.slice(0, 120);
     if (Object.keys(posthog).length) data.posthog = posthog;
   }
+
+  // The click identity, stored HERE because this is the only moment we hold it. The Stripe
+  // webhook fires a day later from Stripe's servers, not the buyer's browser: no cookies, no
+  // IP, no user agent. Without this row the Purchase we send Meta carries a hashed email and
+  // nothing else, which is the weakest match on the whole pixel - it tells Meta someone bought,
+  // not that the buyer is the click it billed us for.
+  //
+  // `_fbc` is taken from the cookie when the pixel set it, and rebuilt from the `fbclid` in the
+  // landing URL when it did not - in this audience the pixel is blocked more often than not,
+  // and the referer still carries the click.
+  // No IP and no user agent, on purpose - wr-register.js made that call already and it stands:
+  // personal data we would then have to declare, justify and delete. `_fbp` and `_fbc` are
+  // Meta's own first-party cookies, already on this browser under the consent banner.
+  const { fbp, fbc } = fbCookies(req);
+  const meta = {};
+  if (fbp) meta.fbp = fbp;
+  const clickId = fbc || fbcFromUrl(referrer, Date.now());
+  if (clickId) meta.fbc = clickId;
+  if (Object.keys(meta).length) data.meta = meta;
 
   // The upsert merges every column it is given, so a second opt-in from the same address must
   // not carry keys it has no value for - that would blank what the first one recorded.
