@@ -35,24 +35,45 @@ import { sendMetaEvents, clientInfo, fbCookies, trackingAllowed, SITE_URL } from
  * simply returns null here and the beacon goes quiet rather than guessing.
  */
 async function verifiedSession(sessionId) {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) return null;
+  // STRIPE_READ_KEY first: a restricted key with READ on Checkout Sessions and nothing else.
+  // STRIPE_SECRET_KEY is the site's checkout key and may well have no read permission at all -
+  // restricted keys are per-resource - so it is only the fallback, and a 401/403 from it is a
+  // configuration answer, not an outage.
+  const key = process.env.STRIPE_READ_KEY || process.env.STRIPE_SECRET_KEY;
+  if (!key) {
+    console.error('purchase-beacon: no Stripe key set - Purchase NOT sent for', sessionId);
+    return null;
+  }
 
   try {
     const res = await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}`, {
       headers: { Authorization: `Basic ${Buffer.from(`${key}:`).toString('base64')}` },
     });
     if (!res.ok) {
-      console.error('purchase-beacon: Stripe returned', res.status);
+      // 401/403 means the key cannot read sessions and every sale is going out short-matched;
+      // 404 is just a bad id. Both are loud on purpose - the failure mode of this whole file is
+      // silence, and silence looks exactly like "no sales happened".
+      console.error(
+        `purchase-beacon: Stripe ${res.status} for ${sessionId}` +
+          (res.status === 401 || res.status === 403
+            ? ' - THE KEY CANNOT READ CHECKOUT SESSIONS, Purchase went without live match keys'
+            : '')
+      );
       return null;
     }
     const s = await res.json();
-    if (s.payment_status !== 'paid') return null;
+    if (s.payment_status !== 'paid') {
+      console.warn('purchase-beacon: session not paid:', sessionId, s.payment_status);
+      return null;
+    }
     // A comped seat must never teach the optimizer what a buyer looks like - same rule as the
     // webhook, which excludes it there too.
     if (s.metadata?.zf_comp === 'granted') return null;
     const email = s.customer_details?.email || s.customer_email || null;
-    if (!email) return null;
+    if (!email) {
+      console.error('purchase-beacon: paid session with no email:', sessionId);
+      return null;
+    }
     return {
       email,
       value: Number(s.amount_total || 0) / 100,
