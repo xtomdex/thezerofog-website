@@ -237,6 +237,43 @@
   function loadTrackers() {
     loadMarketingPixels();
     loadPostHog();
+    sendPurchaseBeacon();
+  }
+
+  // The first-party Purchase, sent to our own domain instead of Meta's.
+  //
+  // The fbq('track','Purchase') above only runs if fbevents.js loaded, and in this audience it
+  // usually does not - blockers, iOS, the CEO's own Chrome. This one is a POST to
+  // /.netlify/functions/purchase-beacon, which nothing blocks, and it is the only way Meta ever
+  // sees the buyer's live IP, user agent and click cookies: the Stripe webhook fires from
+  // Stripe's servers and has none of them.
+  //
+  // Same eventID as the pixel and the webhook (the Stripe session id), so Meta collapses all of
+  // them into one sale. Deliberately NOT dependent on fbq, on window.ZF_META_PIXEL_ID or on the
+  // pixel having loaded - it must run in exactly the cases where those failed. Consent is
+  // already decided: this is only called from loadTrackers.
+  function sendPurchaseBeacon() {
+    var sid = (location.search.match(/[?&]session_id=([^&]+)/) || [])[1];
+    if (!sid || location.pathname.indexOf('/welcome') !== 0) return;
+    sid = decodeURIComponent(sid);
+
+    // Reload guard, same shape as the pixel's. A failure to read sessionStorage sends anyway -
+    // Meta dedups on the id regardless, the guard just saves the round trip.
+    var seen = 'zf_beacon_purchase_' + sid;
+    try {
+      if (sessionStorage.getItem(seen)) return;
+      sessionStorage.setItem(seen, '1');
+    } catch (e) {}
+
+    try {
+      fetch('/.netlify/functions/purchase-beacon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sid }),
+        credentials: 'same-origin',
+        keepalive: true,
+      }).catch(function() {});
+    } catch (e) {}
   }
 
   // Best-effort stop for the opt-out path: trackers may already be running in
