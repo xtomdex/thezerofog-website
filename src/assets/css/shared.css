@@ -133,8 +133,11 @@ html:not(.dark) body {
 }
 
 /* === THEME TOGGLE === */
+/* Absolute, not fixed, since 2026-09-01. Fixed meant the pill rode down the page over whatever
+   was underneath it and sat on top of form fields on the way. It is a preference switch, not
+   navigation: it belongs at the top of the page and is allowed to scroll away with it. */
 .theme-toggle {
-  position: fixed; top: 16px; right: 16px; z-index: 100;
+  position: absolute; top: 16px; right: 16px; z-index: 100;
   background: var(--bg2); border: 1px solid var(--border);
   border-radius: 20px; padding: 6px 14px; cursor: pointer;
   font-family: 'Inter', sans-serif; font-size: 0.65rem; font-weight: 500;
