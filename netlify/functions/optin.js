@@ -15,7 +15,7 @@
 
 import { upsert, isValidEmail } from './lib/wr-db.js';
 import { addListSubscriber } from './lib/wr-mailerlite.js';
-import { fbCookies, fbcFromUrl } from './lib/meta-capi.js';
+import { fbCookies, fbcFromUrl, trackingAllowed } from './lib/meta-capi.js';
 
 const ALLOWED_ORIGIN = 'https://thezerofog.com';
 
@@ -101,12 +101,16 @@ export default async function handler(req) {
   // No IP and no user agent, on purpose - wr-register.js made that call already and it stands:
   // personal data we would then have to declare, justify and delete. `_fbp` and `_fbc` are
   // Meta's own first-party cookies, already on this browser under the consent banner.
-  const { fbp, fbc } = fbCookies(req);
-  const meta = {};
-  if (fbp) meta.fbp = fbp;
-  const clickId = fbc || fbcFromUrl(referrer, Date.now());
-  if (clickId) meta.fbc = clickId;
-  if (Object.keys(meta).length) data.meta = meta;
+  //
+  // Gated by the same geo split as every other tracker on the site - see trackingAllowed.
+  if (trackingAllowed(req)) {
+    const { fbp, fbc } = fbCookies(req);
+    const meta = {};
+    if (fbp) meta.fbp = fbp;
+    const clickId = fbc || fbcFromUrl(referrer, Date.now());
+    if (clickId) meta.fbc = clickId;
+    if (Object.keys(meta).length) data.meta = meta;
+  }
 
   // The upsert merges every column it is given, so a second opt-in from the same address must
   // not carry keys it has no value for - that would blank what the first one recorded.

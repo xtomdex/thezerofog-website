@@ -65,6 +65,47 @@ export function fbCookies(req) {
 }
 
 /**
+ * The same consent split the browser runs, decided server-side.
+ *
+ * cookie-consent-5.js splits by jurisdiction: EU-27 + EEA + UK + CH (and any country it cannot
+ * resolve) are opt-in - nothing loads until "Accept All"; everywhere else is opt-out. The
+ * `zf_cookies_consent` cookie is domain-wide, so a decision the visitor already made arrives
+ * here on its own.
+ *
+ * This exists because `fbcFromUrl` can rebuild the click id from `?fbclid=` even when the pixel
+ * never ran - which is the whole point of it, and also exactly the case the banner is supposed
+ * to gate. Reading Meta's own `_fbp`/`_fbc` cookies needs no gate (they only exist if the pixel
+ * was allowed to set them), but they go through the same door here so there is one rule, not two.
+ *
+ * Country comes from `x-nf-geo`, which Netlify sets at the edge and strips from client input;
+ * `x-country` is the fallback. Unknown country falls back to the strict side, same as the client.
+ */
+const OPT_IN_COUNTRIES = new Set([
+  'AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU',
+  'MT','NL','PL','PT','RO','SK','SI','ES','SE','IS','LI','NO','GB','CH',
+]);
+
+export function trackingAllowed(req) {
+  const jar = req.headers.get('cookie') || '';
+  const choice = jar.match(/(?:^|;\s*)zf_cookies_consent=(all|essential)(?:;|$)/);
+  if (choice) return choice[1] === 'all';
+
+  // No choice on record: the regime decides, exactly as it does in the browser.
+  let country = '';
+  const nfGeo = req.headers.get('x-nf-geo');
+  if (nfGeo) {
+    try {
+      country = JSON.parse(Buffer.from(nfGeo, 'base64').toString('utf8'))?.country?.code || '';
+    } catch {
+      country = '';
+    }
+  }
+  if (!country) country = (req.headers.get('x-country') || '').toUpperCase();
+  if (!country) return false;
+  return !OPT_IN_COUNTRIES.has(country.toUpperCase());
+}
+
+/**
  * Build an `_fbc` value out of a landing URL that carries `?fbclid=`.
  *
  * Meta's own format is `fb.<subdomain-index>.<creation-time-ms>.<fbclid>`, and `fb.1.<ts>.<id>`
