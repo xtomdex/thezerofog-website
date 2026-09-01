@@ -162,6 +162,20 @@
   status = 301
   force = true
 
+# LinkedIn profile link. Same rule as /r and /q above: the tag belongs in the profile
+# link field, not in the body of a post.
+[[redirects]]
+  from = "/li"
+  to = "/?utm_source=linkedin&utm_medium=bio&utm_campaign=profile"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/li/"
+  to = "/?utm_source=linkedin&utm_medium=bio&utm_campaign=profile"
+  status = 301
+  force = true
+
 # Legacy /social and retired /waitlist pages → home
 # (waitlist page removed 2026-07-09; sources archived in archive/waitlist-page/)
 [[redirects]]
