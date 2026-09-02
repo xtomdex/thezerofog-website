@@ -306,8 +306,14 @@
   // - checkout_clicked: #buyBtn on /sales/, .cta-checkout on /workshop-text/
   // - replay_video_started: first <video> play on /replay/ (no-op until embedded)
   document.addEventListener('submit', function(e) {
-    if (e.target && e.target.id === 'optinForm') {
-      zfCapture('optin_submitted', { page: location.pathname });
+    // Matches on the CLASS, not the id: since 2026-09-02 the landing carries a second
+    // form after the bullets. `place` says which one was used - that is the whole point
+    // of the second form, to learn whether people were losing the ask or refusing it.
+    if (e.target && e.target.classList && e.target.classList.contains('cta-form')) {
+      zfCapture('optin_submitted', {
+        page: location.pathname,
+        place: e.target.id === 'optinFormBottom' ? 'bottom' : 'hero'
+      });
     }
   }, true);
 

@@ -1,12 +1,17 @@
 // === FORM HANDLER ===
-document.getElementById('optinForm').addEventListener('submit', function(e) {
+// One handler, attached to EVERY .cta-form on the page. The page carries two since
+// 2026-09-02: the one in the hero and a second after the bullets, because 162 of the
+// people who scrolled past 75% of the page had nothing to act on down there.
+// Button and error element are looked up INSIDE the submitted form - by id they would
+// always resolve to the first one and the bottom form would report into the top one.
+function zfOptinSubmit(e) {
   e.preventDefault();
 
   var form = this;
   var email = form.querySelector('input[name="email"]').value;
   var website = form.querySelector('input[name="website"]').value;
-  var btn = document.getElementById('ctaBtn');
-  var errorEl = document.getElementById('formError');
+  var btn = form.querySelector('.cta-btn');
+  var errorEl = form.querySelector('.form-error');
 
   errorEl.textContent = '';
 
@@ -90,6 +95,10 @@ document.getElementById('optinForm').addEventListener('submit', function(e) {
     btn.textContent = 'Save My Spot';
     errorEl.textContent = 'Something went wrong, please try again.';
   });
+}
+
+Array.prototype.forEach.call(document.querySelectorAll('.cta-form'), function (formEl) {
+  formEl.addEventListener('submit', zfOptinSubmit);
 });
 
 // === A/B TEST SUPPORT ===

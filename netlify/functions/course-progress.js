@@ -40,7 +40,7 @@ const corsHeaders = {
 };
 
 // Two shapes arrive here:
-//   {kind:'watch', studentId, lectureId, watched, duration, course, name} -> lesson_watch
+//   {kind:'watch', studentId, lectureId, watched, duration, videos, course, name} -> lesson_watch
 //   {studentId, completed, total, course, name}                          -> course_progress
 
 function json(body, status = 200) {
@@ -92,6 +92,13 @@ export default async function handler(req) {
     if (!isInt(lectureId, 1, 1e12)) return json({ error: 'Bad lectureId' }, 400);
     if (!isInt(watched, 1, 86400)) return json({ error: 'Bad watched' }, 400);
     if (!isInt(duration, 0, 86400)) return json({ error: 'Bad duration' }, 400);
+    // `videos` is how many videos on that lecture page actually reported a duration, i.e.
+    // were played at least once - not how many the page carries. Both numbers above
+    // are page-level totals: watched is every played second on the page, duration is the
+    // sum of the videos' lengths. Before 2026-09-02 duration was whichever video reported
+    // last, which is how rows reading `933 of 52` got into the table - see the block in
+    // _Course/systeme-blocks/course-embedded-code.html. Older senders omit the field.
+    const videos = Number.isFinite(Number(body.videos)) ? Math.round(Number(body.videos)) : null;
     row = {
       source: 'course',
       event: 'lesson_watch',
@@ -100,6 +107,7 @@ export default async function handler(req) {
         systeme_user_id: studentId,
         watched_sec: watched,
         duration_sec: duration || null,
+        videos_count: isInt(videos, 0, 200) ? videos : null,
         course,
         name,
       },
