@@ -1,4 +1,5 @@
-# Production health check - every 30 minutes, from OUTSIDE our own infrastructure.
+# Production health check - one run that watches for five hours, probing every 30 minutes,
+# from OUTSIDE our own infrastructure.
 #
 # Written 2026-08-29, the day the site served 503 for three hours and nobody knew.
 # Netlify had blocked the account on exhausted plan credits (usage_exceeded); the ads
@@ -9,25 +10,37 @@
 # exactly when Netlify is the thing that broke, and a launchd job on a laptop is asleep
 # when the laptop is. This runs whether or not anything of ours is up.
 #
+# REBUILT 2026-09-02. The first version asked GitHub for 48 scheduled runs a day and
+# GitHub refused to give them. Measured over the 60 hours to 02.09 08:04 UTC: 21 runs,
+# one every 3 hours on average, and a hole of 8 hours 09 minutes on 31.08 between
+# 06:44 and 14:53 UTC. A watchman that sleeps eight hours is not a watchman - the
+# outage it exists to catch lasted three.
+#
+# So the schedule is no longer the heartbeat. One run now loops for five hours and
+# probes production itself every 30 minutes; the hourly cron and the self-dispatch at
+# the end are only ways to re-arm that loop. `concurrency` guarantees exactly one loop
+# is ever alive: a newly armed run cancels the one it replaces. The repository is
+# public, so the runner minutes this burns are free and unmetered.
+#
 # It checks what a real visitor and a real buyer need, not just that a server answered:
 #   1. the landing page returns 200
 #   2. the schedule step returns 200 (the funnel's second door)
-#   3. create-checkout still mints a LIVE Stripe session (cs_live_) - the mode is proven,
+#   3. the workshop room endpoint answers (its own function, separate from the pages)
+#   4. create-checkout still mints a LIVE Stripe session (cs_live_) - the mode is proven,
 #      never read from config, per the project's standing rule
-#   4. the workshop room endpoint answers (its own function, separate from the pages)
 #
 # Any failure pushes a Telegram alert to the operator channel (@zerofog_alerts_bot) and
-# fails the run. When a run passes after a failed one, it pushes a recovery note, so the
-# channel says both "it broke" and "it is back" without anyone asking.
-#
-# Cron note: GitHub delays scheduled runs under load, so 30 minutes is a floor, not a
-# guarantee. Good enough for an outage alarm; it is not an SLA monitor.
+# fails the run. While production stays broken the alert repeats every two hours, so a
+# long outage cannot go quiet; when it comes back the channel is told that too, so it
+# says both "it broke" and "it is back" without anyone asking.
 
 name: health-check
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    # Only a re-arm, not the heartbeat. GitHub delivers this whenever it feels like it -
+    # every 3 hours in practice - and the five-hour loop covers the gap either way.
+    - cron: '0 * * * *'
   workflow_dispatch:
     inputs:
       test_alert:
@@ -35,75 +48,28 @@ on:
         type: boolean
         default: false
 
+# actions: write is what lets the run re-arm itself at the end. workflow_dispatch is one
+# of the two events GITHUB_TOKEN is still allowed to raise.
 permissions:
-  actions: read
+  actions: write
   contents: read
+
+# Exactly one watchman alive, and exactly one waiting. GitHub keeps only the newest
+# pending run in a group and cancels the rest, so every re-arm collapses into a single
+# successor that starts the moment this watch ends. Cancelling the RUNNING one instead
+# would be worse: the cancellation can land before the step that records the outage, and
+# the run would conclude "cancelled" - saying nothing about production to the run after it.
+concurrency:
+  group: health-check
+  cancel-in-progress: false
 
 jobs:
   probe:
     runs-on: ubuntu-latest
+    # The job ceiling is 6 hours. The loop below plans for 5h00m of probing; this leaves
+    # the run room to finish rather than being killed mid-alert.
+    timeout-minutes: 340
     steps:
-      - name: Probe production
-        id: probe
-        run: |
-          FAILURES=""
-
-          check_code() {
-            local url="$1" want="$2" label="$3"
-            local code
-            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 25 "$url" || echo "000")
-            echo "$label: $code"
-            if [ "$code" != "$want" ]; then
-              FAILURES="${FAILURES}
-          - ${label} returned ${code} (expected ${want}) - ${url}"
-            fi
-          }
-
-          check_code "https://thezerofog.com/" 200 "landing"
-          check_code "https://thezerofog.com/workshop/schedule/" 200 "schedule"
-          check_code "https://thezerofog.com/.netlify/functions/wr-slots?tz=UTC" 200 "wr-slots"
-
-          # Stripe live mode: prove it by minting a session, never by reading config.
-          #
-          # But minting one every 30 minutes creates ~48 junk Checkout Sessions a day in the
-          # real Stripe account (~1,400 a month) and burns two Netlify function invocations
-          # each - create-checkout now, plus the checkout.session.expired webhook two hours
-          # later. On the day exhausted Netlify credits took the whole site down, a monitor
-          # that adds ~5,800 invocations a month is the wrong trade. So the cheap checks run
-          # every 30 minutes and this one runs on the even hour: outage detection stays at
-          # 30-minute granularity, Stripe junk drops fourfold.
-          #
-          # It sends no email, so the expired session cannot trigger the E18 recovery note
-          # (stripe-webhook.js only sends when the session captured an address).
-          HOUR=$(date -u +%H)
-          if [ $((10#$HOUR % 2)) -eq 0 ]; then
-            CHECKOUT=$(curl -s --max-time 30 -X POST \
-              https://thezerofog.com/.netlify/functions/create-checkout \
-              -H 'Content-Type: application/json' \
-              -H 'Origin: https://thezerofog.com' \
-              -d '{}' || echo "")
-            if echo "$CHECKOUT" | grep -q 'cs_live_'; then
-              echo "checkout: cs_live_ ok"
-            else
-              echo "checkout: FAILED"
-              FAILURES="${FAILURES}
-          - create-checkout did not return a cs_live_ session (payments may be dead)"
-            fi
-          else
-            echo "checkout: skipped (odd hour - runs every 2h to keep Stripe clean)"
-          fi
-
-          if [ -n "$FAILURES" ]; then
-            {
-              echo "failed=true"
-              echo "detail<<EOF"
-              echo "$FAILURES"
-              echo "EOF"
-            } >> "$GITHUB_OUTPUT"
-          else
-            echo "failed=false" >> "$GITHUB_OUTPUT"
-          fi
-
       # An alarm nobody has ever heard is not an alarm. This proves the whole pipe -
       # repo secret, bot, chat id, delivery - without waiting for a real outage.
       - name: Test alert (manual only)
@@ -121,56 +87,142 @@ jobs:
           echo "$RESP" | grep -q '"ok":true' || { echo "TELEGRAM DELIVERY FAILED: $RESP"; exit 1; }
           echo "test alert sent"
 
-      - name: Was the previous run already failing?
-        id: prev
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Best effort: never let this step break the check itself.
-          PREV=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/health-check.yml/runs?status=completed&per_page=1" \
-            --jq '.workflow_runs[0].conclusion' 2>/dev/null || echo "unknown")
-          echo "previous=$PREV" >> "$GITHUB_OUTPUT"
-          echo "previous run: $PREV"
-
-      - name: Alert Telegram on failure
-        if: steps.probe.outputs.failed == 'true'
+      - name: Watch production
+        id: probe
         env:
           TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
-          # Passed through env, never interpolated straight into the shell string: a
-          # `${{ }}` expansion lands in the script before bash sees it, so any backtick or
-          # $(...) in it would execute. Ours is built from our own hardcoded URLs today, but
-          # the pattern is one edit away from being a hole.
-          DETAIL: ${{ steps.probe.outputs.detail }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TEXT="SITE DOWN - thezerofog.com${DETAIL}
+          set -u
 
-          Checked from GitHub Actions at $(date -u '+%Y-%m-%d %H:%M UTC').
+          PROBES=11          # 11 probes, 30 minutes apart = a 5-hour watch
+          INTERVAL=1800
+
+          tg() {
+            local resp
+            resp=$(curl -s --max-time 20 -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+              -d "chat_id=${CHAT}" --data-urlencode "text=$1")
+            # Telegram answers 200 with {"ok":false} on a bad token or chat id. Swallowing
+            # that reply is how an alarm becomes decorative - so the delivery is asserted.
+            if echo "$resp" | grep -q '"ok":true'; then
+              echo "telegram: delivered"
+            else
+              echo "TELEGRAM DELIVERY FAILED: $resp"
+              echo "tg_broken=true" >> "$GITHUB_OUTPUT"
+            fi
+          }
+
+          check_code() {
+            local url="$1" want="$2" label="$3" code
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 25 "$url" || echo "000")
+            echo "  $label: $code"
+            if [ "$code" != "$want" ]; then
+              FAILURES="${FAILURES}
+          - ${label} returned ${code} (expected ${want}) - ${url}"
+            fi
+          }
+
+          # Where this run starts from. A cancelled run says nothing about production -
+          # this workflow cancels itself every time it re-arms - so the last conclusion
+          # that means anything is the last success or failure.
+          PREV=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/health-check.yml/runs?status=completed&per_page=20" \
+            --jq '[.workflow_runs[].conclusion | select(. == "success" or . == "failure")][0]' 2>/dev/null || echo "")
+          [ -z "$PREV" ] && PREV="unknown"
+          echo "previous concluded run: $PREV"
+          if [ "$PREV" = "failure" ]; then WAS_DOWN=1; else WAS_DOWN=0; fi
+
+          DOWN_STREAK=0
+          LAST_FAILED=0
+          i=0
+
+          while [ "$i" -lt "$PROBES" ]; do
+            i=$((i + 1))
+            FAILURES=""
+            echo "probe $i/$PROBES at $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+
+            check_code "https://thezerofog.com/" 200 "landing"
+            check_code "https://thezerofog.com/workshop/schedule/" 200 "schedule"
+            check_code "https://thezerofog.com/.netlify/functions/wr-slots?tz=UTC" 200 "wr-slots"
+
+            # Stripe live mode: prove it by minting a session, never by reading config.
+            #
+            # But minting one every 30 minutes creates ~48 junk Checkout Sessions a day in
+            # the real Stripe account (~1,400 a month) and burns two Netlify function
+            # invocations each - create-checkout now, plus the checkout.session.expired
+            # webhook two hours later. On the day exhausted Netlify credits took the whole
+            # site down, a monitor that adds ~5,800 invocations a month is the wrong trade.
+            # So the cheap checks run every 30 minutes and this one runs on every fourth
+            # probe: outage detection stays at 30-minute granularity, Stripe junk drops
+            # fourfold.
+            #
+            # It sends no email, so the expired session cannot trigger the E18 recovery note
+            # (stripe-webhook.js only sends when the session captured an address).
+            if [ $(( (i - 1) % 4 )) -eq 0 ]; then
+              CHECKOUT=$(curl -s --max-time 30 -X POST \
+                https://thezerofog.com/.netlify/functions/create-checkout \
+                -H 'Content-Type: application/json' \
+                -H 'Origin: https://thezerofog.com' \
+                -d '{}' || echo "")
+              if echo "$CHECKOUT" | grep -q 'cs_live_'; then
+                echo "  checkout: cs_live_ ok"
+              else
+                echo "  checkout: FAILED"
+                FAILURES="${FAILURES}
+          - create-checkout did not return a cs_live_ session (payments may be dead)"
+              fi
+            else
+              echo "  checkout: skipped (runs every 4th probe to keep Stripe clean)"
+            fi
+
+            if [ -n "$FAILURES" ]; then
+              LAST_FAILED=1
+              DOWN_STREAK=$((DOWN_STREAK + 1))
+              # Shout when it breaks, then once every two hours for as long as it stays
+              # broken. Silence after the first alert is how a three-hour outage becomes
+              # a one-message outage nobody scrolls back to.
+              if [ "$WAS_DOWN" -eq 0 ] || [ $(( (DOWN_STREAK - 1) % 4 )) -eq 0 ]; then
+                tg "SITE DOWN - thezerofog.com${FAILURES}
+
+          Checked from GitHub Actions at $(date -u '+%Y-%m-%d %H:%M UTC'), failing check $DOWN_STREAK in a row.
           If every check failed at once, look at Netlify billing first - plan credits
           running out blocks the whole account and returns 503 on every page.
           Ads keep spending while this is down."
-          RESP=$(curl -s --max-time 20 -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
-            -d "chat_id=${CHAT}" --data-urlencode "text=${TEXT}")
-          # Telegram answers 200 with {"ok":false} on a bad token or chat id. Swallowing
-          # that reply is how an alarm becomes decorative - so the delivery is asserted.
-          echo "$RESP" | grep -q '"ok":true' || { echo "TELEGRAM DELIVERY FAILED: $RESP"; exit 1; }
-          echo "alert sent"
+              fi
+              WAS_DOWN=1
+            else
+              if [ "$WAS_DOWN" -eq 1 ]; then
+                tg "RECOVERED - thezerofog.com is answering again ($(date -u '+%H:%M UTC')).
+          Landing, schedule and wr-slots all check out."
+              fi
+              LAST_FAILED=0
+              WAS_DOWN=0
+              DOWN_STREAK=0
+            fi
 
-      - name: Tell Telegram it recovered
-        if: steps.probe.outputs.failed == 'false' && steps.prev.outputs.previous == 'failure'
+            [ "$i" -lt "$PROBES" ] && sleep "$INTERVAL"
+          done
+
+          echo "failed=$LAST_FAILED" >> "$GITHUB_OUTPUT"
+
+      # Re-arm. The cron above is throttled to roughly every three hours, so the loop
+      # hands the watch to its successor itself. Guarded by elapsed time: if this run
+      # died in its first minutes the schedule picks it up instead, rather than the
+      # workflow spinning on itself.
+      - name: Hand the watch to the next run
+        if: always()
         env:
-          TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STARTED: ${{ github.run_started_at }}
         run: |
-          TEXT="RECOVERED - thezerofog.com is answering again ($(date -u '+%H:%M UTC')).
-          Landing, schedule, wr-slots and a live Stripe session all check out."
-          RESP=$(curl -s --max-time 20 -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
-            -d "chat_id=${CHAT}" --data-urlencode "text=${TEXT}")
-          # Telegram answers 200 with {"ok":false} on a bad token or chat id. Swallowing
-          # that reply is how an alarm becomes decorative - so the delivery is asserted.
-          echo "$RESP" | grep -q '"ok":true' || { echo "TELEGRAM DELIVERY FAILED: $RESP"; exit 1; }
-          echo "recovery note sent"
+          ELAPSED=$(( $(date -u +%s) - $(date -u -d "$STARTED" +%s) ))
+          echo "this run lasted ${ELAPSED}s"
+          if [ "$ELAPSED" -lt 3600 ]; then
+            echo "under an hour - not re-arming, the cron will do it"
+            exit 0
+          fi
+          gh workflow run health-check.yml --ref "${GITHUB_REF_NAME}" && echo "next watch armed"
 
       - name: Fail the run if production is broken
-        if: steps.probe.outputs.failed == 'true'
+        if: steps.probe.outputs.failed == '1' || steps.probe.outputs.tg_broken == 'true'
         run: exit 1
