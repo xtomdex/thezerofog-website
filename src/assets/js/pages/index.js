@@ -66,6 +66,18 @@ function zfOptinSubmit(e) {
     // never block the redirect below. Fire-and-forget.
     if (window.zfPixelLoaded && typeof fbq === 'function') {
       fbq('track', 'Lead');
+      // ViewContent is the event the ad set is optimised on, and until 02.09 it fired
+      // only after thirty seconds of reading (cookie-consent-5.js). Half of the people
+      // who leave an address do it in 10-20 seconds and are then sent to the schedule
+      // step, so the timer died with the page and they never fired it - measured 02.09:
+      // 7 of 15 opt-ins since 30.08 were invisible to the event, and Meta was being
+      // trained on the readers who did NOT sign up. The submit now fires it too, so the
+      // bought event means "read for thirty seconds OR left an address". The flag keeps
+      // a slow reader who already fired it at thirty seconds from counting twice.
+      if (!window.zfViewContentSent) {
+        window.zfViewContentSent = true;
+        fbq('track', 'ViewContent');
+      }
     }
 
     // Forward UTM params from the current landing-page URL to the schedule step for

@@ -403,7 +403,12 @@
           // page for thirty seconds. Engaged30 goes out beside it so a named
           // custom conversion can be built in Events Manager later without
           // another deploy - it is not what the ad set buys.
-          fbq('track', 'ViewContent');
+          // Since 02.09 the opt-in submit fires ViewContent as well (pages/index.js);
+          // the flag is shared so one person counts once whichever side fires first.
+          if (!window.zfViewContentSent) {
+            window.zfViewContentSent = true;
+            fbq('track', 'ViewContent');
+          }
           fbq('trackCustom', 'Engaged30');
           return;
         }
