@@ -107,8 +107,34 @@
   overflow-wrap: anywhere;
 }
 
+
+/* One comparison table per article (markdown pipe table). Scrolls inside itself on narrow screens. */
+.article-page table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 28px;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+.article-page th,
+.article-page td {
+  text-align: left;
+  vertical-align: top;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+}
+.article-page th {
+  color: var(--text);
+  font-weight: 600;
+  border-bottom-width: 2px;
+}
+.article-page td:first-child,
+.article-page th:first-child { padding-left: 0; }
+
 @media (max-width: 600px) {
   .article-page { padding: 80px 18px 56px; }
   .article-page h1 { font-size: 1.7rem; margin-bottom: 24px; }
   .article-page h2 { font-size: 1.2rem; margin-top: 44px; }
+  .article-page table { display: block; overflow-x: auto; font-size: 0.9rem; }
 }
