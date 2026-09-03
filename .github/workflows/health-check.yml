@@ -205,7 +205,10 @@ jobs:
 
           echo "failed=$LAST_FAILED" >> "$GITHUB_OUTPUT"
 
-      # Re-arm. The cron above is throttled to roughly every three hours, so the loop
+      # Re-arm. -R is required: by this step the checkout is gone and gh cannot infer the
+      # repo from git (every run 02-03.09 failed here with "not a git repository"; the
+      # hourly cron kept the watch alive by accident).
+      # The cron above is throttled to roughly every three hours, so the loop
       # hands the watch to its successor itself. Guarded by elapsed time: if this run
       # died in its first minutes the schedule picks it up instead, rather than the
       # workflow spinning on itself.
@@ -221,7 +224,7 @@ jobs:
             echo "under an hour - not re-arming, the cron will do it"
             exit 0
           fi
-          gh workflow run health-check.yml --ref "${GITHUB_REF_NAME}" && echo "next watch armed"
+          gh workflow run health-check.yml -R "${GITHUB_REPOSITORY}" --ref "${GITHUB_REF_NAME}" && echo "next watch armed"
 
       - name: Fail the run if production is broken
         if: steps.probe.outputs.failed == '1' || steps.probe.outputs.tg_broken == 'true'
