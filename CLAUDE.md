@@ -334,3 +334,12 @@ One SEO article = one markdown file in `src/articles/`, then build and push. Not
 - Automatic from `src/articles/articles.json` (directory data): `layout: layouts/article.njk`, `tags: [article]`, `author`. That `layout:` key is the ONE sanctioned exception to the `{% extends %}` rule above - markdown cannot extend, so `layouts/article.njk` extends `base.njk` on the article's behalf.
 - Automatic from the layout: meta description, OG/Twitter tags, `article:*` times, Article JSON-LD, the byline (`partials/article-byline.njk`), `assets/css/pages/article.css`. Automatic from `sitemap.njk`: the URL plus `lastmod` from `dateModified`, via `collections.article`.
 - Never paste the draft header or the CEO margin notes into the md - the body only, verbatim, from the H1 through the Sources list.
+
+## IndexNow (added 2026-09-03)
+
+Bing (and ChatGPT search, which reads Bing's index) learns about new and changed pages by a ping, not by waiting for a crawl.
+
+- Key file: `src/indexnow-key.njk` -> `/<key>.txt`. The key was generated in Bing Webmaster Tools (property `thezerofog.com`, imported from Search Console 2026-09-03). Public by design; never delete or rename it without generating a new key in Bing first.
+- Ping: `scripts/indexnow.mjs` POSTs to `api.indexnow.org` every sitemap URL whose `<lastmod>` is within 3 days - in practice the articles, because only they carry `dateModified`. Run by `plugins/indexnow` (`onSuccess`, production context only) after each deploy; by hand: `node scripts/indexnow.mjs [--dry] [--days N] [url ...]`.
+- A failed ping never fails the build. 422 means the key file is not live; 429 means slow down. Nothing retries.
+- Google has no equivalent: new pages there still go through Search Console -> URL inspection -> Request indexing (a CEO click), plus the sitemap.

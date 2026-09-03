@@ -6,6 +6,11 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# IndexNow: after every production deploy, ping Bing with the sitemap URLs whose lastmod is
+# within 3 days (plugins/indexnow -> scripts/indexnow.mjs). Key file: src/indexnow-key.njk.
+[[plugins]]
+  package = "/plugins/indexnow"
+
 # Netlify asset optimization is buggy: it appended a corrupted, unscoped copy of
 # the trailing @media rules to sales.css (2026-07-09) and again to sales-3.css
 # (2026-07-11), breaking desktop layout. We don't use its bundling/minification,
