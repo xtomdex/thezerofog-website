@@ -1,0 +1,16 @@
+{#- Article byline, rendered by layouts/article.njk above the markdown body (the body owns the H1).
+    Reads `author` (directory data) and `datePublished` (front matter, a quoted "YYYY-MM-DD"
+    string). The date is spelled out here in Nunjucks so no date filter is needed in .eleventy.js;
+    an unparseable date simply drops the date, never the byline. -#}
+{%- set months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] -%}
+{%- set d = (datePublished or "") | string -%}
+{%- set parts = d.split("-") -%}
+<p class="article-byline">
+  <span class="article-byline__author">{{ author }}</span>
+  <span class="article-byline__sep">&middot;</span>
+  <a href="/disclaimer/">Not a doctor</a>
+  {%- if parts.length == 3 %}
+  <span class="article-byline__sep">&middot;</span>
+  <time datetime="{{ d }}">{{ parts[2] | int }} {{ months[(parts[1] | int) - 1] }} {{ parts[0] }}</time>
+  {%- endif %}
+</p>

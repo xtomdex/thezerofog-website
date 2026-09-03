@@ -1,0 +1,63 @@
+{#- Article layout - the target of `layout: layouts/article.njk` set by src/articles/articles.json.
+    Markdown cannot `{% extends %}`, so this file does it on the article's behalf: the md body
+    arrives as `content`, and everything else (head meta, CSS, footer) comes from base.njk.
+    Front matter it reads: title, description, canonical, datePublished, dateModified,
+    ogImage (optional), headline (optional, else title); `author` comes from directory data. -#}
+{% extends "layouts/base.njk" %}
+
+{% block head_extras %}
+<meta name="description" content="{{ description }}">
+
+<!-- Open Graph -->
+<meta property="og:title" content="{{ title }}">
+<meta property="og:description" content="{{ description }}">
+<meta property="og:url" content="{{ canonical }}">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="{{ site.brand }}">
+{%- if ogImage %}
+<meta property="og:image" content="{{ ogImage }}">
+{%- endif %}
+<meta property="article:published_time" content="{{ datePublished }}">
+<meta property="article:modified_time" content="{{ dateModified or datePublished }}">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="{{ 'summary_large_image' if ogImage else 'summary' }}">
+<meta name="twitter:title" content="{{ title }}">
+<meta name="twitter:description" content="{{ description }}">
+{%- if ogImage %}
+<meta name="twitter:image" content="{{ ogImage }}">
+{%- endif %}
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": {{ (headline or title) | dump | safe }},
+  "description": {{ description | dump | safe }},
+  "datePublished": {{ datePublished | dump | safe }},
+  "dateModified": {{ (dateModified or datePublished) | dump | safe }},
+  "author": { "@type": "Person", "name": {{ author | dump | safe }} },
+  "publisher": { "@type": "Organization", "name": {{ site.brand | dump | safe }}, "url": {{ site.url | dump | safe }} },
+  "mainEntityOfPage": { "@type": "WebPage", "@id": {{ canonical | dump | safe }} }
+  {%- if ogImage %},
+  "image": {{ ogImage | dump | safe }}
+  {%- endif %}
+}
+</script>
+{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{{ '/assets/css/pages/article.css' | v }}">
+{% endblock %}
+
+{% block content %}
+
+<a href="/" class="brand">{{ site.brand }}</a>
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">Light</button>
+
+<article class="article-page">
+{% include "partials/article-byline.njk" %}
+{{ content | safe }}
+</article>
+
+{% endblock %}

@@ -10,6 +10,11 @@ module.exports = function (eleventyConfig) {
 
   eleventyConfig.addPlugin(HtmlBasePlugin);
 
+  // Markdown (src/articles/*.md): Eleventy already sets html:true, which the article template
+  // relies on to wrap its Sources block in a div. linkify turns the bare URLs in a Sources list
+  // into links, so a citation pasted as plain text is clickable without markdown syntax.
+  eleventyConfig.amendLibrary("md", (mdLib) => mdLib.set({ linkify: true }));
+
   // Passthrough copy
   eleventyConfig.addPassthroughCopy("src/assets");
   // Standalone workshop text-version long-read (self-contained HTML, served verbatim, noindex)

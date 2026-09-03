@@ -325,3 +325,12 @@ derived file that must not be edited directly.
 
 Database schema changes follow `docs/supabase-migration-protocol.md` — migrations live in `supabase/migrations/` (single source of truth); contributors/agents write DRAFT migrations under `supabase/drafts/`, never run `supabase db push`, and never edit applied migrations.
  
+## Articles (added 2026-09-03)
+
+One SEO article = one markdown file in `src/articles/`, then build and push. Nothing else to touch.
+
+- Front matter: `title` (ends ` - The Zero Fog`), `description` (the meta description), `permalink: /<slug>/` (root level, never `/articles/`), `canonical` (full URL), `datePublished` and `dateModified` as quoted `"YYYY-MM-DD"` strings, optional `ogImage` (full URL), optional `headline` (JSON-LD headline; defaults to `title`).
+- The body carries its own `# H1`; the layout renders none. Wrap the `### Sources` block in `<div class="article-sources">` with a blank line on each side (markdown-it has `html: true`; `linkify: true` makes bare URLs clickable).
+- Automatic from `src/articles/articles.json` (directory data): `layout: layouts/article.njk`, `tags: [article]`, `author`. That `layout:` key is the ONE sanctioned exception to the `{% extends %}` rule above - markdown cannot extend, so `layouts/article.njk` extends `base.njk` on the article's behalf.
+- Automatic from the layout: meta description, OG/Twitter tags, `article:*` times, Article JSON-LD, the byline (`partials/article-byline.njk`), `assets/css/pages/article.css`. Automatic from `sitemap.njk`: the URL plus `lastmod` from `dateModified`, via `collections.article`.
+- Never paste the draft header or the CEO margin notes into the md - the body only, verbatim, from the H1 through the Sources list.

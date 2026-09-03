@@ -15,4 +15,10 @@ eleventyExcludeFromCollections: true
 {%- for p in pages %}
   <url><loc>{{ site.url }}{{ p }}</loc></url>
 {%- endfor %}
+{#- Articles are the one collection sweep (added 2026-09-03): every src/articles/*.md is tagged
+    `article` by its directory data, none of them carries noindex, and the md file already knows
+    its own dateModified. Publishing an article must not require touching this file. -#}
+{%- for a in collections.article %}
+  <url><loc>{{ site.url }}{{ a.url }}</loc>{% if a.data.dateModified %}<lastmod>{{ a.data.dateModified }}</lastmod>{% endif %}</url>
+{%- endfor %}
 </urlset>
