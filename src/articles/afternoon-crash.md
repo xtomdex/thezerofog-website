@@ -69,6 +69,8 @@ None of them could have worked, and it had nothing to do with willpower or motiv
 
 In my case, that's what a clean test sheet and a 2 PM crash meant together. If the tank is full you get a dip. If it's empty you get the wall. Standard blood tests don't measure what fills it.
 
+How often a blood panel actually finds the cause when someone comes in tired, with the numbers from three studies, is a separate piece: [normal blood test but still tired](/blood-test-normal-still-tired/).
+
 ## Two things that helped before I understood any of it
 
 Two things made my afternoons easier years before I knew what was going on. Neither fixed the crash, but I still do both.
