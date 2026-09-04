@@ -39,9 +39,9 @@ How I'd tell the two apart now, from my own afternoons:
 
 For me, a hard crash after lunch was mostly not the lunch. That one took me a while to believe. I had tried the light lunch, the no lunch, the salad, the protein, the walk after. One or two helped a bit, but the wall was still there at two.
 
-In a study at the University of Pittsburgh, researchers replaced lunch with liquid feeds every hour, so there was no lunch to blame. Five of the twelve people still had the dip in the early afternoon. The authors' conclusion was that the dip is built in and that people differ in how strong it is.
+In a study at the University of Pittsburgh, researchers replaced lunch with liquid feeds every hour, so there was no lunch to blame. Five of the twelve people still had the dip in the early afternoon. The authors' conclusion was that the dip is built in, and that some people get it and some don't.
 
-What you eat can make it worse. In two studies from Sheffield, people were more tired an hour and a half after a meal than before it, and swapping a fatty meal for a high-carb one made no difference to that. In the second study a fatty meal did leave them more tired three hours later than a high-carb one. So the meal deepens a dip that was going to happen anyway.
+What you eat can make it worse, and the studies don't agree on what exactly. In one Sheffield study people were more tired an hour and a half after a meal than before it, and swapping a fatty meal for a high-carb one made no difference to that. In another from the same lab a fatty meal did leave them more tired three hours later than a high-carb one, and the review that named the dip says a heavy carb lunch makes it worse too. So the meal deepens a dip that was going to happen anyway.
 
 ## Should I get tested?
 
@@ -73,7 +73,7 @@ How often a blood panel actually finds the cause when someone comes in tired, wi
 
 ## Two things that helped before I understood any of it
 
-Two things made my afternoons easier years before I knew what was going on. Neither fixed the crash, but I still do both.
+Two things made my afternoons easier years before I knew what was going on: ten minutes outside at the first sign of the wall, and the hard task before the wall, never after. Neither fixed the crash, but I still do both.
 
 Ten minutes outside at the first sign of the wall. Not a walk to think, just out the door and back. It beat the second coffee every time (and the second coffee wasn't doing anything anyway).
 
@@ -81,7 +81,7 @@ The hard task before the wall, never after. The morning was the only part of my 
 
 ## Questions people ask about the afternoon crash
 
-The other questions Google puts next to mine, answered short.
+A few more questions people ask, with short answers.
 
 ### What causes you to crash in the afternoon?
 
@@ -89,11 +89,11 @@ In the research, a crash in the afternoon comes from a dip that is built into so
 
 ### Why do I crash out at 3pm?
 
-A crash at 3pm is the same crash an hour later. In the threads I read for this the time ran from one to six in the afternoon, and two was the most common. Mine was at two, and the threads had plenty of threes.
+In the threads I read for this the crash time ran from one to six in the afternoon, two came up most, and three came up a lot. Mine was at two.
 
 ### How do I stop crashing in the afternoon?
 
-I couldn't stop it with anything on the usual lists: the lighter lunch, the walk, the second coffee, the better morning. Some of them made an afternoon easier. The crash only went when I found the actual cause, and that wasn't on any of those lists.
+Nothing on the usual lists stopped my crash: the lighter lunch, the walk, the second coffee, the better morning. Some of them made an afternoon easier. The crash only went when I found the actual cause, and that wasn't on any of those lists.
 
 ### What is an afternoon slump?
 
