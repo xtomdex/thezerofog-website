@@ -11,8 +11,9 @@
 // `currentTime`. That distinction is the reason the replay gate works: reading currentTime would
 // let someone drag the scrubber past the reveal and be credited with having watched it.
 
-import { insert, json, preflight, selectOne, update, upsert } from './lib/wr-db.js';
+import { insert, json, preflight, select, selectOne, update, upsert } from './lib/wr-db.js';
 import { loadConfig, deriveSegments } from './lib/wr-config.js';
+import { livePresenceSec } from './lib/wr-presence.js';
 import { sendMetaEvents, clientInfo, fbCookies, SITE_URL } from './lib/meta-capi.js';
 
 const EVENT_TYPES = new Set([
@@ -122,12 +123,41 @@ export default async function handler(req) {
     }
   }
 
+  // Live seconds have a second witness: the join/exit stretches in wr_events. The heartbeat
+  // counter stops when a phone's screen goes dark or the app goes to the background while the
+  // stream keeps running - on 2026-09-02 that filed a person who sat to the end (offer event on
+  // record, playhead at the last second) as "left before the offer" and mailed them so. The
+  // stretches are read off the playhead, which cannot be dragged in a live session, so the
+  // larger of the two counters is kept - still clamped against wall-clock time, as above.
+  let watchedSecRaised = false;
+  if (!isReplay) {
+    try {
+      const events = await select('wr_events', {
+        select: 'type,position_sec,created_at',
+        registration_id: `eq.${registration.id}`,
+        order: 'created_at.asc',
+      });
+      const presence = livePresenceSec(events, {
+        currentPositionSec: position,
+        maxPositionSec: row.max_position_sec,
+      });
+      const evidenced = Math.min(presence, elapsedSec, duration);
+      if (evidenced > row.watched_sec) {
+        row.watched_sec = evidenced;
+        watchedSecRaised = true;
+      }
+    } catch (err) {
+      console.error('wr-heartbeat: presence read failed:', err.message);
+    }
+  }
+
   // Recompute the segments this person now belongs to.
   //
   // The thresholds are measured in WATCHED seconds, not in where the playhead reached. This is
   // the fix for the leak the old EverWebinar plan logged and never resolved: someone who joins at
   // minute 40 and leaves at minute 50 exits after the reveal timecode but has watched none of it,
-  // and under an exit-minute rule would receive the mechanism by email. Here they cannot.
+  // and under an exit-minute rule would receive the mechanism by email. Here they cannot - the
+  // stretch above starts at their join position, so it credits ten minutes, not fifty.
   const { revealSec, offerSec, thresholdGraceSec, bounceSec } = config.timecodes;
 
   // Live and replay are counted in separate columns and never pooled. They answer different
@@ -153,7 +183,9 @@ export default async function handler(req) {
     await update(
       'wr_attendance',
       { registration_id: `eq.${registration.id}` },
-      { segments, total_watched_sec: totalWatched }
+      watchedSecRaised
+        ? { segments, total_watched_sec: totalWatched, watched_sec: row.watched_sec }
+        : { segments, total_watched_sec: totalWatched }
     );
   } catch (err) {
     console.error('wr-heartbeat: segment write failed:', err.message);

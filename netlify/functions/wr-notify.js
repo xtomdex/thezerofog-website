@@ -188,11 +188,26 @@ export default async function handler() {
       );
       sent += 1;
     } catch (err) {
+      const message = String(err.message || err);
+      // A 422 for an unsubscribed or inactive address is not an outage: MailerLite will refuse
+      // this person on every run until the end of time, and a queue row retried every five
+      // minutes forever only buries real failures under the noise (found 2026-09-05: three
+      // people, dozens of rows). Terminal, so `skipped` - the person asked not to be mailed.
+      if (/422/.test(message) && /unsubscribed|not active|cannot be imported/i.test(message)) {
+        console.log(`wr-notify: ${row.template} to ${reg.email} skipped - address unsubscribed or inactive`);
+        await update(
+          'wr_notifications',
+          { id: `eq.${row.id}` },
+          { status: 'skipped', error: message.slice(0, 300) }
+        ).catch(() => {});
+        skipped += 1;
+        continue;
+      }
       // Left as 'pending' on purpose so the next run picks it up again. Only the error text is
       // recorded - a five-minute cadence means a transient outage costs a late email, not a lost
       // one, and marking it failed here would throw the send away for good.
-      console.error(`wr-notify: ${row.template} to ${reg.email} failed:`, err.message);
-      await update('wr_notifications', { id: `eq.${row.id}` }, { error: String(err.message).slice(0, 300) }).catch(
+      console.error(`wr-notify: ${row.template} to ${reg.email} failed:`, message);
+      await update('wr_notifications', { id: `eq.${row.id}` }, { error: message.slice(0, 300) }).catch(
         () => {}
       );
       failed += 1;
