@@ -25,6 +25,36 @@ function stillApplies(entrySegments, personSegments) {
   return entrySegments.some((s) => personSegments.includes(s));
 }
 
+// Rebooking inside 24 hours. MailerLite refuses to send the same automation email to the same
+// address twice within 24 hours (`email-already-sent-today`), so a person who no-shows and picks a
+// slot for the next day never got E1, E3 or E5 for the new slot - while this table said `sent`,
+// because `sent` means "group join accepted" (person #3, 2026-08-30). The three door emails have
+// twins on their own groups (wr-E1-R, wr-E3-R, wr-E5-R) with a first line that admits the
+// rebooking; when the same template already went to this address from ANOTHER registration in the
+// last 24 hours, the twin goes instead. Canon: _Marketing/emails/E1-R-welcome-rebooked.md.
+const REBOOK_TWINS = new Set(['E1', 'E3', 'E5']);
+
+async function rebookTwin(template, email, registrationId, now) {
+  if (!REBOOK_TWINS.has(template) || !email) return template;
+  const since = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+  let prior = [];
+  try {
+    prior = await select('wr_notifications', {
+      select: 'id,registration_id,sent_at,wr_registrations!inner(email)',
+      template: `eq.${template}`,
+      status: 'eq.sent',
+      sent_at: `gte.${since}`,
+      'wr_registrations.email': `eq.${email}`,
+      limit: 10,
+    });
+  } catch (err) {
+    console.error('wr-notify: rebook lookup failed, sending the original template:', err.message);
+    return template;
+  }
+  const fromAnotherSlot = (prior || []).some((p) => p.registration_id !== registrationId);
+  return fromAnotherSlot ? `${template}-R` : template;
+}
+
 export default async function handler() {
   const now = new Date();
 
@@ -134,7 +164,11 @@ export default async function handler() {
     // source=email names the channel, campaign names the exact template - so a return visit
     // in the touch log reads "came back from E7", not "organic". The room page only consumes
     // ?t= and ignores the rest.
-    const utm = `&utm_source=email&utm_medium=email&utm_campaign=${encodeURIComponent(row.template)}`;
+    const template = await rebookTwin(row.template, reg.email, row.registration_id, now);
+    if (template !== row.template) {
+      console.log(`wr-notify: ${row.template} to ${reg.email} went out inside 24 h from another slot - sending ${template}`);
+    }
+    const utm = `&utm_source=email&utm_medium=email&utm_campaign=${encodeURIComponent(template)}`;
     const roomUrl = `${process.env.PUBLIC_SITE_URL || 'https://thezerofog.com'}/workshop/room/?t=${reg.token}${utm}`;
 
     // The same Google Calendar entry the confirmation page builds, rebuilt server-side so E1's
@@ -154,7 +188,7 @@ export default async function handler() {
 
     const payload = {
       type: 'workshop_notification',
-      template: row.template,
+      template,
       email: reg.email,
       name: reg.name || undefined,
       // Merge fields the templates already expect. slot_time_label is what [SLOT_TIME] shows:
