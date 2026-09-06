@@ -3857,18 +3857,30 @@ boot();
      places, because Systeme cannot include our file.
 
      The Systeme course page can only tell Crisp a display name. Here we know exactly who is
-     signed in, so the session carries the real email and the chat has a thread per person. -->
+     signed in, so the session carries the real email and the chat has a thread per person.
+
+     2026-09-06 (T-077, variant A): wherever the widget may not load on its own - EU/UK/CH with
+     no consent cookie, "Essential Only" chosen, /geo failed - a "Chat with Kirill" button stands
+     in its corner. One click loads Crisp and opens the chat: the person asked for the service,
+     so no consent cookie is needed. The click is remembered for the browser session only
+     (sessionStorage, same key as the course block), never as consent to the trackers. Found on
+     Dima's student account: an EU buyer had no chat anywhere. -->
 <script>
 (function () {
+  var REQUESTED = 'zf_chat_requested';
+  var requested = null;
+  try { requested = sessionStorage.getItem(REQUESTED); } catch (e) {}
+  if (requested) { init(); return; }
+
   var m = document.cookie.match(/(?:^|;\s*)zf_cookies_consent=(all|essential)(?:;|$)/);
   var choice = m ? m[1] : null;
-  if (choice === 'essential') return;
+  if (choice === 'essential') { offer(); return; }
   if (choice === 'all') { init(); return; }
 
   var cached = null;
   try { cached = sessionStorage.getItem('zf_course_regime'); } catch (e) {}
   if (cached === 'optout') { init(); return; }
-  if (cached === 'optin') return;
+  if (cached === 'optin') { offer(); return; }
 
   fetch('/geo').then(function (r) { return r.json(); }).then(function (d) {
     var OPT_IN = ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU',
@@ -3876,8 +3888,45 @@ boot();
       'IS','LI','NO','GB','CH'];
     var regime = (d && d.country && OPT_IN.indexOf(d.country) === -1) ? 'optout' : 'optin';
     try { sessionStorage.setItem('zf_course_regime', regime); } catch (e) {}
-    if (regime === 'optout') init();
-  }).catch(function () {});
+    if (regime === 'optout') init(); else offer();
+  }).catch(function () { offer(); });
+
+  /* The stand-in button. Same corner Crisp uses; styled like the app's own filled buttons
+     (.save: accent fill, dark ink in the dark theme, white ink in the light one). While the
+     cookie banner is up it sits above it (body.zf-cb-open + --zf-cb-h come from
+     cookie-consent-5.js), and above the bedroom-guide "Back" button when that one is shown. */
+  function offer() {
+    if (window.zfCrispLoaded || document.getElementById('zf-chat-btn')) return;
+    var st = document.createElement('style');
+    st.textContent =
+      '#zf-chat-btn{position:fixed;right:20px;bottom:20px;z-index:45;' +
+      'font-family:inherit;font-size:13px;font-weight:700;line-height:1;padding:12px 16px;' +
+      'border-radius:10px;background:var(--purple);color:#1a1a1a;border:none;cursor:pointer;' +
+      'box-shadow:0 6px 20px rgba(0,0,0,.35);transition:opacity .15s}' +
+      'body.light #zf-chat-btn{color:#ffffff;box-shadow:0 6px 20px rgba(0,0,0,.18)}' +
+      '#zf-chat-btn:hover{opacity:.88}' +
+      'body.zf-cb-open #zf-chat-btn{bottom:calc(var(--zf-cb-h,0px) + 16px)}' +
+      '#wvBack:not([hidden]) ~ #zf-chat-btn{bottom:72px}' +
+      '@media (max-width:900px){#zf-chat-btn{right:14px;bottom:14px}' +
+      '#wvBack:not([hidden]) ~ #zf-chat-btn{bottom:62px}}' +
+      '@media print{#zf-chat-btn{display:none!important}}';
+    var b = document.createElement('button');
+    b.id = 'zf-chat-btn';
+    b.type = 'button';
+    b.textContent = 'Chat with Kirill';
+    b.addEventListener('click', function () {
+      try { sessionStorage.setItem(REQUESTED, '1'); } catch (e) {}
+      if (b.parentNode) b.parentNode.removeChild(b);
+      init();
+      /* queued before l.js arrives; Crisp replays the queue on init */
+      window.$crisp.push(['do', 'chat:open']);
+    });
+    var mount = function () {
+      document.head.appendChild(st);
+      document.body.appendChild(b);
+    };
+    if (document.body) mount(); else document.addEventListener('DOMContentLoaded', mount);
+  }
 
   function init() {
     if (window.zfCrispLoaded) return;
