@@ -4,7 +4,7 @@ description: "Every afternoon at about 2 PM the day fell apart. I got tested, tr
 permalink: /afternoon-crash/
 canonical: "https://thezerofog.com/afternoon-crash/"
 datePublished: "2026-09-03"
-dateModified: "2026-09-04"
+dateModified: "2026-09-06"
 ---
 # Why am I crashing at 2 PM every day?
 
@@ -42,6 +42,8 @@ For me, a hard crash after lunch was mostly not the lunch. That one took me a wh
 In a study at the University of Pittsburgh, researchers replaced lunch with liquid feeds every hour, so there was no lunch to blame. Five of the twelve people still had the dip in the early afternoon. The authors' conclusion was that the dip is built in, and that some people get it and some don't.
 
 What you eat can make it worse, and the studies don't agree on what exactly. In one Sheffield study people were more tired an hour and a half after a meal than before it, and swapping a fatty meal for a high-carb one made no difference to that. In another from the same lab a fatty meal did leave them more tired three hours later than a high-carb one, and the review that named the dip says a heavy carb lunch makes it worse too. So the meal deepens a dip that was going to happen anyway.
+
+How much of the dip is the lunch itself, meal size against what's in it, with the driving and lab studies, is a separate piece: [why I get tired after lunch](/tired-after-lunch/).
 
 ## Should I get tested?
 
